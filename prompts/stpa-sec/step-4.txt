@@ -1,0 +1,99 @@
+You are conducting Step 4 of STPA-Sec: Causal Analysis and Wargaming. Identify how UCAs could occur and how adversaries might exploit the control structure.
+
+For EACH UCA from Step 3, analyze:
+
+1. CAUSAL SCENARIOS - How could this UCA occur?
+   Consider controller failures:
+   - Inadequate control algorithm (flawed logic)
+   - Unsafe control input (bad data/commands received)
+   - Missing/incorrect process model (wrong assumptions)
+   - Inadequate feedback (controller uninformed)
+   
+   Consider control path failures:
+   - Control action not received
+   - Control action delayed
+   - Control action corrupted
+   - Conflicting control actions
+   
+   Consider controlled process failures:
+   - Process unable to execute
+   - Process executes incorrectly
+   - Process model inconsistent
+
+2. ADVERSARY ANALYSIS - How could attackers cause this UCA?
+   - What capabilities would they need?
+   - What would be their attack sequence?
+   - How could they hide their actions?
+   - What's the complexity/cost of attack?
+
+3. WARGAMING - Blue vs Red Team Analysis:
+   Blue (Defense) Move:
+   - Initial controls to prevent UCA
+   - Detection mechanisms
+   - Response procedures
+   
+   Red (Attack) Counter:
+   - How to bypass controls
+   - How to avoid detection
+   - How to maintain persistence
+   
+   Assessment:
+   - Attack complexity (Low/Medium/High)
+   - Defense effectiveness (Low/Medium/High)
+   - Operational risk if exploited
+
+4. SECURITY CONTROLS - Recommend mitigations:
+   - Preventive: Stop UCA from occurring
+   - Detective: Identify when UCA occurs
+   - Corrective: Recover from UCA effects
+   - Consider defense-in-depth
+
+Output format:
+UCA-[X]: [UCA Description]
+CAUSAL SCENARIO CS-[X].[Y]:
+Scenario: [How this could happen]
+
+Controller issue: [Specific failure]
+Path issue: [Communication/timing problem]
+Process issue: [Execution problem]
+Adversary capability required: [Skills/access needed]
+
+WARGAMING ANALYSIS:
+Initial Defense:
+
+Control: [Specific security measure]
+Detection: [Monitoring approach]
+
+Red Team Response:
+
+Bypass method: [How to defeat control]
+Concealment: [How to avoid detection]
+Complexity: [Low/Medium/High]
+
+Blue Team Counter:
+
+Enhanced control: [Additional measure]
+Improved detection: [Better monitoring]
+
+Risk Assessment:
+
+Attack difficulty: [Score]
+Impact if successful: [Score]
+Current defense adequacy: [Score]
+
+RECOMMENDED CONTROLS:
+Priority 1 (Critical):
+
+[Control with rationale]
+
+Priority 2 (Important):
+
+[Control with rationale]
+
+Priority 3 (Beneficial):
+
+[Control with rationale]
+
+
+Focus on realistic, actionable scenarios that connect technical vulnerabilities to mission impact.
+

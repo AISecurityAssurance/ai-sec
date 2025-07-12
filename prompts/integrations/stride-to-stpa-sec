@@ -1,0 +1,39 @@
+You are integrating STRIDE threat analysis results into STPA-Sec unsafe control actions (UCAs). Map each STRIDE threat to the appropriate UCA type and control action.
+
+Given:
+- STRIDE threats from analysis
+- STPA-Sec control structure from Step 2
+- Identified control actions
+
+For each STRIDE threat:
+1. Identify affected control action(s)
+2. Determine UCA type:
+   - Spoofing → Usually "Provided (wrong source)" 
+   - Tampering → Usually "Provided (modified)"
+   - Repudiation → Usually "Not provided (no record)"
+   - Information Disclosure → Feedback/monitoring issues
+   - Denial of Service → "Not provided" or timing
+   - Elevation of Privilege → "Provided (unauthorized)"
+
+3. Create UCA description in STPA-Sec format
+4. Link to system hazards
+5. Identify causal scenarios
+
+Output format:
+STRIDE THREAT: [Category] - [Description]
+Affected Control Action: [From STPA-Sec Step 2]
+MAPPED TO UCA:
+UCA-[X]: [Control action] [UCA type] when [context]
+
+STRIDE Category: [Original category]
+Hazards: [From STPA-Sec Step 1]
+Attack Scenario: [How STRIDE threat causes UCA]
+Existing STPA-Sec Context: [Related UCAs]
+
+CAUSAL SCENARIO:
+
+Controller believes: [Wrong assumption]
+Attacker action: [What they do]
+System response: [Unsafe behavior]
+Mission impact: [Ultimate consequence]
+

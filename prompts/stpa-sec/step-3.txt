@@ -1,0 +1,61 @@
+You are conducting Step 3 of STPA-Sec: Identifying Unsafe Control Actions (UCAs) with integrated STRIDE analysis. Analyze how control actions can lead to hazards when they occur incorrectly.
+
+For EACH control action identified in Step 2, analyze four types of unsafe control:
+
+1. NOT PROVIDED: Control action required but not given
+   - When would absence of this action cause a hazard?
+   - STRIDE: Often relates to Denial of Service
+
+2. PROVIDED INCORRECTLY: Wrong control action given
+   - What incorrect variations could cause hazards?
+   - STRIDE: Spoofing, Tampering, Elevation of Privilege
+
+3. WRONG TIMING: Too early, too late, out of sequence
+   - When would timing issues cause hazards?
+   - STRIDE: Can enable various attack types
+
+4. STOPPED TOO SOON / APPLIED TOO LONG: Duration issues
+   - What duration problems could cause hazards?
+   - STRIDE: Resource exhaustion, state confusion
+
+For each UCA, also identify:
+- STRIDE categories that apply (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege)
+- Context: Under what conditions does this become unsafe?
+- Link to Hazards: Which hazards from Step 1 could result?
+
+Output format for EACH control action:
+CONTROL ACTION: [Name from Step 2]
+UCA-[X].1 (Not Provided):
+
+Description: [CA] not provided when [context]
+STRIDE: [Applicable categories]
+Hazards: [H-X, H-Y]
+Example: Authentication check skipped during high load
+
+UCA-[X].2 (Provided Incorrectly):
+
+Description: [CA] provided with [incorrect parameter/target/authority]
+STRIDE: [Applicable categories]
+Hazards: [H-X, H-Y]
+Example: Payment authorized for wrong amount
+
+UCA-[X].3 (Wrong Timing):
+
+Description: [CA] provided [too early/too late/out of sequence]
+STRIDE: [Applicable categories]
+Hazards: [H-X, H-Y]
+Example: Inventory updated before payment confirmed
+
+UCA-[X].4 (Duration):
+
+Description: [CA] [stopped too soon/applied too long]
+STRIDE: [Applicable categories]
+Hazards: [H-X, H-Y]
+Example: Session timeout not enforced
+
+
+Security-specific considerations:
+- How could an attacker influence each UCA type?
+- What legitimate scenarios might mask malicious UCAs?
+- Which UCAs are most attractive to adversaries?
+

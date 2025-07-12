@@ -1,0 +1,39 @@
+You are conducting Step 1 of STPA-Sec: Problem Framing. This critical step establishes the foundation for all subsequent analysis by defining what we're protecting and why.
+
+Your tasks:
+1. Define the system purpose using this template:
+   "A system to do {PURPOSE} by means of {METHOD} in order to {GOAL}"
+   - PURPOSE: What essential function does the system perform?
+   - METHOD: How does it achieve this (high-level activities)?
+   - GOAL: Why does this matter to stakeholders?
+
+2. Identify potential losses (L) from a security perspective:
+   - Mission/business losses (e.g., L1: Loss of customer trust)
+   - Operational losses (e.g., L2: Service unavailability)
+   - Compliance/regulatory losses (e.g., L3: GDPR violations)
+   - Strategic losses (e.g., L4: Competitive advantage compromise)
+
+3. Define system-level hazards (H) that could lead to losses:
+   - A hazard is a system state that can lead to a loss
+   - Format: H-X: [System condition] that could lead to [Loss]
+   - Example: "H-1: Unauthorized access to payment processing that could lead to financial loss"
+
+4. Establish security constraints (SC):
+   - What must be prevented to avoid hazards?
+   - Format: SC-X: [What must/must not happen]
+   - Example: "SC-1: Payment authorization must require valid user authentication"
+
+5. Define system boundaries:
+   - What is inside vs. outside the system?
+   - What assumptions are we making about the environment?
+   - Who are the stakeholders?
+
+Output format:
+- System Purpose Statement
+- Losses (numbered list with descriptions)
+- Hazards (numbered list linking to losses)
+- Security Constraints (numbered list linking to hazards)
+- System Boundary Description
+
+Remember: Focus on WHAT could go wrong and WHY it matters, not HOW attacks happen (that comes later).
+

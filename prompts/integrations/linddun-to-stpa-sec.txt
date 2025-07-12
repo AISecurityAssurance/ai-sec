@@ -1,0 +1,89 @@
+You are integrating LINDDUN privacy threat analysis results into STPA-Sec framework. Map privacy threats to control structure vulnerabilities and unsafe control actions.
+
+Privacy threats often manifest as control problems:
+- Linking → Correlation of control actions across contexts
+- Identifying → Control actions revealing identity
+- Non-repudiation → Excessive control action logging
+- Detecting → Control patterns revealing participation
+- Data Disclosure → Feedback containing private data
+- Unawareness → Missing user control over data processing
+- Non-compliance → Control actions violating regulations
+
+Integration Process:
+1. Map LINDDUN threats to control structure elements
+2. Identify privacy-affecting control actions
+3. Create privacy-focused UCAs
+4. Link to privacy losses (not just security losses)
+5. Consider regulatory requirements as constraints
+
+For each LINDDUN threat:
+
+Input: LINDDUN threat description
+Map to:
+- Affected controllers (who handles private data)
+- Control actions carrying private data
+- Feedback mechanisms leaking information
+- Missing privacy controls
+
+Output format:
+LINDDUN THREAT: [Category] - [Description]
+Private Data Involved: [Data types/categories]
+STPA-SEC MAPPING:
+Affected Control Structure:
+
+Controller: [Component handling private data]
+Control Action: [Action involving private data]
+Feedback: [Information flow with privacy implications]
+
+Privacy-Focused UCA:
+UCA-P-[X]: [Control action] [UCA type] leading to [privacy violation]
+
+LINDDUN Category: [Original category]
+Privacy Loss: [Impact on individuals]
+Regulatory Impact: [GDPR/CCPA violation]
+
+Causal Scenario:
+
+Controller assumption: [What it believes about privacy]
+Actual behavior: [How privacy is violated]
+Individual impact: [Effect on data subjects]
+Compliance failure: [Specific regulation violated]
+
+Privacy Control Gaps:
+
+Missing consent mechanism: [Where needed]
+Insufficient data minimization: [What's over-collected]
+Lack of user control: [What users can't do]
+
+RECOMMENDED PRIVACY CONTROLS:
+Technical:
+
+[Control]: Addresses [privacy threat] in [control action]
+Procedural:
+[Process]: Ensures [privacy requirement] for [controller]
+
+
+Example:
+LINDDUN THREAT: Linking - User activities can be correlated across sessions
+Private Data Involved: Session IDs, timestamps, behavior patterns
+STPA-SEC MAPPING:
+Affected Control Structure:
+
+Controller: Session Manager
+Control Action: Create Session → User Browser
+Feedback: Session Activity → Analytics Engine
+
+Privacy-Focused UCA:
+UCA-P-1: Session Manager provides persistent identifiers when user expects anonymous browsing
+
+LINDDUN Category: Linking
+Privacy Loss: Loss of anonymity, behavior tracking
+Regulatory Impact: GDPR Art. 5(1)(c) - data minimization violation
+
+Causal Scenario:
+
+Controller assumption: Sessions need persistent IDs for functionality
+Actual behavior: IDs enable cross-session tracking
+Individual impact: User profiling without consent
+Compliance failure: Processing beyond stated purpose
+

@@ -1,0 +1,57 @@
+You are performing a rapid integrated security assessment using multiple frameworks in abbreviated form. Time limit: 30 minutes total.
+
+Quick Assessment Process:
+1. System Sketch (5 min): Core purpose and architecture
+2. Multi-Framework Rapid Analysis (20 min):
+   - STPA-Sec: Top 3 UCAs
+   - STRIDE: Highest risk per category
+   - Framework 3: Key findings only
+3. Integrated Findings (5 min): Unified top 5 risks
+
+For efficiency:
+- Use framework shortcuts
+- Focus on highest risks only
+- Identify "must fix" items
+- Skip detailed scenarios
+
+Output format:
+RAPID INTEGRATED ASSESSMENT
+System: [Name and one-line description]
+Assessment Date: [Date]
+Time Spent: [Actual time]
+HIGH-LEVEL VIEW:
+Purpose: [One sentence]
+Key Components: [List max 5]
+Main Threat: [Biggest concern]
+FRAMEWORK QUICK HITS:
+STPA-Sec Flash:
+
+Critical Loss: [Worst case]
+Top UCA: [Most dangerous]
+Key Control Gap: [Biggest hole]
+
+STRIDE Flash:
+
+S: [Highest spoofing risk]
+T: [Highest tampering risk]
+[One per category]
+
+[Other Framework Flash]
+INTEGRATED TOP 5 RISKS:
+
+[Risk]: Found by [frameworks], Score: [High/Critical]
+[Risk]: Found by [frameworks], Score: [High/Critical]
+[Continue]
+
+MUST-FIX CONTROLS:
+
+[Control]: Addresses risks 1,2,3
+[Control]: Addresses risks 2,4
+[Control]: Addresses risk 5
+
+NEXT STEPS:
+
+Deep dive needed on: [Component/Risk]
+Full analysis recommended for: [Area]
+Quick win available: [Easy fix]
+

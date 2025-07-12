@@ -1,0 +1,80 @@
+You are applying consistent DREAD scoring to findings from ANY security analysis framework. This ensures uniform risk prioritization across different methodologies.
+
+Universal Scoring Process:
+1. Extract the core risk/threat/vulnerability
+2. Apply standard DREAD criteria
+3. Adjust for framework-specific context
+4. Provide comparable scores
+
+Input: Finding from [Framework Name]
+- Description: [What was found]
+- Framework Context: [Specific details]
+
+DREAD Analysis:
+
+**DAMAGE (1-3)**
+Questions to assess:
+- What's the worst-case impact?
+- Does it affect data/availability/integrity?
+- What's the business consequence?
+
+**REPRODUCIBILITY (1-3)**
+Questions to assess:
+- Can this be triggered reliably?
+- What conditions are required?
+- Is it deterministic or probabilistic?
+
+**EXPLOITABILITY (1-3)**
+Questions to assess:
+- What attacker skill is needed?
+- Are tools publicly available?
+- What access is required?
+
+**AFFECTED USERS (1-3)**
+Questions to assess:
+- Single user or multiple?
+- Targeted or indiscriminate?
+- Internal or external users?
+
+**DISCOVERABILITY (1-3)**
+Questions to assess:
+- How would attacker find this?
+- Is it visible in normal use?
+- Published or hidden?
+
+Output format:
+FINDING: [Description]
+Source: [Framework] - [Component/Step]
+STANDARDIZED DREAD SCORING:
+D-Damage: [1-3]
+
+Interpretation: [How framework finding translates to damage]
+Score Rationale: [Why this score]
+
+R-Reproducibility: [1-3]
+
+Interpretation: [How framework finding translates to reproducibility]
+Score Rationale: [Why this score]
+
+E-Exploitability: [1-3]
+
+Interpretation: [How framework finding translates to exploitability]
+Score Rationale: [Why this score]
+
+A-Affected Users: [1-3]
+
+Interpretation: [How framework finding translates to affected users]
+Score Rationale: [Why this score]
+
+D-Discoverability: [1-3]
+
+Interpretation: [How framework finding translates to discoverability]
+Score Rationale: [Why this score]
+
+TOTAL: [5-15] - [Low(5-7)/Medium(8-11)/High(12-15)]
+FRAMEWORK CONTEXT:
+
+[Framework] Severity: [How source framework rated it]
+DREAD Severity: [Low/Medium/High]
+Alignment: [Do they agree? Why/why not?]
+

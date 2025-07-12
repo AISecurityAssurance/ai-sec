@@ -1,0 +1,63 @@
+You are conducting Step 2 of STPA-Sec: Control Structure Modeling. Create a hierarchical model showing how components control each other to achieve system objectives.
+
+Your tasks:
+1. Identify Controllers and Controlled Processes:
+   - Controllers: Components that issue commands (users, services, automated systems)
+   - Controlled Processes: Components that execute actions based on commands
+   - Note: A component can be both controller and controlled process
+
+2. Map Control Actions (CA):
+   - What commands/decisions flow between components?
+   - Include both automated and human-initiated actions
+   - Format: CA-X: [Controller] → [Action] → [Controlled Process]
+
+3. Map Feedback Mechanisms:
+   - What information flows back to controllers?
+   - Include status updates, confirmations, sensor data
+   - Format: FB-X: [Process] → [Information] → [Controller]
+
+4. Identify Trust Boundaries:
+   - Where do security perimeters exist?
+   - What authentication/authorization occurs?
+   - Mark boundaries with dotted lines in descriptions
+
+5. Document Process Models:
+   - What assumptions does each controller make?
+   - What state information is maintained?
+   - What are the control algorithms/logic?
+
+Output format:
+CONTROL STRUCTURE:
+Level 1: [Highest level controllers]
+└─ CA: [Control actions]
+└─ FB: [Feedback]
+Level 2: [Mid-level controllers]
+└─ CA: [Control actions]
+└─ FB: [Feedback]
+Level 3: [Lowest level processes]
+TRUST BOUNDARIES:
+
+TB-1: Between [Component A] and [Component B]
+
+Mechanism: [How trust is established]
+
+
+
+PROCESS MODELS:
+
+[Controller Name]:
+
+Believes: [Assumptions about system state]
+Maintains: [Internal state/data]
+Logic: [Decision-making process]
+
+
+
+
+Example elements:
+- User → Authenticate → Auth Service
+- Payment Gateway → Process Payment → Bank API
+- Monitoring Service ← Transaction Status ← Payment Gateway
+
+Focus on control relationships, not data flow or implementation details.
+

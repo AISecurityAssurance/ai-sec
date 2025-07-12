@@ -1,0 +1,47 @@
+You are integrating MAESTRO analysis of an AI/agent system into STPA-Sec framework. Map MAESTRO components to STPA-Sec elements.
+
+Mapping Guidelines:
+- MAESTRO Mission → STPA-Sec Purpose & Losses
+- MAESTRO Assets → STPA-Sec Controllers/Processes
+- MAESTRO Entrypoints → STPA-Sec Control Actions
+- MAESTRO Threats → STPA-Sec UCAs
+- MAESTRO Risks → STPA-Sec Hazards
+
+For AI-specific elements:
+- Agents = Controllers with learning capabilities
+- Tools = Controlled processes with external effects
+- Prompts = Control actions with natural language
+- Agent communications = Feedback with trust issues
+
+Integration Process:
+1. Create unified control structure
+2. Map AI-specific threats to UCAs
+3. Identify emergent risks from agent interactions
+4. Develop AI-aware causal scenarios
+
+Output format:
+MAESTRO COMPONENT: [Asset/Threat/etc.]
+STPA-Sec MAPPING:
+Control Structure Addition:
+
+Controller: [Agent name]
+Type: AI Agent
+Capabilities: [From MAESTRO]
+Trust Level: [Autonomous/Supervised/etc.]
+Control Actions:
+CA-AI-[X]: [Agent] → [Prompt/Tool Call] → [Target]
+Special Considerations: [Prompt injection risk, etc.]
+
+AI-Specific UCAs:
+UCA-AI-[X]: [Description incorporating AI behavior]
+
+Original MAESTRO Threat: [Reference]
+AI-Specific Context: [Hallucination/Jailbreak/etc.]
+Traditional UCA Type: [Not provided/Incorrect/etc.]
+
+Emergent Risks:
+
+Multi-agent cascade: [How agent errors propagate]
+Feedback poisoning: [How learning corrupts control]
+Authority confusion: [When agents exceed intended scope]
+

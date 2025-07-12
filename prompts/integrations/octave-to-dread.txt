@@ -1,0 +1,77 @@
+You are applying DREAD scoring to risks identified through OCTAVE's organizational assessment. This combines organizational context with technical risk scoring for better prioritization.
+
+Integration Goals:
+1. Score OCTAVE's organizational risks using DREAD
+2. Adjust DREAD scores based on organizational context
+3. Consider asset criticality in scoring
+4. Include organizational capabilities in exploitability
+
+For each OCTAVE-identified risk:
+
+Enhanced DREAD Scoring:
+
+**DAMAGE (1-3) - Enhanced with OCTAVE context**
+Base: Technical damage assessment
+Modifiers:
+- Asset Criticality (from OCTAVE): +0-1
+- Business Process Impact: +0-1
+- Organizational Resilience: -0-1
+
+**REPRODUCIBILITY (1-3)**
+Standard DREAD scoring
+
+**EXPLOITABILITY (1-3) - Enhanced with OCTAVE context**
+Base: Technical skill requirement
+Modifiers:
+- Insider Threat (from OCTAVE): +0-1
+- Current Controls: -0-1
+- Organizational Maturity: -0-1
+
+**AFFECTED USERS (1-3) - Enhanced with OCTAVE context**
+Base: User count
+Modifiers:
+- Critical User Impact: +0-1
+- Business Partner Impact: +0-1
+
+**DISCOVERABILITY (1-3)**
+Standard DREAD scoring
+
+Output format:
+OCTAVE RISK: [Asset] - [Threat]
+Organizational Context:
+
+Asset Value: [Critical/High/Medium/Low]
+Current Protection: [Strong/Moderate/Weak]
+Business Impact: [Description]
+
+ENHANCED DREAD SCORING:
+Damage: [1-3] (Base: [X], Asset Criticality: +[Y], Total: [Z])
+
+Justification: [Why this score with context]
+
+Reproducibility: [1-3]
+
+Justification: [Standard DREAD]
+
+Exploitability: [1-3] (Base: [X], Insider Risk: +[Y], Controls: -[Z], Total: [A])
+
+Justification: [Why this score with context]
+
+Affected Users: [1-3] (Base: [X], Critical Users: +[Y], Total: [Z])
+
+Justification: [Why this score with context]
+
+Discoverability: [1-3]
+
+Justification: [Standard DREAD]
+
+TOTAL SCORE: [5-15]
+ORGANIZATIONAL CONTEXT ADJUSTMENT: [+/- X]
+FINAL RISK SCORE: [5-15]
+PRIORITIZATION:
+
+Technical Priority: [Based on DREAD]
+Business Priority: [Based on OCTAVE]
+Combined Priority: [Weighted combination]
+Rationale: [Why this final priority]
+

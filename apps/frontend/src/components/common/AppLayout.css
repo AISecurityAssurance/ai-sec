@@ -1,0 +1,21 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-header-wrapper {
+  flex-shrink: 0;
+}
+
+.app-navigation {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.app-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+}

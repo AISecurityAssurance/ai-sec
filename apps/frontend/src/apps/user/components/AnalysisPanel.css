@@ -1,0 +1,99 @@
+.analysis-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background-secondary);
+  min-height: 0; /* This is crucial for flex children to scroll */
+}
+
+.analysis-content {
+  flex: 1;
+  padding: var(--space-6);
+  overflow-y: auto;
+  min-height: 0; /* Ensures scrolling works properly */
+}
+
+.analyzing-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-secondary);
+}
+
+.analyzing-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--space-4);
+}
+
+.analysis-section {
+  margin-bottom: var(--space-8);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.text-error {
+  color: var(--color-error);
+}
+
+.text-warning {
+  color: var(--color-warning);
+}
+
+.finding-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  transition: all var(--transition-base);
+}
+
+.finding-card:hover {
+  border-color: var(--color-border-secondary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.finding-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.finding-id {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+}
+
+.finding-description {
+  color: var(--color-text);
+  line-height: 1.5;
+  margin-bottom: var(--space-3);
+}
+
+.finding-meta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.action-buttons {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}

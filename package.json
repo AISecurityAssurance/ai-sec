@@ -1,0 +1,25 @@
+{
+  "name": "security-analysis-platform",
+  "version": "1.0.0",
+  "description": "Security Analysis Platform - Monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "generate-types": "turbo run generate-types"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "packageManager": "pnpm@8.6.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AISecurityAssurance/prototype1.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

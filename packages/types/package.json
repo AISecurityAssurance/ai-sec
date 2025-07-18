@@ -1,0 +1,16 @@
+{
+  "name": "@security-platform/types",
+  "version": "1.0.0",
+  "description": "Shared types for Security Analysis Platform",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "generate": "python generate.py"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,192 @@
+.test-config-panel {
+  width: 320px;
+  background: var(--color-background-tertiary);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-5);
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.test-scenario {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.test-scenario:hover {
+  border-color: var(--color-primary);
+}
+
+.test-scenario.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.scenario-title {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-1);
+  color: var(--color-primary);
+}
+
+.scenario-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.test-column {
+  flex: 1;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.variant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.variant-badge {
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-surface-secondary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.variant-badge.experimental {
+  background: var(--color-success);
+  color: white;
+}
+
+.test-controls {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  flex-shrink: 0;
+}
+
+.test-output {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: var(--space-4);
+  min-height: 0;
+}
+
+.output-header {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-2);
+}
+
+.output-section {
+  margin-top: var(--space-3);
+}
+
+.analyzing-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  color: var(--color-text-secondary);
+}
+
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  flex-shrink: 0;
+}
+
+.metrics-row.compact {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.mini-metric {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  text-align: center;
+}
+
+.compact .mini-metric {
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.metric-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+}
+
+.metric-value.better {
+  color: var(--color-success);
+}
+
+.metric-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  margin-top: var(--space-1);
+}
+
+.compact .metric-value {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+.compact .metric-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-transform: none;
+  margin-top: 0;
+}

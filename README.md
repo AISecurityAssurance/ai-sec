@@ -36,10 +36,10 @@ That's it! The app should be running locally.
 ```
 prototype1/
 ├── apps/
-│   └── frontend/          # React TypeScript UI
+│   ├── frontend/         # React TypeScript UI
+│   └── backend/          # FastAPI backend (includes security prompts)
 ├── packages/
 │   └── types/            # Shared TypeScript types
-├── backend/              # FastAPI backend (not yet integrated)
 └── documentation/        # Project documentation
 ```
 

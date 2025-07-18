@@ -1,0 +1,81 @@
+.editable-text {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-width: 100px;
+  width: 100%;
+}
+
+.editable-text:hover .text-content {
+  color: var(--color-primary);
+}
+
+.editable-text.editing {
+  cursor: default;
+}
+
+.text-content {
+  flex: 1;
+  transition: color var(--transition-fast);
+}
+
+.edit-icon {
+  color: var(--color-primary);
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.edit-input {
+  flex: 1;
+  padding: var(--space-2);
+  background: var(--color-background);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: inherit;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+}
+
+.edit-actions {
+  display: flex;
+  gap: var(--space-1);
+  margin-left: var(--space-2);
+}
+
+.btn-save,
+.btn-cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-save {
+  background: var(--color-success);
+  color: white;
+}
+
+.btn-save:hover {
+  background: var(--color-success);
+  opacity: 0.9;
+}
+
+.btn-cancel {
+  background: var(--color-error);
+  color: white;
+}
+
+.btn-cancel:hover {
+  background: var(--color-error);
+  opacity: 0.9;
+}

@@ -1,0 +1,228 @@
+.editable-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.list-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-2);
+}
+
+.btn-cancel-all {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-secondary);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-cancel-all:hover {
+  background: var(--color-error);
+  color: white;
+  border-color: var(--color-error);
+}
+
+.list-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  position: relative;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+/* Integration with existing list styles */
+.goal-list .list-item,
+.constraint-list .list-item,
+.assumption-list .list-item {
+  padding-left: var(--space-6);
+}
+
+.boundary-list .list-item {
+  padding: var(--space-2) var(--space-3);
+  margin: var(--space-1) 0;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.boundary-list.included-list .list-item {
+  background: rgba(var(--color-success-rgb), 0.15);
+  color: var(--color-text);
+  border: 1px solid rgba(var(--color-success-rgb), 0.4);
+}
+
+.boundary-list.excluded-list .list-item {
+  background: rgba(var(--color-error-rgb), 0.15);
+  color: var(--color-text);
+  border: 1px solid rgba(var(--color-error-rgb), 0.4);
+}
+
+.list-item:hover {
+  color: var(--color-primary);
+}
+
+.list-item.selected {
+  background: rgba(var(--color-primary-rgb), 0.1);
+  color: var(--color-primary);
+  padding-left: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.list-item.dragging {
+  opacity: 0.5;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: var(--color-text-secondary);
+  margin-left: calc(var(--space-2) * -1);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.item-icon {
+  font-size: var(--font-size-lg);
+  min-width: 24px;
+}
+
+.item-text {
+  flex: 1;
+}
+
+.item-actions {
+  display: flex;
+  gap: var(--space-1);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.list-item:hover .item-actions {
+  opacity: 1;
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: var(--color-surface-secondary);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-icon:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-icon.btn-delete:hover {
+  background: var(--color-error);
+}
+
+.edit-inline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: 1;
+}
+
+.edit-inline .edit-input {
+  flex: 1;
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-background);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: inherit;
+  font-family: inherit;
+  outline: none;
+}
+
+.btn-inline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-inline.btn-save {
+  background: var(--color-success);
+  color: white;
+}
+
+.btn-inline.btn-cancel {
+  background: var(--color-error);
+  color: white;
+}
+
+.add-new-section {
+  margin-top: var(--space-2);
+}
+
+.new-item-input {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.new-item-input .edit-input {
+  flex: 1;
+  padding: var(--space-2);
+  background: var(--color-background);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: inherit;
+  font-family: inherit;
+  outline: none;
+}
+
+.btn-add-new {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-secondary);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: var(--font-size-sm);
+  width: 100%;
+}
+
+.btn-add-new:hover {
+  background: var(--color-primary);
+  color: white;
+  border-style: solid;
+}

@@ -1,0 +1,220 @@
+.editable-table-container {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.btn-cancel-all {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-secondary);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-cancel-all:hover {
+  background: var(--color-error);
+  color: white;
+  border-color: var(--color-error);
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.editable-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.editable-table th {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.editable-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.editable-table th.sortable:hover {
+  color: var(--color-primary);
+}
+
+.th-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.editable-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+}
+
+.editable-table tr:last-child td {
+  border-bottom: none;
+}
+
+.editable-table tr.clickable {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.editable-table tr.clickable:hover {
+  background: var(--color-background);
+}
+
+.editable-table tr.selected {
+  background: rgba(var(--color-primary-rgb), 0.1);
+}
+
+.cell-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.btn-cell-edit {
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+}
+
+tr:hover .btn-cell-edit {
+  opacity: 1;
+}
+
+.btn-cell-edit:hover {
+  background: var(--color-surface-secondary);
+  color: var(--color-primary);
+}
+
+.cell-edit {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.cell-input,
+.cell-select {
+  flex: 1;
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-background);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: inherit;
+  font-family: inherit;
+  outline: none;
+}
+
+.cell-select {
+  cursor: pointer;
+}
+
+.btn-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-cell.btn-save {
+  background: var(--color-success);
+  color: white;
+}
+
+.btn-cell.btn-cancel {
+  background: var(--color-error);
+  color: white;
+}
+
+.actions-column {
+  width: 80px;
+  text-align: center;
+}
+
+.actions-cell {
+  text-align: center;
+}
+
+.btn-delete {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.btn-delete:hover {
+  background: var(--color-error);
+  color: white;
+}
+
+.new-row {
+  background: var(--color-background);
+}
+
+.btn-add-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-background);
+  border: none;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: var(--font-size-sm);
+}
+
+.btn-add-row:hover {
+  background: var(--color-primary);
+  color: white;
+}

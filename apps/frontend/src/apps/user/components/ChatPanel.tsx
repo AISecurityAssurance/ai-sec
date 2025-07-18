@@ -6,6 +6,7 @@ import './ChatPanel.css';
 interface ChatPanelProps {
   projectId?: string;
   activeAnalysis: string;
+  selectedElement?: { element: any; type: string } | null;
 }
 
 const analysisSuggestions = [
@@ -22,9 +23,87 @@ const comparisonSuggestions = [
   '🔍 Explain variant B improvements',
 ];
 
-export default function ChatPanel({ projectId, activeAnalysis }: ChatPanelProps) {
+const getElementSuggestions = (element: any, type: string) => {
+  switch (type) {
+    case 'loss':
+      return [
+        `🔍 Show all hazards leading to ${element.id}`,
+        `📊 Analyze impact on ${element.stakeholders?.[0] || 'stakeholders'}`,
+        `🛡️ Suggest controls to prevent ${element.id}`,
+        `🔗 Trace ${element.id} to causal scenarios`
+      ];
+    case 'hazard':
+      return [
+        `⚠️ Explain how ${element.id} occurs`,
+        `📈 Show worst-case scenario for ${element.id}`,
+        `🔍 Find all UCAs related to ${element.id}`,
+        `🛡️ List mitigations for ${element.id}`
+      ];
+    case 'uca':
+      return [
+        `🎯 Show causal factors for ${element.id}`,
+        `🔗 Trace ${element.id} to losses`,
+        `📊 Analyze ${element.type} pattern`,
+        `🛡️ Recommend controls for ${element.id}`
+      ];
+    case 'scenario':
+      return [
+        `📊 Explain attack path for ${element.id}`,
+        `🎯 Show D4 analysis for ${element.id}`,
+        `🛡️ Detail mitigations for ${element.id}`,
+        `🔍 Find similar scenarios`
+      ];
+    case 'system-item':
+      const itemType = element.type;
+      if (itemType.startsWith('goal')) {
+        return [
+          `❓ Why is this a system goal?`,
+          `🔍 Show related constraints`,
+          `📊 Analyze goal achievement`,
+          `✏️ Suggest goal refinements`
+        ];
+      } else if (itemType.startsWith('constraint')) {
+        return [
+          `❓ Why is this constraint necessary?`,
+          `🔍 Show violations of this constraint`,
+          `📊 Analyze constraint impact`,
+          `✏️ Refine constraint wording`
+        ];
+      } else if (itemType.startsWith('boundary-included')) {
+        return [
+          `➡️ Move to excluded boundaries`,
+          `❓ Why is this included?`,
+          `🔍 Show dependencies`,
+          `📊 Analyze security implications`
+        ];
+      } else if (itemType.startsWith('boundary-excluded')) {
+        return [
+          `⬅️ Move to included boundaries`,
+          `❓ Why is this excluded?`,
+          `🔍 Show potential risks`,
+          `📊 Analyze if inclusion needed`
+        ];
+      } else if (itemType.startsWith('assumption')) {
+        return [
+          `❓ Validate this assumption`,
+          `🗑️ Remove this assumption`,
+          `✏️ Edit assumption text`,
+          `📊 Analyze assumption risks`
+        ];
+      }
+      return analysisSuggestions;
+    default:
+      return analysisSuggestions;
+  }
+};
+
+export default function ChatPanel({ projectId, activeAnalysis, selectedElement }: ChatPanelProps) {
   const isComparison = activeAnalysis === 'comparison';
-  const suggestionChips = isComparison ? comparisonSuggestions : analysisSuggestions;
+  const suggestionChips = selectedElement 
+    ? getElementSuggestions(selectedElement.element, selectedElement.type)
+    : isComparison 
+      ? comparisonSuggestions 
+      : analysisSuggestions;
   
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -51,6 +130,29 @@ export default function ChatPanel({ projectId, activeAnalysis }: ChatPanelProps)
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (selectedElement) {
+      const { element, type } = selectedElement;
+      if (type === 'system-item') {
+        const itemType = element.type;
+        if (itemType.startsWith('goal')) {
+          setInputValue(`Why is "${element.description}" a system goal?`);
+        } else if (itemType.startsWith('constraint')) {
+          setInputValue(`Why do we have the constraint: "${element.description}"?`);
+        } else if (itemType.startsWith('boundary-included')) {
+          setInputValue(`Why is "${element.description}" included in the system boundary?`);
+        } else if (itemType.startsWith('boundary-excluded')) {
+          setInputValue(`Why is "${element.description}" excluded from the system boundary?`);
+        } else if (itemType.startsWith('assumption')) {
+          setInputValue(`Is this assumption valid: "${element.description}"?`);
+        }
+      } else {
+        const prompt = `Tell me more about ${type.toUpperCase()} ${element.id}: ${element.description || element.name || ''}`;
+        setInputValue(prompt);
+      }
+    }
+  }, [selectedElement]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     isResizing.current = true;

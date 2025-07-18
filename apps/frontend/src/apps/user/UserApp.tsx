@@ -11,6 +11,18 @@ export default function UserApp() {
   const [activeAnalysis, setActiveAnalysis] = useState('stpa-sec');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [selectedElement, setSelectedElement] = useState<any>(null);
+  const [enabledAnalyses, setEnabledAnalyses] = useState<Record<string, boolean>>({
+    'stpa-sec': true,
+    'stride': true,
+    'pasta': false,
+    'maestro': false,
+    'dread': false,
+    'linddun': false,
+    'hazop': false,
+    'octave': false,
+    'cve': false
+  });
 
   const handleRunAnalysis = async () => {
     setIsAnalyzing(true);
@@ -59,6 +71,7 @@ export default function UserApp() {
           <Sidebar 
             selectedProject={selectedProject}
             onProjectSelect={setSelectedProject}
+            onAnalysisTypesChange={setEnabledAnalyses}
           />
         )}
         
@@ -67,12 +80,15 @@ export default function UserApp() {
             activeAnalysis={activeAnalysis}
             onAnalysisChange={setActiveAnalysis}
             isAnalyzing={isAnalyzing}
+            onElementSelect={(element, type) => setSelectedElement({ element, type })}
+            enabledAnalyses={enabledAnalyses}
           />
         </div>
         
         <ChatPanel 
           projectId={selectedProject?.id}
           activeAnalysis={activeAnalysis}
+          selectedElement={selectedElement}
         />
       </div>
     </AppLayout>

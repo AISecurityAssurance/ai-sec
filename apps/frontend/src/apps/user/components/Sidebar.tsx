@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { FileText, Folder, FileCode, Upload, Shield, Target, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { FileText, Folder, FileCode, Upload, Shield, Target, Search, Eye, Brain, Activity, Lock, AlertTriangle, Users, Layers, Info } from 'lucide-react';
 import './Sidebar.css';
 
 const mockFiles = [
@@ -9,21 +9,91 @@ const mockFiles = [
 ];
 
 const analysisTypes = [
-  { id: 'stpa-sec', name: 'STPA-Sec', icon: Shield, enabled: true },
-  { id: 'stride', name: 'STRIDE', icon: Target, enabled: true },
-  { id: 'cve', name: 'CVE Search', icon: Search, enabled: false },
+  { 
+    id: 'stpa-sec', 
+    name: 'STPA-Sec', 
+    icon: Shield, 
+    enabled: true,
+    description: 'System-Theoretic Process Analysis for Security'
+  },
+  { 
+    id: 'stride', 
+    name: 'STRIDE', 
+    icon: Target, 
+    enabled: true,
+    description: 'Spoofing, Tampering, Repudiation, Info Disclosure, DoS, Elevation'
+  },
+  { 
+    id: 'pasta', 
+    name: 'PASTA', 
+    icon: Activity, 
+    enabled: false,
+    description: 'Process for Attack Simulation and Threat Analysis'
+  },
+  { 
+    id: 'maestro', 
+    name: 'MAESTRO', 
+    icon: Brain, 
+    enabled: false,
+    description: 'Multi-Agent Evaluated Securely Through Rigorous Oversight'
+  },
+  { 
+    id: 'dread', 
+    name: 'DREAD', 
+    icon: AlertTriangle, 
+    enabled: false,
+    description: 'Damage, Reproducibility, Exploitability, Affected, Discoverability'
+  },
+  { 
+    id: 'linddun', 
+    name: 'LINDDUN', 
+    icon: Eye, 
+    enabled: false,
+    description: 'Privacy threat modeling framework'
+  },
+  { 
+    id: 'hazop', 
+    name: 'HAZOP', 
+    icon: AlertTriangle, 
+    enabled: false,
+    description: 'Hazard and Operability Study'
+  },
+  { 
+    id: 'octave', 
+    name: 'OCTAVE', 
+    icon: Layers, 
+    enabled: false,
+    description: 'Operationally Critical Threat, Asset, and Vulnerability Evaluation'
+  },
+  { 
+    id: 'cve', 
+    name: 'CVE Search', 
+    icon: Search, 
+    enabled: false,
+    description: 'Common Vulnerabilities and Exposures database search'
+  },
 ];
 
 interface SidebarProps {
   selectedProject: any;
   onProjectSelect: (project: any) => void;
+  onAnalysisTypesChange?: (enabledTypes: Record<string, boolean>) => void;
 }
 
-export default function Sidebar({ selectedProject, onProjectSelect }: SidebarProps) {
+export default function Sidebar({ selectedProject, onProjectSelect, onAnalysisTypesChange }: SidebarProps) {
   const [selectedFile, setSelectedFile] = useState('1');
   const [enabledAnalyses, setEnabledAnalyses] = useState(
     analysisTypes.reduce((acc, type) => ({ ...acc, [type.id]: type.enabled }), {})
   );
+  
+  // Initialize with the passed state on mount
+  useEffect(() => {
+    onAnalysisTypesChange?.(enabledAnalyses);
+  }, []);
+  const [showRecommendations, setShowRecommendations] = useState(true);
+  
+  // Based on system being a Digital Banking Platform, these are recommended
+  const recommendedAnalyses = ['pasta', 'maestro', 'dread', 'octave'];
 
   const handleFileUpload = () => {
     // TODO: Implement file upload
@@ -31,10 +101,14 @@ export default function Sidebar({ selectedProject, onProjectSelect }: SidebarPro
   };
 
   const toggleAnalysis = (analysisId: string) => {
-    setEnabledAnalyses(prev => ({
-      ...prev,
-      [analysisId]: !prev[analysisId]
-    }));
+    setEnabledAnalyses(prev => {
+      const newState = {
+        ...prev,
+        [analysisId]: !prev[analysisId]
+      };
+      onAnalysisTypesChange?.(newState);
+      return newState;
+    });
   };
 
   return (
@@ -67,10 +141,12 @@ export default function Sidebar({ selectedProject, onProjectSelect }: SidebarPro
         <div className="analysis-options">
           {analysisTypes.map(type => {
             const Icon = type.icon;
+            const isRecommended = recommendedAnalyses.includes(type.id);
             return (
               <label
                 key={type.id}
-                className={`analysis-option ${enabledAnalyses[type.id] ? 'active' : ''}`}
+                className={`analysis-option ${enabledAnalyses[type.id] ? 'active' : ''} ${isRecommended && showRecommendations ? 'recommended' : ''}`}
+                title={type.description}
               >
                 <input
                   type="checkbox"
@@ -79,10 +155,19 @@ export default function Sidebar({ selectedProject, onProjectSelect }: SidebarPro
                 />
                 <Icon size={16} />
                 <span>{type.name}</span>
+                {isRecommended && showRecommendations && (
+                  <span className="recommendation-badge" title="Recommended for your system">★</span>
+                )}
               </label>
             );
           })}
         </div>
+        {showRecommendations && (
+          <div className="recommendation-note">
+            <Info size={14} />
+            <span>★ Recommended based on your Digital Banking Platform</span>
+          </div>
+        )}
       </div>
     </aside>
   );

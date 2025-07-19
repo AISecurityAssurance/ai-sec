@@ -1,12 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Shield, Settings, Beaker, MessageSquare } from 'lucide-react';
+import { Shield, Settings, FileText, MessageSquare, SlidersHorizontal } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import './AppSwitcher.css';
 
 const apps = [
   { path: '/analysis', label: 'Analysis', icon: Shield },
+  { path: '/prompts', label: 'Prompt Settings', icon: FileText },
+  { path: '/settings', label: 'Settings', icon: SlidersHorizontal },
   { path: '/admin', label: 'Admin', icon: Settings },
-  { path: '/arena', label: 'Testing Arena', icon: Beaker },
   { path: '/feedback', label: 'Feedback', icon: MessageSquare },
 ];
 

@@ -27,7 +27,7 @@ An AI-powered security analysis platform that automates STPA-Sec and STRIDE anal
    ```
 
 4. **Open in browser**
-   Navigate to http://localhost:5174
+   Navigate to http://localhost:5173
 
 That's it! The app should be running locally.
 

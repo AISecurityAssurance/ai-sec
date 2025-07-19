@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './AnalysisTable.css';
 
-interface TableColumn {
+export interface TableColumn {
   key: string;
   label: string;
   width?: string;
 }
 
-interface TableRow {
+export interface TableRow {
   id: string;
   [key: string]: any;
 }

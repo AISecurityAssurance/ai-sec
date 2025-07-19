@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, MouseEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { MouseEvent } from 'react';
 
 interface ContextMenuOptions {
   x: number;

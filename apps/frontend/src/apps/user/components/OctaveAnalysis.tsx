@@ -383,7 +383,7 @@ export default function OctaveAnalysis({ onElementSelect }: OctaveAnalysisProps)
                             style={{ width: `${(score as number) * 20}%` }}
                           />
                         </div>
-                        <span className="impact-score">{score}/5</span>
+                        <span className="impact-score">{String(score)}/5</span>
                       </div>
                     ))}
                   </div>

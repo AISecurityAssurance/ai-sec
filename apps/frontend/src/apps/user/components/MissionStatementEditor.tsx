@@ -31,7 +31,7 @@ export default function MissionStatementEditor({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
   const originalTextRef = useRef<string>('');
-  const originalDataRef = useRef<{ purpose: string; method: string; goals: string[] }>();
+  const originalDataRef = useRef<{ purpose: string; method: string; goals: string[] } | undefined>(undefined);
 
   // Initialize full text from components
   useEffect(() => {

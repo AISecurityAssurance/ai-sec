@@ -18,6 +18,7 @@ import AnalysisOverview from './AnalysisOverview';
 import WargamingTab from './WargamingTab';
 import ProcessControlDiagram from './ProcessControlDiagram';
 import { getRelatedData } from '../mockData/stpaSecData';
+import type { CausalScenario } from '../mockData/stpaSecData';
 import { stakeholders as initialStakeholders, getMissionStatementString } from '../mockData/systemData';
 import { useAnalysisStore } from '../stores/analysisStore';
 import { useBroadcastSync } from '../hooks/useBroadcastChannel';
@@ -675,13 +676,27 @@ export default function AnalysisPanel({
         onRowSelect={(row) => handleElementSelect(row, 'scenario')}
         selectedRowId={selectedElement?.type === 'scenario' ? selectedElement.id : null}
         onUpdate={isEditMode ? (data) => {
-          // Preserve existing mitigations or set empty array for new rows
+          // Preserve all existing fields and merge with updated data
           const updatedScenarios = data.map(d => {
             const existing = scenarios.find(s => s.id === d.id);
+            if (existing) {
+              return {
+                ...existing,
+                ...d,
+                mitigations: existing.mitigations || []
+              };
+            }
+            // For new scenarios, provide default values
             return {
-              ...d,
-              mitigations: existing?.mitigations || []
-            };
+              id: d.id,
+              ucaId: d.ucaId || '',
+              description: d.description || '',
+              causalFactors: d.causalFactors || [],
+              strideCategory: d.strideCategory || '',
+              d4Score: d.d4Score || { detectability: 0, difficulty: 0, damage: 0, deniability: 0 },
+              confidence: d.confidence || 0,
+              mitigations: []
+            } as CausalScenario;
           });
           updateScenarios(updatedScenarios);
         } : undefined}

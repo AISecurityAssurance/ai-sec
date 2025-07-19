@@ -4,7 +4,33 @@ import { useState, useEffect } from 'react';
 import { useAnalysisStore } from '../stores/analysisStore';
 import { useBroadcastSync } from '../hooks/useBroadcastChannel';
 import { getRelatedData } from '../mockData/stpaSecData';
+import type { Loss, Hazard, Controller, ControlAction, UCA, CausalScenario } from '../mockData/stpaSecData';
 import './FocusedItemView.css';
+
+// Type guards for each item type
+function isLoss(item: any): item is Loss {
+  return item && 'severity' in item && 'category' in item && 'stakeholders' in item;
+}
+
+function isHazard(item: any): item is Hazard {
+  return item && 'severity' in item && 'relatedLosses' in item && 'worstCase' in item;
+}
+
+function isController(item: any): item is Controller {
+  return item && 'name' in item && 'type' in item && 'responsibilities' in item;
+}
+
+function isControlAction(item: any): item is ControlAction {
+  return item && 'action' in item && 'controllerId' in item && 'targetProcess' in item;
+}
+
+function isUCA(item: any): item is UCA {
+  return item && 'controlActionId' in item && 'type' in item && 'hazards' in item;
+}
+
+function isCausalScenario(item: any): item is CausalScenario {
+  return item && 'ucaId' in item && 'strideCategory' in item && 'confidence' in item;
+}
 
 export default function FocusedItemView() {
   const { itemType, itemId } = useParams<{ itemType: string; itemId: string }>();
@@ -48,7 +74,7 @@ export default function FocusedItemView() {
   };
   
   const item = getItemData();
-  const [editedItem, setEditedItem] = useState(item);
+  const [editedItem, setEditedItem] = useState<Loss | Hazard | Controller | ControlAction | UCA | CausalScenario | null | undefined>(item);
   
   useEffect(() => {
     setEditedItem(item);
@@ -112,22 +138,34 @@ export default function FocusedItemView() {
     
     switch (itemType) {
       case 'loss':
-        updateLosses(losses.map(l => l.id === itemId ? editedItem : l));
+        if (isLoss(editedItem)) {
+          updateLosses(losses.map(l => l.id === itemId ? editedItem : l));
+        }
         break;
       case 'hazard':
-        updateHazards(hazards.map(h => h.id === itemId ? editedItem : h));
+        if (isHazard(editedItem)) {
+          updateHazards(hazards.map(h => h.id === itemId ? editedItem : h));
+        }
         break;
       case 'controller':
-        updateControllers(controllers.map(c => c.id === itemId ? editedItem : c));
+        if (isController(editedItem)) {
+          updateControllers(controllers.map(c => c.id === itemId ? editedItem : c));
+        }
         break;
       case 'control-action':
-        updateControlActions(controlActions.map(ca => ca.id === itemId ? editedItem : ca));
+        if (isControlAction(editedItem)) {
+          updateControlActions(controlActions.map(ca => ca.id === itemId ? editedItem : ca));
+        }
         break;
       case 'uca':
-        updateUcas(ucas.map(u => u.id === itemId ? editedItem : u));
+        if (isUCA(editedItem)) {
+          updateUcas(ucas.map(u => u.id === itemId ? editedItem : u));
+        }
         break;
       case 'scenario':
-        updateScenarios(scenarios.map(s => s.id === itemId ? editedItem : s));
+        if (isCausalScenario(editedItem)) {
+          updateScenarios(scenarios.map(s => s.id === itemId ? editedItem : s));
+        }
         break;
     }
     
@@ -139,7 +177,9 @@ export default function FocusedItemView() {
     setIsEditMode(false);
   };
   
-  const related = getRelatedData(itemId, itemType);
+  const related = itemType === 'controller' || itemType === 'control-action' 
+    ? { losses: [], hazards: [], ucas: [], scenarios: [] }
+    : getRelatedData(itemId, itemType as 'loss' | 'hazard' | 'uca' | 'scenario');
   
   return (
     <div className="focused-item-view">
@@ -258,7 +298,7 @@ export default function FocusedItemView() {
   function renderItemDetails() {
     if (!editedItem) return null;
     
-    const renderField = (label: string, value: any, key: string, options?: Array<{value: string, label: string}>) => {
+    const renderField = (label: string, value: any, key: string, options?: Array<{value: string, label: string}>, isArray?: boolean) => {
       if (isEditMode && key !== 'id') {
         if (options) {
           return (
@@ -283,7 +323,15 @@ export default function FocusedItemView() {
               <label>{label}:</label>
               <textarea 
                 value={value} 
-                onChange={(e) => setEditedItem({...editedItem, [key]: e.target.value})}
+                onChange={(e) => {
+                  if (isArray) {
+                    // Convert comma-separated string back to array
+                    const newValue = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+                    setEditedItem({...editedItem, [key]: newValue});
+                  } else {
+                    setEditedItem({...editedItem, [key]: e.target.value});
+                  }
+                }}
                 className="detail-textarea"
                 rows={4}
               />
@@ -297,7 +345,15 @@ export default function FocusedItemView() {
             <input 
               type="text" 
               value={value} 
-              onChange={(e) => setEditedItem({...editedItem, [key]: e.target.value})}
+              onChange={(e) => {
+                if (isArray) {
+                  // Convert comma-separated string back to array
+                  const newValue = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+                  setEditedItem({...editedItem, [key]: newValue});
+                } else {
+                  setEditedItem({...editedItem, [key]: e.target.value});
+                }
+              }}
               className="detail-input"
             />
           </div>
@@ -321,93 +377,111 @@ export default function FocusedItemView() {
     
     switch (itemType) {
       case 'loss':
-        return (
-          <>
-            {renderField('ID', editedItem.id, 'id')}
-            {renderField('Description', editedItem.description, 'description')}
-            {renderField('Severity', editedItem.severity, 'severity', severityOptions)}
-            {renderField('Category', editedItem.category, 'category')}
-            {renderField('Stakeholders', editedItem.stakeholders, 'stakeholders')}
-          </>
-        );
+        if (isLoss(editedItem)) {
+          return (
+            <>
+              {renderField('ID', editedItem.id, 'id')}
+              {renderField('Description', editedItem.description, 'description')}
+              {renderField('Severity', editedItem.severity, 'severity', severityOptions)}
+              {renderField('Category', editedItem.category, 'category')}
+              {renderField('Stakeholders', editedItem.stakeholders.join(', '), 'stakeholders', undefined, true)}
+            </>
+          );
+        }
+        break;
         
       case 'hazard':
-        return (
-          <>
-            {renderField('ID', editedItem.id, 'id')}
-            {renderField('Description', editedItem.description, 'description')}
-            {renderField('Severity', editedItem.severity, 'severity', severityOptions)}
-            {renderField('Related Losses', editedItem.relatedLosses, 'relatedLosses')}
-            {renderField('Worst Case Scenario', editedItem.worstCase, 'worstCase')}
-          </>
-        );
+        if (isHazard(editedItem)) {
+          return (
+            <>
+              {renderField('ID', editedItem.id, 'id')}
+              {renderField('Description', editedItem.description, 'description')}
+              {renderField('Severity', editedItem.severity, 'severity', severityOptions)}
+              {renderField('Related Losses', editedItem.relatedLosses.join(', '), 'relatedLosses', undefined, true)}
+              {renderField('Worst Case Scenario', editedItem.worstCase, 'worstCase')}
+            </>
+          );
+        }
+        break;
         
       case 'controller':
-        return (
-          <>
-            {renderField('ID', editedItem.id, 'id')}
-            {renderField('Name', editedItem.name, 'name')}
-            {renderField('Type', editedItem.type, 'type')}
-            {renderField('Responsibilities', editedItem.responsibilities, 'responsibilities')}
-          </>
-        );
+        if (isController(editedItem)) {
+          return (
+            <>
+              {renderField('ID', editedItem.id, 'id')}
+              {renderField('Name', editedItem.name, 'name')}
+              {renderField('Type', editedItem.type, 'type')}
+              {renderField('Responsibilities', editedItem.responsibilities.join(', '), 'responsibilities', undefined, true)}
+            </>
+          );
+        }
+        break;
         
       case 'control-action':
-        return (
-          <>
-            {renderField('ID', editedItem.id, 'id')}
-            {renderField('Action', editedItem.action, 'action')}
-            {renderField('Controller', editedItem.controllerId, 'controllerId')}
-            {renderField('Target Process', editedItem.targetProcess, 'targetProcess')}
-            {renderField('Constraints', editedItem.constraints, 'constraints')}
-          </>
-        );
+        if (isControlAction(editedItem)) {
+          return (
+            <>
+              {renderField('ID', editedItem.id, 'id')}
+              {renderField('Action', editedItem.action, 'action')}
+              {renderField('Controller', editedItem.controllerId, 'controllerId')}
+              {renderField('Target Process', editedItem.targetProcess, 'targetProcess')}
+              {renderField('Constraints', editedItem.constraints.join(', '), 'constraints', undefined, true)}
+            </>
+          );
+        }
+        break;
         
       case 'uca':
-        const ucaTypeOptions = [
-          { value: 'not-provided', label: 'Not Provided' },
-          { value: 'provided-causes-hazard', label: 'Provided Causes Hazard/Vulnerability' },
-          { value: 'wrong-timing', label: 'Wrong Timing/Order' },
-          { value: 'stopped-too-soon', label: 'Stopped Too Soon/Applied Too Long' }
-        ];
-        
-        return (
-          <>
-            {renderField('ID', editedItem.id, 'id')}
-            {renderField('Control Action', editedItem.controlActionId, 'controlActionId')}
-            {renderField('Type', editedItem.type, 'type', ucaTypeOptions)}
-            {renderField('Description', editedItem.description, 'description')}
-            {renderField('Context', editedItem.context, 'context')}
-            {renderField('Hazards/Vulnerabilities', editedItem.hazards, 'hazards')}
-            {renderField('Severity', editedItem.severity, 'severity', severityOptions)}
-          </>
-        );
+        if (isUCA(editedItem)) {
+          const ucaTypeOptions = [
+            { value: 'not-provided', label: 'Not Provided' },
+            { value: 'provided', label: 'Provided Causes Hazard/Vulnerability' },
+            { value: 'wrong-timing', label: 'Wrong Timing/Order' },
+            { value: 'wrong-duration', label: 'Wrong Duration/Applied Too Long' }
+          ];
+          
+          return (
+            <>
+              {renderField('ID', editedItem.id, 'id')}
+              {renderField('Control Action', editedItem.controlActionId, 'controlActionId')}
+              {renderField('Type', editedItem.type, 'type', ucaTypeOptions)}
+              {renderField('Description', editedItem.description, 'description')}
+              {renderField('Context', editedItem.context, 'context')}
+              {renderField('Hazards/Vulnerabilities', editedItem.hazards.join(', '), 'hazards', undefined, true)}
+              {renderField('Severity', editedItem.severity, 'severity', severityOptions)}
+            </>
+          );
+        }
+        break;
         
       case 'scenario':
-        return (
-          <>
-            {renderField('ID', editedItem.id, 'id')}
-            {renderField('UCA', editedItem.ucaId, 'ucaId')}
-            {renderField('Description', editedItem.description, 'description')}
-            {renderField('STRIDE Category', editedItem.strideCategory, 'strideCategory')}
-            {renderField('Confidence', `${editedItem.confidence}%`, 'confidence')}
-            {editedItem.mitigations && editedItem.mitigations.length > 0 && (
-              <div className="detail-field">
-                <label>Mitigations:</label>
-                <ul className="mitigations-list">
-                  {editedItem.mitigations.map((m: any, idx: number) => (
-                    <li key={idx}>
-                      <strong>{m.type}:</strong> {m.description}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </>
-        );
+        if (isCausalScenario(editedItem)) {
+          return (
+            <>
+              {renderField('ID', editedItem.id, 'id')}
+              {renderField('UCA', editedItem.ucaId, 'ucaId')}
+              {renderField('Description', editedItem.description, 'description')}
+              {renderField('STRIDE Category', editedItem.strideCategory, 'strideCategory')}
+              {renderField('Confidence', `${editedItem.confidence}%`, 'confidence')}
+              {editedItem.mitigations && editedItem.mitigations.length > 0 && (
+                <div className="detail-field">
+                  <label>Mitigations:</label>
+                  <ul className="mitigations-list">
+                    {editedItem.mitigations.map((m: string, idx: number) => (
+                      <li key={idx}>{m}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
+          );
+        }
+        break;
         
       default:
         return null;
     }
+    
+    return null; // Return null if type guard fails
   }
 }

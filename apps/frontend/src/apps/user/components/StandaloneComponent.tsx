@@ -26,7 +26,13 @@ export default function StandaloneComponent() {
     controlActions,
     ucas,
     scenarios,
-    enabledAnalyses
+    enabledAnalyses,
+    updateLosses,
+    updateHazards,
+    updateControllers,
+    updateControlActions,
+    updateUcas,
+    updateScenarios
   } = useAnalysisStore();
   
   // Set up broadcast channel for state sync
@@ -85,6 +91,7 @@ export default function StandaloneComponent() {
             ]}
             data={losses}
             isEditMode={isEditMode}
+            onUpdate={updateLosses}
           />
         );
         
@@ -101,6 +108,7 @@ export default function StandaloneComponent() {
             ]}
             data={hazards}
             isEditMode={isEditMode}
+            onUpdate={updateHazards}
           />
         );
         
@@ -116,6 +124,7 @@ export default function StandaloneComponent() {
             ]}
             data={controllers}
             isEditMode={isEditMode}
+            onUpdate={updateControllers}
           />
         );
         
@@ -132,6 +141,7 @@ export default function StandaloneComponent() {
             ]}
             data={controlActions}
             isEditMode={isEditMode}
+            onUpdate={updateControlActions}
           />
         );
         
@@ -150,6 +160,7 @@ export default function StandaloneComponent() {
             ]}
             data={ucas}
             isEditMode={isEditMode}
+            onUpdate={updateUcas}
           />
         );
         
@@ -170,6 +181,31 @@ export default function StandaloneComponent() {
               mitigations: s.mitigations.length + ' mitigations'
             }))}
             isEditMode={isEditMode}
+            onUpdate={(data) => {
+              // Preserve all existing fields and merge with updated data
+              const transformedData = data.map(item => {
+                const originalScenario = scenarios.find(s => s.id === item.id);
+                if (originalScenario) {
+                  return {
+                    ...originalScenario,
+                    ...item,
+                    mitigations: originalScenario.mitigations || []
+                  };
+                }
+                // For new scenarios, provide default values
+                return {
+                  id: item.id,
+                  ucaId: item.ucaId || '',
+                  description: item.description || '',
+                  causalFactors: item.causalFactors || [],
+                  strideCategory: item.strideCategory || '',
+                  d4Score: item.d4Score || { detectability: 0, difficulty: 0, damage: 0, deniability: 0 },
+                  confidence: item.confidence || 0,
+                  mitigations: []
+                };
+              });
+              updateScenarios(transformedData);
+            }}
           />
         );
         

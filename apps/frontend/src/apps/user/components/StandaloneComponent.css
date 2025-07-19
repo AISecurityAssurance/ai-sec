@@ -1,0 +1,121 @@
+.standalone-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--color-background);
+}
+
+.standalone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.standalone-header h1 {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  color: var(--color-primary);
+}
+
+.standalone-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-icon:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.btn-icon.btn-close:hover {
+  background: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.standalone-content {
+  flex: 1;
+  padding: var(--space-4);
+  overflow: auto;
+  min-height: 0;
+}
+
+/* Ensure tables and diagrams fill available space */
+.standalone-content > div {
+  height: 100%;
+}
+
+/* Override some component styles for standalone view */
+.standalone-content .process-control-diagram {
+  height: 100%;
+}
+
+.standalone-content .single-table-view {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.standalone-content .analysis-table {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.standalone-content .table-container {
+  flex: 1;
+  overflow: auto;
+}
+
+/* Fullscreen adjustments */
+:fullscreen .standalone-container {
+  background: var(--color-background);
+}
+
+:fullscreen .standalone-content {
+  padding: var(--space-6);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .standalone-container {
+    background: var(--color-background);
+  }
+}
+
+/* Print styles */
+@media print {
+  .standalone-header {
+    position: static;
+    box-shadow: none;
+  }
+  
+  .standalone-controls {
+    display: none;
+  }
+  
+  .standalone-content {
+    padding: 0;
+  }
+}

@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Shield, Settings, Beaker, MessageSquare } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import './AppSwitcher.css';
@@ -11,7 +11,6 @@ const apps = [
 ];
 
 export default function AppSwitcher() {
-  const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
 
@@ -25,14 +24,14 @@ export default function AppSwitcher() {
           const isActive = location.pathname.startsWith(app.path);
           
           return (
-            <button
+            <Link
               key={app.path}
+              to={app.path}
               className={`app-btn ${isActive ? 'active' : ''}`}
-              onClick={() => navigate(app.path)}
             >
               <Icon size={16} />
               <span>{app.label}</span>
-            </button>
+            </Link>
           );
         })}
       </div>

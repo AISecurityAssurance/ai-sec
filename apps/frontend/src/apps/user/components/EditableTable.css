@@ -48,6 +48,7 @@
 .editable-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .editable-table th {
@@ -80,6 +81,10 @@
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--color-border);
   font-size: var(--font-size-sm);
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  vertical-align: top;
 }
 
 .editable-table tr:last-child td {

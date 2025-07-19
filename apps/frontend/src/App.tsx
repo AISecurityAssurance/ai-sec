@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useTheme } from './hooks/useTheme';
-import UserApp from './apps/user/UserApp';
+import UserRoutes from './apps/user/routes';
 import AdminApp from './apps/admin/AdminApp';
 import ArenaApp from './apps/arena/ArenaApp';
 import CSATApp from './apps/csat/CSATApp';
@@ -21,7 +21,7 @@ function App() {
     <ErrorBoundary>
       <div className="app-container">
         <Routes>
-          <Route path="/analysis/*" element={<UserApp />} />
+          <Route path="/analysis/*" element={<UserRoutes />} />
           <Route path="/admin/*" element={<AdminApp />} />
           <Route path="/arena/*" element={<ArenaApp />} />
           <Route path="/feedback/*" element={<CSATApp />} />

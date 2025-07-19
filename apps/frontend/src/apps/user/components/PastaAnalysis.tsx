@@ -12,7 +12,11 @@ import {
 } from '../mockData/pastaData';
 import './AnalysisPanel.css';
 
-export default function PastaAnalysis() {
+interface PastaAnalysisProps {
+  onElementSelect?: (element: any, type: string) => void;
+}
+
+export default function PastaAnalysis({ onElementSelect }: PastaAnalysisProps) {
   const [activeStage, setActiveStage] = useState('objectives');
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
@@ -33,17 +37,22 @@ export default function PastaAnalysis() {
       <AnalysisTable
         columns={[
           { key: 'id', label: 'ID', width: '80px' },
-          { key: 'objective', label: 'Business Objective' },
+          { key: 'objective', label: 'Business Objective', width: '35%' },
           { key: 'priority', label: 'Priority', width: '100px' },
           { key: 'impactArea', label: 'Impact Area', width: '150px' },
-          { key: 'relatedAssets', label: 'Related Assets' },
+          { key: 'relatedAssets', label: 'Related Assets', width: '25%' },
         ]}
         data={businessObjectives.map(obj => ({
           ...obj,
           relatedAssets: obj.relatedAssets.join(', ')
         }))}
-        onRowSelect={setSelectedItem}
+        onRowSelect={(item) => {
+          setSelectedItem(item);
+          onElementSelect?.(item, 'pasta-objective');
+        }}
         selectedRowId={selectedItem?.id}
+        itemType="pasta-objective"
+        linkable={true}
       />
     </div>
   );
@@ -67,7 +76,10 @@ export default function PastaAnalysis() {
           interfaces: scope.interfaces.join(', '),
           dependencies: scope.dependencies.join(', ')
         }))}
-        onRowSelect={setSelectedItem}
+        onRowSelect={(item) => {
+          setSelectedItem(item);
+          onElementSelect?.(item, 'pasta-scope');
+        }}
         selectedRowId={selectedItem?.id}
       />
     </div>
@@ -91,7 +103,10 @@ export default function PastaAnalysis() {
           ...actor,
           targetedAssets: actor.targetedAssets.join(', ')
         }))}
-        onRowSelect={setSelectedItem}
+        onRowSelect={(item) => {
+          setSelectedItem(item);
+          onElementSelect?.(item, 'pasta-threat-actor');
+        }}
         selectedRowId={selectedItem?.id}
       />
     </div>
@@ -113,7 +128,10 @@ export default function PastaAnalysis() {
           { key: 'risk', label: 'Risk', width: '80px' },
         ]}
         data={attackScenarios}
-        onRowSelect={setSelectedItem}
+        onRowSelect={(item) => {
+          setSelectedItem(item);
+          onElementSelect?.(item, 'pasta-scenario');
+        }}
         selectedRowId={selectedItem?.id}
         getRowClassName={(row) => `risk-${row.risk}`}
       />
@@ -142,7 +160,10 @@ export default function PastaAnalysis() {
           technicalImpact: `${risk.technicalImpact}/5`,
           overallRisk: risk.overallRisk.toFixed(1)
         }))}
-        onRowSelect={setSelectedItem}
+        onRowSelect={(item) => {
+          setSelectedItem(item);
+          onElementSelect?.(item, 'pasta-risk');
+        }}
         selectedRowId={selectedItem?.id}
       />
     </div>

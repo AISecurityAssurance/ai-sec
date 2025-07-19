@@ -95,6 +95,118 @@ const getElementSuggestions = (element: any, type: string) => {
         `🛡️ Prioritize mitigations for ${element.asset}`,
         `🔍 Compare with other ${element.priority} priority risks`
       ];
+    case 'stride-threat':
+      return [
+        `🎯 Explain ${element.threatType} threat: ${element.description}`,
+        `🛡️ Detail mitigations for ${element.component}`,
+        `📊 Analyze attack vector: ${element.attackVector}`,
+        `🔍 Show similar ${element.threatType} threats`
+      ];
+    case 'maestro-agent':
+      return [
+        `🤖 Explain ${element.name} capabilities and risks`,
+        `🔍 Show all threats for ${element.name}`,
+        `🛡️ List security controls for this ${element.type}`,
+        `📊 Analyze trust level: ${element.trustLevel}`
+      ];
+    case 'maestro-threat':
+      return [
+        `⚠️ Explain ${element.category} threat: ${element.threat}`,
+        `🎯 Detail attack scenario: ${element.scenario}`,
+        `🛡️ Show mitigations and monitoring`,
+        `📊 Analyze detection difficulty: ${element.detectionDifficulty}`
+      ];
+    case 'maestro-control':
+      return [
+        `🛡️ Explain how ${element.name} works`,
+        `📊 Show effectiveness: ${element.effectiveness}`,
+        `🔍 List covered agents`,
+        `⚙️ Implementation details`
+      ];
+    case 'linddun-category':
+      return [
+        `📊 Explain ${element.name} privacy threats`,
+        `🔍 Show all ${element.threatCount} threats in this category`,
+        `🛡️ Best practices for ${element.name} mitigation`,
+        `⚖️ GDPR implications of ${element.name}`
+      ];
+    case 'linddun-dataflow':
+      return [
+        `🔍 Analyze privacy risks in ${element.name}`,
+        `📊 Show all threats for this data flow`,
+        `⚖️ GDPR compliance for ${element.purpose}`,
+        `🛡️ Recommend privacy controls`
+      ];
+    case 'linddun-threat':
+      return [
+        `⚠️ Explain ${element.category}: ${element.threat}`,
+        `📊 Analyze privacy impact on ${element.affectedParties?.join(', ')}`,
+        `🛡️ Detail mitigations for ${element.id}`,
+        `⚖️ GDPR requirements for this threat`
+      ];
+    case 'linddun-control':
+      return [
+        `🛡️ How does ${element.name} protect privacy?`,
+        `📊 Show ${element.effectiveness} effectiveness details`,
+        `🔍 Which threats does this control mitigate?`,
+        `⚙️ Implementation guide for ${element.type} control`
+      ];
+    case 'hazop-node':
+      return [
+        `🔍 Analyze deviations for ${element.name}`,
+        `📊 Show all ${element.parameters?.length} parameters`,
+        `⚠️ List critical deviations for this ${element.type}`,
+        `🛡️ Recommend additional safeguards`
+      ];
+    case 'hazop-deviation':
+      return [
+        `⚠️ Explain ${element.guideWord} deviation: ${element.deviation}`,
+        `📊 Analyze risk: ${element.severity} severity, ${element.likelihood} likelihood`,
+        `🛡️ Detail safeguards and recommendations`,
+        `🎯 Show all related action items`
+      ];
+    case 'hazop-action':
+      return [
+        `📋 Explain action: ${element.action}`,
+        `🎯 Why is this ${element.priority} priority?`,
+        `👤 Contact ${element.responsible} for status`,
+        `📅 Impact if missed: ${element.dueDate}`
+      ];
+    case 'octave-asset':
+      return [
+        `🎯 Why is ${element.name} critical to operations?`,
+        `🔍 Show all threats to this ${element.type}`,
+        `📊 Analyze CIA requirements: C:${element.securityRequirements?.confidentiality} I:${element.securityRequirements?.integrity} A:${element.securityRequirements?.availability}`,
+        `🛡️ Recommend additional protections`
+      ];
+    case 'octave-threat':
+      return [
+        `⚠️ Explain threat: ${element.actor} - ${element.outcome}`,
+        `📊 Analyze ${element.source} threat probability`,
+        `🎯 Detail impact across all categories`,
+        `🛡️ Show control gaps and recommendations`
+      ];
+    case 'octave-vulnerability':
+      return [
+        `🔍 Explain ${element.type} vulnerability: ${element.description}`,
+        `⚠️ Why is this ${element.severity} severity?`,
+        `🎯 Which threats exploit this vulnerability?`,
+        `🛡️ Remediation plan (effort: ${element.remediationEffort})`
+      ];
+    case 'octave-risk':
+      return [
+        `📊 Explain risk: ${element.description}`,
+        `🎯 Why ${element.likelihood} likelihood, ${element.impact} impact?`,
+        `🛡️ Detail ${element.strategy} strategy`,
+        `📈 Analyze residual risk: ${element.residualRisk || 'Not assessed'}`
+      ];
+    case 'octave-strategy':
+      return [
+        `🛡️ How does ${element.name} protect assets?`,
+        `📊 Why ${element.effectiveness} effectiveness?`,
+        `💰 Justify ${element.cost} cost for ${element.timeframe}`,
+        `🎯 Which assets benefit from this strategy?`
+      ];
     case 'system-item':
       const itemType = element.type;
       if (itemType.startsWith('goal')) {
@@ -212,6 +324,54 @@ export default function ChatPanel({ projectId, activeAnalysis, selectedElement }
             prompt = `Analyze risk assessment for: ${element.asset} (Priority: ${element.priority}, Overall Risk: ${element.overallRisk})`;
             break;
         }
+        setInputValue(prompt);
+      } else if (type === 'stride-threat') {
+        const prompt = `Analyze STRIDE threat ${element.id}: ${element.description} (${element.threatType} on ${element.component}, Risk: ${element.riskLevel})`;
+        setInputValue(prompt);
+      } else if (type === 'maestro-agent') {
+        const prompt = `Analyze AI agent: ${element.name} (${element.type}, Trust Level: ${element.trustLevel})`;
+        setInputValue(prompt);
+      } else if (type === 'maestro-threat') {
+        const prompt = `Analyze AI threat ${element.id}: ${element.threat} (${element.category}, Impact: ${element.impact})`;
+        setInputValue(prompt);
+      } else if (type === 'maestro-control') {
+        const prompt = `Explain control ${element.id}: ${element.name} (${element.type}, Effectiveness: ${element.effectiveness})`;
+        setInputValue(prompt);
+      } else if (type === 'linddun-category') {
+        const prompt = `Analyze LINDDUN category: ${element.name} (${element.threatCount} threats)`;
+        setInputValue(prompt);
+      } else if (type === 'linddun-dataflow') {
+        const prompt = `Analyze data flow ${element.id}: ${element.name} (${element.source} → ${element.destination})`;
+        setInputValue(prompt);
+      } else if (type === 'linddun-threat') {
+        const prompt = `Analyze privacy threat ${element.id}: ${element.threat} (${element.category}, Impact: ${element.privacyImpact})`;
+        setInputValue(prompt);
+      } else if (type === 'linddun-control') {
+        const prompt = `Explain privacy control ${element.id}: ${element.name} (${element.type}, Effectiveness: ${element.effectiveness})`;
+        setInputValue(prompt);
+      } else if (type === 'hazop-node') {
+        const prompt = `Analyze HAZOP node ${element.id}: ${element.name} (${element.type})`;
+        setInputValue(prompt);
+      } else if (type === 'hazop-deviation') {
+        const prompt = `Analyze HAZOP deviation ${element.id}: ${element.guideWord} - ${element.deviation} (Risk: ${element.riskRating})`;
+        setInputValue(prompt);
+      } else if (type === 'hazop-action') {
+        const prompt = `Review action ${element.id}: ${element.action} (Priority: ${element.priority}, Status: ${element.status})`;
+        setInputValue(prompt);
+      } else if (type === 'octave-asset') {
+        const prompt = `Analyze critical asset ${element.id}: ${element.name} (${element.type}, Criticality: ${element.criticality})`;
+        setInputValue(prompt);
+      } else if (type === 'octave-threat') {
+        const prompt = `Analyze threat ${element.id}: ${element.actor} - ${element.outcome} (Source: ${element.source})`;
+        setInputValue(prompt);
+      } else if (type === 'octave-vulnerability') {
+        const prompt = `Analyze vulnerability ${element.id}: ${element.description} (${element.type}, Severity: ${element.severity})`;
+        setInputValue(prompt);
+      } else if (type === 'octave-risk') {
+        const prompt = `Analyze risk ${element.id}: ${element.description} (Level: ${element.riskLevel}, Strategy: ${element.strategy})`;
+        setInputValue(prompt);
+      } else if (type === 'octave-strategy') {
+        const prompt = `Explain strategy ${element.id}: ${element.name} (${element.type}, Status: ${element.status})`;
         setInputValue(prompt);
       } else {
         const prompt = `Tell me more about ${type.toUpperCase()} ${element.id}: ${element.description || element.name || ''}`;

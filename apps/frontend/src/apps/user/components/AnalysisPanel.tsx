@@ -9,6 +9,11 @@ import MissionStatementEditor from './MissionStatementEditor';
 import InlineTextEditor from './InlineTextEditor';
 import PastaAnalysis from './PastaAnalysis';
 import DreadAnalysis from './DreadAnalysis';
+import StrideAnalysis from './StrideAnalysis';
+import MaestroAnalysis from './MaestroAnalysis';
+import LinddunAnalysis from './LinddunAnalysis';
+import HazopAnalysis from './HazopAnalysis';
+import OctaveAnalysis from './OctaveAnalysis';
 import AnalysisOverview from './AnalysisOverview';
 import WargamingTab from './WargamingTab';
 import ProcessControlDiagram from './ProcessControlDiagram';
@@ -909,44 +914,19 @@ export default function AnalysisPanel({
               </div>
             )}
             
-            {activeTab === 'stride' && (
-              <div className="analysis-section">
-                <h3>STRIDE Analysis</h3>
-                <p className="text-secondary">STRIDE analysis results will appear here...</p>
-              </div>
-            )}
+            {activeTab === 'stride' && <StrideAnalysis onElementSelect={handleElementSelect} />}
             
             {activeTab === 'pasta' && <PastaAnalysis onElementSelect={handleElementSelect} />}
             
-            {activeTab === 'maestro' && (
-              <div className="analysis-section">
-                <h3>MAESTRO Analysis</h3>
-                <p className="text-secondary">Multi-Agent Evaluated Securely Through Rigorous Oversight results will appear here...</p>
-              </div>
-            )}
+            {activeTab === 'maestro' && <MaestroAnalysis onElementSelect={handleElementSelect} />}
             
             {activeTab === 'dread' && <DreadAnalysis onElementSelect={handleElementSelect} />}
             
-            {activeTab === 'linddun' && (
-              <div className="analysis-section">
-                <h3>LINDDUN Analysis</h3>
-                <p className="text-secondary">Privacy threat modeling results will appear here...</p>
-              </div>
-            )}
+            {activeTab === 'linddun' && <LinddunAnalysis onElementSelect={handleElementSelect} />}
             
-            {activeTab === 'hazop' && (
-              <div className="analysis-section">
-                <h3>HAZOP Analysis</h3>
-                <p className="text-secondary">Hazard and Operability Study results will appear here...</p>
-              </div>
-            )}
+            {activeTab === 'hazop' && <HazopAnalysis onElementSelect={handleElementSelect} />}
             
-            {activeTab === 'octave' && (
-              <div className="analysis-section">
-                <h3>OCTAVE Analysis</h3>
-                <p className="text-secondary">Operationally Critical Threat, Asset, and Vulnerability Evaluation results will appear here...</p>
-              </div>
-            )}
+            {activeTab === 'octave' && <OctaveAnalysis onElementSelect={handleElementSelect} />}
             
             {activeTab === 'cve' && (
               <div className="analysis-section">

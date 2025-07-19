@@ -1,5 +1,11 @@
 /* Prompts App Styles */
-.prompts-header {
+.prompts-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.prompts-page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -8,7 +14,7 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-.prompts-header h1 {
+.prompts-page-header h1 {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);
   margin: 0;
@@ -35,8 +41,9 @@
 
 .prompts-container {
   display: flex;
-  height: 100%;
+  flex: 1;
   background: var(--color-background);
+  overflow: hidden;
 }
 
 .prompts-sidebar {

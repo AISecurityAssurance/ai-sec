@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Cpu, FileText, Sliders, Plug } from 'lucide-react';
-import AppLayout from '../../components/common/AppLayout';
+import SimpleLayout from '../../components/common/SimpleLayout';
 import ModelConfig from './components/ModelConfig';
 import PromptEngineering from './components/PromptEngineering';
 import AnalysisParameters from './components/AnalysisParameters';
@@ -19,14 +19,9 @@ export default function AdminApp() {
 
   const ActiveComponent = navItems.find(item => item.id === activeSection)?.component || ModelConfig;
 
-  const header = (
-    <header className="admin-header">
-      <h1 className="heading-3">🔧 Security Analysis Platform - Admin Panel</h1>
-    </header>
-  );
 
   return (
-    <AppLayout header={header}>
+    <SimpleLayout>
       <aside className="admin-sidebar">
         {navItems.map(item => {
           const Icon = item.icon;
@@ -46,6 +41,6 @@ export default function AdminApp() {
       <main className="admin-content">
         <ActiveComponent />
       </main>
-    </AppLayout>
+    </SimpleLayout>
   );
 }

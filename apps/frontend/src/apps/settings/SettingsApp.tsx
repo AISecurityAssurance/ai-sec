@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Save, Download, Upload, RotateCcw, ChevronRight } from 'lucide-react';
-import AppLayout from '../../components/common/AppLayout';
+import SimpleLayout from '../../components/common/SimpleLayout';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { usePromptStore } from '../../stores/promptStore';
 import './SettingsApp.css';
@@ -389,35 +389,33 @@ export default function SettingsApp() {
     );
   };
 
-  const header = (
-    <div className="settings-header">
-      <h1>Settings</h1>
-      <div className="header-actions">
-        <button onClick={handleExportSettings} className="header-button">
-          <Download size={20} />
-          Export
-        </button>
-        <label className="header-button">
-          <Upload size={20} />
-          Import
-          <input
-            type="file"
-            accept=".json"
-            onChange={handleImportSettings}
-            style={{ display: 'none' }}
-          />
-        </label>
-        <button onClick={resetToDefaults} className="header-button">
-          <RotateCcw size={20} />
-          Reset
-        </button>
-      </div>
-    </div>
-  );
-
   return (
-    <AppLayout header={header}>
-      <div className="settings-container">
+    <SimpleLayout>
+      <div className="settings-page">
+        <div className="settings-page-header">
+          <h1>Settings</h1>
+          <div className="header-actions">
+            <button onClick={handleExportSettings} className="header-button">
+              <Download size={20} />
+              Export
+            </button>
+            <label className="header-button">
+              <Upload size={20} />
+              Import
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImportSettings}
+                style={{ display: 'none' }}
+              />
+            </label>
+            <button onClick={resetToDefaults} className="header-button">
+              <RotateCcw size={20} />
+              Reset
+            </button>
+          </div>
+        </div>
+        <div className="settings-container">
         <div className="settings-sidebar">
           <div className="settings-tabs">
             <button
@@ -461,6 +459,7 @@ export default function SettingsApp() {
           {activeTab === 'analysis' && renderAnalysisSettings()}
         </div>
       </div>
-    </AppLayout>
+      </div>
+    </SimpleLayout>
   );
 }

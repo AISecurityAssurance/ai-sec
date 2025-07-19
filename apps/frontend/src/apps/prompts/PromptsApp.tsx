@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus, Edit2, Copy, Trash2, Save, FileText } from 'lucide-react';
-import AppLayout from '../../components/common/AppLayout';
+import SimpleLayout from '../../components/common/SimpleLayout';
 import { usePromptStore, getTemplatesByType } from '../../stores/promptStore';
 import './PromptsApp.css';
 
@@ -39,19 +39,17 @@ export default function PromptsApp() {
     }
   };
 
-  const header = (
-    <div className="prompts-header">
-      <h1>Prompt Settings</h1>
-      <button className="add-template-button">
-        <Plus size={20} />
-        New Template
-      </button>
-    </div>
-  );
-
   return (
-    <AppLayout header={header}>
-      <div className="prompts-container">
+    <SimpleLayout>
+      <div className="prompts-page">
+        <div className="prompts-page-header">
+          <h1>Prompt Settings</h1>
+          <button className="add-template-button">
+            <Plus size={20} />
+            New Template
+          </button>
+        </div>
+        <div className="prompts-container">
         <div className="prompts-sidebar">
           <div className="analysis-type-filter">
             <h3>Analysis Type</h3>
@@ -178,6 +176,7 @@ export default function PromptsApp() {
           </div>
         </div>
       </div>
-    </AppLayout>
+      </div>
+    </SimpleLayout>
   );
 }

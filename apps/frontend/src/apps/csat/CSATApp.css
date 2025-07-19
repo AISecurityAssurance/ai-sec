@@ -1,3 +1,39 @@
+/* CSAT App Styles */
+.csat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.csat-tabs {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.csat-tab {
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.csat-tab:hover {
+  color: var(--color-text);
+}
+
+.csat-tab.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
 .csat-header {
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);

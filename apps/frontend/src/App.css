@@ -1,5 +1,6 @@
 .app-container {
   width: 100vw;
-  height: 100vh;
+  height: calc(100vh - 48px);
+  margin-top: 48px;
   overflow: hidden;
 }

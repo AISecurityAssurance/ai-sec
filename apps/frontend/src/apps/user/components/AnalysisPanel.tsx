@@ -20,7 +20,7 @@ import ProcessControlDiagram from './ProcessControlDiagram';
 import { getRelatedData } from '../mockData/stpaSecData';
 import type { CausalScenario } from '../mockData/stpaSecData';
 import { stakeholders as initialStakeholders, getMissionStatementString } from '../mockData/systemData';
-import { useAnalysisStore } from '../stores/analysisStore';
+import { useAnalysisStore } from '../../../stores/analysisStore';
 import { useBroadcastSync } from '../hooks/useBroadcastChannel';
 import './AnalysisPanel.css';
 
@@ -43,6 +43,11 @@ interface AnalysisPanelProps {
   onElementSelect?: (element: any, type: string) => void;
   enabledAnalyses?: Record<string, boolean>;
   standaloneMode?: boolean;
+  isCollapsible?: boolean;
+  onToggleSection?: (sectionId: string) => void;
+  onToggleTable?: (tableId: string) => void;
+  expandedSections?: Set<string>;
+  expandedTables?: Set<string>;
 }
 
 export default function AnalysisPanel({ 
@@ -54,7 +59,12 @@ export default function AnalysisPanel({
     'stpa-sec': true,
     'stride': true
   },
-  standaloneMode = false
+  standaloneMode = false,
+  isCollapsible = false,
+  onToggleSection,
+  onToggleTable,
+  expandedSections,
+  expandedTables
 }: AnalysisPanelProps) {
   const [activeTab, setActiveTab] = useState(activeAnalysis || 'stpa-sec');
   const [stpaSecSubTab, setStpaSecSubTab] = useState('system-description');

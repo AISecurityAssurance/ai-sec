@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Shield, FileText, SlidersHorizontal, Settings, MessageSquare, Menu } from 'lucide-react';
+import { Shield, FileText, SlidersHorizontal, Settings, MessageSquare, Menu, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../../hooks/useTheme';
 import './TopNavBar.css';
 
 const apps = [
@@ -15,11 +16,12 @@ export default function TopNavBar() {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const { theme, toggleTheme } = useTheme();
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth < 1024);
     };
     
     checkMobile();
@@ -27,6 +29,7 @@ export default function TopNavBar() {
     
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -83,6 +86,16 @@ export default function TopNavBar() {
                       </Link>
                     );
                   })}
+                  <button
+                    className="mobile-nav-item theme-toggle-mobile"
+                    onClick={() => {
+                      toggleTheme();
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -101,6 +114,13 @@ export default function TopNavBar() {
                   </Link>
                 );
               })}
+              <button
+                className="theme-toggle"
+                onClick={toggleTheme}
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
             </div>
           )}
         </div>

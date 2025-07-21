@@ -1,0 +1,130 @@
+.system-description-template {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-3);
+  background: var(--color-surface);
+}
+
+.system-description-template.editing {
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+.system-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.system-title-link {
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+}
+
+.system-title {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.system-toolbar {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.system-content {
+  padding: var(--space-3);
+}
+
+.mission-section {
+  margin-bottom: var(--space-4);
+}
+
+.mission-section h5 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.lists-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.list-group {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
+.list-group h5 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.boundaries-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+@media (max-width: 768px) {
+  .boundaries-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Icon-only toolbar buttons */
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1);
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.toolbar-btn:hover {
+  background: var(--color-surface-secondary);
+  color: var(--color-text);
+  border-color: var(--color-border-secondary);
+}
+
+.toolbar-btn.edit:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.toolbar-btn.cancel:hover {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.toolbar-btn.save {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.toolbar-btn.save:hover {
+  background: var(--color-primary-hover);
+}
+
+.toolbar-btn.export:hover {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}

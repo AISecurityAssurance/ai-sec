@@ -1,6 +1,11 @@
 .app-container {
-  width: 100vw;
+  position: fixed;
+  top: 48px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
   height: calc(100vh - 48px);
-  margin-top: 48px;
   overflow: hidden;
+  background: var(--color-background);
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useAnalysisStore } from '../stores/analysisStore';
+import { useAnalysisStore } from '../../../stores/analysisStore';
 
 type BroadcastMessage = {
   type: 'STATE_UPDATE';

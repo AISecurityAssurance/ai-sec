@@ -1,0 +1,66 @@
+.analysis-flow {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.analysis-flow-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.analysis-flow-header h3 {
+  margin: 0;
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.analysis-flow-toolbar {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.analysis-flow-container {
+  flex: 1;
+  position: relative;
+  min-height: 500px;
+  height: 500px;
+}
+
+/* Override React Flow styles for consistency */
+.react-flow__controls {
+  bottom: var(--space-3);
+  left: var(--space-3);
+}
+
+.react-flow__minimap {
+  bottom: var(--space-3);
+  right: var(--space-3);
+}
+
+.react-flow__node {
+  font-size: var(--font-sm);
+}
+
+.react-flow__edge-path {
+  stroke: var(--text-secondary);
+}
+
+.react-flow__node-default {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.react-flow__node-default.selected {
+  border-color: var(--primary);
+}

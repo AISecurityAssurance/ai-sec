@@ -10,7 +10,7 @@ import DreadAnalysis from './DreadAnalysis';
 import AnalysisOverview from './AnalysisOverview';
 import { STANDALONE_COMPONENTS, type StandaloneComponentType } from '../routes';
 import { useBroadcastChannel } from '../hooks/useBroadcastChannel';
-import { useAnalysisStore } from '../stores/analysisStore';
+import { useAnalysisStore } from '../../../stores/analysisStore';
 import './StandaloneComponent.css';
 
 export default function StandaloneComponent() {

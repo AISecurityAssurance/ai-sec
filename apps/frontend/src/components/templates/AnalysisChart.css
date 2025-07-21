@@ -1,0 +1,124 @@
+.analysis-chart {
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.analysis-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.analysis-chart-header h3 {
+  margin: 0;
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.analysis-chart-toolbar {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.analysis-chart-content {
+  padding: var(--space-4);
+  min-height: 300px;
+}
+
+/* Bar Chart Styles */
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.bar-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.bar-label {
+  min-width: 80px;
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+.bar-wrapper {
+  flex: 1;
+  height: 24px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: var(--space-2);
+  transition: width 0.3s ease;
+}
+
+.bar-value {
+  font-size: var(--font-xs);
+  color: white;
+  font-weight: 600;
+}
+
+/* Pie Chart Styles */
+.pie-chart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-sm);
+}
+
+.legend-label {
+  flex: 1;
+  font-size: var(--font-sm);
+  color: var(--text-primary);
+}
+
+.legend-value {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Placeholder */
+.chart-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--text-secondary);
+  font-style: italic;
+}

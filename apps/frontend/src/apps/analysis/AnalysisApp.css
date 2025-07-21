@@ -1,0 +1,6 @@
+/* Analysis App Styles */
+.analysis-app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}

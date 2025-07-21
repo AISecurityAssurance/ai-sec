@@ -1,0 +1,242 @@
+.analysis-table-template {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-3);
+  background: var(--color-surface);
+}
+
+.analysis-table-template.editing {
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table-title-link {
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+}
+
+.table-title {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.table-toolbar {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.table-filter {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.filter-input {
+  width: 100%;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+.table-container {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* Ensure table maintains minimum width */
+.table-container .analysis-table {
+  min-width: max-content;
+}
+
+.analysis-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.analysis-table th {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-secondary);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.analysis-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.analysis-table th.sortable:hover {
+  background: var(--color-surface-tertiary);
+}
+
+.th-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.sort-indicator {
+  display: flex;
+  align-items: center;
+  color: var(--color-primary);
+}
+
+.analysis-table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.analysis-table tr:last-child td {
+  border-bottom: none;
+}
+
+.analysis-table tr:hover {
+  background: var(--color-surface-secondary);
+}
+
+.cell-input {
+  width: 100%;
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+/* Icon-only toolbar buttons */
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1);
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.toolbar-btn:hover {
+  background: var(--color-surface-secondary);
+  color: var(--color-text);
+  border-color: var(--color-border-secondary);
+}
+
+.toolbar-btn.edit:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.toolbar-btn.cancel:hover {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.toolbar-btn.save {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.toolbar-btn.save:hover {
+  background: var(--color-primary-hover);
+}
+
+.toolbar-btn.export:hover {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.toolbar-btn.open:hover {
+  color: var(--color-info);
+  border-color: var(--color-info);
+}
+
+/* Dropdown and new row styles */
+.cell-select {
+  width: 100%;
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  background: var(--color-background);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.action-column {
+  width: 60px;
+  text-align: center;
+}
+
+.row-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.row-btn:hover {
+  background: var(--color-surface-secondary);
+  color: var(--color-text);
+}
+
+.row-btn.delete:hover {
+  color: var(--color-error);
+  border-color: var(--color-error);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.row-btn.add {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.row-btn.add:hover {
+  background: var(--color-primary-hover);
+}
+
+.new-row {
+  background: var(--color-surface-secondary);
+}
+
+.new-row td {
+  border-top: 2px dashed var(--color-border);
+}
+
+/* Clickable rows */
+.analysis-table tbody tr.clickable-row:hover {
+  background: var(--surface-hover);
+}
+
+.analysis-table tbody tr.clickable-row {
+  transition: background 0.2s ease;
+}

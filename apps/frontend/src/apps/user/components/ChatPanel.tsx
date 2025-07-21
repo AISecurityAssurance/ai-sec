@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Send, Paperclip } from 'lucide-react';
 import type { ChatMessage } from '@security-platform/types';
 import './ChatPanel.css';
 
@@ -259,24 +259,11 @@ export default function ChatPanel({ projectId, activeAnalysis, selectedElement }
       ? comparisonSuggestions 
       : analysisSuggestions;
   
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome',
-      sessionId: 'session-1',
-      role: 'assistant',
-      content: isComparison 
-        ? 'Ready to help analyze the comparison results. I can summarize differences, explain findings, or answer questions about the variants.'
-        : 'Ready to help analyze your security findings. Choose a suggestion below or ask me anything about the analysis.',
-      timestamp: new Date(),
-    }
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [width, setWidth] = useState(350);
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const isResizing = useRef(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -380,37 +367,6 @@ export default function ChatPanel({ projectId, activeAnalysis, selectedElement }
     }
   }, [selectedElement]);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    isResizing.current = true;
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing.current) return;
-      
-      const newWidth = window.innerWidth - e.clientX;
-      if (newWidth >= 300 && newWidth <= 600) {
-        setWidth(newWidth);
-      }
-    };
-
-    const handleMouseUp = () => {
-      isResizing.current = false;
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
-
   const handleSend = async () => {
     if (!inputValue.trim()) return;
 
@@ -452,36 +408,42 @@ export default function ChatPanel({ projectId, activeAnalysis, selectedElement }
   };
 
   return (
-    <aside className={`chat-panel ${isCollapsed ? 'collapsed' : ''}`} ref={panelRef} style={{ width: isCollapsed ? '48px' : `${width}px` }}>
-      <div className="resize-handle" onMouseDown={handleMouseDown} />
-      
-      <div className="chat-header">
-        <button 
-          className="collapse-toggle"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          title={isCollapsed ? 'Expand chat' : 'Collapse chat'}
-        >
-          {isCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-        </button>
-        {!isCollapsed && <h3 className="chat-title">Security Analyst</h3>}
-      </div>
-      
-      {!isCollapsed && (
-        <>
-          <div className="suggestion-chips-container">
-            {suggestionChips.map((suggestion, idx) => (
-              <button
-                key={idx}
-                className="chip"
-                onClick={() => handleSuggestionClick(suggestion)}
-              >
-                {suggestion}
-              </button>
-            ))}
+    <aside className="chat-panel" ref={panelRef}>
+      <div className="chat-messages">
+        {messages.length === 0 && (
+          <div className="suggestion-chips-container in-chat">
+            <div className="message assistant">
+              <div className="message-avatar">🤖</div>
+              <div className="message-content">
+                <p>
+                  {isComparison 
+                    ? 'Ready to help analyze the comparison results. Would you like to '
+                    : 'Ready to help analyze your security findings. Would you like to '}
+                  {suggestionChips.slice(0, 2).map((suggestion, idx) => {
+                    const cleanSuggestion = suggestion.replace(/^[🔍⚠️🛡️🔌📊🎯⚡➡️⬅️❓🗑️✏️🔗🤖📋👤📅💰📈⚙️⚖️]\s*/, '');
+                    return (
+                      <span key={idx}>
+                        <a 
+                          href="#" 
+                          className="suggestion-link"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleSuggestionClick(suggestion);
+                          }}
+                        >
+                          {cleanSuggestion.toLowerCase()}
+                        </a>
+                        {idx === 0 ? ' or ' : ''}
+                      </span>
+                    );
+                  })}
+                  {' '}or ask me something else?
+                </p>
+              </div>
+            </div>
           </div>
-          
-          <div className="chat-messages">
-            {messages.map(message => (
+        )}
+        {messages.map(message => (
               <div key={message.id} className={`message ${message.role}`}>
                 {message.role === 'assistant' && (
                   <div className="message-avatar">🤖</div>
@@ -528,8 +490,6 @@ export default function ChatPanel({ projectId, activeAnalysis, selectedElement }
               </button>
             </div>
           </div>
-        </>
-      )}
     </aside>
   );
 }

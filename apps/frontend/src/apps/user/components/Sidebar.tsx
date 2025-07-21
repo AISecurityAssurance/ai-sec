@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, Folder, FileCode, Upload, Shield, Target, Search, Eye, Brain, Activity, Lock, AlertTriangle, Users, Layers, Info } from 'lucide-react';
-import { useAnalysisStore } from '../stores/analysisStore';
+import { useAnalysisStore } from '../../../stores/analysisStore';
 import './Sidebar.css';
 
 const mockFiles = [

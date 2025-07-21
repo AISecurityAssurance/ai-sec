@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useTheme } from './hooks/useTheme';
-import UserRoutes from './apps/user/routes';
+import AnalysisRoutes from './apps/analysis/routes';
 import AdminApp from './apps/admin/AdminApp';
 import SettingsApp from './apps/settings/SettingsApp';
 import PromptsApp from './apps/prompts/PromptsApp';
@@ -23,7 +23,7 @@ function App() {
       <TopNavBar />
       <div className="app-container">
         <Routes>
-          <Route path="/analysis/*" element={<UserRoutes />} />
+          <Route path="/analysis/*" element={<AnalysisRoutes />} />
           <Route path="/admin/*" element={<AdminApp />} />
           <Route path="/settings/*" element={<SettingsApp />} />
           <Route path="/prompts/*" element={<PromptsApp />} />

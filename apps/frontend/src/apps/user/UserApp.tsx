@@ -3,7 +3,7 @@ import SimpleLayout from '../../components/common/SimpleLayout';
 import Sidebar from './components/Sidebar';
 import AnalysisPanel from './components/AnalysisPanel';
 import ChatPanel from './components/ChatPanel';
-import { useAnalysisStore } from './stores/analysisStore';
+import { useAnalysisStore } from '../../stores/analysisStore';
 import './UserApp.css';
 
 export default function UserApp() {

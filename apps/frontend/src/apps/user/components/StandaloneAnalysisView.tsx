@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { X, Menu } from 'lucide-react';
 import AnalysisPanel from './AnalysisPanel';
 import ChatPanel from './ChatPanel';
-import { useAnalysisStore } from '../stores/analysisStore';
+import { useAnalysisStore } from '../../../stores/analysisStore';
 import { useBroadcastSync } from '../hooks/useBroadcastChannel';
 import './StandaloneAnalysisView.css';
 

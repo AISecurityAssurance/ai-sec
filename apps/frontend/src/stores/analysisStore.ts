@@ -7,8 +7,8 @@ import {
   controlActions as initialControlActions,
   ucas as initialUcas,
   causalScenarios as initialScenarios
-} from '../mockData/stpaSecData';
-import { systemDescription as initialSystemDescription } from '../mockData/systemData';
+} from '../apps/user/mockData/stpaSecData';
+import { systemDescription as initialSystemDescription } from '../apps/user/mockData/systemData';
 
 interface AnalysisState {
   // Project info

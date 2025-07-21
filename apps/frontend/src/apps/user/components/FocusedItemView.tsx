@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Edit3, Save, AlertTriangle, ShieldAlert, Users, Zap, Target } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useAnalysisStore } from '../stores/analysisStore';
+import { useAnalysisStore } from '../../../stores/analysisStore';
 import { useBroadcastSync } from '../hooks/useBroadcastChannel';
 import { getRelatedData } from '../mockData/stpaSecData';
 import type { Loss, Hazard, Controller, ControlAction, UCA, CausalScenario } from '../mockData/stpaSecData';

@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import UserApp from './UserApp';
 import StandaloneComponent from './components/StandaloneComponent';
 import StandaloneAnalysisView from './components/StandaloneAnalysisView';
+import StandaloneTemplateView from './components/StandaloneTemplateView';
 import FocusedItemView from './components/FocusedItemView';
 
 // Component types that can be opened in standalone windows
@@ -30,6 +31,10 @@ export default function UserRoutes() {
       
       {/* Full analysis view routes */}
       <Route path="/view/:analysisType" element={<StandaloneAnalysisView />} />
+      
+      {/* Template-based analysis view routes */}
+      <Route path="/template/:analysisType" element={<StandaloneTemplateView />} />
+      <Route path="/template/:analysisType/:sectionId" element={<StandaloneTemplateView />} />
       
       {/* Standalone component routes */}
       <Route path="/component/:componentType" element={<StandaloneComponent />} />

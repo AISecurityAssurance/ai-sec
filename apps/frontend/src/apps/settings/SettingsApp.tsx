@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Save, Download, Upload, RotateCcw, ChevronRight } from 'lucide-react';
+import { Save, Download, Upload, RotateCcw, ChevronRight, Key, Globe, Cpu, AlertCircle, Check } from 'lucide-react';
 import SimpleLayout from '../../components/common/SimpleLayout';
 import { useSettingsStore } from '../../stores/settingsStore';
-import { usePromptStore } from '../../stores/promptStore';
 import './SettingsApp.css';
 
-type SettingsTab = 'general' | 'tokens' | 'prompts' | 'panels' | 'analysis';
+type SettingsTab = 'general' | 'models' | 'tokens' | 'panels' | 'analysis';
 
 export default function SettingsApp() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
@@ -14,10 +13,13 @@ export default function SettingsApp() {
     panels,
     analysis,
     general,
+    models,
     updateTokenEstimation,
     updatePanelSettings,
     updateAnalysisSettings,
     updateGeneralSettings,
+    updateModelSettings,
+    updateProviderConfig,
     resetToDefaults,
     exportSettings,
     importSettings
@@ -332,43 +334,52 @@ export default function SettingsApp() {
     </div>
   );
 
-  const renderPromptsSettings = () => {
-    const { templates, settings } = usePromptStore();
-    
+  const renderModelSettings = () => {
+    const providerInfo = {
+      anthropic: { name: 'Anthropic (Claude)', icon: '🤖', supportsOAuth: true },
+      openai: { name: 'OpenAI (GPT)', icon: '🧠', supportsOAuth: false },
+      groq: { name: 'Groq', icon: '⚡', supportsOAuth: false },
+      gemini: { name: 'Google Gemini', icon: '✨', supportsOAuth: true },
+      ollama: { name: 'Ollama (Local)', icon: '🦙', supportsOAuth: false },
+      custom: { name: 'Custom Provider', icon: '🔧', supportsOAuth: false }
+    };
+
     return (
       <div className="settings-section">
-        <h2>Prompt Settings</h2>
+        <h2>Model Settings</h2>
         
         <div className="setting-group">
           <label className="setting-label">
-            <span>Temperature</span>
+            <span>Active Provider</span>
             <p className="setting-description">
-              Controls randomness in responses (0 = deterministic, 1 = creative)
+              Select the primary model provider for analysis
             </p>
           </label>
-          <input
-            type="number"
-            value={settings.temperature}
-            onChange={(e) => usePromptStore.getState().updateSettings({ temperature: parseFloat(e.target.value) || 0.7 })}
-            min="0"
-            max="1"
-            step="0.1"
-            className="setting-input"
-          />
+          <select
+            value={models.activeProvider}
+            onChange={(e) => updateModelSettings({ activeProvider: e.target.value as any })}
+            className="setting-select"
+          >
+            {Object.entries(providerInfo).map(([key, info]) => (
+              <option key={key} value={key} disabled={!models.providers[key as any].isEnabled}>
+                {info.icon} {info.name} {!models.providers[key as any].isEnabled && '(Not configured)'}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="setting-group">
           <label className="setting-label">
-            <span>Use Generated Artifacts</span>
+            <span>Enable Fallback</span>
             <p className="setting-description">
-              Use outputs from one analysis as inputs for others
+              Automatically switch to backup providers if primary fails
             </p>
           </label>
           <label className="toggle-switch">
             <input
               type="checkbox"
-              checked={settings.useGeneratedArtifacts}
-              onChange={(e) => usePromptStore.getState().updateSettings({ useGeneratedArtifacts: e.target.checked })}
+              checked={models.enableFallback}
+              onChange={(e) => updateModelSettings({ enableFallback: e.target.checked })}
             />
             <span className="toggle-slider"></span>
           </label>
@@ -376,18 +387,116 @@ export default function SettingsApp() {
 
         <div className="setting-group">
           <label className="setting-label">
-            <span>Prompt Templates</span>
+            <span>Stream Responses</span>
             <p className="setting-description">
-              Manage prompt templates for different analyses
+              Show analysis results as they're generated
             </p>
           </label>
-          <div className="template-count">
-            {templates.length} templates configured
-          </div>
+          <label className="toggle-switch">
+            <input
+              type="checkbox"
+              checked={models.streamResponses}
+              onChange={(e) => updateModelSettings({ streamResponses: e.target.checked })}
+            />
+            <span className="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div className="model-providers">
+          <h3>Provider Configuration</h3>
+          {Object.entries(providerInfo).map(([providerId, info]) => {
+            const provider = models.providers[providerId as any];
+            return (
+              <div key={providerId} className="provider-config">
+                <div className="provider-header">
+                  <span className="provider-name">
+                    {info.icon} {info.name}
+                  </span>
+                  {provider.isEnabled && <Check size={16} className="enabled-icon" />}
+                </div>
+                
+                {provider.authMethod === 'api-key' && (
+                  <div className="provider-field">
+                    <label>API Key</label>
+                    <input
+                      type="password"
+                      value={provider.apiKey || ''}
+                      onChange={(e) => updateProviderConfig(providerId as any, { 
+                        apiKey: e.target.value,
+                        isEnabled: e.target.value.length > 0
+                      })}
+                      placeholder="Enter API key"
+                      className="setting-input"
+                    />
+                  </div>
+                )}
+                
+                {(providerId === 'ollama' || providerId === 'custom') && (
+                  <div className="provider-field">
+                    <label>API Endpoint</label>
+                    <input
+                      type="text"
+                      value={provider.apiEndpoint || ''}
+                      onChange={(e) => updateProviderConfig(providerId as any, { apiEndpoint: e.target.value })}
+                      placeholder={providerId === 'ollama' ? 'http://localhost:11434' : 'https://api.example.com'}
+                      className="setting-input"
+                    />
+                  </div>
+                )}
+                
+                <div className="provider-field">
+                  <label>Model</label>
+                  <input
+                    type="text"
+                    value={provider.model || ''}
+                    onChange={(e) => updateProviderConfig(providerId as any, { model: e.target.value })}
+                    placeholder={provider.model || 'Default model'}
+                    className="setting-input"
+                  />
+                </div>
+                
+                <div className="provider-field-row">
+                  <div className="provider-field">
+                    <label>Temperature</label>
+                    <input
+                      type="number"
+                      value={provider.temperature || models.defaultTemperature}
+                      onChange={(e) => updateProviderConfig(providerId as any, { temperature: parseFloat(e.target.value) })}
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      className="setting-input small"
+                    />
+                  </div>
+                  
+                  <div className="provider-field">
+                    <label>Max Tokens</label>
+                    <input
+                      type="number"
+                      value={provider.maxTokens || models.defaultMaxTokens}
+                      onChange={(e) => updateProviderConfig(providerId as any, { maxTokens: parseInt(e.target.value) })}
+                      min="1"
+                      max="32768"
+                      step="1024"
+                      className="setting-input small"
+                    />
+                  </div>
+                </div>
+                
+                {info.supportsOAuth && (
+                  <div className="provider-note">
+                    <AlertCircle size={14} />
+                    OAuth login support coming soon
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     );
   };
+
 
   return (
     <SimpleLayout>
@@ -425,16 +534,16 @@ export default function SettingsApp() {
               General
             </button>
             <button
+              className={`settings-tab ${activeTab === 'models' ? 'active' : ''}`}
+              onClick={() => setActiveTab('models')}
+            >
+              Models
+            </button>
+            <button
               className={`settings-tab ${activeTab === 'tokens' ? 'active' : ''}`}
               onClick={() => setActiveTab('tokens')}
             >
               Token Estimation
-            </button>
-            <button
-              className={`settings-tab ${activeTab === 'prompts' ? 'active' : ''}`}
-              onClick={() => setActiveTab('prompts')}
-            >
-              Prompts
             </button>
             <button
               className={`settings-tab ${activeTab === 'panels' ? 'active' : ''}`}
@@ -453,8 +562,8 @@ export default function SettingsApp() {
         
         <div className="settings-content">
           {activeTab === 'general' && renderGeneralSettings()}
+          {activeTab === 'models' && renderModelSettings()}
           {activeTab === 'tokens' && renderTokenSettings()}
-          {activeTab === 'prompts' && renderPromptsSettings()}
           {activeTab === 'panels' && renderPanelSettings()}
           {activeTab === 'analysis' && renderAnalysisSettings()}
         </div>

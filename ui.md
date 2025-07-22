@@ -282,3 +282,41 @@ Questions Before Implementation:
 
   # MAESTRO
   - Data Flow Mapping/AI Data Flow Mapping (blank.  see 'data_flow_mapping.jpg')
+
+  # LINDDUN
+  - Privacy Impact Heat Map is blank (similar to the others).
+  - Threat Distribution by Category should be plotted as a distribution rather than numbers. 
+  - Threat categories are un-rendered Markdown (not human readable.  Should these be a table?  Rendered Markdown?  Something else?)
+
+  # Several Components
+  - Executive Summaries/risk summaries look like they are Markdown by not rendered as markdown.  See 'risk_summary.jpg' as an example in MAESTRO.  In fact, all strict text summaries and overviews look like un-rendered Markdown.  Each user regular text or show as Markdown (preferred).
+
+
+  Update Todos
+  ⎿  ☒ Fix PASTA Attack Tree Example (blank)                         
+     ☒ MAESTRO: Convert Threat Category Distribution to bar plot
+     ☒ MAESTRO: Fix AI Data Flow Mapping (missing edges/entities)
+     ☒ MAESTRO: Fix Control Recommendations markdown rendering
+     ☒ LINDDUN: Fix Privacy Impact Heat Map (empty)
+     ☒ LINDDUN: Convert Threat Distribution by Category to bar plot
+     ☒ LINDDUN: Fix Privacy Compliance Summary markdown rendering
+     ☒ HAZOP: Convert Deviations by Process Node to proper bar plot
+     ☒ HAZOP: Fix Risk Heat Map (blank)
+     ☒ HAZOP: Convert Action Status Overview to bar plot distribution
+     ☒ OCTAVE: Convert Asset Criticality Distribution to bar plot
+     ☒ OCTAVE: Fix Risk Heat Map (blank)
+     ☒ OCTAVE: Fix Risk Analysis Summary markdown rendering
+
+
+More fixes:
+
+☒ OCTAVE: Security Requirements Summary Markdown not rendering.
+☒ OCTAVE: Fix Risk Heat Map y-label overlapping row names.  Some renames do not fit inside the visible area.  What do the circled numbers in the heat map mean?  Hover over?
+☒ OCTAVE: Strategy Effectiveness vs Cost should be a bar chart.  The left bar labels should align to right.  Bars lengths should be relative to the number not the length to the text.
+☒ HAZOP: Deviations by Process Node should be a bar chart.  The left bar labels should align to right.  Bars lengths should be relative to the number not the length to the text.
+☒ HAZOP: Security Analysis Results heat map y-label overlapping row names.  Some renames do not fit inside the visible area.  What do the circled numbers in the heat map mean?  Hover over?
+☒ LINDDUN: See 'security_analysis_results.jpg'.  Shouldn't there be entires under the three columns instead of spanning across all columns?  
+☒ LINDDUN: Threat Distribution by Category should be a bar chart. The left bar labels should align to right.  Bars lengths should be relative to the number not the length to the text.
+☒ MAESTRO: Threat by Category should be a bar chart. The left bar labels should align to right.  Bars lengths should be relative to the number not the length to the text.
+☒ MAESTRO:  See "maestro.jpg'.  The plot is incomplete.
+☒ MAESTRO: AI Risk Heat Map (is this a heat map?  It looks like a cross between a bar chart with misaligned bars and something else).  Fix this.

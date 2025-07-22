@@ -266,3 +266,82 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
+
+/* Model Provider Settings */
+.model-providers {
+  margin-top: var(--space-6);
+}
+
+.model-providers h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-4) 0;
+}
+
+.provider-config {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.provider-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  font-weight: var(--font-weight-semibold);
+}
+
+.provider-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-md);
+}
+
+.enabled-icon {
+  color: var(--color-success);
+}
+
+.provider-field {
+  margin-bottom: var(--space-3);
+}
+
+.provider-field label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-1);
+  color: var(--color-text-secondary);
+}
+
+.provider-field .setting-input {
+  width: 100%;
+}
+
+.provider-field .setting-input.small {
+  width: 120px;
+}
+
+.provider-field-row {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.provider-field-row .provider-field {
+  flex: 1;
+}
+
+.provider-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-secondary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-3);
+}

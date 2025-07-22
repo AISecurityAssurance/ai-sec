@@ -33,17 +33,44 @@ interface GeneralSettings {
   autoSaveInterval: number; // in seconds
 }
 
+export type ModelProvider = 'anthropic' | 'openai' | 'groq' | 'gemini' | 'ollama' | 'custom';
+export type AuthMethod = 'api-key' | 'oauth' | 'none';
+
+interface ModelConfig {
+  provider: ModelProvider;
+  authMethod: AuthMethod;
+  apiKey?: string;
+  apiEndpoint?: string;
+  model?: string;
+  temperature?: number;
+  maxTokens?: number;
+  isEnabled: boolean;
+}
+
+interface ModelSettings {
+  activeProvider: ModelProvider;
+  providers: Record<ModelProvider, ModelConfig>;
+  defaultTemperature: number;
+  defaultMaxTokens: number;
+  streamResponses: boolean;
+  enableFallback: boolean;
+  fallbackOrder: ModelProvider[];
+}
+
 interface SettingsState {
   tokenEstimation: TokenEstimationSettings;
   panels: PanelSettings;
   analysis: AnalysisSettings;
   general: GeneralSettings;
+  models: ModelSettings;
   
   // Actions
   updateTokenEstimation: (settings: Partial<TokenEstimationSettings>) => void;
   updatePanelSettings: (settings: Partial<PanelSettings>) => void;
   updateAnalysisSettings: (settings: Partial<AnalysisSettings>) => void;
   updateGeneralSettings: (settings: Partial<GeneralSettings>) => void;
+  updateModelSettings: (settings: Partial<ModelSettings>) => void;
+  updateProviderConfig: (provider: ModelProvider, config: Partial<ModelConfig>) => void;
   resetToDefaults: () => void;
   exportSettings: () => string;
   importSettings: (settingsJson: string) => boolean;
@@ -83,6 +110,71 @@ const defaultSettings = {
     demoMode: true,
     theme: 'light' as const,
     autoSaveInterval: 30,
+  },
+  models: {
+    activeProvider: 'anthropic' as ModelProvider,
+    providers: {
+      anthropic: {
+        provider: 'anthropic',
+        authMethod: 'api-key',
+        apiKey: '',
+        model: 'claude-3-opus-20240229',
+        temperature: 0.7,
+        maxTokens: 4096,
+        isEnabled: false,
+      },
+      openai: {
+        provider: 'openai',
+        authMethod: 'api-key',
+        apiKey: '',
+        model: 'gpt-4-turbo-preview',
+        temperature: 0.7,
+        maxTokens: 4096,
+        isEnabled: false,
+      },
+      groq: {
+        provider: 'groq',
+        authMethod: 'api-key',
+        apiKey: '',
+        model: 'llama2-70b-4096',
+        temperature: 0.7,
+        maxTokens: 4096,
+        isEnabled: false,
+      },
+      gemini: {
+        provider: 'gemini',
+        authMethod: 'api-key',
+        apiKey: '',
+        model: 'gemini-pro',
+        temperature: 0.7,
+        maxTokens: 4096,
+        isEnabled: false,
+      },
+      ollama: {
+        provider: 'ollama',
+        authMethod: 'none',
+        apiEndpoint: 'http://localhost:11434',
+        model: 'llama2',
+        temperature: 0.7,
+        maxTokens: 4096,
+        isEnabled: false,
+      },
+      custom: {
+        provider: 'custom',
+        authMethod: 'api-key',
+        apiKey: '',
+        apiEndpoint: '',
+        model: '',
+        temperature: 0.7,
+        maxTokens: 4096,
+        isEnabled: false,
+      },
+    } as Record<ModelProvider, ModelConfig>,
+    defaultTemperature: 0.7,
+    defaultMaxTokens: 4096,
+    streamResponses: true,
+    enableFallback: false,
+    fallbackOrder: ['anthropic', 'openai', 'groq', 'gemini', 'ollama'] as ModelProvider[],
   }
 };
 
@@ -111,6 +203,22 @@ export const useSettingsStore = create<SettingsState>()(
           general: { ...state.general, ...settings }
         })),
         
+      updateModelSettings: (settings) =>
+        set((state) => ({
+          models: { ...state.models, ...settings }
+        })),
+        
+      updateProviderConfig: (provider, config) =>
+        set((state) => ({
+          models: {
+            ...state.models,
+            providers: {
+              ...state.models.providers,
+              [provider]: { ...state.models.providers[provider], ...config }
+            }
+          }
+        })),
+        
       resetToDefaults: () => set(defaultSettings),
       
       exportSettings: () => {
@@ -120,6 +228,7 @@ export const useSettingsStore = create<SettingsState>()(
           panels: state.panels,
           analysis: state.analysis,
           general: state.general,
+          models: state.models,
           version: '1.0.0',
           exportDate: new Date().toISOString()
         };
@@ -134,7 +243,8 @@ export const useSettingsStore = create<SettingsState>()(
               tokenEstimation: imported.tokenEstimation,
               panels: imported.panels,
               analysis: imported.analysis,
-              general: imported.general
+              general: imported.general,
+              models: imported.models || defaultSettings.models
             });
             return true;
           }
@@ -151,7 +261,8 @@ export const useSettingsStore = create<SettingsState>()(
         tokenEstimation: state.tokenEstimation,
         panels: state.panels,
         analysis: state.analysis,
-        general: state.general
+        general: state.general,
+        models: state.models
       })
     }
   )

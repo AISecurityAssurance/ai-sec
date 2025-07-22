@@ -1,0 +1,207 @@
+# UI Redesign
+
+Now the we have everything included in the frontend, we need to redesign the UI.
+
+# Issues
+1) The visual space is cluttered with buttons and menu items.  The focus of the visual space should be the analysis, diagrams, reports, and other artifacts from the analyses.  
+2) The menus, buttons, and options take up about a third of the window real estate.  Our goal here is NOT to impress users with all the options, but to impress uses with a) a tool that speeds up analysis (including automation), b) a tool that allows for additional analysis through, for example, an AI chat agent or plugins for new analyses tools (such as compliance specs and assessments)
+
+# Two examples.
+## Example 1 (img2)
+Take a look at `documentation/u1_2.jpg` (img2).The is a UI design idea, but not exactly what we want.
+### What I like:
+- There are three panels ONLY: System Browser, Analysis Canvas, and Conversational Assistant. Imagine each panel is expandable/collapsible (like our SA Agent).  Also, imagine we can right-click on the Analysis Canvas, System Browser, or Conversational Assistant titles and open them in a new window/tab. 
+- Notice how the app switcher at the top (Dashboard, Projects, Reports, Settings) takes up very little real estate on the page.  
+ 
+
+### What I don't like:
+- The Losses, Hazards, and Identified Threats are drop down lists, rather than expandable/collapsible tables (see discussion on Example 2, img1). 
+- No single header/title bar at the top that persists on all pages.
+
+## Example 2 (img1)
+Take a look at `documentation/u1_1.jpg` (img1). The is a UI design idea, but not exactly what we want.
+### What I like:
+- Tables for  Losses & Hazards, Safety Constraints, etc. are expandable/collapsible.  This is critical.  With expandable/collapsible tables, we can keep the tables on the same analysis page.  Furthermore, imagine that each table can be openend in a new window/tab as needed for analysis.
+
+### What I don't like:
+- Analysis options (STPA-Sec, STRIDE, Data-Analysis, CVE Bench) take up space in the analysis real estate.  But, once we've selected an analysis to focus on, we want to hide these options.
+
+
+# UI Redesign
+Redesign our UI, merging the best of the two images with some additional changes.
+## Top Navigation Bar (TNP)
+- The top of the page is the app header.  It spans across all windows.  It is very minimal (like img2 and img1)
+- The app title Security Analysis Platform is at the far left.
+- The app switcher menu (Analysis, Admin, Testing Arena, Feedback) is at the far right.  For smaller windows, the app switcher collapses into a hamburger icon that shows the app switcher menu when the mouse hovers over it (or click on it in a mobile version)
+- Nothing else in the TNP
+
+## App switcher
+For now, our app switcher should have the following components:
+- Analysis
+- Prompt Settings (adjusting prompts and prompt settings, which versions of tools to prefer, whether or not to use generated artifacts for other analysis.)
+- Admin (model, api keys, host computers, etc., temperature, etc.)
+- Feedback
+
+
+
+
+## Three-Panel System (TPS)
+### Highlevel view
+Each panel is expandable/collapsible.  
+Each panel can be opened in a new tab/window by right-clicking and selecting an option.
+
+The TPS has three components:
+- (Left) Input/Plugin Selection
+- (Middle) Analysis
+- (Right) SA agent
+
+### Left panel (Input/Plugin Selection)
+Two sections:
+- Input Selection (IS)
+- Analyses Plugin Selection (APS)
+
+Each section is expandable/collapsible.
+
+### Middle (Analysis):
+- All analyses are included in the same window.
+- All analysis sections are expandable/collapsible (default all are collapses). Use can expand and scroll all generate analysis.
+- All analysis sections can be opened in new tab/window by right-clicking and selecting option.
+- Analysis order can be dragged to different order (i.e., select and drag) in both analysis section or using analysis plugin (left window Analysis Plugin selections)
+- Options to mark sections of analysis to keep (i.e., when SA agent reanalyzes, don't change these edits.)  
+- Options to reanalyze specific sections only.
+
+
+### Input Selection (IS)
+Select files and links for analysis.
+There are four types of inputs:
+- Files
+- Links
+- Load existing analysis
+- Database (for loading UCAs, etc. )
+
+#### Files 
+User select files (all, subset) using a checkbox for each file (or to select all files in a directory).  See img2 for an example of a directory structure.  Instead of file and image icons, we want checkboxes.  How does the user know that it's a directory and they can expand it? (User needs to know this too.)
+
+#### Links
+User can paste a link.  User has the option to provide a tag/label for the link for reference in chats and the analysis. If the user does not provide a tag/label, autogenerate one.  For example, link1, link2, etc.  
+
+The link boxes should be simple: A textbox to paste the link and a text box to provide a tag/label (with an autogenerated label as a default).  
+
+#### Exiting analysis
+This is to load a saved analysis.  For now, it's a placeholder.  Once we finish the frontend, we'll work on a system for saving and documenting analyses. 
+
+#### Database
+The Database should be a place holder for now. We expect that large systems will need access to large databases of information for various activities.
+
+### Analyses Plugin Selections (APS)
+- These are our analyses plugin options: STPA-Sec, STRIDE, PASTA, DREAD, Overview, PASTA, etc. (The same as the current fronted.)
+- Analyses plugin options are checkboxes.  No buttons, just a list of analysis plugin names with a checkbox. (No buttons because they take up too much space.)
+- When an analysis plugin is selected, it is slated for analysis.
+- When the user clicks on an analysis option, it opens in the Analysis area (middle panel).
+- When the user right-clicks on an analysis option, they can choose to open it in a new window/tab.
+
+## Other considerations:
+- Diagram options--choose specific diagram agent (DA).  Option to add multiple diagrams.   Default not to improve existing diagrams and use as is. 
+- Analysis area to flexible enough to add additional analyses from the agent.
+
+# Initial views
+- Before the user selects any inputs for analysis or analysis plugins, the analysis window should NOT include any results.  Rather, it should provide brief instructions for selecting inputs for analysis and selecting analysis plugins.  (How will we handle this with the mock examples?)
+- Once the user selects inputs and analysis plugins, we need to execute the analysis.  
+- If the user selects "Load existing analysis" we need an option to actually load the analysis.
+- We also need an option to allow the AI agent to run the initial analysis.  We should have an option to provide additional instructions to the SA agent for running the analysis (i.e., do this, don't do that, include these files, etc.).
+- If loading from an existing analysis, we need the option for the SA agent to run another analysis to update the exsint analysis or to use the existing artifacts to run a new analysis.
+- Any other options?
+- If the user wants to add analysis plugins after the initial analysis, they should be able to select those plugins and ask the SA agent to run the analysis for this plugin (using the existing analysis artifacts, using only the inputs, or using both). We also need an option to re-run the entire analysis from scratch with the new options.  (What else?)  
+- Running analysis can be pop-up windows of some sort.  What works best?
+
+
+Do NOT start coding.  Ask questions if you need clarification.  Once i've confirmed you understand the task, then we'll start coding.  Do you have any questions?
+
+
+I'm not seeing the changes you've made. Let's re-assess. Do NOT start coding yet.
+
+
+# STATE PRESERVATION/PERSISTENCE
+- ALWAYS  use the native browser tools for new tab/window
+- ALWAYS preserve state when opening in a new tab/window. That is, the existing state should show up in the new window. 
+- ALWAYS preserve state when closing the app.  That is, when the app closes, reload the last user state.  You will need to store the exiting state and update whenever something changes.  
+- We need another section in the Selections (Left) panel: Select Analysis:  That is, there will be three sections (Select Analysis, Inputs, and Analysis Plugins).  Add the Select Analysis section to the TOP of the left panel.  
+
+## Select Analysis
+Purpose: Allow the user to select an analysis to load, clear the existing analysis and start a new one (they'll need to select inputs OR describe the system to the SA Agent);
+### Options
+- Load Saved Analysis (opens a dialog box to provide path.  In the future we will include a "recent analyses" for a quick selection.)
+- Clear Existing Analysis
+- Start New Analysis
+Anything else?
+
+DO NOT start coding.  Let's discuss this first.  (The goal is to preserve previous analyses.  It would be DISASTROUS if a user performed an analysis, forgot to save it, and then lost all their work, which could be hours to days worth of work.  )
+
+
+
+DO NOT start coding.  Let's discuss this first. 
+1. Select Analysis Section
+  - Load Saved Analysis
+    - Opens file dialog to select saved analysis file (.json or custom format)--YES
+    - In future: Recent analyses dropdown for quick access--YES
+    - Should load all state including inputs, enabled plugins, and all analysis data--YES
+  - Clear Existing Analysis
+    - Confirmation dialog ("Are you sure? Unsaved changes will be lost")--Ask to "Save existing analysis first?". Provide dialog box to save analysis:  (How do we manage this?  Analyses will be the full state of everything, not merely a document.  It will save databases, tables, diagrams, ... everything necessary to populate the Analysis Canvas as it was before clearing.)
+    - Resets all state to defaults
+    - Clears all analysis data from the Analysis Canvas
+  - Start New Analysis (We do NOT need this)
+    - We don't need this, because the Clear Existing Analysis will clear everything.  The Initial Analysis Canvas provides instructions "To get started"
+  - Save Current Analysis
+    - Same dialog box as saving from the Clear Existing Analysis.  (Great for backing up...although, the app should backup whenever there is a change made to the analysis.)
+  - Additional Options to Consider:
+    - Save Analysis - Explicit save to file--YES
+    - Save As - Save with new name--YES
+    - Auto-save indicator - Shows when last auto-saved--YES
+    - Analysis Name/Title - Display current analysis name--??
+
+
+OK.  This is getting complicated.  We probably need to add the backend to do all this.  
+  2. Complete State Persistence Strategy
+  What needs to be persisted:
+  - Analysis metadata (name, creation date, last modified)--YES.  We need a versioning system.
+  - All analysis data (not just references):
+    - Control flow nodes and edges
+    - Stakeholder data
+    - Wargaming scenarios
+    - DREAD threat data
+    - All plugin-specific data
+  - UI state:
+    - Enabled analyses
+    - Expanded/collapsed sections
+    - Selected items
+    - Window/panel configurations
+
+How to persist:
+  - Auto-save to localStorage every X seconds or on change
+  - Explicit save to file for portability
+  - Version the save format for future compatibility
+  - Compress large data if needed
+
+  3. State Synchronization for New Windows
+
+  Current issue: New windows can't access the actual data
+  Solution:
+  - Store complete data in the persisted store, not just import references
+  - Use BroadcastChannel API for real-time sync between windows
+  - Ensure all windows share the same state source
+
+  4. Data Loss Prevention
+
+  - Unsaved changes indicator
+  - Confirmation on close if unsaved changes exist
+  - Recovery mode if browser crashes
+  - Undo/Redo functionality (future enhancement)
+
+  Questions for Discussion
+
+  1. File format: Should we use JSON, or a custom format? Should it be human-readable?
+  2. Auto-save frequency: Every change? Every 30 seconds? Only on significant actions?
+  3. Storage limits: localStorage has limits (~10MB). Should we also support IndexedDB for larger analyses?
+  4. Multi-user scenarios: How do we handle if the same analysis is opened in multiple browser tabs?
+  5. Demo mode: Should demo mode be a type of analysis that can be saved/loaded, or separate?
+  6. Templates: Should we support saving analyses as templates for reuse?

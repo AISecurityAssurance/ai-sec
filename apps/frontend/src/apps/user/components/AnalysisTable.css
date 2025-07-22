@@ -16,12 +16,16 @@
 
 .table-wrapper {
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .analysis-table {
   width: 100%;
   border-collapse: collapse;
   font-size: var(--font-size-sm);
+  table-layout: auto; /* Changed from fixed to auto to allow flexible column widths */
+  min-width: 600px; /* Ensure minimum width to prevent column collapse */
 }
 
 .analysis-table thead {
@@ -38,6 +42,7 @@
   color: var(--color-text-secondary);
   white-space: nowrap;
   border-bottom: 2px solid var(--color-border);
+  position: relative;
 }
 
 .analysis-table th.sortable {
@@ -79,6 +84,10 @@
 .analysis-table td {
   padding: var(--space-3) var(--space-4);
   vertical-align: top;
+  word-wrap: break-word;
+  word-break: normal; /* Changed from break-word to normal to prevent aggressive breaking */
+  white-space: normal;
+  overflow-wrap: break-word; /* Add overflow-wrap for better text handling */
 }
 
 /* Cell content styles */
@@ -118,6 +127,53 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   text-align: center;
+}
+
+/* Linkable row styles */
+.linkable-row {
+  padding: 0 !important;
+}
+
+.row-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  text-decoration: none;
+  color: inherit;
+  transition: background-color var(--transition-fast);
+}
+
+.row-link:hover {
+  background: var(--color-surface-secondary);
+}
+
+.row-cell {
+  display: inline-block;
+  margin-right: var(--space-4);
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.row-cell:last-child {
+  margin-right: 0;
+}
+
+/* Standalone view adjustments */
+.standalone-analysis-view .analysis-table {
+  min-width: 500px; /* Reduced minimum width for standalone view */
+}
+
+/* When chat panel is open, ensure table columns adjust properly */
+.standalone-analysis-view .analysis-table th,
+.standalone-analysis-view .analysis-table td {
+  min-width: auto;
+  white-space: nowrap; /* Prevent wrapping in headers */
+}
+
+.standalone-analysis-view .analysis-table td {
+  white-space: normal; /* Allow wrapping in data cells */
 }
 
 /* Responsive */

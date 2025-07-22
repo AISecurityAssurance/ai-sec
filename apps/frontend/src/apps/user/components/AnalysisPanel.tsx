@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { AlertTriangle, ShieldAlert, GitBranch, Zap, Target, FileText, Users, Edit3, Save, Download, Settings, Shield } from 'lucide-react';
 import AnalysisTable from './AnalysisTable';
 import EditableTable from './EditableTable';
@@ -8,24 +9,32 @@ import MissionStatementEditor from './MissionStatementEditor';
 import InlineTextEditor from './InlineTextEditor';
 import PastaAnalysis from './PastaAnalysis';
 import DreadAnalysis from './DreadAnalysis';
+import StrideAnalysis from './StrideAnalysis';
+import MaestroAnalysis from './MaestroAnalysis';
+import LinddunAnalysis from './LinddunAnalysis';
+import HazopAnalysis from './HazopAnalysis';
+import OctaveAnalysis from './OctaveAnalysis';
 import AnalysisOverview from './AnalysisOverview';
 import WargamingTab from './WargamingTab';
 import ProcessControlDiagram from './ProcessControlDiagram';
-import { 
-  losses as initialLosses, 
-  hazards as initialHazards, 
-  controllers as initialControllers,
-  controlActions as initialControlActions,
-  ucas as initialUcas, 
-  causalScenarios as initialScenarios,
-  getRelatedData 
-} from '../mockData/stpaSecData';
-import { 
-  systemDescription as initialSystemDescription, 
-  stakeholders as initialStakeholders, 
-  getMissionStatementString 
-} from '../mockData/systemData';
+import { getRelatedData } from '../mockData/stpaSecData';
+import type { CausalScenario } from '../mockData/stpaSecData';
+import { stakeholders as initialStakeholders, getMissionStatementString } from '../mockData/systemData';
+import { useAnalysisStore } from '../../../stores/analysisStore';
+import { useBroadcastSync } from '../hooks/useBroadcastChannel';
 import './AnalysisPanel.css';
+
+// Mapping of subtab IDs to component types for standalone windows
+const SUBTAB_TO_COMPONENT: Record<string, string> = {
+  'losses': 'losses',
+  'hazards': 'hazards',
+  'control-diagram': 'control-diagram',
+  'controllers': 'controllers',
+  'control-actions': 'control-actions',
+  'ucas': 'ucas',
+  'scenarios': 'scenarios',
+  'wargaming': 'wargaming'
+};
 
 interface AnalysisPanelProps {
   activeAnalysis: string;
@@ -33,6 +42,12 @@ interface AnalysisPanelProps {
   isAnalyzing: boolean;
   onElementSelect?: (element: any, type: string) => void;
   enabledAnalyses?: Record<string, boolean>;
+  standaloneMode?: boolean;
+  isCollapsible?: boolean;
+  onToggleSection?: (sectionId: string) => void;
+  onToggleTable?: (tableId: string) => void;
+  expandedSections?: Set<string>;
+  expandedTables?: Set<string>;
 }
 
 export default function AnalysisPanel({ 
@@ -43,33 +58,108 @@ export default function AnalysisPanel({
   enabledAnalyses = {
     'stpa-sec': true,
     'stride': true
-  }
+  },
+  standaloneMode = false,
+  isCollapsible = false,
+  onToggleSection,
+  onToggleTable,
+  expandedSections,
+  expandedTables
 }: AnalysisPanelProps) {
-  const [activeTab, setActiveTab] = useState('stpa-sec');
+  const [activeTab, setActiveTab] = useState(activeAnalysis || 'stpa-sec');
   const [stpaSecSubTab, setStpaSecSubTab] = useState('system-description');
   const [selectedElement, setSelectedElement] = useState<any>(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [systemDescription, setSystemDescription] = useState(initialSystemDescription);
   const [stakeholders, setStakeholders] = useState(initialStakeholders);
-  const [losses, setLosses] = useState(initialLosses);
-  const [hazards, setHazards] = useState(initialHazards);
-  const [controllers, setControllers] = useState(initialControllers);
-  const [controlActions, setControlActions] = useState(initialControlActions);
-  const [ucas, setUcas] = useState(initialUcas);
-  const [scenarios, setScenarios] = useState(initialScenarios);
   const [automationLevel, setAutomationLevel] = useState<'manual' | 'assisted' | 'semi-auto' | 'fully-auto'>('assisted');
-  const originalSystemDescriptionRef = useRef(initialSystemDescription);
   const [hasValidationErrors, setHasValidationErrors] = useState(false);
+  
+  // Get data from store
+  const {
+    systemDescription,
+    losses,
+    hazards,
+    controllers,
+    controlActions,
+    ucas,
+    scenarios,
+    updateSystemDescription,
+    updateLosses,
+    updateHazards,
+    updateControllers,
+    updateControlActions,
+    updateUcas,
+    updateScenarios
+  } = useAnalysisStore();
+  
+  // Set up broadcast sync
+  useBroadcastSync();
+  
+  const originalSystemDescriptionRef = useRef(systemDescription);
+  const originalStakeholdersRef = useRef(stakeholders);
+  const originalLossesRef = useRef(losses);
+  const originalHazardsRef = useRef(hazards);
+  const originalControllersRef = useRef(controllers);
+  const originalControlActionsRef = useRef(controlActions);
+  const originalUcasRef = useRef(ucas);
+  const originalScenariosRef = useRef(scenarios);
+  
+  // Function to open component in new window
+  const openInNewWindow = (componentType: string) => {
+    const width = 1200;
+    const height = 800;
+    const left = (window.screen.width - width) / 2;
+    const top = (window.screen.height - height) / 2;
+    
+    window.open(
+      `/analysis/component/${componentType}`,
+      `${componentType}-window`,
+      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+    );
+  };
+  
+  // Function to open analysis view in new window
+  const openAnalysisInNewWindow = (analysisType: string) => {
+    const width = 1400;
+    const height = 900;
+    const left = (window.screen.width - width) / 2;
+    const top = (window.screen.height - height) / 2;
+    
+    window.open(
+      `/analysis/view/${analysisType}`,
+      `${analysisType}-analysis-window`,
+      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+    );
+  };
+  
+  // Function to open analysis view in new tab
+  const openAnalysisInNewTab = (analysisType: string) => {
+    window.open(`/analysis/view/${analysisType}`, '_blank');
+  };
   
   // Track original values when entering edit mode
   useEffect(() => {
     if (isEditMode) {
       originalSystemDescriptionRef.current = { ...systemDescription };
+      originalStakeholdersRef.current = [...stakeholders];
+      originalLossesRef.current = [...losses];
+      originalHazardsRef.current = [...hazards];
+      originalControllersRef.current = [...controllers];
+      originalControlActionsRef.current = [...controlActions];
+      originalUcasRef.current = [...ucas];
+      originalScenariosRef.current = [...scenarios];
     } else {
       // Clear validation errors when exiting edit mode
       setHasValidationErrors(false);
     }
   }, [isEditMode]);
+
+  // Update activeTab when activeAnalysis changes (for standalone mode)
+  useEffect(() => {
+    if (activeAnalysis) {
+      setActiveTab(activeAnalysis);
+    }
+  }, [activeAnalysis]);
 
   // Build tabs based on enabled analyses
   const tabs = [
@@ -121,40 +211,36 @@ export default function AnalysisPanel({
   };
 
   const updateSystemGoals = (goals: string[]) => {
-    setSystemDescription(prev => ({
-      ...prev,
+    updateSystemDescription({
       missionStatement: {
-        ...prev.missionStatement,
+        ...systemDescription.missionStatement,
         goals
       }
-    }));
+    });
   };
 
   const updateSystemConstraints = (constraints: string[]) => {
-    setSystemDescription(prev => ({
-      ...prev,
+    updateSystemDescription({
       missionStatement: {
-        ...prev.missionStatement,
+        ...systemDescription.missionStatement,
         constraints
       }
-    }));
+    });
   };
 
   const updateSystemBoundaries = (type: 'included' | 'excluded', items: string[]) => {
-    setSystemDescription(prev => ({
-      ...prev,
+    updateSystemDescription({
       boundaries: {
-        ...prev.boundaries,
+        ...systemDescription.boundaries,
         [type]: items
       }
-    }));
+    });
   };
 
   const updateSystemAssumptions = (assumptions: string[]) => {
-    setSystemDescription(prev => ({
-      ...prev,
+    updateSystemDescription({
       assumptions
-    }));
+    });
   };
 
   const handleExport = (format: 'json' | 'pdf' | 'html') => {
@@ -173,20 +259,18 @@ export default function AnalysisPanel({
   };
 
   const updateMissionStatement = (field: 'purpose' | 'method', value: string) => {
-    setSystemDescription(prev => ({
-      ...prev,
+    updateSystemDescription({
       missionStatement: {
-        ...prev.missionStatement,
+        ...systemDescription.missionStatement,
         [field]: value
       }
-    }));
+    });
   };
 
   const updateSystemField = (field: 'fullDescription' | 'context', value: string) => {
-    setSystemDescription(prev => ({
-      ...prev,
+    updateSystemDescription({
       [field]: value
-    }));
+    });
   };
 
   const renderSystemDescription = () => (
@@ -198,14 +282,13 @@ export default function AnalysisPanel({
           method={systemDescription.missionStatement.method}
           goals={systemDescription.missionStatement.goals}
           onChange={(data) => {
-            setSystemDescription(prev => ({
-              ...prev,
+            updateSystemDescription({
               missionStatement: {
-                ...prev.missionStatement,
+                ...systemDescription.missionStatement,
                 purpose: data.purpose,
                 method: data.method
               }
-            }));
+            });
             // If the why/goals were parsed, update them
             if (data.why !== undefined) {
               const goals = data.why ? data.why.split(',').map(g => g.trim()).filter(g => g) : [];
@@ -213,10 +296,9 @@ export default function AnalysisPanel({
             }
           }}
           onReset={() => {
-            setSystemDescription(prev => ({
-              ...prev,
+            updateSystemDescription({
               missionStatement: { ...originalSystemDescriptionRef.current.missionStatement }
-            }));
+            });
           }}
           onValidationChange={(isValid) => setHasValidationErrors(!isValid)}
           onClick={() => handleSystemItemClick(getMissionStatementString(systemDescription.missionStatement), 'mission', 0)}
@@ -362,7 +444,7 @@ export default function AnalysisPanel({
             ]}
             data={primaryStakeholders.map(s => ({
               ...s,
-              interests: s.interests.slice(0, 2).join(', ') + '...'
+              interests: s.interests.join(', ')
             }))}
             onRowSelect={(row) => handleElementSelect(row, 'stakeholder')}
             selectedRowId={selectedElement?.type === 'stakeholder' ? selectedElement.id : null}
@@ -383,7 +465,7 @@ export default function AnalysisPanel({
             ]}
             data={secondaryStakeholders.map(s => ({
               ...s,
-              interests: s.interests.slice(0, 2).join(', ') + '...'
+              interests: s.interests.join(', ')
             }))}
             onRowSelect={(row) => handleElementSelect(row, 'stakeholder')}
             selectedRowId={selectedElement?.type === 'stakeholder' ? selectedElement.id : null}
@@ -404,7 +486,7 @@ export default function AnalysisPanel({
             ]}
             data={adversaries.map(s => ({
               ...s,
-              interests: s.interests.slice(0, 2).join(', ') + '...'
+              interests: s.interests.join(', ')
             }))}
             onRowSelect={(row) => handleElementSelect(row, 'adversary')}
             selectedRowId={selectedElement?.type === 'adversary' ? selectedElement.id : null}
@@ -432,7 +514,7 @@ export default function AnalysisPanel({
           title="Identified Losses"
           columns={[
             { key: 'id', label: 'ID', width: '60px', editable: false },
-            { key: 'description', label: 'Description' },
+            { key: 'description', label: 'Description', width: '35%' },
             { key: 'severity', label: 'Severity', width: '100px', editType: 'select', options: severityOptions },
             { key: 'category', label: 'Category', width: '120px' },
             { key: 'stakeholders', label: 'Stakeholders', width: '200px' },
@@ -440,8 +522,10 @@ export default function AnalysisPanel({
           data={losses}
           onRowSelect={(row) => handleElementSelect(row, 'loss')}
           selectedRowId={selectedElement?.type === 'loss' ? selectedElement.id : null}
-          onUpdate={isEditMode ? setLosses : undefined}
+          onUpdate={isEditMode ? updateLosses : undefined}
           isEditMode={isEditMode}
+          itemType="loss"
+          linkable={!isEditMode}
         />
       </div>
     );
@@ -463,16 +547,18 @@ export default function AnalysisPanel({
           title="Security Hazards/Vulnerabilities"
           columns={[
             { key: 'id', label: 'ID', width: '60px', editable: false },
-            { key: 'description', label: 'Description' },
+            { key: 'description', label: 'Description', width: '30%' },
             { key: 'severity', label: 'Severity', width: '100px', editType: 'select', options: severityOptions },
             { key: 'relatedLosses', label: 'Related Losses', width: '120px' },
-            { key: 'worstCase', label: 'Worst Case', width: '300px' },
+            { key: 'worstCase', label: 'Worst Case', width: '25%' },
           ]}
           data={hazards}
           onRowSelect={(row) => handleElementSelect(row, 'hazard')}
           selectedRowId={selectedElement?.type === 'hazard' ? selectedElement.id : null}
-          onUpdate={isEditMode ? setHazards : undefined}
+          onUpdate={isEditMode ? updateHazards : undefined}
           isEditMode={isEditMode}
+          itemType="hazard"
+          linkable={!isEditMode}
         />
       </div>
     );
@@ -487,15 +573,17 @@ export default function AnalysisPanel({
           title="System Controllers"
           columns={[
             { key: 'id', label: 'ID', width: '60px' },
-            { key: 'name', label: 'Controller Name' },
+            { key: 'name', label: 'Controller Name', width: '25%' },
             { key: 'type', label: 'Type', width: '120px' },
-            { key: 'responsibilities', label: 'Responsibilities' },
+            { key: 'responsibilities', label: 'Responsibilities', width: '45%' },
           ]}
           data={controllers}
           onRowSelect={(row) => handleElementSelect(row, 'controller')}
           selectedRowId={selectedElement?.type === 'controller' ? selectedElement.id : null}
-          onUpdate={isEditMode ? setControllers : undefined}
+          onUpdate={isEditMode ? updateControllers : undefined}
           isEditMode={isEditMode}
+          itemType="controller"
+          linkable={!isEditMode}
         />
       </div>
     );
@@ -510,16 +598,18 @@ export default function AnalysisPanel({
           title="Control Actions"
           columns={[
             { key: 'id', label: 'ID', width: '60px' },
-            { key: 'action', label: 'Control Action' },
+            { key: 'action', label: 'Control Action', width: '25%' },
             { key: 'controllerId', label: 'Controller', width: '100px' },
-            { key: 'targetProcess', label: 'Target Process' },
-            { key: 'constraints', label: 'Constraints' },
+            { key: 'targetProcess', label: 'Target Process', width: '20%' },
+            { key: 'constraints', label: 'Constraints', width: '30%' },
           ]}
           data={controlActions}
           onRowSelect={(row) => handleElementSelect(row, 'controlAction')}
           selectedRowId={selectedElement?.type === 'controlAction' ? selectedElement.id : null}
-          onUpdate={isEditMode ? setControlActions : undefined}
+          onUpdate={isEditMode ? updateControlActions : undefined}
           isEditMode={isEditMode}
+          itemType="control-action"
+          linkable={!isEditMode}
         />
       </div>
     );
@@ -559,16 +649,18 @@ export default function AnalysisPanel({
           { key: 'id', label: 'ID', width: '60px', editable: false },
           { key: 'controlActionId', label: 'Control Action', width: '120px' },
           { key: 'type', label: 'Type', width: '140px', editType: 'select', options: ucaTypeOptions },
-          { key: 'description', label: 'Description' },
-          { key: 'context', label: 'Context' },
+          { key: 'description', label: 'Description', width: '25%' },
+          { key: 'context', label: 'Context', width: '20%' },
           { key: 'hazards', label: 'Hazards/Vulnerabilities', width: '120px' },
           { key: 'severity', label: 'Severity', width: '100px', editType: 'select', options: severityOptions },
         ]}
         data={ucas}
         onRowSelect={(row) => handleElementSelect(row, 'uca')}
         selectedRowId={selectedElement?.type === 'uca' ? selectedElement.id : null}
-        onUpdate={isEditMode ? setUcas : undefined}
+        onUpdate={isEditMode ? updateUcas : undefined}
         isEditMode={isEditMode}
+        itemType="uca"
+        linkable={!isEditMode}
       />
     );
   };
@@ -582,29 +674,45 @@ export default function AnalysisPanel({
         columns={[
           { key: 'id', label: 'ID', width: '60px' },
           { key: 'ucaId', label: 'UCA', width: '80px' },
-          { key: 'description', label: 'Scenario Description' },
+          { key: 'description', label: 'Scenario Description', width: '30%' },
           { key: 'strideCategory', label: 'STRIDE', width: '120px' },
           { key: 'confidence', label: 'Confidence', width: '100px' },
-          { key: 'mitigations', label: 'Mitigations' },
+          { key: 'mitigations', label: 'Mitigations', width: '25%' },
         ]}
         data={scenarios.map(s => ({
           ...s,
-          mitigations: s.mitigations.length + ' mitigations'
+          mitigations: s.mitigations.join('; ')
         }))}
         onRowSelect={(row) => handleElementSelect(row, 'scenario')}
         selectedRowId={selectedElement?.type === 'scenario' ? selectedElement.id : null}
         onUpdate={isEditMode ? (data) => {
-          // Preserve existing mitigations or set empty array for new rows
+          // Preserve all existing fields and merge with updated data
           const updatedScenarios = data.map(d => {
             const existing = scenarios.find(s => s.id === d.id);
+            if (existing) {
+              return {
+                ...existing,
+                ...d,
+                mitigations: existing.mitigations || []
+              };
+            }
+            // For new scenarios, provide default values
             return {
-              ...d,
-              mitigations: existing?.mitigations || []
-            };
+              id: d.id,
+              ucaId: d.ucaId || '',
+              description: d.description || '',
+              causalFactors: d.causalFactors || [],
+              strideCategory: d.strideCategory || '',
+              d4Score: d.d4Score || { detectability: 0, difficulty: 0, damage: 0, deniability: 0 },
+              confidence: d.confidence || 0,
+              mitigations: []
+            } as CausalScenario;
           });
-          setScenarios(updatedScenarios);
+          updateScenarios(updatedScenarios);
         } : undefined}
         isEditMode={isEditMode}
+        itemType="scenario"
+        linkable={!isEditMode}
       />
     );
   };
@@ -675,19 +783,52 @@ export default function AnalysisPanel({
     <main className="analysis-panel">
       <div className="analysis-toolbar">
         <div className="toolbar-left">
-          <button
-            className={`btn-toolbar ${isEditMode ? 'active' : ''} ${hasValidationErrors ? 'disabled' : ''}`}
-            onClick={() => {
-              if (!hasValidationErrors) {
-                setIsEditMode(!isEditMode);
-              }
-            }}
-            title={hasValidationErrors ? 'Fix validation errors before saving' : (isEditMode ? 'Exit edit mode' : 'Enter edit mode')}
-            disabled={hasValidationErrors}
-          >
-            {isEditMode ? <Save size={16} /> : <Edit3 size={16} />}
-            <span>{isEditMode ? 'Save Changes' : 'Edit Mode'}</span>
-          </button>
+          {!isEditMode ? (
+            <button
+              className="btn-toolbar"
+              onClick={() => {
+                setIsEditMode(true);
+              }}
+              title="Enter edit mode"
+            >
+              <Edit3 size={16} />
+              <span>Edit Mode</span>
+            </button>
+          ) : (
+            <>
+              <button
+                className={`btn-toolbar primary ${hasValidationErrors ? 'disabled' : ''}`}
+                onClick={() => {
+                  if (!hasValidationErrors) {
+                    setIsEditMode(false);
+                  }
+                }}
+                title={hasValidationErrors ? 'Fix validation errors before saving' : 'Save changes and exit edit mode'}
+                disabled={hasValidationErrors}
+              >
+                <Save size={16} />
+                <span>Save Changes</span>
+              </button>
+              <button
+                className="btn-toolbar secondary"
+                onClick={() => {
+                  // Restore all original values
+                  updateSystemDescription(originalSystemDescriptionRef.current);
+                  setStakeholders(originalStakeholdersRef.current);
+                  updateLosses(originalLossesRef.current);
+                  updateHazards(originalHazardsRef.current);
+                  updateControllers(originalControllersRef.current);
+                  updateControlActions(originalControlActionsRef.current);
+                  updateUcas(originalUcasRef.current);
+                  updateScenarios(originalScenariosRef.current);
+                  setIsEditMode(false);
+                }}
+                title="Cancel changes and exit edit mode"
+              >
+                <span>Cancel</span>
+              </button>
+            </>
+          )}
           
           <div className="automation-selector">
             <Settings size={16} />
@@ -719,34 +860,48 @@ export default function AnalysisPanel({
         </div>
       </div>
       
-      <div className="tabs">
-        {tabs.map(tab => (
-          <div
-            key={tab.id}
-            className={`tab ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab(tab.id);
-              onAnalysisChange(tab.id);
-            }}
-          >
-            {tab.label}
-          </div>
-        ))}
-      </div>
+      {!standaloneMode && (
+        <div className="tabs">
+          {tabs.map(tab => (
+            <Link
+              key={tab.id}
+              to={`/analysis/view/${tab.id}`}
+              className={`tab ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setActiveTab(tab.id);
+                onAnalysisChange(tab.id);
+              }}
+            >
+              {tab.label}
+            </Link>
+          ))}
+        </div>
+      )}
       
-      {activeTab === 'stpa-sec' && (
+      {activeTab === 'stpa-sec' && !standaloneMode && (
         <div className="subtabs">
           {stpaSecSubTabs.map(subTab => {
             const Icon = subTab.icon;
+            const canOpenStandalone = SUBTAB_TO_COMPONENT[subTab.id];
+            
+            const href = canOpenStandalone 
+              ? `/analysis/component/${canOpenStandalone}`
+              : '#';
+            
             return (
-              <div
+              <Link
                 key={subTab.id}
+                to={href}
                 className={`subtab ${stpaSecSubTab === subTab.id ? 'active' : ''}`}
-                onClick={() => setStpaSecSubTab(subTab.id)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setStpaSecSubTab(subTab.id);
+                }}
               >
                 <Icon size={16} />
                 <span>{subTab.label}</span>
-              </div>
+              </Link>
             );
           })}
         </div>
@@ -784,44 +939,19 @@ export default function AnalysisPanel({
               </div>
             )}
             
-            {activeTab === 'stride' && (
-              <div className="analysis-section">
-                <h3>STRIDE Analysis</h3>
-                <p className="text-secondary">STRIDE analysis results will appear here...</p>
-              </div>
-            )}
+            {activeTab === 'stride' && <StrideAnalysis onElementSelect={handleElementSelect} />}
             
-            {activeTab === 'pasta' && <PastaAnalysis />}
+            {activeTab === 'pasta' && <PastaAnalysis onElementSelect={handleElementSelect} />}
             
-            {activeTab === 'maestro' && (
-              <div className="analysis-section">
-                <h3>MAESTRO Analysis</h3>
-                <p className="text-secondary">Multi-Agent Evaluated Securely Through Rigorous Oversight results will appear here...</p>
-              </div>
-            )}
+            {activeTab === 'maestro' && <MaestroAnalysis onElementSelect={handleElementSelect} />}
             
-            {activeTab === 'dread' && <DreadAnalysis />}
+            {activeTab === 'dread' && <DreadAnalysis onElementSelect={handleElementSelect} />}
             
-            {activeTab === 'linddun' && (
-              <div className="analysis-section">
-                <h3>LINDDUN Analysis</h3>
-                <p className="text-secondary">Privacy threat modeling results will appear here...</p>
-              </div>
-            )}
+            {activeTab === 'linddun' && <LinddunAnalysis onElementSelect={handleElementSelect} />}
             
-            {activeTab === 'hazop' && (
-              <div className="analysis-section">
-                <h3>HAZOP Analysis</h3>
-                <p className="text-secondary">Hazard and Operability Study results will appear here...</p>
-              </div>
-            )}
+            {activeTab === 'hazop' && <HazopAnalysis onElementSelect={handleElementSelect} />}
             
-            {activeTab === 'octave' && (
-              <div className="analysis-section">
-                <h3>OCTAVE Analysis</h3>
-                <p className="text-secondary">Operationally Critical Threat, Asset, and Vulnerability Evaluation results will appear here...</p>
-              </div>
-            )}
+            {activeTab === 'octave' && <OctaveAnalysis onElementSelect={handleElementSelect} />}
             
             {activeTab === 'cve' && (
               <div className="analysis-section">

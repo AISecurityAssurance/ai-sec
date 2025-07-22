@@ -7,6 +7,22 @@
   box-sizing: border-box;
 }
 
+/* Button Reset */
+button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
 /* Theme Variables */
 :root {
   /* Light Theme Colors */
@@ -35,6 +51,7 @@
   --color-warning: #f59e0b;
   --color-error: #ef4444;
   --color-error-rgb: 239, 68, 68;
+  --color-error-light: #fee2e2;
   --color-info: #3b82f6;
   
   /* Gradients */
@@ -85,6 +102,7 @@
   /* Transitions */
   --transition-fast: 150ms ease-in-out;
   --transition-base: 200ms ease-in-out;
+  --transition-normal: 200ms ease-in-out;
   --transition-slow: 300ms ease-in-out;
   
   /* Z-index */
@@ -122,6 +140,7 @@
   --color-warning: #f59e0b;
   --color-error: #dc2626;
   --color-error-rgb: 220, 38, 38;
+  --color-error-light: #451a1a;
   --color-info: #3b82f6;
   
   /* Dark theme shadows are lighter */
@@ -365,29 +384,7 @@ body {
   color: white;
 }
 
-/* Tab Styles */
-.tabs {
-  display: flex;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.tab {
-  padding: var(--space-3) var(--space-5);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all var(--transition-fast);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.tab:hover {
-  color: var(--color-text);
-}
-
-.tab.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-}
+/* Tab Styles - moved to AnalysisPanel.css for specific styling */
 
 /* Sidebar Styles */
 .sidebar {
@@ -396,6 +393,7 @@ body {
   border-right: 1px solid var(--color-border);
   height: 100%;
   overflow-y: auto;
+  flex-shrink: 0;
 }
 
 .sidebar-section {

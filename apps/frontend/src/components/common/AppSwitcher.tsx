@@ -1,17 +1,17 @@
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Shield, Settings, Beaker, MessageSquare } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Shield, Settings, FileText, MessageSquare, SlidersHorizontal } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import './AppSwitcher.css';
 
 const apps = [
   { path: '/analysis', label: 'Analysis', icon: Shield },
+  { path: '/prompts', label: 'Prompt Settings', icon: FileText },
+  { path: '/settings', label: 'Settings', icon: SlidersHorizontal },
   { path: '/admin', label: 'Admin', icon: Settings },
-  { path: '/arena', label: 'Testing Arena', icon: Beaker },
   { path: '/feedback', label: 'Feedback', icon: MessageSquare },
 ];
 
 export default function AppSwitcher() {
-  const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
 
@@ -25,14 +25,14 @@ export default function AppSwitcher() {
           const isActive = location.pathname.startsWith(app.path);
           
           return (
-            <button
+            <Link
               key={app.path}
+              to={app.path}
               className={`app-btn ${isActive ? 'active' : ''}`}
-              onClick={() => navigate(app.path)}
             >
               <Icon size={16} />
               <span>{app.label}</span>
-            </button>
+            </Link>
           );
         })}
       </div>

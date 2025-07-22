@@ -1,0 +1,9 @@
+/* Simple Layout Styles */
+.simple-layout {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background);
+  overflow: hidden;
+}

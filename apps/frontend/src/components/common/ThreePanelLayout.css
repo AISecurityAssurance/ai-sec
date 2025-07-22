@@ -1,0 +1,216 @@
+/* Three Panel Layout Styles */
+.three-panel-layout {
+  position: relative;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  background: var(--color-background);
+  overflow: hidden;
+}
+
+.panel-group {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  position: relative;
+}
+
+.panel-container {
+  position: relative;
+  height: 100%;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.left-panel {
+  border-right: none;
+}
+
+.center-panel {
+  background: var(--color-background);
+}
+
+.right-panel {
+  border-left: none;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  min-height: 36px;
+}
+
+.panel-title-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+}
+
+.panel-title-link:hover h3 {
+  color: var(--color-primary);
+}
+
+.panel-header h3 {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  margin: 0;
+  user-select: none;
+  transition: color var(--transition-fast);
+}
+
+.panel-controls {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.panel-control-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.panel-control-btn:hover {
+  background: var(--color-surface-secondary);
+  color: var(--color-text);
+}
+
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Resize Handle */
+[data-panel-resize-handle-enabled] {
+  position: relative;
+  width: 8px !important;
+  background: transparent;
+  cursor: col-resize;
+  z-index: 20;
+  flex-shrink: 0;
+  user-select: none;
+  touch-action: none;
+}
+
+[data-panel-resize-handle-enabled]:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+[data-panel-resize-handle-enabled]:active {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+[data-panel-resize-handle-enabled]::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  top: 0;
+  bottom: 0;
+  background: var(--color-border);
+  border-radius: 1px;
+  transition: all var(--transition-fast);
+}
+
+[data-panel-resize-handle-enabled]:hover::before {
+  background: var(--color-primary);
+  width: 5px;
+  top: 0;
+  bottom: 0;
+}
+
+[data-panel-resize-handle-enabled]:active::before {
+  background: var(--color-primary);
+  width: 5px;
+}
+
+/* Collapsed Panel Indicators */
+.collapsed-indicator {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  z-index: 100;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-md);
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--color-text);
+}
+
+.collapsed-indicator:hover {
+  background: var(--color-surface-secondary);
+}
+
+.collapsed-indicator.left {
+  left: 0;
+  border-left: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.collapsed-indicator.right {
+  right: 0;
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.collapsed-indicator span {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+/* Fullscreen styles */
+.three-panel-layout:fullscreen {
+  background: var(--color-background);
+}
+
+.three-panel-layout:fullscreen .panel-group {
+  height: 100vh;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .panel-header h3 {
+    font-size: var(--font-size-xs);
+  }
+  
+  .panel-control-btn {
+    width: 24px;
+    height: 24px;
+  }
+}

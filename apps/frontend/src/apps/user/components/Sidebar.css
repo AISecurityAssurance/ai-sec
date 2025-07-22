@@ -56,6 +56,8 @@
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
+  text-decoration: none;
+  color: var(--color-text);
 }
 
 .analysis-option:hover {
@@ -99,4 +101,50 @@
   width: 16px;
   height: 16px;
   cursor: pointer;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .sidebar-section {
+    padding: var(--space-3);
+  }
+  
+  .analysis-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--space-2);
+  }
+  
+  .analysis-option {
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar-title {
+    font-size: var(--font-size-xs);
+  }
+  
+  .file-item {
+    font-size: var(--font-size-sm);
+    padding: var(--space-1) var(--space-2);
+  }
+  
+  .analysis-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .recommendation-note {
+    font-size: var(--font-size-xs);
+    padding: var(--space-2);
+  }
 }

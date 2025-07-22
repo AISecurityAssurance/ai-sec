@@ -1,13 +1,14 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import './AnalysisTable.css';
 
-interface TableColumn {
+export interface TableColumn {
   key: string;
   label: string;
   width?: string;
 }
 
-interface TableRow {
+export interface TableRow {
   id: string;
   [key: string]: any;
 }
@@ -19,6 +20,9 @@ interface AnalysisTableProps {
   selectedRowId?: string | null;
   title?: string;
   enableMultiSelect?: boolean;
+  itemType?: string;
+  linkable?: boolean;
+  getRowClassName?: (row: TableRow) => string;
 }
 
 export default function AnalysisTable({ 
@@ -27,7 +31,10 @@ export default function AnalysisTable({
   onRowSelect, 
   selectedRowId,
   title,
-  enableMultiSelect = false
+  enableMultiSelect = false,
+  itemType,
+  linkable = false,
+  getRowClassName
 }: AnalysisTableProps) {
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [sortKey, setSortKey] = useState<string | null>(null);
@@ -91,22 +98,63 @@ export default function AnalysisTable({
             </tr>
           </thead>
           <tbody>
-            {sortedData.map(row => (
-              <tr 
-                key={row.id}
-                onClick={() => handleRowClick(row)}
-                className={`
-                  ${selectedRowId === row.id || selectedRows.has(row.id) ? 'selected' : ''}
-                  ${onRowSelect ? 'clickable' : ''}
-                `}
-              >
-                {columns.map(col => (
-                  <td key={col.key}>
-                    {renderCellContent(row[col.key], col.key)}
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {sortedData.map(row => {
+              const rowContent = (
+                <>
+                  {columns.map(col => (
+                    <td key={col.key}>
+                      {renderCellContent(row[col.key], col.key)}
+                    </td>
+                  ))}
+                </>
+              );
+              
+              if (linkable && itemType) {
+                const rowClass = [
+                  selectedRowId === row.id || selectedRows.has(row.id) ? 'selected' : '',
+                  getRowClassName?.(row) || ''
+                ].filter(Boolean).join(' ');
+                
+                return (
+                  <tr key={row.id} className={rowClass}>
+                    <td colSpan={columns.length} className="linkable-row">
+                      <Link
+                        to={`/analysis/item/${itemType}/${row.id}`}
+                        className="row-link"
+                        onClick={(e) => {
+                          if (!e.ctrlKey && !e.metaKey && e.button === 0) {
+                            e.preventDefault();
+                            handleRowClick(row);
+                          }
+                        }}
+                      >
+                        {columns.map(col => (
+                          <span key={col.key} className="row-cell" style={{ width: col.width }}>
+                            {renderCellContent(row[col.key], col.key)}
+                          </span>
+                        ))}
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              }
+              
+              const rowClass = [
+                selectedRowId === row.id || selectedRows.has(row.id) ? 'selected' : '',
+                onRowSelect ? 'clickable' : '',
+                getRowClassName?.(row) || ''
+              ].filter(Boolean).join(' ');
+              
+              return (
+                <tr 
+                  key={row.id}
+                  onClick={() => handleRowClick(row)}
+                  className={rowClass}
+                >
+                  {rowContent}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

@@ -1,0 +1,92 @@
+.analysis-diagram-template {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-3);
+  background: var(--color-surface);
+}
+
+.analysis-diagram-template.editing {
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+.diagram-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.diagram-title-link {
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+}
+
+.diagram-title {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.diagram-toolbar {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.diagram-content {
+  padding: var(--space-3);
+  min-height: 200px;
+}
+
+/* Icon-only toolbar buttons */
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1);
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.toolbar-btn:hover {
+  background: var(--color-surface-secondary);
+  color: var(--color-text);
+  border-color: var(--color-border-secondary);
+}
+
+.toolbar-btn.edit:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.toolbar-btn.cancel:hover {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.toolbar-btn.save {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.toolbar-btn.save:hover {
+  background: var(--color-primary-hover);
+}
+
+.toolbar-btn.export:hover {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.toolbar-btn.open:hover {
+  color: var(--color-info);
+  border-color: var(--color-info);
+}

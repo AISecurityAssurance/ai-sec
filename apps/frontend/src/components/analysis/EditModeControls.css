@@ -1,0 +1,101 @@
+/* Edit Mode Controls Styles */
+.edit-mode-controls {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.control-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.control-btn:hover {
+  background: var(--color-surface-secondary);
+}
+
+.control-btn.edit {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.control-btn.edit:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+.control-btn.save {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.control-btn.save:hover {
+  background: var(--color-primary-hover);
+}
+
+.control-btn.cancel {
+  background: var(--color-surface-secondary);
+  border-color: var(--color-border);
+}
+
+.control-btn.cancel:hover {
+  background: var(--color-surface-tertiary);
+}
+
+/* Export Dropdown */
+.export-dropdown {
+  position: relative;
+}
+
+.export-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: var(--space-1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-1);
+  box-shadow: var(--shadow-lg);
+  min-width: 160px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: all var(--transition-fast);
+  z-index: var(--z-dropdown);
+}
+
+.export-dropdown:hover .export-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.export-menu button {
+  display: block;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.export-menu button:hover {
+  background: var(--color-surface-secondary);
+}

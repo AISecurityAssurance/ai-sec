@@ -1,11 +1,12 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useTheme } from './hooks/useTheme';
-import UserApp from './apps/user/UserApp';
+import AnalysisRoutes from './apps/analysis/routes';
 import AdminApp from './apps/admin/AdminApp';
-import ArenaApp from './apps/arena/ArenaApp';
+import SettingsApp from './apps/settings/SettingsApp';
+import PromptsApp from './apps/prompts/PromptsApp';
 import CSATApp from './apps/csat/CSATApp';
-import AppSwitcher from './components/common/AppSwitcher';
+import TopNavBar from './components/common/TopNavBar';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import './App.css';
 
@@ -19,11 +20,13 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <TopNavBar />
       <div className="app-container">
         <Routes>
-          <Route path="/analysis/*" element={<UserApp />} />
+          <Route path="/analysis/*" element={<AnalysisRoutes />} />
           <Route path="/admin/*" element={<AdminApp />} />
-          <Route path="/arena/*" element={<ArenaApp />} />
+          <Route path="/settings/*" element={<SettingsApp />} />
+          <Route path="/prompts/*" element={<PromptsApp />} />
           <Route path="/feedback/*" element={<CSATApp />} />
           <Route path="/" element={<Navigate to="/analysis" replace />} />
         </Routes>

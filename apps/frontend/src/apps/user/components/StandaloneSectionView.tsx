@@ -17,7 +17,26 @@ const ANALYSIS_NAMES = {
   'octave': 'OCTAVE Analysis'
 } as const;
 
-export default function StandaloneTemplateView() {
+const SECTION_NAMES: Record<string, string> = {
+  'system-description': 'System Description',
+  'stakeholders': 'Stakeholders',
+  'losses': 'Losses',
+  'hazards': 'Hazards/Vulnerabilities',
+  'control-diagram': 'Control Diagram',
+  'controllers': 'Controllers',
+  'control-actions': 'Control Actions',
+  'ucas': 'Unsafe/Unsecure Control Actions',
+  'scenarios': 'Causal Scenarios',
+  'wargaming': 'Wargaming',
+  'overview': 'Overview',
+  'threats': 'Threat Analysis',
+  'mitigations': 'Mitigations',
+  'stages': 'Attack Stages',
+  'ratings': 'Risk Ratings',
+  'distribution': 'Risk Distribution'
+};
+
+export default function StandaloneSectionView() {
   const { analysisType, sectionId } = useParams<{ analysisType: string; sectionId?: string }>();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { enabledAnalyses } = useAnalysisStore();
@@ -27,11 +46,13 @@ export default function StandaloneTemplateView() {
   
   // Update window title
   useEffect(() => {
-    const title = analysisType && ANALYSIS_NAMES[analysisType as keyof typeof ANALYSIS_NAMES] 
+    const sectionTitle = sectionId && SECTION_NAMES[sectionId] 
+      ? SECTION_NAMES[sectionId]
+      : 'Section';
+    const analysisTitle = analysisType && ANALYSIS_NAMES[analysisType as keyof typeof ANALYSIS_NAMES]
       ? ANALYSIS_NAMES[analysisType as keyof typeof ANALYSIS_NAMES]
-      : 'Security Analysis';
-    const sectionTitle = sectionId ? ` - ${sectionId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}` : '';
-    document.title = `${title}${sectionTitle} - Security Analysis Platform`;
+      : 'Analysis';
+    document.title = `${sectionTitle} - ${analysisTitle} - Security Analysis Platform`;
   }, [analysisType, sectionId]);
   
   // Handle fullscreen toggle
@@ -50,20 +71,16 @@ export default function StandaloneTemplateView() {
     window.close();
   };
   
-  if (!analysisType || !ANALYSIS_NAMES[analysisType as keyof typeof ANALYSIS_NAMES]) {
-    return <div>Invalid analysis type</div>;
+  if (!analysisType || !sectionId) {
+    return <div>Invalid section</div>;
   }
   
-  // Get section title
-  const getSectionTitle = () => {
-    if (!sectionId) return ANALYSIS_NAMES[analysisType as keyof typeof ANALYSIS_NAMES];
-    return sectionId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-  };
+  const sectionTitle = SECTION_NAMES[sectionId] || sectionId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   
   return (
     <div className="standalone-container">
       <header className="standalone-header">
-        <h1>{getSectionTitle()}</h1>
+        <h1>{sectionTitle}</h1>
         <div className="standalone-controls">
           <button 
             className="btn-icon" 
@@ -83,18 +100,11 @@ export default function StandaloneTemplateView() {
       </header>
       
       <main className="standalone-content">
-        {sectionId ? (
-          <CollapsibleAnalysisContentWithTemplates 
-            analysisId={analysisType}
-            enabledAnalyses={enabledAnalyses}
-            focusedSection={sectionId}
-          />
-        ) : (
-          <CollapsibleAnalysisContentWithTemplates 
-            analysisId={analysisType}
-            enabledAnalyses={enabledAnalyses}
-          />
-        )}
+        <CollapsibleAnalysisContentWithTemplates 
+          analysisId={analysisType}
+          enabledAnalyses={enabledAnalyses}
+          focusedSection={sectionId}
+        />
       </main>
     </div>
   );

@@ -72,12 +72,11 @@ const analysisPlugins = [
 
 export default function InputSelectionPanel() {
   const { tokenEstimation } = useSettingsStore();
-  const { enabledAnalyses, setEnabledAnalyses } = useAnalysisStore();
+  const { enabledAnalyses, setEnabledAnalyses, demoMode, setDemoMode } = useAnalysisStore();
   const [fileTree, setFileTree] = useState<FileNode[]>(mockFileStructure);
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [totalTokens, setTotalTokens] = useState(0);
   const [selectedTokens, setSelectedTokens] = useState(0);
-  const [demoMode, setDemoMode] = useState(false);
   const [inputSelectionExpanded, setInputSelectionExpanded] = useState(false);
   const [analysisPluginsExpanded, setAnalysisPluginsExpanded] = useState(false);
 

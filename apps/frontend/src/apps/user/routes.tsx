@@ -3,6 +3,7 @@ import UserApp from './UserApp';
 import StandaloneComponent from './components/StandaloneComponent';
 import StandaloneAnalysisView from './components/StandaloneAnalysisView';
 import StandaloneTemplateView from './components/StandaloneTemplateView';
+import StandaloneSectionView from './components/StandaloneSectionView';
 import FocusedItemView from './components/FocusedItemView';
 
 // Component types that can be opened in standalone windows
@@ -34,7 +35,7 @@ export default function UserRoutes() {
       
       {/* Template-based analysis view routes */}
       <Route path="/template/:analysisType" element={<StandaloneTemplateView />} />
-      <Route path="/template/:analysisType/:sectionId" element={<StandaloneTemplateView />} />
+      <Route path="/template/:analysisType/:sectionId" element={<StandaloneSectionView />} />
       
       {/* Standalone component routes */}
       <Route path="/component/:componentType" element={<StandaloneComponent />} />

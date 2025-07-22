@@ -104,6 +104,21 @@
   }
 }
 
+/* Focused section view */
+.standalone-content.focused-section {
+  padding: 0;
+}
+
+.standalone-content.focused-section > div {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.standalone-content .analysis-flow {
+  height: 100% !important;
+}
+
 /* Print styles */
 @media print {
   .standalone-header {

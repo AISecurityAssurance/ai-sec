@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Edit2, X, Save, Download } from 'lucide-react';
+import { getSectionUrl } from './utils';
 import './AnalysisSection.css';
 
 interface AnalysisSectionProps {
@@ -68,7 +69,7 @@ export function AnalysisSection({
         )}
         {icon && <span className="section-icon">{icon}</span>}
         <a 
-          href={`/analysis/template/${id.split('-')[0]}/${id.split('-').slice(1).join('-')}`}
+          href={getSectionUrl(id)}
           className="section-title-link"
           onClick={(e) => e.preventDefault()}
         >

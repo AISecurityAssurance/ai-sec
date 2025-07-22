@@ -28,6 +28,7 @@ interface AnalysisState {
   
   // UI state
   enabledAnalyses: Record<string, boolean>;
+  demoMode: boolean;
   
   // Actions
   setProjectId: (id: string | null) => void;
@@ -40,6 +41,7 @@ interface AnalysisState {
   updateUcas: (data: typeof initialUcas) => void;
   updateScenarios: (data: typeof initialScenarios) => void;
   setEnabledAnalyses: (analyses: Record<string, boolean>) => void;
+  setDemoMode: (enabled: boolean) => void;
 }
 
 export const useAnalysisStore = create<AnalysisState>()(
@@ -58,14 +60,15 @@ export const useAnalysisStore = create<AnalysisState>()(
       enabledAnalyses: {
         'stpa-sec': true,
         'stride': true,
-        'pasta': false,
+        'pasta': true,
         'maestro': false,
-        'dread': false,
+        'dread': true,
         'linddun': false,
         'hazop': false,
         'octave': false,
         'cve': false
       },
+      demoMode: true,
       
       // Actions
       setProjectId: (id) => set({ projectId: id }),
@@ -79,7 +82,8 @@ export const useAnalysisStore = create<AnalysisState>()(
       updateControlActions: (data) => set({ controlActions: data }),
       updateUcas: (data) => set({ ucas: data }),
       updateScenarios: (data) => set({ scenarios: data }),
-      setEnabledAnalyses: (analyses) => set({ enabledAnalyses: analyses })
+      setEnabledAnalyses: (analyses) => set({ enabledAnalyses: analyses }),
+      setDemoMode: (enabled) => set({ demoMode: enabled })
     }),
     {
       name: 'analysis-storage',
@@ -93,7 +97,8 @@ export const useAnalysisStore = create<AnalysisState>()(
         controlActions: state.controlActions,
         ucas: state.ucas,
         scenarios: state.scenarios,
-        enabledAnalyses: state.enabledAnalyses
+        enabledAnalyses: state.enabledAnalyses,
+        demoMode: state.demoMode
       })
     }
   )

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Edit2, X, Save, Download, Plus, Trash2 } from 'lucide-react';
+import { getSectionUrl } from './utils';
 import './AnalysisList.css';
 
 interface AnalysisListProps {
@@ -87,7 +88,7 @@ export function AnalysisList({
     <div className={`analysis-list-template ${isEditing ? 'editing' : ''}`}>
       <div className="list-header">
         <a 
-          href={`/analysis/list/${id}`}
+          href={getSectionUrl(id)}
           className="list-title-link"
           onClick={(e) => e.preventDefault()}
         >

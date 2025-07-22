@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Edit2, X, Save, Download } from 'lucide-react';
+import { getSectionUrl } from './utils';
 import './AnalysisText.css';
 
 interface AnalysisTextProps {
@@ -40,7 +41,7 @@ export function AnalysisText({
       <div className="text-header">
         {title && (
           <a 
-            href={`/analysis/text/${id}`}
+            href={getSectionUrl(id)}
             className="text-title-link"
             onClick={(e) => e.preventDefault()}
           >

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Edit2, X, Save, Download } from 'lucide-react';
+import { getSectionUrl } from './utils';
 import './AnalysisDiagram.css';
 
 interface AnalysisDiagramProps {
@@ -34,7 +35,7 @@ export function AnalysisDiagram({
       <div className="diagram-header">
         {title && (
           <a 
-            href={`/analysis/diagram/${id}`}
+            href={getSectionUrl(id)}
             className="diagram-title-link"
             onClick={(e) => e.preventDefault()}
           >

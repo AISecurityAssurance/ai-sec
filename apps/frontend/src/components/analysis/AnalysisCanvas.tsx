@@ -18,18 +18,17 @@ const analysisOrder = [
 ];
 
 export default function AnalysisCanvas() {
-  const { enabledAnalyses } = useAnalysisStore();
-  const [demoMode, setDemoMode] = useState(false);
+  const { enabledAnalyses, demoMode } = useAnalysisStore();
   const [expandedAnalyses, setExpandedAnalyses] = useState<Set<string>>(new Set());
   const [showExportDialog, setShowExportDialog] = useState(false);
   
   // Check if we're in standalone mode (opened in new window)
   const isStandalone = window.location.pathname === '/analysis/canvas';
 
-  // Listen for demo mode changes
+  // Listen for demo mode changes (for real-time updates across components)
   useEffect(() => {
     const handleDemoModeChange = (event: CustomEvent) => {
-      setDemoMode(event.detail.enabled);
+      // Demo mode is now handled by the store, but we keep this for backward compatibility
     };
     
     window.addEventListener('demoModeChanged' as any, handleDemoModeChange);

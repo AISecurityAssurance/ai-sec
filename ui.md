@@ -118,4 +118,90 @@ The Database should be a place holder for now. We expect that large systems will
 Do NOT start coding.  Ask questions if you need clarification.  Once i've confirmed you understand the task, then we'll start coding.  Do you have any questions?
 
 
+I'm not seeing the changes you've made. Let's re-assess. Do NOT start coding yet.
 
+
+# STATE PRESERVATION/PERSISTENCE
+- ALWAYS  use the native browser tools for new tab/window
+- ALWAYS preserve state when opening in a new tab/window. That is, the existing state should show up in the new window. 
+- ALWAYS preserve state when closing the app.  That is, when the app closes, reload the last user state.  You will need to store the exiting state and update whenever something changes.  
+- We need another section in the Selections (Left) panel: Select Analysis:  That is, there will be three sections (Select Analysis, Inputs, and Analysis Plugins).  Add the Select Analysis section to the TOP of the left panel.  
+
+## Select Analysis
+Purpose: Allow the user to select an analysis to load, clear the existing analysis and start a new one (they'll need to select inputs OR describe the system to the SA Agent);
+### Options
+- Load Saved Analysis (opens a dialog box to provide path.  In the future we will include a "recent analyses" for a quick selection.)
+- Clear Existing Analysis
+- Start New Analysis
+Anything else?
+
+DO NOT start coding.  Let's discuss this first.  (The goal is to preserve previous analyses.  It would be DISASTROUS if a user performed an analysis, forgot to save it, and then lost all their work, which could be hours to days worth of work.  )
+
+
+
+DO NOT start coding.  Let's discuss this first. 
+1. Select Analysis Section
+  - Load Saved Analysis
+    - Opens file dialog to select saved analysis file (.json or custom format)--YES
+    - In future: Recent analyses dropdown for quick access--YES
+    - Should load all state including inputs, enabled plugins, and all analysis data--YES
+  - Clear Existing Analysis
+    - Confirmation dialog ("Are you sure? Unsaved changes will be lost")--Ask to "Save existing analysis first?". Provide dialog box to save analysis:  (How do we manage this?  Analyses will be the full state of everything, not merely a document.  It will save databases, tables, diagrams, ... everything necessary to populate the Analysis Canvas as it was before clearing.)
+    - Resets all state to defaults
+    - Clears all analysis data from the Analysis Canvas
+  - Start New Analysis (We do NOT need this)
+    - We don't need this, because the Clear Existing Analysis will clear everything.  The Initial Analysis Canvas provides instructions "To get started"
+  - Save Current Analysis
+    - Same dialog box as saving from the Clear Existing Analysis.  (Great for backing up...although, the app should backup whenever there is a change made to the analysis.)
+  - Additional Options to Consider:
+    - Save Analysis - Explicit save to file--YES
+    - Save As - Save with new name--YES
+    - Auto-save indicator - Shows when last auto-saved--YES
+    - Analysis Name/Title - Display current analysis name--??
+
+
+OK.  This is getting complicated.  We probably need to add the backend to do all this.  
+  2. Complete State Persistence Strategy
+  What needs to be persisted:
+  - Analysis metadata (name, creation date, last modified)--YES.  We need a versioning system.
+  - All analysis data (not just references):
+    - Control flow nodes and edges
+    - Stakeholder data
+    - Wargaming scenarios
+    - DREAD threat data
+    - All plugin-specific data
+  - UI state:
+    - Enabled analyses
+    - Expanded/collapsed sections
+    - Selected items
+    - Window/panel configurations
+
+How to persist:
+  - Auto-save to localStorage every X seconds or on change
+  - Explicit save to file for portability
+  - Version the save format for future compatibility
+  - Compress large data if needed
+
+  3. State Synchronization for New Windows
+
+  Current issue: New windows can't access the actual data
+  Solution:
+  - Store complete data in the persisted store, not just import references
+  - Use BroadcastChannel API for real-time sync between windows
+  - Ensure all windows share the same state source
+
+  4. Data Loss Prevention
+
+  - Unsaved changes indicator
+  - Confirmation on close if unsaved changes exist
+  - Recovery mode if browser crashes
+  - Undo/Redo functionality (future enhancement)
+
+  Questions for Discussion
+
+  1. File format: Should we use JSON, or a custom format? Should it be human-readable?
+  2. Auto-save frequency: Every change? Every 30 seconds? Only on significant actions?
+  3. Storage limits: localStorage has limits (~10MB). Should we also support IndexedDB for larger analyses?
+  4. Multi-user scenarios: How do we handle if the same analysis is opened in multiple browser tabs?
+  5. Demo mode: Should demo mode be a type of analysis that can be saved/loaded, or separate?
+  6. Templates: Should we support saving analyses as templates for reuse?

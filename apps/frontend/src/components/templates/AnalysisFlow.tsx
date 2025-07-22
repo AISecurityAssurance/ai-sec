@@ -14,6 +14,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Edit2, Download, X, Check } from 'lucide-react';
+import { getSectionUrl } from './utils';
 import './AnalysisFlow.css';
 
 interface AnalysisFlowProps {
@@ -75,9 +76,15 @@ export function AnalysisFlow({
   };
 
   return (
-    <div className="analysis-flow">
+    <div className="analysis-flow" style={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
       <div className="analysis-flow-header">
-        <h3>{title}</h3>
+        <a 
+          href={getSectionUrl(id)}
+          className="analysis-flow-title-link"
+          onClick={(e) => e.preventDefault()}
+        >
+          <h3>{title}</h3>
+        </a>
         {editable && (
           <div className="analysis-flow-toolbar">
             {isEditing ? (
@@ -122,7 +129,7 @@ export function AnalysisFlow({
           </div>
         )}
       </div>
-      <div className="analysis-flow-container">
+      <div className="analysis-flow-container" style={{ flex: 1, width: '100%' }}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -130,6 +137,7 @@ export function AnalysisFlow({
           onEdgesChange={isEditing ? onEdgesChange : undefined}
           onConnect={isEditing ? onConnect : undefined}
           fitView
+          proOptions={{ hideAttribution: true }}
         >
           <Controls />
           <MiniMap />

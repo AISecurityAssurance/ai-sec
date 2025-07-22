@@ -3,6 +3,7 @@ import { Edit2, X, Save, Download } from 'lucide-react';
 import MissionStatementEditor from '../../apps/user/components/MissionStatementEditor';
 import { AnalysisList } from './AnalysisList';
 import { AnalysisText } from './AnalysisText';
+import { getSectionUrl } from './utils';
 import './SystemDescriptionTemplate.css';
 
 interface SystemDescriptionTemplateProps {
@@ -76,7 +77,7 @@ export function SystemDescriptionTemplate({
     <div className={`system-description-template ${isEditing ? 'editing' : ''}`}>
       <div className="system-header">
         <a 
-          href={`/analysis/system-description/${id}`}
+          href={getSectionUrl(id)}
           className="system-title-link"
           onClick={(e) => e.preventDefault()}
         >

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Edit2, X, Save, Download, ArrowUp, ArrowDown, Plus, Trash2 } from 'lucide-react';
+import { getSectionUrl } from './utils';
 import './AnalysisTable.css';
 
 interface TableColumn {
@@ -143,7 +144,7 @@ export function AnalysisTable({
       <div className="table-header">
         {title && (
           <a 
-            href={`/analysis/table/${id}`}
+            href={getSectionUrl(id)}
             className="table-title-link"
             onClick={(e) => e.preventDefault()}
           >

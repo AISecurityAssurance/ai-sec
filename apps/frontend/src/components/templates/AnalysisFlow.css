@@ -24,6 +24,15 @@
   color: var(--text-primary);
 }
 
+.analysis-flow-title-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.analysis-flow-title-link:hover h3 {
+  color: var(--primary);
+}
+
 .analysis-flow-toolbar {
   display: flex;
   gap: var(--space-2);

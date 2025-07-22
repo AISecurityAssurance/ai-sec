@@ -330,3 +330,51 @@ export const strideThreatTypes = [
   { type: 'Denial of Service', description: 'Deny or degrade service availability', icon: '🚧' },
   { type: 'Elevation of Privilege', description: 'Gain unauthorized capabilities', icon: '⬆️' }
 ];
+
+// Component Threat Summary
+export const componentThreats = strideComponents.map(component => {
+  const threats = getStrideByComponent(component);
+  const summary = {
+    component,
+    spoofing: threats.filter(t => t.threatType === 'Spoofing').length,
+    tampering: threats.filter(t => t.threatType === 'Tampering').length,
+    repudiation: threats.filter(t => t.threatType === 'Repudiation').length,
+    informationDisclosure: threats.filter(t => t.threatType === 'Information Disclosure').length,
+    denialOfService: threats.filter(t => t.threatType === 'Denial of Service').length,
+    elevationOfPrivilege: threats.filter(t => t.threatType === 'Elevation of Privilege').length,
+    total: threats.length
+  };
+  return summary;
+});
+
+// Threat Category Summary
+export const threatCategorySummary = {
+  spoofing: strideThreats.filter(t => t.threatType === 'Spoofing').length,
+  tampering: strideThreats.filter(t => t.threatType === 'Tampering').length,
+  repudiation: strideThreats.filter(t => t.threatType === 'Repudiation').length,
+  informationDisclosure: strideThreats.filter(t => t.threatType === 'Information Disclosure').length,
+  denialOfService: strideThreats.filter(t => t.threatType === 'Denial of Service').length,
+  elevationOfPrivilege: strideThreats.filter(t => t.threatType === 'Elevation of Privilege').length
+};
+
+// Risk Matrix Data
+export const riskMatrix = {
+  'High': {
+    'Critical': strideThreats.filter(t => t.likelihood === 'high' && t.impact === 'high' && t.riskLevel === 'critical').map(t => t.id),
+    'High': strideThreats.filter(t => t.likelihood === 'high' && t.impact === 'high' && t.riskLevel === 'high').map(t => t.id),
+    'Medium': strideThreats.filter(t => t.likelihood === 'high' && t.impact === 'medium').map(t => t.id),
+    'Low': strideThreats.filter(t => t.likelihood === 'high' && t.impact === 'low').map(t => t.id)
+  },
+  'Medium': {
+    'Critical': strideThreats.filter(t => t.likelihood === 'medium' && t.impact === 'high' && t.riskLevel === 'critical').map(t => t.id),
+    'High': strideThreats.filter(t => t.likelihood === 'medium' && t.impact === 'high' && t.riskLevel === 'high').map(t => t.id),
+    'Medium': strideThreats.filter(t => t.likelihood === 'medium' && t.impact === 'medium').map(t => t.id),
+    'Low': strideThreats.filter(t => t.likelihood === 'medium' && t.impact === 'low').map(t => t.id)
+  },
+  'Low': {
+    'Critical': strideThreats.filter(t => t.likelihood === 'low' && t.impact === 'high' && t.riskLevel === 'critical').map(t => t.id),
+    'High': strideThreats.filter(t => t.likelihood === 'low' && t.impact === 'high' && t.riskLevel === 'high').map(t => t.id),
+    'Medium': strideThreats.filter(t => t.likelihood === 'low' && t.impact === 'medium').map(t => t.id),
+    'Low': strideThreats.filter(t => t.likelihood === 'low' && t.impact === 'low').map(t => t.id)
+  }
+};

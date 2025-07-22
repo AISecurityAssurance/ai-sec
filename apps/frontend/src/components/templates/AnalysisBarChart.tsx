@@ -1,5 +1,5 @@
-import React from 'react';
-import { AnalysisChart } from './AnalysisChart';
+import React, { useState } from 'react';
+import { Edit2, Download, X, Check } from 'lucide-react';
 
 interface BarChartDataItem {
   label: string;
@@ -30,90 +30,220 @@ export function AnalysisBarChart({
   defaultColor = '#3498db',
   onSave
 }: AnalysisBarChartProps) {
-  // Prepare data for Chart.js
-  const chartData = {
-    labels: data.map(item => item.label),
-    datasets: [{
-      label: yAxisLabel || 'Value',
-      data: data.map(item => item.value),
-      backgroundColor: useColors 
-        ? data.map(item => item.color || defaultColor)
-        : defaultColor,
-      borderColor: useColors
-        ? data.map(item => item.color || defaultColor)
-        : defaultColor,
-      borderWidth: 1
-    }]
+  const [isEditing, setIsEditing] = useState(false);
+  const maxValue = Math.max(...data.map(item => item.value));
+  
+  const handleExport = () => {
+    console.log('Export chart:', id);
   };
 
-  const options = {
-    indexAxis: horizontal ? 'y' as const : 'x' as const,
-    responsive: true,
-    maintainAspectRatio: false,
-    layout: {
-      padding: {
-        left: 10,
-        right: 30,
-        top: 10,
-        bottom: 10
-      }
-    },
-    scales: {
-      x: {
-        beginAtZero: true,
-        grid: {
-          display: true,
-          drawBorder: true
-        },
-        ticks: {
-          stepSize: 1,
-          padding: 5
-        },
-        title: horizontal && xAxisLabel ? {
-          display: true,
-          text: xAxisLabel,
-          padding: { top: 10 }
-        } : undefined
-      },
-      y: {
-        grid: {
-          display: false
-        },
-        ticks: {
-          padding: 10,
-          font: {
-            size: 12
-          }
-        },
-        title: !horizontal && yAxisLabel ? {
-          display: true,
-          text: yAxisLabel,
-          padding: { bottom: 10 }
-        } : undefined
-      }
-    },
-    plugins: {
-      legend: {
-        display: false
-      },
-      tooltip: {
-        enabled: true,
-        callbacks: {
-          label: function(context: any) {
-            return `${context.parsed[horizontal ? 'x' : 'y']} ${yAxisLabel || 'items'}`;
-          }
-        }
-      }
+  const handleSave = () => {
+    setIsEditing(false);
+    if (onSave) {
+      onSave(id, data);
     }
   };
 
+  const handleCancel = () => {
+    setIsEditing(false);
+  };
+
+  const renderHorizontalBars = () => {
+    return (
+      <div style={{ marginTop: '20px' }}>
+        {/* X-axis label */}
+        {xAxisLabel && (
+          <div style={{ 
+            textAlign: 'center', 
+            marginBottom: '10px',
+            fontSize: '12px',
+            fontWeight: 'bold'
+          }}>
+            {xAxisLabel}
+          </div>
+        )}
+        
+        {/* Bar chart container */}
+        <div style={{ position: 'relative' }}>
+          {/* Y-axis label */}
+          {yAxisLabel && (
+            <div style={{
+              position: 'absolute',
+              left: '-40px',
+              top: '50%',
+              transform: 'rotate(-90deg) translateX(-50%)',
+              transformOrigin: 'center',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              whiteSpace: 'nowrap'
+            }}>
+              {yAxisLabel}
+            </div>
+          )}
+          
+          {/* Bars */}
+          <div style={{ paddingLeft: '10px' }}>
+            {data.map((item, index) => {
+              const percentage = (item.value / maxValue) * 100;
+              return (
+                <div key={index} style={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  marginBottom: '10px',
+                  minHeight: '30px'
+                }}>
+                  {/* Label */}
+                  <div style={{ 
+                    width: '150px',
+                    paddingRight: '15px',
+                    textAlign: 'right',
+                    fontSize: '12px',
+                    flexShrink: 0
+                  }}>
+                    {item.label}
+                  </div>
+                  
+                  {/* Bar */}
+                  <div style={{ 
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    position: 'relative'
+                  }}>
+                    <div style={{
+                      height: '24px',
+                      width: `${percentage}%`,
+                      backgroundColor: useColors && item.color ? item.color : defaultColor,
+                      borderRadius: '2px',
+                      position: 'relative',
+                      minWidth: '2px',
+                      transition: 'width 0.3s ease'
+                    }}>
+                      {/* Value label */}
+                      <span style={{
+                        position: 'absolute',
+                        right: '-5px',
+                        top: '50%',
+                        transform: 'translateY(-50%) translateX(100%)',
+                        fontSize: '11px',
+                        fontWeight: 'bold',
+                        paddingLeft: '5px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {item.value}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Grid lines */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: '160px',
+            right: '50px',
+            bottom: 0,
+            pointerEvents: 'none'
+          }}>
+            {[0, 25, 50, 75, 100].map(percent => (
+              <div key={percent} style={{
+                position: 'absolute',
+                left: `${percent}%`,
+                top: 0,
+                bottom: 0,
+                borderLeft: '1px solid #e0e0e0',
+                zIndex: -1
+              }} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderVerticalBars = () => {
+    // Vertical bar implementation (if needed later)
+    return <div>Vertical bars not implemented yet</div>;
+  };
+
   return (
-    <AnalysisChart
-      id={id}
-      title={title}
-      type="bar"
-      data={chartData}
-      onSave={onSave}
-    />
+    <div style={{
+      backgroundColor: 'white',
+      border: '1px solid #ddd',
+      borderRadius: '8px',
+      padding: '16px',
+      marginBottom: '16px'
+    }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '16px'
+      }}>
+        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 'bold' }}>{title}</h3>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {isEditing ? (
+            <>
+              <button 
+                onClick={handleSave} 
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px'
+                }}
+                title="Save"
+              >
+                <Check size={16} />
+              </button>
+              <button 
+                onClick={handleCancel} 
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px'
+                }}
+                title="Cancel"
+              >
+                <X size={16} />
+              </button>
+            </>
+          ) : (
+            <>
+              <button 
+                onClick={() => setIsEditing(true)} 
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px'
+                }}
+                title="Edit"
+              >
+                <Edit2 size={16} />
+              </button>
+              <button 
+                onClick={handleExport} 
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px'
+                }}
+                title="Export"
+              >
+                <Download size={16} />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+      
+      {horizontal ? renderHorizontalBars() : renderVerticalBars()}
+    </div>
   );
 }

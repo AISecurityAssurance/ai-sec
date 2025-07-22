@@ -3,26 +3,30 @@ Base agent class for all analysis agents.
 This provides the foundation for structured output that maps to frontend templates.
 """
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, List
-from pydantic import BaseModel
-import instructor
-from openai import AsyncOpenAI
+from typing import Dict, Any, Optional, List, Union
+from uuid import UUID
+import time
+import asyncio
+from pydantic import BaseModel, Field
 
-from core.models.templates import (
-    AnalysisSection, AnalysisTable, AnalysisDiagram,
-    AnalysisText, AnalysisList, AnalysisChart
+from core.models.schemas import (
+    FrameworkType, AnalysisStatus, AgentContext, AgentResult,
+    TableData, ChartData, DiagramData,
+    create_table_content, create_chart_content, create_diagram_content,
+    create_text_content, create_list_content
 )
-from core.utils.prompt_manager import PromptManager
-from core.memory.artifact_store import ArtifactStore
+from core.utils.llm_client import llm_manager, LLMResponse
+from config.settings import settings, metrics
 
 
-class AnalysisContext(BaseModel):
-    """Context passed between agents"""
-    system_description: str
-    analysis_request: Dict[str, Any]
-    previous_results: Dict[str, Any] = {}
-    user_modifications: Optional[str] = None
-    enabled_plugins: List[str] = []
+class SectionResult(BaseModel):
+    """Result from analyzing a section"""
+    section_id: str
+    title: str
+    content: Dict[str, Any]
+    template_type: str
+    status: AnalysisStatus = AnalysisStatus.COMPLETED
+    error_message: Optional[str] = None
     
 
 class BaseAnalysisAgent(ABC):
@@ -36,87 +40,173 @@ class BaseAnalysisAgent(ABC):
     4. Stores artifacts for cross-referencing
     """
     
-    def __init__(
-        self,
-        agent_id: str,
-        llm_client: AsyncOpenAI,
-        prompt_manager: PromptManager,
-        artifact_store: ArtifactStore
-    ):
-        self.agent_id = agent_id
-        self.llm = instructor.from_openai(llm_client)
-        self.prompts = prompt_manager
-        self.artifacts = artifact_store
+    def __init__(self, framework: FrameworkType):
+        self.framework = framework
+        self.prompt_dir = settings.prompts_dir / framework.value
         
     @abstractmethod
-    async def analyze(self, context: AnalysisContext) -> AnalysisSection:
+    async def analyze(self, context: AgentContext, section_ids: Optional[List[str]] = None) -> AgentResult:
         """
         Run analysis and return structured output.
-        Must return AnalysisSection that maps to frontend templates.
+        Must return AgentResult with sections that map to frontend templates.
         """
         pass
         
     @abstractmethod
-    def get_sections(self) -> List[str]:
+    def get_sections(self) -> List[Dict[str, str]]:
         """Return list of sections this agent can analyze"""
+        # Returns: [{"id": "section-id", "title": "Section Title", "template": "table"}]
         pass
         
-    @abstractmethod
-    def get_template_structure(self) -> Dict[str, Any]:
-        """Return expected template structure for frontend"""
-        pass
+    async def analyze_sections(
+        self,
+        context: AgentContext,
+        section_ids: Optional[List[str]] = None
+    ) -> List[SectionResult]:
+        """Analyze specific sections or all sections"""
+        sections_to_analyze = section_ids or [s["id"] for s in self.get_sections()]
+        results = []
+        
+        for section_id in sections_to_analyze:
+            try:
+                result = await self.analyze_section(section_id, context)
+                results.append(result)
+            except Exception as e:
+                results.append(SectionResult(
+                    section_id=section_id,
+                    title=self._get_section_title(section_id),
+                    content={},
+                    template_type="error",
+                    status=AnalysisStatus.FAILED,
+                    error_message=str(e)
+                ))
+        
+        return results
         
     async def analyze_section(
         self,
         section_id: str,
-        context: AnalysisContext
-    ) -> AnalysisSection:
+        context: AgentContext
+    ) -> SectionResult:
         """Analyze a specific section"""
         # Get section-specific prompt
-        prompt = self.prompts.get_prompt(
-            self.agent_id,
-            section_id,
-            context.user_modifications
-        )
-        
-        # Get relevant artifacts from other analyses
-        relevant_context = await self.artifacts.get_relevant_context(
-            query=f"{self.agent_id} {section_id}",
-            existing_results=context.previous_results
-        )
+        prompt = await self._load_prompt(section_id)
         
         # Build complete prompt with context
-        full_prompt = self._build_prompt(prompt, context, relevant_context)
+        full_prompt = self._build_prompt(prompt, context, section_id)
         
-        # Get structured output from LLM
-        result = await self._get_llm_response(full_prompt, section_id)
+        # Get response from LLM
+        response = await llm_manager.generate(full_prompt)
         
-        # Store artifact
-        await self.artifacts.store(
-            agent_id=self.agent_id,
+        # Parse and structure the response
+        structured_content = await self._parse_response(response.content, section_id)
+        
+        # Store as artifact in context
+        context.artifacts[f"{self.framework.value}_{section_id}"] = structured_content
+        
+        return SectionResult(
             section_id=section_id,
-            artifact=result
+            title=self._get_section_title(section_id),
+            content=structured_content,
+            template_type=self._get_template_type(section_id)
         )
         
-        return result
+    async def _load_prompt(self, section_id: str) -> str:
+        """Load prompt from file"""
+        prompt_file = self.prompt_dir / f"{section_id}.txt"
+        if not prompt_file.exists():
+            # Try master prompt
+            prompt_file = self.prompt_dir / "master.txt"
         
+        if prompt_file.exists():
+            return prompt_file.read_text()
+        else:
+            return self._get_default_prompt(section_id)
+    
     def _build_prompt(
         self,
         base_prompt: str,
-        context: AnalysisContext,
-        relevant_artifacts: Dict[str, Any]
+        context: AgentContext,
+        section_id: str
     ) -> str:
         """Build complete prompt with context"""
-        # TODO: Implement prompt building logic
-        # Include system description, previous results, etc.
-        pass
+        # Replace placeholders in prompt
+        prompt = base_prompt.replace("{{SYSTEM_DESCRIPTION}}", context.system_description)
         
-    async def _get_llm_response(
+        # Add relevant artifacts from other analyses
+        if context.artifacts:
+            relevant_artifacts = self._get_relevant_artifacts(context.artifacts, section_id)
+            if relevant_artifacts:
+                artifacts_text = "\n\nRelevant information from other analyses:\n"
+                for key, value in relevant_artifacts.items():
+                    artifacts_text += f"\n{key}:\n{value}\n"
+                prompt += artifacts_text
+        
+        # Add specific instructions for structured output
+        prompt += f"\n\nProvide the output in a structured format suitable for the '{self._get_template_type(section_id)}' template."
+        
+        return prompt
+    
+    def _get_relevant_artifacts(
         self,
-        prompt: str,
+        artifacts: Dict[str, Any],
         section_id: str
-    ) -> AnalysisSection:
-        """Get structured response from LLM"""
-        # TODO: Use instructor to get structured output
-        # Map to appropriate template type based on section
+    ) -> Dict[str, Any]:
+        """Get artifacts relevant to current section"""
+        # Override in subclasses for specific relevance logic
+        relevant = {}
+        
+        # Always include STPA-Sec results if available
+        if "stpa-sec_control_structure" in artifacts:
+            relevant["Control Structure"] = artifacts["stpa-sec_control_structure"]
+        
+        return relevant
+    
+    @abstractmethod
+    async def _parse_response(self, response: str, section_id: str) -> Dict[str, Any]:
+        """Parse LLM response into structured format for frontend template"""
         pass
+    
+    def _get_section_title(self, section_id: str) -> str:
+        """Get title for a section"""
+        for section in self.get_sections():
+            if section["id"] == section_id:
+                return section["title"]
+        return section_id.replace("_", " ").title()
+    
+    def _get_template_type(self, section_id: str) -> str:
+        """Get template type for a section"""
+        for section in self.get_sections():
+            if section["id"] == section_id:
+                return section.get("template", "text")
+        return "text"
+    
+    def _get_default_prompt(self, section_id: str) -> str:
+        """Get default prompt for a section"""
+        return f"""Analyze the following system for {self.framework.value} framework, focusing on {section_id}.
+
+System Description:
+{{{{SYSTEM_DESCRIPTION}}}}
+
+Provide a comprehensive analysis following the {self.framework.value} methodology."""
+    
+    # Helper methods for creating structured content
+    def create_table(self, columns: List[Dict], rows: List[Dict]) -> Dict[str, Any]:
+        """Create table content"""
+        return create_table_content(TableData(columns=columns, rows=rows))
+    
+    def create_chart(self, chart_type: str, labels: List[str], datasets: List[Dict]) -> Dict[str, Any]:
+        """Create chart content"""
+        return create_chart_content(ChartData(type=chart_type, labels=labels, datasets=datasets))
+    
+    def create_diagram(self, nodes: List[Dict], edges: List[Dict]) -> Dict[str, Any]:
+        """Create diagram content"""
+        return create_diagram_content(DiagramData(nodes=nodes, edges=edges))
+    
+    def create_text(self, content: str, format: str = "markdown") -> Dict[str, Any]:
+        """Create text content"""
+        return create_text_content(content, format)
+    
+    def create_list(self, items: List[Dict], ordered: bool = False) -> Dict[str, Any]:
+        """Create list content"""
+        return create_list_content(items, ordered)

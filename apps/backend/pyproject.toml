@@ -1,0 +1,87 @@
+[project]
+name = "security-analyst-backend"
+version = "0.1.0"
+description = "Backend for Security Analyst - AI-powered security analysis platform"
+authors = [{name = "Security Analyst Team", email = "team@securityanalyst.ai"}]
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    # Core
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "pydantic>=2.5.3",
+    "pydantic-settings>=2.1.0",
+    "python-dotenv>=1.0.0",
+    "httpx>=0.26.0",
+    
+    # Database
+    "sqlalchemy>=2.0.25",
+    "alembic>=1.13.1",
+    "asyncpg>=0.29.0",
+    "redis>=5.0.1",
+    "neo4j>=5.16.0",
+    
+    # LLM Providers
+    "anthropic>=0.8.1",
+    "openai>=1.7.2",
+    "groq>=0.3.0",
+    "google-generativeai>=0.3.2",
+    
+    # LLM Tools
+    "instructor>=0.4.5",
+    "tiktoken>=0.5.2",
+    "llama-index>=0.9.23",
+    "langchain>=0.1.0",
+    
+    # Security
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-multipart>=0.0.6",
+    
+    # Utilities
+    "tenacity>=8.2.3",
+    "python-dateutil>=2.8.2",
+    "pyyaml>=6.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.4",
+    "pytest-asyncio>=0.23.3",
+    "pytest-cov>=4.1.0",
+    "black>=23.12.1",
+    "isort>=5.13.2",
+    "mypy>=1.8.0",
+    "ruff>=0.1.11",
+    "pre-commit>=3.6.0",
+]
+
+[tool.setuptools]
+packages = ["api", "core", "storage", "config"]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+check_untyped_defs = true
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -82,7 +82,7 @@ export function AnalysisBarChart({
           )}
           
           {/* Bars */}
-          <div style={{ paddingLeft: '10px' }}>
+          <div style={{ paddingLeft: '20px', paddingRight: '20px' }}>
             {data.map((item, index) => {
               const percentage = (item.value / maxValue) * 100;
               return (
@@ -143,8 +143,8 @@ export function AnalysisBarChart({
           <div style={{
             position: 'absolute',
             top: 0,
-            left: '160px',
-            right: '50px',
+            left: '170px',
+            right: '70px',
             bottom: 0,
             pointerEvents: 'none'
           }}>
@@ -174,7 +174,7 @@ export function AnalysisBarChart({
       backgroundColor: 'white',
       border: '1px solid #ddd',
       borderRadius: '8px',
-      padding: '16px',
+      padding: '20px',
       marginBottom: '16px'
     }}>
       <div style={{

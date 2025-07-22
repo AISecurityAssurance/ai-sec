@@ -17,8 +17,8 @@ export default function CollapsibleAnalysisSection({
   isExpanded,
   onToggle
 }: CollapsibleAnalysisSectionProps) {
-  // Use template version for STPA-Sec and DREAD to demonstrate the new functionality
-  const useTemplates = ['stpa-sec', 'dread'].includes(analysisId);
+  // Use template version for all implemented analyses
+  const useTemplates = ['stpa-sec', 'dread', 'stride', 'pasta', 'maestro', 'linddun', 'hazop', 'octave'].includes(analysisId);
   
   return (
     <div className="analysis-section">

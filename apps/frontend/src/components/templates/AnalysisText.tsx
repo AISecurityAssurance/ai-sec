@@ -3,6 +3,31 @@ import { Edit2, X, Save, Download } from 'lucide-react';
 import { getSectionUrl } from './utils';
 import './AnalysisText.css';
 
+// Simple markdown to HTML converter
+function renderMarkdown(text: string): string {
+  return text
+    // Headers
+    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    // Bold
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Lists
+    .replace(/^\* (.+)/gm, '<li>$1</li>')
+    .replace(/^\- (.+)/gm, '<li>$1</li>')
+    .replace(/^\d+\. (.+)/gm, '<li>$1</li>')
+    // Wrap lists
+    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+    // Line breaks
+    .replace(/\n\n/g, '</p><p>')
+    // Wrap in paragraphs
+    .replace(/^([^<].*)$/gm, '<p>$1</p>')
+    // Clean up
+    .replace(/<p><\/p>/g, '')
+    .replace(/<p>(<h[1-6]>)/g, '$1')
+    .replace(/(<\/h[1-6]>)<\/p>/g, '$1');
+}
+
 interface AnalysisTextProps {
   id: string;
   title?: string;
@@ -103,7 +128,15 @@ export function AnalysisText({
             placeholder="Enter content..."
           />
         ) : (
-          <div className={`text-display ${format}`}>{textContent}</div>
+          <div className={`text-display ${format}`}>
+            {format === 'markdown' ? (
+              <div dangerouslySetInnerHTML={{ __html: renderMarkdown(textContent) }} />
+            ) : format === 'html' ? (
+              <div dangerouslySetInnerHTML={{ __html: textContent }} />
+            ) : (
+              textContent
+            )}
+          </div>
         )}
       </div>
 

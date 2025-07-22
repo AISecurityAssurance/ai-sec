@@ -788,6 +788,7 @@ Total scores range from 5-15:
 
 This systematic approach helps security teams prioritize threats based on their potential impact and likelihood.`}
               onSave={handleSave}
+              format="markdown"
             />
           );
 
@@ -821,16 +822,41 @@ This systematic approach helps security teams prioritize threats based on their 
 
 STRIDE helps identify and categorize threats systematically during the design phase, enabling teams to build appropriate security controls for each threat type.`}
               onSave={handleSave}
+              format="markdown"
             />
           );
 
         case 'data-flow-diagram':
+          // Create STRIDE-specific data flow nodes
+          const strideDataFlowNodes = [
+            { id: '1', data: { label: 'User Browser' }, position: { x: 100, y: 100 }, style: { background: '#e3f2fd' } },
+            { id: '2', data: { label: 'Web Portal' }, position: { x: 300, y: 100 }, style: { background: '#fff3e0' } },
+            { id: '3', data: { label: 'API Gateway' }, position: { x: 500, y: 100 }, style: { background: '#f3e5f5' } },
+            { id: '4', data: { label: 'Auth Service' }, position: { x: 300, y: 250 }, style: { background: '#e8f5e9' } },
+            { id: '5', data: { label: 'Transaction Engine' }, position: { x: 500, y: 250 }, style: { background: '#fce4ec' } },
+            { id: '6', data: { label: 'Customer DB' }, position: { x: 700, y: 250 }, style: { background: '#fff9c4' } },
+            { id: '7', data: { label: 'Fraud Detection' }, position: { x: 500, y: 400 }, style: { background: '#ffebee' } },
+            { id: '8', data: { label: 'Core Banking' }, position: { x: 700, y: 400 }, style: { background: '#e0f2f1' } }
+          ];
+          
+          const strideDataFlowEdges = [
+            { id: 'e1-2', source: '1', target: '2', label: 'HTTPS', animated: true },
+            { id: 'e2-3', source: '2', target: '3', label: 'API Calls' },
+            { id: 'e3-4', source: '3', target: '4', label: 'Auth Request' },
+            { id: 'e3-5', source: '3', target: '5', label: 'Transaction' },
+            { id: 'e4-6', source: '4', target: '6', label: 'User Lookup' },
+            { id: 'e5-7', source: '5', target: '7', label: 'Risk Check' },
+            { id: 'e5-8', source: '5', target: '8', label: 'Process' },
+            { id: 'e6-4', source: '6', target: '4', label: 'User Data', style: { stroke: '#888' } },
+            { id: 'e7-5', source: '7', target: '5', label: 'Risk Score', style: { stroke: '#f44336' } }
+          ];
+          
           return (
             <AnalysisFlow
               id={`${analysisId}-${subsectionId}`}
               title="System Data Flow Diagram"
-              initialNodes={controlFlowNodes}
-              initialEdges={controlFlowEdges}
+              initialNodes={strideDataFlowNodes}
+              initialEdges={strideDataFlowEdges}
               onSave={handleSave}
             />
           );
@@ -1019,7 +1045,16 @@ STRIDE helps identify and categorize threats systematically during the design ph
                               const threats = cellThreats.map(id => strideThreats.find(t => t.id === id)).filter(Boolean);
                               setSelectedDetail({
                                 title: `${likelihood} Likelihood / ${impact} Impact Threats`,
-                                data: threats
+                                data: threats.map(threat => ({
+                                  id: threat.id,
+                                  component: threat.component,
+                                  threatType: threat.threatType,
+                                  description: threat.description,
+                                  impact: threat.impact,
+                                  likelihood: threat.likelihood,
+                                  riskLevel: threat.riskLevel,
+                                  status: threat.status
+                                }))
                               });
                             }
                           }}
@@ -1105,6 +1140,7 @@ STRIDE helps identify and categorize threats systematically during the design ph
 
 PASTA aligns technical threats with business impact, helping organizations make risk-based security decisions.`}
               onSave={handleSave}
+              format="markdown"
             />
           );
 
@@ -1157,26 +1193,26 @@ PASTA aligns technical threats with business impact, helping organizations make 
               <AnalysisFlow
                 id={`${analysisId}-data-flow`}
                 title="Data Flow Diagram"
-                nodes={applicationComponents.map(comp => ({
-                  id: comp.id,
-                  type: 'component',
-                  data: { 
-                    label: comp.name,
-                    type: comp.type,
-                    assets: comp.assets
-                  },
-                  position: { x: Math.random() * 600, y: Math.random() * 400 }
-                }))}
-                edges={applicationComponents.flatMap(comp => 
-                  comp.dataFlows.map((flow, idx) => ({
-                    id: `${comp.id}-flow-${idx}`,
-                    source: comp.id,
-                    target: applicationComponents.find(c => c.name === flow.to)?.id || flow.to,
-                    label: flow.data,
-                    animated: flow.encryption,
-                    style: { stroke: flow.encryption ? '#2ecc71' : '#e74c3c' }
-                  }))
-                )}
+                initialNodes={[
+                  { id: 'AC-001', data: { label: 'Customer Web Portal' }, position: { x: 100, y: 100 }, style: { background: '#e3f2fd' } },
+                  { id: 'AC-002', data: { label: 'API Gateway' }, position: { x: 400, y: 100 }, style: { background: '#f3e5f5' } },
+                  { id: 'AC-003', data: { label: 'Transaction Processing' }, position: { x: 400, y: 300 }, style: { background: '#fce4ec' } },
+                  { id: 'AC-004', data: { label: 'Customer Database' }, position: { x: 700, y: 200 }, style: { background: '#fff9c4' } },
+                  { id: 'CDN', data: { label: 'CDN' }, position: { x: 100, y: 0 }, style: { background: '#e0f2f1' } },
+                  { id: 'Auth', data: { label: 'Auth Service' }, position: { x: 400, y: 200 }, style: { background: '#e8f5e9' } },
+                  { id: 'CoreBanking', data: { label: 'Core Banking' }, position: { x: 700, y: 300 }, style: { background: '#f5f5f5' } },
+                  { id: 'FraudDetection', data: { label: 'Fraud Detection' }, position: { x: 400, y: 400 }, style: { background: '#ffebee' } }
+                ]}
+                initialEdges={[
+                  { id: 'e1', source: 'AC-001', target: 'CDN', label: 'Static Assets', animated: true, style: { stroke: '#2ecc71' } },
+                  { id: 'e2', source: 'AC-001', target: 'AC-002', label: 'User Requests', animated: true, style: { stroke: '#2ecc71' } },
+                  { id: 'e3', source: 'AC-002', target: 'Auth', label: 'Auth Requests', animated: true, style: { stroke: '#2ecc71' } },
+                  { id: 'e4', source: 'AC-002', target: 'AC-003', label: 'Transactions', animated: true, style: { stroke: '#2ecc71' } },
+                  { id: 'e5', source: 'AC-003', target: 'CoreBanking', label: 'Transaction Requests', animated: true, style: { stroke: '#2ecc71' } },
+                  { id: 'e6', source: 'FraudDetection', target: 'AC-003', label: 'Risk Scores', animated: true, style: { stroke: '#2ecc71' } },
+                  { id: 'e7', source: 'Auth', target: 'AC-004', label: 'User Queries', animated: true, style: { stroke: '#2ecc71' } },
+                  { id: 'e8', source: 'AC-004', target: 'Auth', label: 'User Data', style: { stroke: '#888' } }
+                ]}
                 onSave={handleSave}
               />
 
@@ -1297,79 +1333,77 @@ PASTA aligns technical threats with business impact, helping organizations make 
               <AnalysisDiagram
                 id={`${analysisId}-attack-tree`}
                 title="Attack Tree Example: Steal Customer Financial Data"
-                content={`
-                  <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Root Goal -->
-                    <rect x="300" y="20" width="200" height="40" fill="#e74c3c" stroke="#333" stroke-width="2"/>
-                    <text x="400" y="45" text-anchor="middle" fill="white" font-weight="bold">Steal Customer Data</text>
+              >
+                <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+                    {/* Root Goal */}
+                    <rect x="300" y="20" width="200" height="40" fill="#e74c3c" stroke="#333" strokeWidth="2"/>
+                    <text x="400" y="45" textAnchor="middle" fill="white" fontWeight="bold">Steal Customer Data</text>
                     
-                    <!-- OR Gate -->
-                    <circle cx="400" cy="100" r="20" fill="#f39c12" stroke="#333" stroke-width="2"/>
-                    <text x="400" y="107" text-anchor="middle" fill="white" font-weight="bold">OR</text>
+                    {/* OR Gate */}
+                    <circle cx="400" cy="100" r="20" fill="#f39c12" stroke="#333" strokeWidth="2"/>
+                    <text x="400" y="107" textAnchor="middle" fill="white" fontWeight="bold">OR</text>
                     
-                    <!-- Branch 1: SQL Injection -->
-                    <rect x="100" y="160" width="180" height="40" fill="#3498db" stroke="#333" stroke-width="2"/>
-                    <text x="190" y="185" text-anchor="middle" fill="white">SQL Injection Attack</text>
+                    {/* Branch 1: SQL Injection */}
+                    <rect x="100" y="160" width="180" height="40" fill="#3498db" stroke="#333" strokeWidth="2"/>
+                    <text x="190" y="185" textAnchor="middle" fill="white">SQL Injection Attack</text>
                     
-                    <!-- Branch 2: Compromise Admin -->
-                    <rect x="520" y="160" width="180" height="40" fill="#3498db" stroke="#333" stroke-width="2"/>
-                    <text x="610" y="185" text-anchor="middle" fill="white">Compromise Admin</text>
+                    {/* Branch 2: Compromise Admin */}
+                    <rect x="520" y="160" width="180" height="40" fill="#3498db" stroke="#333" strokeWidth="2"/>
+                    <text x="610" y="185" textAnchor="middle" fill="white">Compromise Admin</text>
                     
-                    <!-- AND Gate for SQL Injection -->
-                    <circle cx="190" cy="240" r="20" fill="#9b59b6" stroke="#333" stroke-width="2"/>
-                    <text x="190" y="247" text-anchor="middle" fill="white" font-weight="bold">AND</text>
+                    {/* AND Gate for SQL Injection */}
+                    <circle cx="190" cy="240" r="20" fill="#9b59b6" stroke="#333" strokeWidth="2"/>
+                    <text x="190" y="247" textAnchor="middle" fill="white" fontWeight="bold">AND</text>
                     
-                    <!-- AND Gate for Admin -->
-                    <circle cx="610" cy="240" r="20" fill="#9b59b6" stroke="#333" stroke-width="2"/>
-                    <text x="610" y="247" text-anchor="middle" fill="white" font-weight="bold">AND</text>
+                    {/* AND Gate for Admin */}
+                    <circle cx="610" cy="240" r="20" fill="#9b59b6" stroke="#333" strokeWidth="2"/>
+                    <text x="610" y="247" textAnchor="middle" fill="white" fontWeight="bold">AND</text>
                     
-                    <!-- SQL Injection Sub-nodes -->
-                    <rect x="50" y="300" width="120" height="35" fill="#2ecc71" stroke="#333" stroke-width="2"/>
-                    <text x="110" y="322" text-anchor="middle" fill="white" font-size="12">Find Vulnerable</text>
+                    {/* SQL Injection Sub-nodes */}
+                    <rect x="50" y="300" width="120" height="35" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="110" y="322" textAnchor="middle" fill="white" fontSize="12">Find Vulnerable</text>
                     
-                    <rect x="210" y="300" width="120" height="35" fill="#2ecc71" stroke="#333" stroke-width="2"/>
-                    <text x="270" y="322" text-anchor="middle" fill="white" font-size="12">Bypass WAF</text>
+                    <rect x="210" y="300" width="120" height="35" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="270" y="322" textAnchor="middle" fill="white" fontSize="12">Bypass WAF</text>
                     
-                    <!-- Admin Compromise Sub-nodes -->
-                    <rect x="470" y="300" width="120" height="35" fill="#2ecc71" stroke="#333" stroke-width="2"/>
-                    <text x="530" y="322" text-anchor="middle" fill="white" font-size="12">Phish Credentials</text>
+                    {/* Admin Compromise Sub-nodes */}
+                    <rect x="470" y="300" width="120" height="35" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="530" y="322" textAnchor="middle" fill="white" fontSize="12">Phish Credentials</text>
                     
-                    <rect x="630" y="300" width="120" height="35" fill="#2ecc71" stroke="#333" stroke-width="2"/>
-                    <text x="690" y="322" text-anchor="middle" fill="white" font-size="12">Bypass MFA</text>
+                    <rect x="630" y="300" width="120" height="35" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="690" y="322" textAnchor="middle" fill="white" fontSize="12">Bypass MFA</text>
                     
-                    <!-- Connections -->
-                    <line x1="400" y1="60" x2="400" y2="80" stroke="#333" stroke-width="2"/>
-                    <line x1="400" y1="120" x2="190" y2="160" stroke="#333" stroke-width="2"/>
-                    <line x1="400" y1="120" x2="610" y2="160" stroke="#333" stroke-width="2"/>
-                    <line x1="190" y1="200" x2="190" y2="220" stroke="#333" stroke-width="2"/>
-                    <line x1="610" y1="200" x2="610" y2="220" stroke="#333" stroke-width="2"/>
-                    <line x1="190" y1="260" x2="110" y2="300" stroke="#333" stroke-width="2"/>
-                    <line x1="190" y1="260" x2="270" y2="300" stroke="#333" stroke-width="2"/>
-                    <line x1="610" y1="260" x2="530" y2="300" stroke="#333" stroke-width="2"/>
-                    <line x1="610" y1="260" x2="690" y2="300" stroke="#333" stroke-width="2"/>
+                    {/* Connections */}
+                    <line x1="400" y1="60" x2="400" y2="80" stroke="#333" strokeWidth="2"/>
+                    <line x1="400" y1="120" x2="190" y2="160" stroke="#333" strokeWidth="2"/>
+                    <line x1="400" y1="120" x2="610" y2="160" stroke="#333" strokeWidth="2"/>
+                    <line x1="190" y1="200" x2="190" y2="220" stroke="#333" strokeWidth="2"/>
+                    <line x1="610" y1="200" x2="610" y2="220" stroke="#333" strokeWidth="2"/>
+                    <line x1="190" y1="260" x2="110" y2="300" stroke="#333" strokeWidth="2"/>
+                    <line x1="190" y1="260" x2="270" y2="300" stroke="#333" strokeWidth="2"/>
+                    <line x1="610" y1="260" x2="530" y2="300" stroke="#333" strokeWidth="2"/>
+                    <line x1="610" y1="260" x2="690" y2="300" stroke="#333" strokeWidth="2"/>
                     
-                    <!-- Probability Labels -->
-                    <text x="110" y="350" text-anchor="middle" fill="#666" font-size="11">P=0.7</text>
-                    <text x="270" y="350" text-anchor="middle" fill="#666" font-size="11">P=0.4</text>
-                    <text x="530" y="350" text-anchor="middle" fill="#666" font-size="11">P=0.3</text>
-                    <text x="690" y="350" text-anchor="middle" fill="#666" font-size="11">P=0.2</text>
+                    {/* Probability Labels */}
+                    <text x="110" y="350" textAnchor="middle" fill="#666" fontSize="11">P=0.7</text>
+                    <text x="270" y="350" textAnchor="middle" fill="#666" fontSize="11">P=0.4</text>
+                    <text x="530" y="350" textAnchor="middle" fill="#666" fontSize="11">P=0.3</text>
+                    <text x="690" y="350" textAnchor="middle" fill="#666" fontSize="11">P=0.2</text>
                     
-                    <!-- Legend -->
-                    <text x="50" y="450" font-weight="bold" font-size="14">Legend:</text>
+                    {/* Legend */}
+                    <text x="50" y="450" fontWeight="bold" fontSize="14">Legend:</text>
                     <rect x="50" y="460" width="30" height="20" fill="#e74c3c"/>
-                    <text x="90" y="475" font-size="12">Goal</text>
+                    <text x="90" y="475" fontSize="12">Goal</text>
                     <rect x="150" y="460" width="30" height="20" fill="#3498db"/>
-                    <text x="190" y="475" font-size="12">Sub-goal</text>
+                    <text x="190" y="475" fontSize="12">Sub-goal</text>
                     <rect x="270" y="460" width="30" height="20" fill="#2ecc71"/>
-                    <text x="310" y="475" font-size="12">Attack Step</text>
+                    <text x="310" y="475" fontSize="12">Attack Step</text>
                     <circle cx="415" cy="470" r="10" fill="#f39c12"/>
-                    <text x="435" y="475" font-size="12">OR Gate</text>
+                    <text x="435" y="475" fontSize="12">OR Gate</text>
                     <circle cx="520" cy="470" r="10" fill="#9b59b6"/>
-                    <text x="540" y="475" font-size="12">AND Gate</text>
+                    <text x="540" y="475" fontSize="12">AND Gate</text>
                   </svg>
-                `}
-                onSave={handleSave}
-              />
+              </AnalysisDiagram>
             </AnalysisSection>
           );
 
@@ -1464,6 +1498,7 @@ Based on our PASTA analysis of the Digital Banking Platform, we have identified:
 - 20% - Security awareness and training
 - 10% - Continuous monitoring and assessment`}
                 onSave={handleSave}
+                format="markdown"
               />
             </AnalysisSection>
           );
@@ -1499,6 +1534,7 @@ Based on our PASTA analysis of the Digital Banking Platform, we have identified:
 
 MAESTRO helps organizations secure their AI/ML infrastructure against emerging threats while ensuring responsible AI deployment.`}
               onSave={handleSave}
+              format="markdown"
             />
           );
 
@@ -1555,14 +1591,32 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
               <AnalysisChart
                 id={`${analysisId}-threat-categories`}
                 title="Threat Category Distribution"
-                type="pie"
+                type="bar"
                 data={{
                   labels: maestroCategories.map(c => c.name),
                   datasets: [{
                     label: 'Number of Threats',
                     data: maestroCategories.map(c => maestroThreats.filter(t => t.category === c.name).length),
-                    backgroundColor: ['#e74c3c', '#f39c12', '#9b59b6', '#3498db', '#1abc9c', '#95a5a6']
+                    backgroundColor: '#3498db',
+                    borderColor: '#2980b9',
+                    borderWidth: 1
                   }]
+                }}
+                options={{
+                  indexAxis: 'y',
+                  scales: {
+                    x: {
+                      beginAtZero: true,
+                      ticks: {
+                        stepSize: 1
+                      }
+                    }
+                  },
+                  plugins: {
+                    legend: {
+                      display: false
+                    }
+                  }
                 }}
                 onSave={handleSave}
               />
@@ -1574,27 +1628,39 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
             <AnalysisFlow
               id={`${analysisId}-${subsectionId}`}
               title="AI Data Flow Mapping"
-              nodes={[
-                ...maestroAgents.map(agent => ({
-                  id: agent.id,
-                  type: 'ai-component',
-                  data: { 
-                    label: agent.name,
-                    type: agent.type,
-                    trustLevel: agent.trustLevel
-                  },
-                  position: { x: Math.random() * 800, y: Math.random() * 600 }
-                })),
-                { id: 'data-sources', type: 'data', data: { label: 'External Data Sources' }, position: { x: 100, y: 100 } },
-                { id: 'user-input', type: 'data', data: { label: 'User Inputs' }, position: { x: 100, y: 300 } },
-                { id: 'training-data', type: 'data', data: { label: 'Training Data' }, position: { x: 100, y: 500 } }
+              initialNodes={[
+                // AI/ML Components
+                { id: 'MA-001', data: { label: 'Customer Service Chatbot' }, position: { x: 400, y: 100 }, style: { background: '#e3f2fd', width: 180, textAlign: 'center' } },
+                { id: 'MA-002', data: { label: 'Fraud Detection Model' }, position: { x: 400, y: 250 }, style: { background: '#ffebee', width: 180, textAlign: 'center' } },
+                { id: 'MA-003', data: { label: 'Credit Risk Assessor' }, position: { x: 700, y: 175 }, style: { background: '#fff3e0', width: 180, textAlign: 'center' } },
+                { id: 'MA-004', data: { label: 'Investment Advisor Bot' }, position: { x: 700, y: 325 }, style: { background: '#e8f5e9', width: 180, textAlign: 'center' } },
+                { id: 'MA-005', data: { label: 'AML Transaction Monitor' }, position: { x: 400, y: 400 }, style: { background: '#fce4ec', width: 180, textAlign: 'center' } },
+                // Data Sources
+                { id: 'data-sources', data: { label: 'External Data Sources' }, position: { x: 50, y: 100 }, style: { background: '#f5f5f5', width: 150, textAlign: 'center' } },
+                { id: 'user-input', data: { label: 'User Inputs' }, position: { x: 50, y: 250 }, style: { background: '#f5f5f5', width: 150, textAlign: 'center' } },
+                { id: 'training-data', data: { label: 'Training Data' }, position: { x: 50, y: 400 }, style: { background: '#f5f5f5', width: 150, textAlign: 'center' } },
+                // Output/Storage
+                { id: 'decision-log', data: { label: 'Decision Log' }, position: { x: 1000, y: 250 }, style: { background: '#e1f5fe', width: 150, textAlign: 'center' } }
               ]}
-              edges={[
+              initialEdges={[
+                // Input flows
                 { id: 'e1', source: 'user-input', target: 'MA-001', label: 'Queries', animated: true },
                 { id: 'e2', source: 'data-sources', target: 'MA-002', label: 'Transaction Feed', animated: true },
                 { id: 'e3', source: 'training-data', target: 'MA-002', label: 'Model Training' },
-                { id: 'e4', source: 'MA-002', target: 'MA-005', label: 'Risk Scores' },
-                { id: 'e5', source: 'MA-003', target: 'MA-004', label: 'Credit Data' }
+                { id: 'e4', source: 'data-sources', target: 'MA-003', label: 'Credit History' },
+                { id: 'e5', source: 'data-sources', target: 'MA-005', label: 'Sanctions Lists' },
+                { id: 'e6', source: 'user-input', target: 'MA-004', label: 'Investment Goals' },
+                // Inter-component flows
+                { id: 'e7', source: 'MA-002', target: 'MA-005', label: 'Risk Scores' },
+                { id: 'e8', source: 'MA-001', target: 'MA-003', label: 'Loan Applications' },
+                { id: 'e9', source: 'MA-003', target: 'MA-004', label: 'Credit Data' },
+                { id: 'e10', source: 'MA-005', target: 'MA-002', label: 'Feedback Loop', style: { stroke: '#888' } },
+                // Output flows
+                { id: 'e11', source: 'MA-001', target: 'decision-log', label: 'Chat Logs' },
+                { id: 'e12', source: 'MA-002', target: 'decision-log', label: 'Fraud Alerts' },
+                { id: 'e13', source: 'MA-003', target: 'decision-log', label: 'Credit Decisions' },
+                { id: 'e14', source: 'MA-004', target: 'decision-log', label: 'Recommendations' },
+                { id: 'e15', source: 'MA-005', target: 'decision-log', label: 'AML Flags' }
               ]}
               onSave={handleSave}
             />
@@ -1608,49 +1674,82 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
               level={4}
               onSave={handleSave}
             >
-              <AnalysisChart
+              <AnalysisDiagram
                 id={`${analysisId}-risk-heatmap`}
                 title="AI Risk Heat Map"
-                type="bar"
-                data={{
-                  labels: ['Fraud Detection', 'Chatbot', 'Credit Scoring', 'Investment Advisor', 'AML Monitor'],
-                  datasets: [
-                    {
-                      label: 'Adversarial Risk',
-                      data: [3, 4, 2, 2, 1],
-                      backgroundColor: '#e74c3c'
-                    },
-                    {
-                      label: 'Bias Risk',
-                      data: [2, 1, 5, 3, 2],
-                      backgroundColor: '#f39c12'
-                    },
-                    {
-                      label: 'Privacy Risk',
-                      data: [3, 2, 4, 3, 4],
-                      backgroundColor: '#3498db'
-                    },
-                    {
-                      label: 'Reliability Risk',
-                      data: [4, 3, 3, 3, 4],
-                      backgroundColor: '#2ecc71'
-                    }
-                  ]
-                }}
-                options={{
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      max: 5,
-                      title: {
-                        display: true,
-                        text: 'Risk Level (1-5)'
-                      }
-                    }
-                  }
-                }}
-                onSave={handleSave}
-              />
+              >
+                <div style={{ display: 'grid', gridTemplateColumns: '150px repeat(5, 1fr)', gap: '5px', marginTop: '20px' }}>
+                  {/* Header row */}
+                  <div></div>
+                  <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '12px' }}>Fraud Detection</div>
+                  <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '12px' }}>Chatbot</div>
+                  <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '12px' }}>Credit Scoring</div>
+                  <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '12px' }}>Investment Advisor</div>
+                  <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '12px' }}>AML Monitor</div>
+                  
+                  {/* Risk rows */}
+                  {[
+                    { name: 'Adversarial Risk', values: [3, 4, 2, 2, 1] },
+                    { name: 'Bias Risk', values: [2, 1, 5, 3, 2] },
+                    { name: 'Privacy Risk', values: [3, 2, 4, 3, 4] },
+                    { name: 'Reliability Risk', values: [4, 3, 3, 3, 4] }
+                  ].map((risk) => (
+                    <React.Fragment key={risk.name}>
+                      <div style={{ fontWeight: 'bold', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '10px' }}>
+                        {risk.name}
+                      </div>
+                      {risk.values.map((value, idx) => {
+                        const color = value === 5 ? '#e74c3c' : 
+                                    value === 4 ? '#f39c12' :
+                                    value === 3 ? '#f1c40f' :
+                                    value === 2 ? '#2ecc71' :
+                                    '#27ae60';
+                        return (
+                          <div
+                            key={idx}
+                            style={{
+                              backgroundColor: color,
+                              padding: '20px',
+                              border: '1px solid #ddd',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer'
+                            }}
+                            title={`Risk Level: ${value}/5`}
+                          >
+                            <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'white' }}>
+                              {value}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </React.Fragment>
+                  ))}
+                </div>
+                <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <div style={{ width: '20px', height: '20px', backgroundColor: '#27ae60' }}></div>
+                    <span>Very Low (1)</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <div style={{ width: '20px', height: '20px', backgroundColor: '#2ecc71' }}></div>
+                    <span>Low (2)</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <div style={{ width: '20px', height: '20px', backgroundColor: '#f1c40f' }}></div>
+                    <span>Medium (3)</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <div style={{ width: '20px', height: '20px', backgroundColor: '#f39c12' }}></div>
+                    <span>High (4)</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <div style={{ width: '20px', height: '20px', backgroundColor: '#e74c3c' }}></div>
+                    <span>Critical (5)</span>
+                  </div>
+                </div>
+              </AnalysisDiagram>
 
               <AnalysisText
                 id={`${analysisId}-risk-summary`}
@@ -1668,6 +1767,7 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
 - Enhance input validation and output filtering for LLM-based agents
 - Establish continuous monitoring for model drift and performance degradation`}
                 onSave={handleSave}
+                format="markdown"
               />
             </AnalysisSection>
           );
@@ -1741,6 +1841,7 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
 - Build security into ML development lifecycle
 - Create incident response procedures for AI-specific threats`}
                 onSave={handleSave}
+                format="markdown"
               />
             </AnalysisSection>
           );
@@ -1777,6 +1878,7 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
 
 LINDDUN helps organizations build privacy-preserving systems while ensuring regulatory compliance.`}
               onSave={handleSave}
+              format="markdown"
             />
           );
 
@@ -1832,57 +1934,67 @@ LINDDUN helps organizations build privacy-preserving systems while ensuring regu
                 pageSize={10}
               />
 
-              <AnalysisChart
+              <AnalysisDiagram
                 id={`${analysisId}-impact-matrix`}
                 title="Privacy Impact Heat Map"
-                type="scatter"
-                data={{
-                  datasets: [{
-                    label: 'Privacy Threats',
-                    data: linddunThreats.map(threat => ({
-                      x: threat.likelihood === 'low' ? 1 : threat.likelihood === 'medium' ? 2 : 3,
-                      y: threat.privacyImpact === 'low' ? 1 : threat.privacyImpact === 'medium' ? 2 : threat.privacyImpact === 'high' ? 3 : 4,
-                      r: 10
-                    })),
-                    backgroundColor: linddunThreats.map(threat => {
-                      const score = (threat.likelihood === 'low' ? 1 : threat.likelihood === 'medium' ? 2 : 3) * 
-                                   (threat.privacyImpact === 'low' ? 1 : threat.privacyImpact === 'medium' ? 2 : threat.privacyImpact === 'high' ? 3 : 4);
-                      return score >= 9 ? '#e74c3c' : score >= 6 ? '#f39c12' : score >= 3 ? '#f1c40f' : '#2ecc71';
-                    })
-                  }]
-                }}
-                options={{
-                  scales: {
-                    x: {
-                      min: 0,
-                      max: 4,
-                      title: {
-                        display: true,
-                        text: 'Likelihood'
-                      },
-                      ticks: {
-                        callback: function(value: any) {
-                          return ['', 'Low', 'Medium', 'High'][value] || '';
-                        }
-                      }
-                    },
-                    y: {
-                      min: 0,
-                      max: 5,
-                      title: {
-                        display: true,
-                        text: 'Privacy Impact'
-                      },
-                      ticks: {
-                        callback: function(value: any) {
-                          return ['', 'Low', 'Medium', 'High', 'Critical'][value] || '';
-                        }
-                      }
-                    }
-                  }
-                }}
-                onSave={handleSave}
-              />
+              >
+                <div style={{ display: 'grid', gridTemplateColumns: '100px repeat(3, 1fr)', gap: '10px', marginTop: '20px' }}>
+                  {/* Header row */}
+                  <div></div>
+                  <div style={{ textAlign: 'center', fontWeight: 'bold' }}>Low Likelihood</div>
+                  <div style={{ textAlign: 'center', fontWeight: 'bold' }}>Medium Likelihood</div>
+                  <div style={{ textAlign: 'center', fontWeight: 'bold' }}>High Likelihood</div>
+                  
+                  {/* Data rows */}
+                  {['Critical', 'High', 'Medium', 'Low'].map(impact => (
+                    <React.Fragment key={impact}>
+                      <div style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '10px' }}>
+                        {impact}<br/>Impact
+                      </div>
+                      {['low', 'medium', 'high'].map(likelihood => {
+                        const cellThreats = linddunThreats.filter(t => 
+                          t.likelihood === likelihood && 
+                          (impact === 'Critical' ? t.privacyImpact === 'critical' : 
+                           impact === 'High' ? t.privacyImpact === 'high' :
+                           impact === 'Medium' ? t.privacyImpact === 'medium' :
+                           t.privacyImpact === 'low')
+                        );
+                        
+                        const cellColor = 
+                          (likelihood === 'high' && (impact === 'Critical' || impact === 'High')) ? '#e74c3c' :
+                          (likelihood === 'high' && impact === 'Medium') || (likelihood === 'medium' && (impact === 'Critical' || impact === 'High')) ? '#f39c12' :
+                          (likelihood === 'medium' && impact === 'Medium') || (likelihood === 'low' && (impact === 'Critical' || impact === 'High')) ? '#f1c40f' :
+                          '#2ecc71';
+                        
+                        return (
+                          <div
+                            key={`${impact}-${likelihood}`}
+                            style={{
+                              backgroundColor: cellColor,
+                              padding: '20px',
+                              border: '1px solid #ccc',
+                              minHeight: '80px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: cellThreats.length > 0 ? 'pointer' : 'default'
+                            }}
+                            title={cellThreats.map(t => t.threat).join(', ')}
+                          >
+                            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>
+                              {cellThreats.length}
+                            </span>
+                            {cellThreats.length > 0 && (
+                              <span style={{ fontSize: '12px', color: 'white' }}>threats</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </AnalysisDiagram>
             </AnalysisSection>
           );
 
@@ -1897,14 +2009,32 @@ LINDDUN helps organizations build privacy-preserving systems while ensuring regu
               <AnalysisChart
                 id={`${analysisId}-category-distribution`}
                 title="Threat Distribution by Category"
-                type="doughnut"
+                type="bar"
                 data={{
                   labels: linddunCategories.map(c => c.name),
                   datasets: [{
                     label: 'Number of Threats',
                     data: linddunCategories.map(c => linddunThreats.filter(t => t.category === c.name).length),
-                    backgroundColor: ['#e74c3c', '#f39c12', '#f1c40f', '#2ecc71', '#1abc9c', '#3498db', '#9b59b6']
+                    backgroundColor: '#3498db',
+                    borderColor: '#2980b9',
+                    borderWidth: 1
                   }]
+                }}
+                options={{
+                  indexAxis: 'y',
+                  scales: {
+                    x: {
+                      beginAtZero: true,
+                      ticks: {
+                        stepSize: 1
+                      }
+                    }
+                  },
+                  plugins: {
+                    legend: {
+                      display: false
+                    }
+                  }
                 }}
                 onSave={handleSave}
               />
@@ -1927,6 +2057,7 @@ LINDDUN helps organizations build privacy-preserving systems while ensuring regu
 **Example Scenarios:**
 ${categoryThreats.slice(0, 2).map(t => `- ${t.scenario}`).join('\n')}`}
                     onSave={handleSave}
+                    format="markdown"
                   />
                 );
               })}
@@ -2007,6 +2138,7 @@ ${categoryThreats.slice(0, 2).map(t => `- ${t.scenario}`).join('\n')}`}
 
 **Overall Compliance Score: 78%**`}
                 onSave={handleSave}
+                format="markdown"
               />
             </AnalysisSection>
           );
@@ -2041,6 +2173,7 @@ ${categoryThreats.slice(0, 2).map(t => `- ${t.scenario}`).join('\n')}`}
 
 HAZOP helps identify what can go wrong before it happens, enabling proactive risk mitigation in banking systems.`}
               onSave={handleSave}
+              format="markdown"
             />
           );
 
@@ -2103,13 +2236,49 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
                 data={{
                   labels: hazopNodes.map(n => n.name),
                   datasets: [{
-                    label: 'Number of Deviations',
+                    label: 'Total Deviations',
                     data: hazopNodes.map(n => getDeviationsByNode(n.id).length),
                     backgroundColor: hazopNodes.map(n => {
                       const criticalCount = getDeviationsByNode(n.id).filter(d => d.riskRating === 'critical').length;
                       return criticalCount > 0 ? '#e74c3c' : '#3498db';
-                    })
+                    }),
+                    borderColor: hazopNodes.map(n => {
+                      const criticalCount = getDeviationsByNode(n.id).filter(d => d.riskRating === 'critical').length;
+                      return criticalCount > 0 ? '#c0392b' : '#2980b9';
+                    }),
+                    borderWidth: 1
                   }]
+                }}
+                options={{
+                  indexAxis: 'y',
+                  scales: {
+                    x: {
+                      beginAtZero: true,
+                      ticks: {
+                        stepSize: 1
+                      },
+                      title: {
+                        display: true,
+                        text: 'Number of Deviations'
+                      }
+                    }
+                  },
+                  plugins: {
+                    legend: {
+                      display: false
+                    },
+                    tooltip: {
+                      callbacks: {
+                        afterLabel: function(context: any) {
+                          const nodeId = hazopNodes[context.dataIndex].id;
+                          const deviations = getDeviationsByNode(nodeId);
+                          const critical = deviations.filter(d => d.riskRating === 'critical').length;
+                          const high = deviations.filter(d => d.riskRating === 'high').length;
+                          return `Critical: ${critical}, High: ${high}`;
+                        }
+                      }
+                    }
+                  }
                 }}
                 onSave={handleSave}
               />
@@ -2127,74 +2296,79 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
               <AnalysisDiagram
                 id={`${analysisId}-risk-heatmap`}
                 title="Risk Heat Map"
-                content={`
-                  <svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                      <pattern id="grid" width="100" height="80" patternUnits="userSpaceOnUse">
-                        <rect width="100" height="80" fill="none" stroke="#ddd" stroke-width="1"/>
-                      </pattern>
-                    </defs>
-                    
-                    <!-- Grid -->
-                    <rect width="500" height="320" x="50" y="30" fill="url(#grid)"/>
-                    
-                    <!-- Risk Zones -->
-                    <!-- Low Risk (Green) -->
-                    <rect x="50" y="270" width="100" height="80" fill="#2ecc71" opacity="0.3"/>
-                    <rect x="150" y="270" width="100" height="80" fill="#2ecc71" opacity="0.3"/>
-                    <rect x="50" y="190" width="100" height="80" fill="#2ecc71" opacity="0.3"/>
-                    
-                    <!-- Medium Risk (Yellow) -->
-                    <rect x="250" y="270" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
-                    <rect x="150" y="190" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
-                    <rect x="50" y="110" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
-                    <rect x="350" y="270" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
-                    <rect x="250" y="190" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
-                    <rect x="150" y="110" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
-                    
-                    <!-- High Risk (Orange) -->
-                    <rect x="450" y="270" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    <rect x="350" y="190" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    <rect x="250" y="110" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    <rect x="150" y="30" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    <rect x="450" y="190" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    <rect x="350" y="110" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    <rect x="250" y="30" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    
-                    <!-- Critical Risk (Red) -->
-                    <rect x="450" y="110" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
-                    <rect x="350" y="30" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
-                    <rect x="450" y="30" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
-                    
-                    <!-- Axes Labels -->
-                    <text x="300" y="380" text-anchor="middle" font-weight="bold">Likelihood →</text>
-                    <text x="20" y="190" text-anchor="middle" font-weight="bold" transform="rotate(-90 20 190)">Severity →</text>
-                    
-                    <!-- X-axis labels -->
-                    <text x="100" y="370" text-anchor="middle" font-size="12">Rare</text>
-                    <text x="200" y="370" text-anchor="middle" font-size="12">Unlikely</text>
-                    <text x="300" y="370" text-anchor="middle" font-size="12">Possible</text>
-                    <text x="400" y="370" text-anchor="middle" font-size="12">Likely</text>
-                    <text x="500" y="370" text-anchor="middle" font-size="12">Almost Certain</text>
-                    
-                    <!-- Y-axis labels -->
-                    <text x="40" y="315" text-anchor="end" font-size="12">Low</text>
-                    <text x="40" y="235" text-anchor="end" font-size="12">Medium</text>
-                    <text x="40" y="155" text-anchor="end" font-size="12">High</text>
-                    <text x="40" y="75" text-anchor="end" font-size="12">Critical</text>
-                    
-                    <!-- Plot deviations -->
-                    ${hazopDeviations.map(dev => {
-                      const likelihoodMap: Record<string, number> = { 'rare': 100, 'unlikely': 200, 'possible': 300, 'likely': 400, 'almost certain': 500 };
-                      const severityMap: Record<string, number> = { 'low': 310, 'medium': 230, 'high': 150, 'critical': 70 };
-                      const x = likelihoodMap[dev.likelihood];
-                      const y = severityMap[dev.severity];
-                      return `<circle cx="${x}" cy="${y}" r="8" fill="#333" opacity="0.7" title="${dev.deviation}"/>`;
-                    }).join('')}
-                  </svg>
-                `}
                 onSave={handleSave}
-              />
+              >
+                <svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="grid" width="100" height="80" patternUnits="userSpaceOnUse">
+                      <rect width="100" height="80" fill="none" stroke="#ddd" strokeWidth="1"/>
+                    </pattern>
+                  </defs>
+                  
+                  {/* Grid */}
+                  <rect width="500" height="320" x="50" y="30" fill="url(#grid)"/>
+                  
+                  {/* Risk Zones */}
+                  {/* Low Risk (Green) */}
+                  <rect x="50" y="270" width="100" height="80" fill="#2ecc71" opacity="0.3"/>
+                  <rect x="150" y="270" width="100" height="80" fill="#2ecc71" opacity="0.3"/>
+                  <rect x="50" y="190" width="100" height="80" fill="#2ecc71" opacity="0.3"/>
+                  
+                  {/* Medium Risk (Yellow) */}
+                  <rect x="250" y="270" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
+                  <rect x="150" y="190" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
+                  <rect x="50" y="110" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
+                  <rect x="350" y="270" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
+                  <rect x="250" y="190" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
+                  <rect x="150" y="110" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
+                  
+                  {/* High Risk (Orange) */}
+                  <rect x="450" y="270" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  <rect x="350" y="190" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  <rect x="250" y="110" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  <rect x="150" y="30" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  <rect x="450" y="190" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  <rect x="350" y="110" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  <rect x="250" y="30" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  
+                  {/* Critical Risk (Red) */}
+                  <rect x="450" y="110" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
+                  <rect x="350" y="30" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
+                  <rect x="450" y="30" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
+                  
+                  {/* Axes Labels */}
+                  <text x="300" y="380" textAnchor="middle" fontWeight="bold">Likelihood →</text>
+                  <text x="15" y="190" textAnchor="middle" fontWeight="bold" transform="rotate(-90 15 190)">Severity →</text>
+                  
+                  {/* X-axis labels */}
+                  <text x="100" y="370" textAnchor="middle" fontSize="12">Rare</text>
+                  <text x="200" y="370" textAnchor="middle" fontSize="12">Unlikely</text>
+                  <text x="300" y="370" textAnchor="middle" fontSize="12">Possible</text>
+                  <text x="400" y="370" textAnchor="middle" fontSize="12">Likely</text>
+                  <text x="500" y="370" textAnchor="middle" fontSize="12">Almost Certain</text>
+                  
+                  {/* Y-axis labels */}
+                  <text x="45" y="315" textAnchor="end" fontSize="11">Low</text>
+                  <text x="45" y="235" textAnchor="end" fontSize="11">Medium</text>
+                  <text x="45" y="155" textAnchor="end" fontSize="11">High</text>
+                  <text x="45" y="75" textAnchor="end" fontSize="11">Critical</text>
+                  
+                  {/* Plot deviations */}
+                  {hazopDeviations.map((dev, idx) => {
+                    const likelihoodMap: Record<string, number> = { 'rare': 100, 'unlikely': 200, 'possible': 300, 'likely': 400, 'almost certain': 500 };
+                    const severityMap: Record<string, number> = { 'low': 310, 'medium': 230, 'high': 150, 'critical': 70 };
+                    const x = likelihoodMap[dev.likelihood];
+                    const y = severityMap[dev.severity];
+                    return (
+                      <g key={idx}>
+                        <circle cx={x} cy={y} r="8" fill="#333" opacity="0.7">
+                          <title>Deviation: {dev.deviation}&#10;Risk: {dev.riskRating}</title>
+                        </circle>
+                      </g>
+                    );
+                  })}
+                </svg>
+              </AnalysisDiagram>
 
               <AnalysisText
                 id={`${analysisId}-risk-summary`}
@@ -2216,6 +2390,7 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
 - Implement recommended safeguards for high-likelihood deviations
 - Regular review of risk ratings as controls are implemented`}
                 onSave={handleSave}
+                format="markdown"
               />
             </AnalysisSection>
           );
@@ -2252,10 +2427,11 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
               <AnalysisChart
                 id={`${analysisId}-action-status`}
                 title="Action Status Overview"
-                type="pie"
+                type="bar"
                 data={{
                   labels: ['Pending', 'In Progress', 'Completed', 'Overdue'],
                   datasets: [{
+                    label: 'Number of Actions',
                     data: [
                       hazopActions.filter(a => a.status === 'pending').length,
                       hazopActions.filter(a => a.status === 'in-progress').length,
@@ -2315,6 +2491,7 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
 
 OCTAVE focuses on organizational risk and strategic, practice-related issues, distinguishing it from technology-focused assessments.`}
               onSave={handleSave}
+              format="markdown"
             />
           );
 
@@ -2346,10 +2523,11 @@ OCTAVE focuses on organizational risk and strategic, practice-related issues, di
               <AnalysisChart
                 id={`${analysisId}-asset-criticality`}
                 title="Asset Criticality Distribution"
-                type="doughnut"
+                type="bar"
                 data={{
                   labels: ['Critical', 'High', 'Medium', 'Low'],
                   datasets: [{
+                    label: 'Number of Assets',
                     data: [
                       octaveAssets.filter(a => a.criticality === 'critical').length,
                       octaveAssets.filter(a => a.criticality === 'high').length,
@@ -2374,6 +2552,7 @@ ${getHighValueAssets().map(asset => `### ${asset.name}
 - **Rationale:** ${asset.rationale}
 `).join('\n')}`}
                 onSave={handleSave}
+                format="markdown"
               />
             </AnalysisSection>
           );
@@ -2499,82 +2678,89 @@ ${getHighValueAssets().map(asset => `### ${asset.name}
               <AnalysisDiagram
                 id={`${analysisId}-risk-matrix`}
                 title="Risk Heat Map"
-                content={`
-                  <svg viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                      <pattern id="octave-grid" width="100" height="80" patternUnits="userSpaceOnUse">
-                        <rect width="100" height="80" fill="none" stroke="#ddd" stroke-width="1"/>
-                      </pattern>
-                    </defs>
-                    
-                    <!-- Grid -->
-                    <rect width="500" height="400" x="50" y="30" fill="url(#octave-grid)"/>
-                    
-                    <!-- Risk Zones -->
-                    <!-- Low Risk -->
-                    <rect x="50" y="350" width="100" height="80" fill="#2ecc71" opacity="0.3"/>
-                    <rect x="150" y="350" width="100" height="80" fill="#2ecc71" opacity="0.3"/>
-                    <rect x="50" y="270" width="100" height="80" fill="#2ecc71" opacity="0.3"/>
-                    
-                    <!-- Medium Risk -->
-                    <rect x="250" y="350" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
-                    <rect x="150" y="270" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
-                    <rect x="50" y="190" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
-                    <rect x="350" y="350" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
-                    <rect x="250" y="270" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
-                    <rect x="150" y="190" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
-                    <rect x="50" y="110" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
-                    
-                    <!-- High Risk -->
-                    <rect x="450" y="350" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    <rect x="350" y="270" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    <rect x="250" y="190" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    <rect x="150" y="110" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    <rect x="50" y="30" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    <rect x="450" y="270" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    <rect x="350" y="190" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    <rect x="250" y="110" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    <rect x="150" y="30" width="100" height="80" fill="#f39c12" opacity="0.3"/>
-                    
-                    <!-- Critical Risk -->
-                    <rect x="450" y="190" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
-                    <rect x="350" y="110" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
-                    <rect x="250" y="30" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
-                    <rect x="450" y="110" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
-                    <rect x="350" y="30" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
-                    <rect x="450" y="30" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
-                    
-                    <!-- Axes -->
-                    <text x="300" y="470" text-anchor="middle" font-weight="bold">Likelihood →</text>
-                    <text x="20" y="230" text-anchor="middle" font-weight="bold" transform="rotate(-90 20 230)">Impact →</text>
-                    
-                    <!-- X-axis labels -->
-                    <text x="100" y="450" text-anchor="middle" font-size="11">Very Low</text>
-                    <text x="200" y="450" text-anchor="middle" font-size="11">Low</text>
-                    <text x="300" y="450" text-anchor="middle" font-size="11">Medium</text>
-                    <text x="400" y="450" text-anchor="middle" font-size="11">High</text>
-                    <text x="500" y="450" text-anchor="middle" font-size="11">Very High</text>
-                    
-                    <!-- Y-axis labels -->
-                    <text x="40" y="395" text-anchor="end" font-size="11">Negligible</text>
-                    <text x="40" y="315" text-anchor="end" font-size="11">Minor</text>
-                    <text x="40" y="235" text-anchor="end" font-size="11">Moderate</text>
-                    <text x="40" y="155" text-anchor="end" font-size="11">Major</text>
-                    <text x="40" y="75" text-anchor="end" font-size="11">Severe</text>
-                    
-                    <!-- Plot risks -->
-                    ${octaveRisks.map((risk, idx) => {
-                      const likelihoodMap: Record<string, number> = { 'very-low': 100, 'low': 200, 'medium': 300, 'high': 400, 'very-high': 500 };
-                      const impactMap: Record<string, number> = { 'negligible': 390, 'minor': 310, 'moderate': 230, 'major': 150, 'severe': 70 };
-                      const x = likelihoodMap[risk.likelihood];
-                      const y = impactMap[risk.impact];
-                      return `<circle cx="${x}" cy="${y}" r="10" fill="#333" opacity="0.7" title="${risk.description}"/>
-                              <text x="${x}" y="${y + 4}" text-anchor="middle" fill="white" font-size="10" font-weight="bold">${idx + 1}</text>`;
-                    }).join('')}
-                  </svg>
-                `}
                 onSave={handleSave}
-              />
+              >
+                <svg viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="octave-grid" width="100" height="80" patternUnits="userSpaceOnUse">
+                      <rect width="100" height="80" fill="none" stroke="#ddd" strokeWidth="1"/>
+                    </pattern>
+                  </defs>
+                  
+                  {/* Grid */}
+                  <rect width="500" height="400" x="50" y="30" fill="url(#octave-grid)"/>
+                  
+                  {/* Risk Zones */}
+                  {/* Low Risk */}
+                  <rect x="50" y="350" width="100" height="80" fill="#2ecc71" opacity="0.3"/>
+                  <rect x="150" y="350" width="100" height="80" fill="#2ecc71" opacity="0.3"/>
+                  <rect x="50" y="270" width="100" height="80" fill="#2ecc71" opacity="0.3"/>
+                  
+                  {/* Medium Risk */}
+                  <rect x="250" y="350" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
+                  <rect x="150" y="270" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
+                  <rect x="50" y="190" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
+                  <rect x="350" y="350" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
+                  <rect x="250" y="270" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
+                  <rect x="150" y="190" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
+                  <rect x="50" y="110" width="100" height="80" fill="#f1c40f" opacity="0.3"/>
+                  
+                  {/* High Risk */}
+                  <rect x="450" y="350" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  <rect x="350" y="270" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  <rect x="250" y="190" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  <rect x="150" y="110" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  <rect x="50" y="30" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  <rect x="450" y="270" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  <rect x="350" y="190" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  <rect x="250" y="110" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  <rect x="150" y="30" width="100" height="80" fill="#f39c12" opacity="0.3"/>
+                  
+                  {/* Critical Risk */}
+                  <rect x="450" y="190" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
+                  <rect x="350" y="110" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
+                  <rect x="250" y="30" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
+                  <rect x="450" y="110" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
+                  <rect x="350" y="30" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
+                  <rect x="450" y="30" width="100" height="80" fill="#e74c3c" opacity="0.3"/>
+                  
+                  {/* Axes */}
+                  <text x="300" y="470" textAnchor="middle" fontWeight="bold">Likelihood →</text>
+                  <text x="15" y="230" textAnchor="middle" fontWeight="bold" transform="rotate(-90 15 230)">Impact →</text>
+                  
+                  {/* X-axis labels */}
+                  <text x="100" y="450" textAnchor="middle" fontSize="11">Very Low</text>
+                  <text x="200" y="450" textAnchor="middle" fontSize="11">Low</text>
+                  <text x="300" y="450" textAnchor="middle" fontSize="11">Medium</text>
+                  <text x="400" y="450" textAnchor="middle" fontSize="11">High</text>
+                  <text x="500" y="450" textAnchor="middle" fontSize="11">Very High</text>
+                  
+                  {/* Y-axis labels */}
+                  <text x="45" y="395" textAnchor="end" fontSize="10">Negligible</text>
+                  <text x="45" y="315" textAnchor="end" fontSize="10">Minor</text>
+                  <text x="45" y="235" textAnchor="end" fontSize="10">Moderate</text>
+                  <text x="45" y="155" textAnchor="end" fontSize="10">Major</text>
+                  <text x="45" y="75" textAnchor="end" fontSize="10">Severe</text>
+                  
+                  {/* Plot risks */}
+                  {octaveRisks.map((risk, idx) => {
+                    const likelihoodMap: Record<string, number> = { 'very-low': 100, 'low': 200, 'medium': 300, 'high': 400, 'very-high': 500 };
+                    const impactMap: Record<string, number> = { 'negligible': 390, 'minor': 310, 'moderate': 230, 'major': 150, 'severe': 70 };
+                    const x = likelihoodMap[risk.likelihood];
+                    const y = impactMap[risk.impact];
+                    return (
+                      <g key={idx}>
+                        <circle cx={x} cy={y} r="10" fill="#333" opacity="0.7">
+                          <title>Risk #{idx + 1}: {risk.description}</title>
+                        </circle>
+                        <text x={x} y={y + 4} textAnchor="middle" fill="white" fontSize="10" fontWeight="bold" style={{ pointerEvents: 'none' }}>
+                          {idx + 1}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              </AnalysisDiagram>
 
               <AnalysisText
                 id={`${analysisId}-risk-summary`}
@@ -2597,6 +2783,7 @@ ${getHighValueAssets().map(asset => `### ${asset.name}
 2. Internal process vulnerabilities in change management
 3. Supply chain dependencies creating single points of failure`}
                 onSave={handleSave}
+                format="markdown"
               />
             </AnalysisSection>
           );
@@ -2631,50 +2818,43 @@ ${getHighValueAssets().map(asset => `### ${asset.name}
               <AnalysisChart
                 id={`${analysisId}-strategy-effectiveness`}
                 title="Strategy Effectiveness vs Cost"
-                type="scatter"
+                type="bar"
                 data={{
-                  datasets: [{
-                    label: 'Protection Strategies',
-                    data: octaveProtectionStrategies.map(s => ({
-                      x: s.cost === 'low' ? 1 : s.cost === 'medium' ? 2 : 3,
-                      y: s.effectiveness === 'low' ? 1 : s.effectiveness === 'medium' ? 2 : 3,
-                      r: 15
-                    })),
-                    backgroundColor: octaveProtectionStrategies.map(s => {
-                      if (s.status === 'operational') return '#2ecc71';
-                      if (s.status === 'implementing') return '#3498db';
-                      if (s.status === 'approved') return '#f39c12';
-                      return '#95a5a6';
-                    })
-                  }]
+                  labels: octaveProtectionStrategies.map(s => s.name),
+                  datasets: [
+                    {
+                      label: 'Effectiveness',
+                      data: octaveProtectionStrategies.map(s => 
+                        s.effectiveness === 'high' ? 3 : s.effectiveness === 'medium' ? 2 : 1
+                      ),
+                      backgroundColor: '#3498db'
+                    },
+                    {
+                      label: 'Cost',
+                      data: octaveProtectionStrategies.map(s => 
+                        s.cost === 'high' ? 3 : s.cost === 'medium' ? 2 : 1
+                      ),
+                      backgroundColor: '#e74c3c'
+                    }
+                  ]
                 }}
                 options={{
+                  indexAxis: 'y',
                   scales: {
                     x: {
                       min: 0,
-                      max: 4,
-                      title: {
-                        display: true,
-                        text: 'Cost'
-                      },
+                      max: 3,
                       ticks: {
+                        stepSize: 1,
                         callback: function(value: any) {
                           return ['', 'Low', 'Medium', 'High'][value] || '';
                         }
                       }
-                    },
-                    y: {
-                      min: 0,
-                      max: 4,
-                      title: {
-                        display: true,
-                        text: 'Effectiveness'
-                      },
-                      ticks: {
-                        callback: function(value: any) {
-                          return ['', 'Low', 'Medium', 'High'][value] || '';
-                        }
-                      }
+                    }
+                  },
+                  plugins: {
+                    legend: {
+                      position: 'top'
                     }
                   }
                 }}
@@ -2703,6 +2883,7 @@ ${getHighValueAssets().map(asset => `### ${asset.name}
 - Decrease mean time to detect (MTTD) to <1 hour
 - Achieve 95% coverage of critical assets with protection strategies`}
                 onSave={handleSave}
+                format="markdown"
               />
             </AnalysisSection>
           );

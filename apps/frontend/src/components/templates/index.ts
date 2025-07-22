@@ -8,3 +8,5 @@ export { SystemDescriptionTemplate } from './SystemDescriptionTemplate';
 export { AnalysisFlow } from './AnalysisFlow';
 export { AnalysisChart } from './AnalysisChart';
 export { AnalysisDetail } from './AnalysisDetail';
+export { AnalysisBarChart } from './AnalysisBarChart';
+export { AnalysisHeatMap } from './AnalysisHeatMap';

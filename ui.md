@@ -205,3 +205,80 @@ How to persist:
   4. Multi-user scenarios: How do we handle if the same analysis is opened in multiple browser tabs?
   5. Demo mode: Should demo mode be a type of analysis that can be saved/loaded, or separate?
   6. Templates: Should we support saving analyses as templates for reuse?
+
+
+Questions before proceeding:
+
+  1. STRIDE - Should include:
+    - Threat modeling diagram (data flow diagram)? YES
+    - Threats by component table? YES
+    - Threats by category (Spoofing, Tampering, etc.)? YES
+    - Mitigation strategies table? YES
+    - Risk matrix visualization? YES
+  2. PASTA - Should include:
+    - All 7 stages as separate sections? YES
+    - Attack trees/graphs? YES
+    - Threat intelligence feeds section? YES
+    - Vulnerability assessment results? YES
+    - Risk heat maps? YES
+  3. MAESTRO, LINDDUN, HAZOP, OCTAVE - Do you have specific requirements for what sections/components each should include, or should I research and
+  implement based on the standard methodologies? YES. Start by looking at the prompts for these (apps/backend/core/prompts).  If you need to do more research to better understand SOTA for these (and how to present them to the user), then go ahead and do the additional research.  It's important that analysis plugins are consistent with what a user typically sees when the do the analysis manually--we don't want to overburden them by forcing them to learn a new structure.
+  4. Common components across plugins:
+    - Should each plugin have its own wargaming/simulation section? If this is standard.  Otherwise, exclude it for now.
+    - Should each have export capabilities?  YES
+    - Should they all follow similar structure (overview, analysis, results, mitigations)? Probably.  Research current practices and follow these.
+  5. Visual components:
+    - What types of diagrams/charts are most important?  ALL diagrams and standard diagrams and charts that a user would probably see as part of a particular analysis is important.  One of the pain points of our customers is poor diagrams.  Therefore, one of our goals is to improve our diagrams.  Diagrams are critical (humans do best when they can visualize the system or analysis).  Let's discuss diagrams more.
+    - Should we use React Flow for all flow diagrams? Let's discuss.
+    - Any specific visualization requirements? Let's discuss.
+
+# Diagrams
+- We will want to add in different backend AI agents for different diagrams.  For example, we may prompt the SA agent to use a specific diagraming tool for a specific diagram. For now, we'll use React Flow for the demo.  
+- One critical consideration for the diagram is using a graph database that stored components and relationships.  With this, we can use any tool to draw the diagram using the graph database.
+- For the backend, our data will be stored in searchable databases.  Larger analyses may need a RAG system.  (Were still thinking this through).  
+
+# Other considerations
+- We'll want to link components between analysis plugins.  For example, our prompt me be to use the STPA-Sec analysis to guide the STRIDE analysis OR combine the STRIDE analysis in the STPA-Sec analysis. We're still figuring this out.  But we should keep this in mind with the current templated analysis plugin system--from where will the analysis plugin data come? But, for now, we just want to make sure ALL the components of each analysis type are pre-determined before working on the backend.  Therefore, we want to see everything that will be re-structured to work with the backend before we transition to the backend.  Make sure you save all the demo components with that in mind.
+
+Do NOT start coding yet.  Do you have any questions?
+
+
+
+
+
+Questions Before Implementation:
+
+  1. React Flow for Demo: You mentioned :
+    - Use React Flow for all flow/network diagrams in the demo? YES
+    - Use different libraries for different diagram types (e.g., tree diagrams, matrices)? YES, when appropriate for the particular analysis.
+    - Create placeholder diagrams that will be replaced by AI-generated ones later? For now, show diagrams, not placeholders.  We want to see what an example analysis looks like. But, these will be replaced once we have the backend.
+  2. Data Consistency: For the demo, should I:
+    - Reuse some components from STPA-Sec (like you suggested for STRIDE's system diagram)? YES, when appropriate for the particular analysis.
+    - Create unique demo data for each analysis to show variety?  NO.  The demo should include aspects that are relevant for ALL analysis.  That is, one comprehensive demo that benefits from analysis using all current analysis plugins.  (Is that the current demo?  Or, do we need to update it?).  The demo is an example system that touches on all areas of a system that would require analysis for all the pluging components. 
+    - Ensure the demo data shows potential cross-analysis connections? If necessary.  
+  3. Prompts Location: You mentioned root/apps/backend/core/prompts but I don't see a backend directory. Should I:
+    - Check if these prompts exist elsewhere in the codebase? If you can't find them, then search for them. 
+    - Research the standard methodologies independently?
+    - Create prompts based on industry standards?  If you feel new prompts are better, then go ahead and change/create/replace the existing prompts (I have a backup copy in another repo.)
+  4. Visual Components Priority: For diagrams/charts, which are most critical:
+    - Flow diagrams (data flow, process flow, attack flow)? YES. When appropriate for a particular analysis.
+    - Hierarchical diagrams (attack trees, fault trees)? YES. When appropriate for a particular analysis.
+    - Matrix visualizations (risk matrices, threat matrices)? YES. When appropriate for a particular analysis.
+    - Network diagrams (component relationships)? YES. When appropriate for a particular analysis.
+    - Heat maps and other statistical visualizations? YES. When appropriate for a particular analysis.
+  5. Section Structure: Should each analysis plugin follow its standard methodology structure exactly, or should we have some consistency across plugins.  Each plugin should follow its standard methodology structure, but do so in the context of using our template system for display.  That is, use common components for tables, charts, sections, etc.  But WHICH COMPONENTS to include should be determined by standard methodology. That is, we want to fit the analysis into our Analysis Canvas (allowing for opening in new tag/browser, making edits, exporting, etc.) AND we want the user to see what they would normally see for this type of analysis.  We do NOT want the user to have to learn new types of tables, charts or other data.  All the standard methodology analysis components should be present.  Additional components may be added, but only as a "here's more stuff to help with the analysis" and NOT "here's a different way to do what you normally do".  
+  (e.g., all have an Overview section first)?
+
+
+
+
+  Now I see it.  Great.  Let's work on some fixes:
+  # STRIDE 
+  - Risk Matrix Visualization: I'm not sure what this is doing.  Look at 'risk_matrix_visualization_click_for_details.jpg' and 'risk_matrix_visualization.jpg'.
+
+  # PASTA
+  - Application Decomposition/Data Flow Diagram is empty. Look at 'data_flow_diagram.jpg'.
+  - Attack Modeling/Attack Modeling/Attack Tree Example: (blank see 'attack_tree.jpg').
+
+  # MAESTRO
+  - Data Flow Mapping/AI Data Flow Mapping (blank.  see 'data_flow_mapping.jpg')

@@ -10,10 +10,37 @@ import {
 } from '../apps/user/mockData/stpaSecData';
 import { systemDescription as initialSystemDescription } from '../apps/user/mockData/systemData';
 
+interface AnalysisStatus {
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  progress: number;
+  message?: string;
+}
+
+interface AnalysisSection {
+  id: string;
+  title: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  content?: any;
+  error?: string;
+}
+
+interface AnalysisResult {
+  framework: string;
+  sections: AnalysisSection[];
+  status: AnalysisStatus;
+  startedAt?: string;
+  completedAt?: string;
+}
+
 interface AnalysisState {
   // Project info
   projectId: string | null;
   projectVersion: string;
+  
+  // Analysis info
+  currentAnalysisId: string | null;
+  analysisStatus: AnalysisStatus;
+  analysisResults: Record<string, AnalysisResult>;
   
   // System data
   systemDescription: typeof initialSystemDescription;
@@ -33,6 +60,10 @@ interface AnalysisState {
   // Actions
   setProjectId: (id: string | null) => void;
   setProjectVersion: (version: string) => void;
+  setCurrentAnalysisId: (id: string | null) => void;
+  updateAnalysisStatus: (status: AnalysisStatus) => void;
+  updateAnalysisResult: (framework: string, result: AnalysisResult) => void;
+  updateSectionResult: (framework: string, sectionId: string, section: Partial<AnalysisSection>) => void;
   updateSystemDescription: (data: Partial<typeof initialSystemDescription>) => void;
   updateLosses: (data: typeof initialLosses) => void;
   updateHazards: (data: typeof initialHazards) => void;
@@ -42,6 +73,7 @@ interface AnalysisState {
   updateScenarios: (data: typeof initialScenarios) => void;
   setEnabledAnalyses: (analyses: Record<string, boolean>) => void;
   setDemoMode: (enabled: boolean) => void;
+  clearAnalysisResults: () => void;
 }
 
 export const useAnalysisStore = create<AnalysisState>()(
@@ -50,6 +82,9 @@ export const useAnalysisStore = create<AnalysisState>()(
       // Initial state
       projectId: null,
       projectVersion: '1.0.0',
+      currentAnalysisId: null,
+      analysisStatus: { status: 'pending', progress: 0 },
+      analysisResults: {},
       systemDescription: initialSystemDescription,
       losses: initialLosses,
       hazards: initialHazards,
@@ -73,6 +108,32 @@ export const useAnalysisStore = create<AnalysisState>()(
       // Actions
       setProjectId: (id) => set({ projectId: id }),
       setProjectVersion: (version) => set({ projectVersion: version }),
+      setCurrentAnalysisId: (id) => set({ currentAnalysisId: id }),
+      updateAnalysisStatus: (status) => set({ analysisStatus: status }),
+      updateAnalysisResult: (framework, result) => set((state) => ({
+        analysisResults: {
+          ...state.analysisResults,
+          [framework]: result
+        }
+      })),
+      updateSectionResult: (framework, sectionId, section) => set((state) => {
+        const frameworkResult = state.analysisResults[framework];
+        if (!frameworkResult) return state;
+        
+        const updatedSections = frameworkResult.sections.map(s => 
+          s.id === sectionId ? { ...s, ...section } : s
+        );
+        
+        return {
+          analysisResults: {
+            ...state.analysisResults,
+            [framework]: {
+              ...frameworkResult,
+              sections: updatedSections
+            }
+          }
+        };
+      }),
       updateSystemDescription: (data) => set((state) => ({
         systemDescription: { ...state.systemDescription, ...data }
       })),
@@ -83,7 +144,12 @@ export const useAnalysisStore = create<AnalysisState>()(
       updateUcas: (data) => set({ ucas: data }),
       updateScenarios: (data) => set({ scenarios: data }),
       setEnabledAnalyses: (analyses) => set({ enabledAnalyses: analyses }),
-      setDemoMode: (enabled) => set({ demoMode: enabled })
+      setDemoMode: (enabled) => set({ demoMode: enabled }),
+      clearAnalysisResults: () => set({ 
+        analysisResults: {}, 
+        analysisStatus: { status: 'pending', progress: 0 },
+        currentAnalysisId: null 
+      })
     }),
     {
       name: 'analysis-storage',

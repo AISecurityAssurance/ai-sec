@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import AnalysisPanel from './components/AnalysisPanel';
 import ChatPanel from './components/ChatPanel';
 import { useAnalysisStore } from '../../stores/analysisStore';
+import { AnalysisWebSocketProvider } from '../../components/analysis/AnalysisWebSocketProvider';
 import './UserApp.css';
 
 export default function UserApp() {
@@ -25,29 +26,31 @@ export default function UserApp() {
 
   return (
     <SimpleLayout>
-      <div className="user-layout">
-        <Sidebar 
-          selectedProject={selectedProject}
-          onProjectSelect={setSelectedProject}
-          onAnalysisTypesChange={setEnabledAnalyses}
-        />
-        
-        <div className="user-main">
-          <AnalysisPanel 
+      <AnalysisWebSocketProvider>
+        <div className="user-layout">
+          <Sidebar 
+            selectedProject={selectedProject}
+            onProjectSelect={setSelectedProject}
+            onAnalysisTypesChange={setEnabledAnalyses}
+          />
+          
+          <div className="user-main">
+            <AnalysisPanel 
+              activeAnalysis={activeAnalysis}
+              onAnalysisChange={setActiveAnalysis}
+              isAnalyzing={isAnalyzing}
+              onElementSelect={(element, type) => setSelectedElement({ element, type })}
+              enabledAnalyses={enabledAnalyses}
+            />
+          </div>
+          
+          <ChatPanel 
+            projectId={selectedProject?.id}
             activeAnalysis={activeAnalysis}
-            onAnalysisChange={setActiveAnalysis}
-            isAnalyzing={isAnalyzing}
-            onElementSelect={(element, type) => setSelectedElement({ element, type })}
-            enabledAnalyses={enabledAnalyses}
+            selectedElement={selectedElement}
           />
         </div>
-        
-        <ChatPanel 
-          projectId={selectedProject?.id}
-          activeAnalysis={activeAnalysis}
-          selectedElement={selectedElement}
-        />
-      </div>
+      </AnalysisWebSocketProvider>
     </SimpleLayout>
   );
 }

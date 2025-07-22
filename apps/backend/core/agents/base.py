@@ -17,6 +17,7 @@ from core.models.schemas import (
 )
 from core.utils.llm_client import llm_manager, LLMResponse
 from config.settings import settings, metrics
+from core.agents.websocket_integration import AgentWebSocketNotifier
 
 
 class SectionResult(BaseModel):
@@ -26,7 +27,7 @@ class SectionResult(BaseModel):
     content: Dict[str, Any]
     template_type: str
     status: AnalysisStatus = AnalysisStatus.COMPLETED
-    error_message: Optional[str] = None
+    error: Optional[str] = None  # Changed to match websocket_integration expectations
     
 
 class BaseAnalysisAgent(ABC):
@@ -61,25 +62,58 @@ class BaseAnalysisAgent(ABC):
     async def analyze_sections(
         self,
         context: AgentContext,
-        section_ids: Optional[List[str]] = None
+        section_ids: Optional[List[str]] = None,
+        notifier: Optional[AgentWebSocketNotifier] = None
     ) -> List[SectionResult]:
         """Analyze specific sections or all sections"""
         sections_to_analyze = section_ids or [s["id"] for s in self.get_sections()]
         results = []
+        total_sections = len(sections_to_analyze)
         
-        for section_id in sections_to_analyze:
+        for i, section_id in enumerate(sections_to_analyze):
             try:
+                # Notify section start if notifier available
+                if notifier:
+                    section_title = self._get_section_title(section_id)
+                    await notifier.notify_section_start(
+                        self.framework.value,
+                        section_id,
+                        section_title
+                    )
+                    
                 result = await self.analyze_section(section_id, context)
                 results.append(result)
+                
+                # Notify section complete
+                if notifier:
+                    await notifier.notify_section_complete(
+                        self.framework.value,
+                        result
+                    )
+                    # Update overall progress
+                    progress = ((i + 1) / total_sections) * 100
+                    await notifier.notify_analysis_progress(
+                        progress,
+                        f"Completed {result.title}"
+                    )
+                    
             except Exception as e:
-                results.append(SectionResult(
+                error_result = SectionResult(
                     section_id=section_id,
                     title=self._get_section_title(section_id),
                     content={},
                     template_type="error",
                     status=AnalysisStatus.FAILED,
-                    error_message=str(e)
-                ))
+                    error=str(e)
+                )
+                results.append(error_result)
+                
+                # Notify section error
+                if notifier:
+                    await notifier.notify_section_complete(
+                        self.framework.value,
+                        error_result
+                    )
         
         return results
         

@@ -47,12 +47,22 @@ class UpdateAnalysisRequest(BaseModel):
     section_ids: Optional[Dict[str, List[str]]] = None
 
 
-# Agent registry - TODO: Add other agents as they're implemented
+# Import agents
+from core.agents.framework_agents.stpa_sec import StpaSecAgent
+from core.agents.framework_agents.stride import StrideAgent
+from core.agents.framework_agents.pasta import PastaAgent
+from core.agents.framework_agents.dread import DreadAgent
+
+# Agent registry
 AGENT_REGISTRY = {
     FrameworkType.STPA_SEC: StpaSecAgent,
-    # FrameworkType.STRIDE: StrideAgent,
-    # FrameworkType.PASTA: PastaAgent,
-    # etc.
+    FrameworkType.STRIDE: StrideAgent,
+    FrameworkType.PASTA: PastaAgent,
+    FrameworkType.DREAD: DreadAgent,
+    # FrameworkType.MAESTRO: MaestroAgent,
+    # FrameworkType.LINDDUN: LinddunAgent,
+    # FrameworkType.HAZOP: HazopAgent,
+    # FrameworkType.OCTAVE: OctaveAgent,
 }
 
 

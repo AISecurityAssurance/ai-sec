@@ -1,5 +1,5 @@
 import React from 'react';
-import { AnalysisSection, AnalysisTable, AnalysisText, AnalysisDiagram, TableColumn } from '../index';
+import { AnalysisSection, AnalysisTable, AnalysisText, AnalysisDiagram } from '../index';
 
 /**
  * Demo component showcasing the template system
@@ -15,44 +15,30 @@ export const TemplateDemo: React.FC = () => {
   ];
 
   // Table columns configuration
-  const columns: TableColumn[] = [
+  const columns = [
     { 
-      id: 'name', 
-      header: 'System Name', 
-      accessor: 'name',
-      editable: true,
-      width: '30%'
+      key: 'name', 
+      label: 'System Name',
+      sortable: true
     },
     { 
-      id: 'risk', 
-      header: 'Risk Level', 
-      accessor: 'risk',
-      editable: true,
-      type: 'select',
-      options: [
-        { value: 'Low', label: 'Low' },
-        { value: 'Medium', label: 'Medium' },
-        { value: 'High', label: 'High' }
-      ]
+      key: 'risk', 
+      label: 'Risk Level',
+      sortable: true,
+      type: 'dropdown' as const,
+      options: ['Low', 'Medium', 'High']
     },
     { 
-      id: 'status', 
-      header: 'Status', 
-      accessor: 'status',
-      editable: true,
-      type: 'select',
-      options: [
-        { value: 'Active', label: 'Active' },
-        { value: 'Inactive', label: 'Inactive' },
-        { value: 'Pending', label: 'Pending' }
-      ]
+      key: 'status', 
+      label: 'Status',
+      sortable: true,
+      type: 'dropdown' as const,
+      options: ['Active', 'Inactive', 'Pending']
     },
     { 
-      id: 'score', 
-      header: 'Score', 
-      accessor: 'score',
-      editable: true,
-      type: 'number'
+      key: 'score', 
+      label: 'Score',
+      sortable: true
     }
   ];
 
@@ -73,7 +59,7 @@ export const TemplateDemo: React.FC = () => {
         title="Risk Assessment Overview"
         level={1}
         collapsible={true}
-        defaultCollapsed={false}
+        defaultExpanded={true}
         onSave={handleSectionSave}
       >
         <p style={{ marginBottom: '16px' }}>
@@ -104,9 +90,8 @@ export const TemplateDemo: React.FC = () => {
             title="System Risk Assessment"
             data={sampleData}
             columns={columns}
-            enableSorting={true}
-            enableFiltering={true}
-            enablePagination={true}
+            sortable={true}
+            filterable={true}
             pageSize={10}
             onSave={handleTableSave}
           />

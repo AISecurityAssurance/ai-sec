@@ -28,7 +28,7 @@ except ImportError:
     # For older versions or if not available
     HuggingFaceEmbedding = None
 
-from core.models.schemas import AgentContext, ChatMessage
+from core.models.schemas import AgentContext
 from config.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -166,7 +166,9 @@ class ContextManager:
     async def add_chat_message(
         self,
         analysis_id: UUID,
-        message: ChatMessage
+        message: str,
+        response: str,
+        metadata: Optional[Dict[str, Any]] = None
     ):
         """Add chat message to context"""
         analysis_id_str = str(analysis_id)
@@ -176,13 +178,14 @@ class ContextManager:
             return
         
         # Create document from message
+        chat_text = f"User: {message}\nAssistant: {response}"
         document = Document(
-            text=message.content,
+            text=chat_text,
             metadata={
                 "type": "chat_message",
-                "role": message.role,
                 "analysis_id": analysis_id_str,
-                "timestamp": message.timestamp.isoformat() if message.timestamp else datetime.utcnow().isoformat()
+                "timestamp": datetime.utcnow().isoformat(),
+                **(metadata or {})
             }
         )
         
@@ -233,7 +236,7 @@ class ContextManager:
         self,
         analysis_id: UUID,
         limit: int = 10
-    ) -> List[ChatMessage]:
+    ) -> List[Dict[str, Any]]:
         """Get recent conversation history"""
         analysis_id_str = str(analysis_id)
         
@@ -248,17 +251,17 @@ class ContextManager:
             context_type="chat_message"
         )
         
-        # Convert to ChatMessage objects
+        # Convert to dict format
         messages = []
         for item in context_items:
-            messages.append(ChatMessage(
-                role=item["metadata"]["role"],
-                content=item["content"],
-                timestamp=datetime.fromisoformat(item["metadata"]["timestamp"])
-            ))
+            messages.append({
+                "content": item["content"],
+                "timestamp": item["metadata"].get("timestamp"),
+                "metadata": item["metadata"]
+            })
         
         # Sort by timestamp
-        messages.sort(key=lambda x: x.timestamp)
+        messages.sort(key=lambda x: x.get("timestamp", ""))
         
         return messages
     

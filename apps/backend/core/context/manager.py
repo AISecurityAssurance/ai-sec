@@ -4,6 +4,7 @@ Manages conversation history and provides context to LLMs
 """
 from typing import List, Dict, Any, Optional
 import json
+import os
 from datetime import datetime
 from uuid import UUID
 import logging
@@ -46,7 +47,7 @@ class ContextManager:
     """
     
     def __init__(self, embedding_model: Optional[str] = None):
-        self.embedding_model = embedding_model or settings.EMBEDDING_MODEL
+        self.embedding_model = embedding_model or getattr(settings, 'EMBEDDING_MODEL', 'text-embedding-ada-002')
         self.embedding = self._initialize_embedding()
         self.indices: Dict[str, VectorStoreIndex] = {}
         self.storage_contexts: Dict[str, StorageContext] = {}
@@ -56,7 +57,7 @@ class ContextManager:
         if self.embedding_model.startswith("openai"):
             return OpenAIEmbedding(
                 model=self.embedding_model,
-                api_key=settings.OPENAI_API_KEY
+                api_key=getattr(settings, 'OPENAI_API_KEY', None) or os.getenv('OPENAI_API_KEY')
             )
         elif self.embedding_model.startswith("sentence-transformers"):
             if HuggingFaceEmbedding:

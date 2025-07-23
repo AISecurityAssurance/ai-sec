@@ -257,7 +257,7 @@ async def create_analysis(
     )
 
 
-@router.get("/{analysis_id}", response_model=AnalysisResponse)
+@router.get("/{analysis_id}", response_model=SimpleAnalysisResponse)
 async def get_analysis(
     analysis_id: UUID,
     db: AsyncSession = Depends(get_db)
@@ -273,24 +273,14 @@ async def get_analysis(
     )
     analysis_results = results.scalars().all()
     
-    return AnalysisResponse(
+    return SimpleAnalysisResponse(
         id=analysis.id,
         project_id=analysis.project_id,
         status=analysis.status,
         frameworks=analysis.frameworks,
-        results=[
-            {
-                "framework": r.framework,
-                "sections": r.sections,
-                "duration": r.duration,
-                "token_usage": r.token_usage
-            }
-            for r in analysis_results
-        ],
         created_at=analysis.created_at,
         started_at=analysis.started_at,
-        completed_at=analysis.completed_at,
-        error_message=analysis.error_message
+        completed_at=analysis.completed_at
     )
 
 

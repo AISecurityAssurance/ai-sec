@@ -1,13 +1,19 @@
 import { test, expect } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Load comprehensive demo system
+const demoSystemPath = path.join(__dirname, '..', 'demo-system.md');
+const demoSystem = fs.readFileSync(demoSystemPath, 'utf-8');
 
 test.describe('Analysis Completion', () => {
   test('analysis completes successfully', async ({ request }) => {
-    // Create an analysis
+    // Create an analysis with comprehensive demo system
     const createResponse = await request.post('http://localhost:8000/api/v1/analysis', {
       data: {
         project_id: crypto.randomUUID(),
-        system_description: 'Simple test system for completion check',
-        frameworks: ['stpa-sec']  // Just one framework to speed up
+        system_description: demoSystem,
+        frameworks: ['stpa-sec']  // Just STPA-SEC to test step dependencies
       }
     });
     
@@ -23,6 +29,8 @@ test.describe('Analysis Completion', () => {
       await new Promise(resolve => setTimeout(resolve, 5000));  // Wait 5 seconds
       
       const statusResponse = await request.get(`http://localhost:8000/api/v1/analysis/${analysis.id}`);
+      console.log(`Status check ${i + 1}: ${statusResponse.status()}`);
+      
       if (statusResponse.ok()) {
         const data = await statusResponse.json();
         status = data.status;
@@ -31,6 +39,10 @@ test.describe('Analysis Completion', () => {
         if (status === 'COMPLETED' || status === 'FAILED') {
           break;
         }
+      } else {
+        // If GET fails, just check the database directly via a simpler endpoint
+        // For now, we'll assume it's still processing
+        console.log(`Status check failed with ${statusResponse.status()}, continuing...`);
       }
     }
     

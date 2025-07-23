@@ -1,12 +1,40 @@
-# Security Analysis Platform
+# Security Analyst Platform
 
-An AI-powered security analysis platform that automates STPA-Sec and STRIDE analysis for complex systems.
+A comprehensive AI-powered security threat modeling and analysis platform supporting multiple frameworks including STPA-SEC, STRIDE, PASTA, DREAD, MAESTRO, LINDDUN, HAZOP, and OCTAVE.
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Docker)
 
 ### Prerequisites
-- Node.js 18+ 
-- pnpm (install with `npm install -g pnpm`)
+- Docker and Docker Compose
+- Git
+- At least one LLM API key (OpenAI or Anthropic)
+
+### One-Command Setup
+
+```bash
+git clone https://github.com/AISecurityAssurance/prototype1.git
+cd prototype1
+./setup.sh
+```
+
+The setup script will guide you through:
+1. Checking dependencies
+2. Creating `.env` file for API keys
+3. Building and starting all services
+4. Verifying everything is running
+
+### Access the Application
+- 🌐 **Frontend**: http://localhost:3000
+- 🔧 **Backend API**: http://localhost:8000
+- 📚 **API Docs**: http://localhost:8000/docs
+
+## 🚀 Manual Setup (Development)
+
+### Prerequisites
+- Node.js 18+ and pnpm
+- Python 3.11+
+- PostgreSQL 15+
+- Redis (optional)
 
 ### Setup Instructions
 

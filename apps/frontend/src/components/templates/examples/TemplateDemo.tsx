@@ -56,8 +56,8 @@ export const TemplateDemo: React.FC = () => {
     }
   ];
 
-  const handleTableSave = (data: any[]) => {
-    console.log('Table data saved:', data);
+  const handleTableSave = (id: string, data: any) => {
+    console.log('Table data saved:', id, data);
   };
 
   const handleSectionSave = () => {
@@ -137,10 +137,11 @@ export const TemplateDemo: React.FC = () => {
             id="architecture-diagram"
             title="System Architecture Diagram"
             type="flowchart"
-            data={{ nodes: [], edges: [] }}
-            height={400}
-            interactive={true}
-          />
+          >
+            <div style={{ height: 400, border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <p>Diagram content goes here</p>
+            </div>
+          </AnalysisDiagram>
         </AnalysisSection>
       </AnalysisSection>
 

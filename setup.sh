@@ -1,8 +1,50 @@
 #!/bin/bash
 
 # Security Analyst Platform - Setup Script
+
+# Default values
+BIND_IP="localhost"
+FRONTEND_PORT="3000"
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --ip)
+            BIND_IP="$2"
+            shift 2
+            ;;
+        --port)
+            FRONTEND_PORT="$2"
+            shift 2
+            ;;
+        -h|--help)
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --ip IP      Bind to specific IP (default: localhost)"
+            echo "  --port PORT  Frontend port (default: 3000)"
+            echo ""
+            echo "Examples:"
+            echo "  $0                    # Use defaults"
+            echo "  $0 --ip 0.0.0.0      # Bind to all interfaces"
+            echo "  $0 --port 3002       # Use port 3002"
+            echo "  $0 --ip 0.0.0.0 --port 3002"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Use -h or --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
 echo "🚀 Security Analyst Platform Setup"
 echo "=================================="
+echo ""
+echo "Configuration:"
+echo "  IP: $BIND_IP"
+echo "  Port: $FRONTEND_PORT"
 
 # Check for required tools
 check_requirement() {
@@ -47,6 +89,27 @@ echo ""
 echo "📥 Pulling latest changes..."
 git pull
 
+# Create temporary docker-compose override for custom IP/port
+if [ "$BIND_IP" != "localhost" ] || [ "$FRONTEND_PORT" != "3000" ]; then
+    echo ""
+    echo "📝 Creating docker-compose override for custom IP/port..."
+    cat > docker-compose.override.yml << EOF
+services:
+  frontend:
+    ports:
+      - "${BIND_IP}:${FRONTEND_PORT}:5173"
+  backend:
+    ports:
+      - "${BIND_IP}:8000:8000"
+  postgres:
+    ports:
+      - "${BIND_IP}:5433:5432"
+  redis:
+    ports:
+      - "${BIND_IP}:6380:6379"
+EOF
+fi
+
 # Build and start services
 echo ""
 echo "🔨 Building and starting services..."
@@ -62,15 +125,22 @@ sleep 10
 echo ""
 echo "🏥 Checking service health..."
 
+# Determine the URL to check
+if [ "$BIND_IP" = "0.0.0.0" ]; then
+    CHECK_IP="localhost"
+else
+    CHECK_IP="$BIND_IP"
+fi
+
 # Check backend
-if curl -s http://localhost:8000/health > /dev/null; then
+if curl -s http://${CHECK_IP}:8000/health > /dev/null; then
     echo "✅ Backend API is running"
 else
     echo "⚠️  Backend API is not responding yet. Check logs with: docker compose -f docker-compose.test.yml logs backend"
 fi
 
 # Check frontend
-if curl -s http://localhost:3000 > /dev/null; then
+if curl -s http://${CHECK_IP}:${FRONTEND_PORT} > /dev/null; then
     echo "✅ Frontend is running"
 else
     echo "⚠️  Frontend is not responding yet. Check logs with: docker compose -f docker-compose.test.yml logs frontend"
@@ -81,15 +151,24 @@ echo ""
 echo "🎉 Setup complete!"
 echo ""
 echo "Access the application at:"
-echo "  🌐 Frontend: http://localhost:3000"
-echo "  🔧 Backend API: http://localhost:8000"
-echo "  📚 API Docs: http://localhost:8000/docs"
+if [ "$BIND_IP" = "0.0.0.0" ]; then
+    echo "  🌐 Frontend: http://<your-server-ip>:${FRONTEND_PORT}"
+    echo "  🔧 Backend API: http://<your-server-ip>:8000"
+    echo "  📚 API Docs: http://<your-server-ip>:8000/docs"
+else
+    echo "  🌐 Frontend: http://${BIND_IP}:${FRONTEND_PORT}"
+    echo "  🔧 Backend API: http://${BIND_IP}:8000"
+    echo "  📚 API Docs: http://${BIND_IP}:8000/docs"
+fi
 echo ""
 echo "Useful commands:"
 echo "  View logs:    docker compose -f docker-compose.test.yml logs -f"
 echo "  Stop:         docker compose -f docker-compose.test.yml down"
 echo "  Restart:      docker compose -f docker-compose.test.yml restart"
 echo "  Clean start:  docker compose -f docker-compose.test.yml down -v && ./setup.sh"
+if [ -f docker-compose.override.yml ]; then
+    echo "  Remove override: rm docker-compose.override.yml"
+fi
 echo ""
 echo "To run integration tests:"
 echo "  cd integration-tests && npm test"

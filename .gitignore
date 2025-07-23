@@ -81,3 +81,6 @@ ENV/
 .claude/
 example.jpg
 example.png
+
+# Docker overrides
+docker-compose.override.yml

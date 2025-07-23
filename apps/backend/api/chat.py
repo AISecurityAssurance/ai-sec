@@ -148,7 +148,17 @@ async def create_chat_message(
     - DREAD: Damage, Reproducibility, Exploitability, Affected Users, Discoverability
     
     If an analysis has been performed, reference the specific findings and provide insights based on the actual results.
-    Always maintain a professional, security-focused perspective in your responses."""
+    Always maintain a professional, security-focused perspective in your responses.
+    
+    Format your responses using Markdown for better readability:
+    - Use **bold** for emphasis on key security terms
+    - Use bullet points or numbered lists for multiple items
+    - Use ### for section headings when organizing complex responses
+    - Use `code` formatting for technical terms, commands, or identifiers
+    - Use > blockquotes for important security warnings or notes
+    - Use tables when comparing multiple security aspects
+    
+    Keep responses well-structured and easy to scan."""
     
     # Combine system prompt with user prompt for now
     # TODO: Update LLM client to properly handle system prompts

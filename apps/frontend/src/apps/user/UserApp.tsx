@@ -16,7 +16,7 @@ export default function UserApp() {
   const [showNewAnalysisDialog, setShowNewAnalysisDialog] = useState(false);
   
   // Get enabledAnalyses from Zustand store
-  const { enabledAnalyses, setEnabledAnalyses } = useAnalysisStore();
+  const { enabledAnalyses, setEnabledAnalyses, setCurrentAnalysisId } = useAnalysisStore();
 
   const handleRunAnalysis = async () => {
     setIsAnalyzing(true);
@@ -52,6 +52,11 @@ export default function UserApp() {
       
       const result = await response.json();
       console.log('Analysis created:', result);
+      
+      // Store the analysis ID in the global store
+      if (result.id) {
+        setCurrentAnalysisId(result.id);
+      }
       
       // Update UI to show analysis in progress
       // The WebSocket connection should handle real-time updates

@@ -6,12 +6,15 @@ import AnalysisCanvas from '../../components/analysis/AnalysisCanvas';
 import ChatPanel from '../user/components/ChatPanel';
 import { NewAnalysisDialog } from '../user/components/NewAnalysisDialog';
 import { AnalysisWebSocketProvider } from '../../components/analysis/AnalysisWebSocketProvider';
+import { useAnalysisStore } from '../../stores/analysisStore';
 import './AnalysisApp.css';
 
 export default function AnalysisApp() {
   const [activeAnalysis, setActiveAnalysis] = useState('stpa-sec');
   const [showNewAnalysisDialog, setShowNewAnalysisDialog] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  
+  const { setCurrentAnalysisId } = useAnalysisStore();
   
   const handleOpenInNewWindow = (panel: 'left' | 'center' | 'right') => {
     const urls = {
@@ -56,6 +59,11 @@ export default function AnalysisApp() {
       
       const result = await response.json();
       console.log('Analysis created:', result);
+      
+      // Store the analysis ID in the global store
+      if (result.id) {
+        setCurrentAnalysisId(result.id);
+      }
       
     } catch (error) {
       console.error('Error creating analysis:', error);

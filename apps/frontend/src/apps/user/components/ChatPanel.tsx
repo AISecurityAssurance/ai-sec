@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, AlertCircle } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import type { ChatMessage } from '@security-platform/types';
+import { useAnalysisStore } from '../../../stores/analysisStore';
 import './ChatPanel.css';
 
 interface ChatPanelProps {
@@ -252,7 +255,11 @@ const getElementSuggestions = (element: any, type: string) => {
   }
 };
 
-export default function ChatPanel({ projectId, activeAnalysis, selectedElement, analysisId }: ChatPanelProps) {
+export default function ChatPanel({ projectId, activeAnalysis, selectedElement, analysisId: propAnalysisId }: ChatPanelProps) {
+  // Get current analysis ID from store if not provided via props
+  const currentAnalysisId = useAnalysisStore((state) => state.currentAnalysisId);
+  const analysisId = propAnalysisId || currentAnalysisId;
+  
   const isComparison = activeAnalysis === 'comparison';
   const suggestionChips = selectedElement 
     ? getElementSuggestions(selectedElement.element, selectedElement.type)
@@ -535,7 +542,16 @@ export default function ChatPanel({ projectId, activeAnalysis, selectedElement, 
                   <div className="message-avatar">🤖</div>
                 )}
                 <div className="message-content">
-                  <p>{message.content}</p>
+                  {message.role === 'assistant' ? (
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      className="markdown-content"
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  ) : (
+                    <p>{message.content}</p>
+                  )}
                 </div>
               </div>
             ))}

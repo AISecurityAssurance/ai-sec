@@ -54,7 +54,7 @@ async def init_db():
     # Import models to ensure they're registered
     from core.models.database import (
         User, Project, Analysis, AnalysisResult, 
-        ChatMessage, Artifact, SystemComponent
+        ChatMessage, Artifact, SystemComponent, Setting
     )
     
     async with engine.begin() as conn:

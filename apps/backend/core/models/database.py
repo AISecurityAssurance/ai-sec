@@ -172,3 +172,21 @@ class SystemComponent(Base):
         Index("idx_component_type", "component_type"),
         UniqueConstraint("analysis_id", "name", name="uq_analysis_component"),
     )
+
+
+class Setting(Base):
+    """Application settings stored in database"""
+    __tablename__ = "settings"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    key = Column(String(255), unique=True, nullable=False)
+    value = Column(Text, nullable=False)
+    category = Column(String(100), nullable=True)  # e.g., "model_config", "system", etc.
+    description = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    __table_args__ = (
+        Index("idx_setting_key", "key"),
+        Index("idx_setting_category", "category"),
+    )

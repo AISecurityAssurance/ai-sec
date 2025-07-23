@@ -109,7 +109,11 @@ export function NewAnalysisDialog({ isOpen, onClose, onSubmit }: NewAnalysisDial
             </label>
             <div className="frameworks-grid">
               {FRAMEWORKS.map(framework => (
-                <label key={framework.id} className="framework-checkbox">
+                <label 
+                  key={framework.id} 
+                  className="framework-checkbox"
+                  title={framework.description}
+                >
                   <input
                     type="checkbox"
                     value={framework.id}

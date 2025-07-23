@@ -154,21 +154,21 @@ async def create_chat_message(
                 # Add user message
                 await context_manager.add_chat_message(
                     request.analysis_id,
-                    ChatMessageSchema(
-                        role="user",
-                        content=request.message,
-                        timestamp=datetime.utcnow()
-                    )
+                    {
+                        "role": "user",
+                        "content": request.message,
+                        "timestamp": datetime.utcnow()
+                    }
                 )
                 
                 # Add assistant response
                 await context_manager.add_chat_message(
                     request.analysis_id,
-                    ChatMessageSchema(
-                        role="assistant",
-                        content=response.content,
-                        timestamp=datetime.utcnow()
-                    )
+                    {
+                        "role": "assistant",
+                        "content": response.content,
+                        "timestamp": datetime.utcnow()
+                    }
                 )
             except Exception as e:
                 logger.warning(f"Failed to add to context manager: {e}")
@@ -206,10 +206,12 @@ async def get_chat_history(
     messages = result.scalars().all()
     
     # Get total count
-    count_query = select(ChatMessage)
+    from sqlalchemy import func
+    count_query = select(func.count(ChatMessage.id))
     if analysis_id:
         count_query = count_query.where(ChatMessage.analysis_id == analysis_id)
-    total = await db.scalar(select(db.func.count()).select_from(count_query.subquery()))
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
     
     return ChatHistoryResponse(
         messages=[
@@ -219,7 +221,7 @@ async def get_chat_history(
                 response=msg.response,
                 analysis_id=msg.analysis_id,
                 timestamp=msg.created_at,
-                metadata=msg.metadata
+                metadata=msg.project_metadata if hasattr(msg, 'project_metadata') else {}
             )
             for msg in messages
         ],
@@ -263,14 +265,19 @@ async def delete_chat_message(
     return {"message": "Chat message deleted"}
 
 
+class SuggestionsRequest(BaseModel):
+    """Request for chat suggestions"""
+    analysis_id: UUID
+
+
 @router.post("/suggestions")
 async def get_chat_suggestions(
-    analysis_id: UUID,
+    request: SuggestionsRequest,
     db: AsyncSession = Depends(get_db)
 ):
     """Get suggested questions based on analysis"""
     # Get analysis context
-    context = await build_chat_context(analysis_id, db, "Generate question suggestions")
+    context = await build_chat_context(request.analysis_id, db, "Generate question suggestions")
     
     # Generate suggestions
     prompt = f"""Based on this security analysis context:

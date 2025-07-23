@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip } from 'lucide-react';
+import { Send, Paperclip, AlertCircle } from 'lucide-react';
 import type { ChatMessage } from '@security-platform/types';
 import './ChatPanel.css';
 
@@ -7,6 +7,7 @@ interface ChatPanelProps {
   projectId?: string;
   activeAnalysis: string;
   selectedElement?: { element: any; type: string } | null;
+  analysisId?: string;
 }
 
 const analysisSuggestions = [
@@ -251,7 +252,7 @@ const getElementSuggestions = (element: any, type: string) => {
   }
 };
 
-export default function ChatPanel({ projectId, activeAnalysis, selectedElement }: ChatPanelProps) {
+export default function ChatPanel({ projectId, activeAnalysis, selectedElement, analysisId }: ChatPanelProps) {
   const isComparison = activeAnalysis === 'comparison';
   const suggestionChips = selectedElement 
     ? getElementSuggestions(selectedElement.element, selectedElement.type)
@@ -262,6 +263,8 @@ export default function ChatPanel({ projectId, activeAnalysis, selectedElement }
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -272,6 +275,51 @@ export default function ChatPanel({ projectId, activeAnalysis, selectedElement }
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Load chat history on mount or when analysisId changes
+  useEffect(() => {
+    if (analysisId) {
+      loadChatHistory();
+    }
+  }, [analysisId]);
+
+  const loadChatHistory = async () => {
+    if (!analysisId) return;
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await fetch(`/api/v1/chat/history?analysis_id=${analysisId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to load chat history: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Convert the API response to our ChatMessage format
+      const formattedMessages: ChatMessage[] = data.messages.map((msg: any) => ({
+        id: msg.id,
+        sessionId: 'session-1', // We'll use a static session for now
+        role: msg.message ? 'user' : 'assistant',
+        content: msg.message || msg.response,
+        timestamp: new Date(msg.timestamp),
+      }));
+
+      setMessages(formattedMessages);
+    } catch (err) {
+      console.error('Error loading chat history:', err);
+      setError('Failed to load chat history');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (selectedElement) {
@@ -370,30 +418,56 @@ export default function ChatPanel({ projectId, activeAnalysis, selectedElement }
   const handleSend = async () => {
     if (!inputValue.trim()) return;
 
+    const messageContent = inputValue.trim();
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       sessionId: 'session-1',
       role: 'user',
-      content: inputValue,
+      content: messageContent,
       timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsTyping(true);
+    setError(null);
 
-    // Simulate assistant response
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/v1/chat/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: messageContent,
+          analysis_id: analysisId || null,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Chat request failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
       const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
+        id: data.id,
         sessionId: 'session-1',
         role: 'assistant',
-        content: `I understand you're asking about "${inputValue}". Let me analyze that in the context of your ${activeAnalysis} analysis...`,
-        timestamp: new Date(),
+        content: data.response,
+        timestamp: new Date(data.timestamp),
       };
+      
       setMessages(prev => [...prev, assistantMessage]);
+    } catch (err) {
+      console.error('Error sending message:', err);
+      setError('Failed to send message. Please try again.');
+      
+      // Remove the user message on error
+      setMessages(prev => prev.filter(msg => msg.id !== userMessage.id));
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -410,7 +484,19 @@ export default function ChatPanel({ projectId, activeAnalysis, selectedElement }
   return (
     <aside className="chat-panel" ref={panelRef}>
       <div className="chat-messages">
-        {messages.length === 0 && (
+        {error && (
+          <div className="chat-error">
+            <AlertCircle size={16} />
+            <span>{error}</span>
+            <button onClick={() => setError(null)}>×</button>
+          </div>
+        )}
+        {isLoading && (
+          <div className="chat-loading">
+            Loading chat history...
+          </div>
+        )}
+        {messages.length === 0 && !isLoading && (
           <div className="suggestion-chips-container in-chat">
             <div className="message assistant">
               <div className="message-avatar">🤖</div>

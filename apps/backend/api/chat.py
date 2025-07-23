@@ -14,6 +14,7 @@ from pydantic import BaseModel
 
 from core.database import get_db
 from core.models.database import ChatMessage, Analysis
+from core.models.schemas import AnalysisStatus
 from core.utils.llm_client import llm_manager
 from config.settings import settings
 from core.context import context_manager
@@ -59,6 +60,28 @@ async def build_chat_context(
         analysis = await db.get(Analysis, analysis_id)
         if analysis:
             context_parts.append(f"System Description: {analysis.system_description}")
+            context_parts.append(f"Analysis Status: {analysis.status}")
+            context_parts.append(f"Frameworks: {', '.join(analysis.frameworks)}")
+            
+            # Get analysis results if completed
+            if analysis.status == AnalysisStatus.COMPLETED:
+                from core.models.database import AnalysisResult
+                from sqlalchemy import select
+                
+                results = await db.execute(
+                    select(AnalysisResult).where(AnalysisResult.analysis_id == analysis_id)
+                )
+                analysis_results = results.scalars().all()
+                
+                if analysis_results:
+                    context_parts.append("\n## Analysis Results Summary:")
+                    for result in analysis_results:
+                        context_parts.append(f"\n### {result.framework.value.upper()} Analysis:")
+                        if result.sections:
+                            for section in result.sections[:3]:  # First 3 sections
+                                context_parts.append(f"- {section.get('title', 'Unknown')}: {section.get('status', 'pending')}")
+                        if result.artifacts:
+                            context_parts.append(f"  Total findings: {len(result.artifacts)}")
             
             # Get relevant context from LlamaIndex
             try:
@@ -115,10 +138,17 @@ async def create_chat_message(
     context = await build_chat_context(request.analysis_id, db, request.message)
     
     # Prepare prompt
-    system_prompt = """You are an expert security analyst assistant. 
-    You help users understand security analysis results, explain concepts, 
-    and provide actionable recommendations based on various security frameworks 
-    like STPA-Sec, STRIDE, PASTA, etc."""
+    system_prompt = """You are the SA Agent (Security Analyst Agent), an expert in systems security and cybersecurity analysis. 
+    Your primary focus is on security threat modeling, vulnerability assessment, and risk analysis.
+    
+    When discussing frameworks like PASTA, STRIDE, STPA-SEC, DREAD, etc., always interpret them in the security context:
+    - PASTA: Process for Attack Simulation and Threat Analysis (NOT the food)
+    - STRIDE: Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege
+    - STPA-SEC: System-Theoretic Process Analysis for Security
+    - DREAD: Damage, Reproducibility, Exploitability, Affected Users, Discoverability
+    
+    If an analysis has been performed, reference the specific findings and provide insights based on the actual results.
+    Always maintain a professional, security-focused perspective in your responses."""
     
     user_prompt = request.message
     if context:

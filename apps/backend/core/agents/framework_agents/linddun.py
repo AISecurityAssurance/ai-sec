@@ -186,7 +186,7 @@ class LinddunAgent(BaseAnalysisAgent):
             data_types = []
             if types_match:
                 types_text = types_match.group(1)
-                data_types = [t.strip() for t in re.findall(r"[-"]\s*(.+?)(?:\n|$)", types_text)]
+                data_types = [t.strip() for t in re.findall(r"[-]\s*(.+?)(?:\n|$)", types_text)]
                 
             # Extract purpose
             purpose_match = re.search(r"Processing Purpose:\s*(.+?)(?:Legal Basis:|$)", section, re.IGNORECASE)
@@ -217,7 +217,7 @@ class LinddunAgent(BaseAnalysisAgent):
         node_map = {}
         
         # Extract data flow patterns
-        flow_pattern = r"(.+?)\s*(?:’|->|flows to|sends)\s*(.+?)(?:\n|$)"
+        flow_pattern = r"(.+?)\s*(?:ï¿½|->|flows to|sends)\s*(.+?)(?:\n|$)"
         
         for match in re.finditer(flow_pattern, response, re.MULTILINE):
             source = match.group(1).strip()
@@ -326,7 +326,7 @@ class LinddunAgent(BaseAnalysisAgent):
             tech_section = re.search(r"Technical:(.*?)(?:Organizational:|$)", content, re.IGNORECASE | re.DOTALL)
             if tech_section:
                 tech_content = tech_section.group(1)
-                control_items = re.findall(r"(?:[-"]|\d+\.)\s*(.+?):\s*(.+?)(?:\n|$)", tech_content, re.MULTILINE)
+                control_items = re.findall(r"(?:[-]|\d+\.)\s*(.+?):\s*(.+?)(?:\n|$)", tech_content, re.MULTILINE)
                 
                 for name, desc in control_items:
                     controls.append({
@@ -341,7 +341,7 @@ class LinddunAgent(BaseAnalysisAgent):
             org_section = re.search(r"Organizational:(.*?)(?:COMPLIANCE|$)", content, re.IGNORECASE | re.DOTALL)
             if org_section:
                 org_content = org_section.group(1)
-                control_items = re.findall(r"(?:[-"]|\d+\.)\s*(.+?):\s*(.+?)(?:\n|$)", org_content, re.MULTILINE)
+                control_items = re.findall(r"(?:[-]|\d+\.)\s*(.+?):\s*(.+?)(?:\n|$)", org_content, re.MULTILINE)
                 
                 for name, desc in control_items:
                     controls.append({

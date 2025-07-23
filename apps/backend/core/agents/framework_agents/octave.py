@@ -291,7 +291,7 @@ class OctaveAgent(BaseAnalysisAgent):
                 
                 if cat_match:
                     cat_content = cat_match.group(1)
-                    req_items = re.findall(r"[-"]\s*(.+?)(?:\n|$)", cat_content, re.MULTILINE)
+                    req_items = re.findall(r"[-]\s*(.+?)(?:\n|$)", cat_content, re.MULTILINE)
                     
                     for req_text in req_items:
                         if req_text.strip():
@@ -337,14 +337,14 @@ class OctaveAgent(BaseAnalysisAgent):
                 assets_targeted = []
                 if assets_match:
                     assets_text = assets_match.group(1)
-                    assets_targeted = [a.strip() for a in re.findall(r"[-"]\s*(.+?)(?:\n|$)", assets_text)]
+                    assets_targeted = [a.strip() for a in re.findall(r"[-]\s*(.+?)(?:\n|$)", assets_text)]
                 
                 # Methods
                 methods_match = re.search(r"Methods:\s*(.+?)(?:Actor:|$)", details_text, re.IGNORECASE | re.DOTALL)
                 methods = []
                 if methods_match:
                     methods_text = methods_match.group(1)
-                    methods = [m.strip() for m in re.findall(r"[-"]\s*(.+?)(?:\n|$)", methods_text)]
+                    methods = [m.strip() for m in re.findall(r"[-]\s*(.+?)(?:\n|$)", methods_text)]
                 
                 threats.append({
                     "id": f"TP-{len(threats)+1:03d}",
@@ -476,7 +476,7 @@ class OctaveAgent(BaseAnalysisAgent):
             org_match = re.search(r"Organizational.*?:(.*?)(?:Technical:|$)", strat_content, re.IGNORECASE | re.DOTALL)
             if org_match:
                 content += "### Organizational Practices\n"
-                org_items = re.findall(r"[-"]\s*(.+?)(?:\n|$)", org_match.group(1), re.MULTILINE)
+                org_items = re.findall(r"[-]\s*(.+?)(?:\n|$)", org_match.group(1), re.MULTILINE)
                 for item in org_items:
                     content += f"- {item.strip()}\n"
                 content += "\n"
@@ -485,7 +485,7 @@ class OctaveAgent(BaseAnalysisAgent):
             tech_match = re.search(r"Technical.*?:(.*?)(?:Near-term:|Long-term:|$)", strat_content, re.IGNORECASE | re.DOTALL)
             if tech_match:
                 content += "### Technical Controls\n"
-                tech_items = re.findall(r"[-"]\s*(.+?)(?:\n|$)", tech_match.group(1), re.MULTILINE)
+                tech_items = re.findall(r"[-]\s*(.+?)(?:\n|$)", tech_match.group(1), re.MULTILINE)
                 for item in tech_items:
                     content += f"- {item.strip()}\n"
                 content += "\n"
@@ -494,7 +494,7 @@ class OctaveAgent(BaseAnalysisAgent):
             near_match = re.search(r"Near-term.*?:(.*?)(?:Long-term:|$)", strat_content, re.IGNORECASE | re.DOTALL)
             if near_match:
                 content += "### Near-term Actions (0-3 months)\n"
-                near_items = re.findall(r"[-"]\s*(.+?)(?:\n|$)", near_match.group(1), re.MULTILINE)
+                near_items = re.findall(r"[-]\s*(.+?)(?:\n|$)", near_match.group(1), re.MULTILINE)
                 for item in near_items:
                     content += f"- {item.strip()}\n"
                 content += "\n"
@@ -503,7 +503,7 @@ class OctaveAgent(BaseAnalysisAgent):
             long_match = re.search(r"Long-term.*?:(.*?)$", strat_content, re.IGNORECASE | re.DOTALL)
             if long_match:
                 content += "### Long-term Strategy (3-12 months)\n"
-                long_items = re.findall(r"[-"]\s*(.+?)(?:\n|$)", long_match.group(1), re.MULTILINE)
+                long_items = re.findall(r"[-]\s*(.+?)(?:\n|$)", long_match.group(1), re.MULTILINE)
                 for item in long_items:
                     content += f"- {item.strip()}\n"
                 content += "\n"

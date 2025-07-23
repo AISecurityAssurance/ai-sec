@@ -20,7 +20,7 @@ from core.models.schemas import (
 )
 from core.utils.llm_client import llm_manager, LLMResponse
 from config.settings import settings, metrics
-from core.context.manager import context_manager
+from core.context import context_manager
 from core.agents.types import SectionResult
     
 

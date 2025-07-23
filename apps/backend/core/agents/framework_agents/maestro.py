@@ -168,7 +168,7 @@ class MaestroAgent(BaseAnalysisAgent):
         obj_section = re.search(r"Security Objectives:(.*?)(?:A\s*-\s*ASSETS|$)", response, re.IGNORECASE | re.DOTALL)
         if obj_section:
             obj_text = obj_section.group(1)
-            obj_items = re.findall(r"[-"]\s*(.+?)(?:\n|$)", obj_text, re.MULTILINE)
+            obj_items = re.findall(r"[-]\s*(.+?)(?:\n|$)", obj_text, re.MULTILINE)
             objectives = [obj.strip() for obj in obj_items if obj.strip()]
         
         content = f"""## Mission Statement
@@ -212,7 +212,7 @@ This system contains AI/ML components that require special security consideratio
                 capabilities = []
                 if cap_match:
                     cap_text = cap_match.group(1)
-                    capabilities = [c.strip() for c in re.findall(r"[-"]\s*(.+?)(?:\n|$)", cap_text)]
+                    capabilities = [c.strip() for c in re.findall(r"[-]\s*(.+?)(?:\n|$)", cap_text)]
                 
                 # Trust level
                 trust_match = re.search(r"Trust Level:\s*(\w+)", details_text, re.IGNORECASE)
@@ -223,7 +223,7 @@ This system contains AI/ML components that require special security consideratio
                 data_access = []
                 if data_match:
                     data_text = data_match.group(1)
-                    data_access = [d.strip() for d in re.findall(r"[-"]\s*(.+?)(?:\n|$)", data_text)]
+                    data_access = [d.strip() for d in re.findall(r"[-]\s*(.+?)(?:\n|$)", data_text)]
                 
                 # Determine type
                 agent_type = self._classify_agent_type(agent_name, capabilities)

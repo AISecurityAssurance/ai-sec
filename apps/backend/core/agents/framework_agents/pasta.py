@@ -268,7 +268,7 @@ class PastaAgent(BaseAnalysisAgent):
                 })
                 
             # Extract data flows as edges
-            flow_pattern = r"(.+?)\s*(?:’|->|flows to)\s*(.+?)(?:\n|$)"
+            flow_pattern = r"(.+?)\s*(?:->|flows to)\s*(.+?)(?:\n|$)"
             for match in re.finditer(flow_pattern, content, re.MULTILINE):
                 source = match.group(1).strip()
                 target = match.group(2).strip()

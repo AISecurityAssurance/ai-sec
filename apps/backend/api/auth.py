@@ -12,7 +12,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel, EmailStr
-import jwt
+from jose import jwt
 from passlib.context import CryptContext
 
 from core.database import get_db
@@ -28,8 +28,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 # JWT settings
-JWT_SECRET = settings.jwt_secret_key or secrets.token_urlsafe(32)
-JWT_ALGORITHM = "HS256"
+JWT_SECRET = settings.secret_key or secrets.token_urlsafe(32)
+JWT_ALGORITHM = settings.jwt_algorithm
 JWT_EXPIRATION_HOURS = 24
 
 

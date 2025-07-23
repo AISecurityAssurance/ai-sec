@@ -23,7 +23,7 @@ from core.agents.framework_agents.stpa_sec import StpaSecAgent
 from core.agents.websocket_integration import create_agent_notifier
 from core.websocket import manager
 from config.settings import settings
-from core.context.manager import context_manager
+from core.context import context_manager
 
 logger = logging.getLogger(__name__)
 
@@ -247,7 +247,7 @@ async def get_analysis(
     )
 
 
-@router.get("/{analysis_id}/sections", response_model=List[SectionResponse])
+@router.get("/{analysis_id}/sections", response_model=List[AnalysisSectionResponse])
 async def get_analysis_sections(
     analysis_id: UUID,
     framework: Optional[FrameworkType] = None,
@@ -264,7 +264,7 @@ async def get_analysis_sections(
     sections = []
     for result in analysis_results:
         for section in result.sections:
-            sections.append(SectionResponse(
+            sections.append(AnalysisSectionResponse(
                 framework=result.framework,
                 section_id=section["section_id"],
                 title=section["title"],

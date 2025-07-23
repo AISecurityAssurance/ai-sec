@@ -16,8 +16,7 @@ from core.database import get_db
 from core.models.database import ChatMessage, Analysis
 from core.utils.llm_client import llm_manager
 from config.settings import settings
-from core.context.manager import context_manager
-from core.models.schemas import ChatMessage as ChatMessageSchema
+from core.context import context_manager
 
 logger = logging.getLogger(__name__)
 

@@ -196,14 +196,14 @@ class HazopAgent(BaseAnalysisAgent):
                 inputs = []
                 if inputs_match:
                     inputs_text = inputs_match.group(1)
-                    inputs = [i.strip() for i in re.findall(r"[-"]\s*(.+?)(?:\n|$)", inputs_text)]
+                    inputs = [i.strip() for i in re.findall(r"[-]\s*(.+?)(?:\n|$)", inputs_text)]
                 
                 # Outputs
                 outputs_match = re.search(r"Outputs:\s*(.+?)(?:Criticality:|NODE|$)", details_text, re.IGNORECASE | re.DOTALL)
                 outputs = []
                 if outputs_match:
                     outputs_text = outputs_match.group(1)
-                    outputs = [o.strip() for o in re.findall(r"[-"]\s*(.+?)(?:\n|$)", outputs_text)]
+                    outputs = [o.strip() for o in re.findall(r"[-]\s*(.+?)(?:\n|$)", outputs_text)]
                 
                 # Criticality
                 crit_match = re.search(r"Criticality:\s*(\w+)", details_text, re.IGNORECASE)
@@ -300,14 +300,14 @@ class HazopAgent(BaseAnalysisAgent):
                         causes = []
                         if causes_match:
                             causes_text = causes_match.group(1)
-                            causes = [c.strip() for c in re.findall(r"[-"]\s*(.+?)(?:\n|$)", causes_text)]
+                            causes = [c.strip() for c in re.findall(r"[-]\s*(.+?)(?:\n|$)", causes_text)]
                         
                         # Consequences
                         cons_match = re.search(r"Consequences:\s*(.+?)(?:Severity:|Deviation:|$)", details_text, re.IGNORECASE | re.DOTALL)
                         consequences = []
                         if cons_match:
                             cons_text = cons_match.group(1)
-                            consequences = [c.strip() for c in re.findall(r"[-"]\s*(.+?)(?:\n|$)", cons_text)]
+                            consequences = [c.strip() for c in re.findall(r"[-]\s*(.+?)(?:\n|$)", cons_text)]
                         
                         # Severity
                         sev_match = re.search(r"Severity:\s*(\w+)", details_text, re.IGNORECASE)
@@ -357,7 +357,7 @@ class HazopAgent(BaseAnalysisAgent):
                 protects = []
                 if prot_match:
                     prot_text = prot_match.group(1)
-                    protects = [p.strip() for p in re.findall(r"[-"]\s*(.+?)(?:\n|$)", prot_text)]
+                    protects = [p.strip() for p in re.findall(r"[-]\s*(.+?)(?:\n|$)", prot_text)]
                 
                 # Effectiveness
                 eff_match = re.search(r"Effectiveness:\s*(\w+)", details_text, re.IGNORECASE)
@@ -470,7 +470,7 @@ class HazopAgent(BaseAnalysisAgent):
             crit_match = re.search(r"Critical.*?:(.*?)(?:High Priority:|Medium Priority:|$)", rec_content, re.IGNORECASE | re.DOTALL)
             if crit_match:
                 content += "### Critical Safety Actions\n"
-                crit_items = re.findall(r"[-"]\s*(.+?)(?:\n|$)", crit_match.group(1), re.MULTILINE)
+                crit_items = re.findall(r"[-]\s*(.+?)(?:\n|$)", crit_match.group(1), re.MULTILINE)
                 for item in crit_items:
                     content += f"- {item.strip()}\n"
                 content += "\n"
@@ -479,7 +479,7 @@ class HazopAgent(BaseAnalysisAgent):
             high_match = re.search(r"High Priority.*?:(.*?)(?:Medium Priority:|Low Priority:|$)", rec_content, re.IGNORECASE | re.DOTALL)
             if high_match:
                 content += "### High Priority Improvements\n"
-                high_items = re.findall(r"[-"]\s*(.+?)(?:\n|$)", high_match.group(1), re.MULTILINE)
+                high_items = re.findall(r"[-]\s*(.+?)(?:\n|$)", high_match.group(1), re.MULTILINE)
                 for item in high_items:
                     content += f"- {item.strip()}\n"
                 content += "\n"

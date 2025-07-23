@@ -10,6 +10,7 @@ import { AnalysisWebSocketProvider } from '../../components/analysis/AnalysisWeb
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { isFirstVisit } from '../../utils/resetStores';
 import { generateUUID } from '../../utils/uuid';
+import { apiFetch } from '../../config/api';
 import './AnalysisApp.css';
 
 export default function AnalysisApp() {
@@ -57,7 +58,7 @@ export default function AnalysisApp() {
     try {
       const projectId = generateUUID();
       
-      const response = await fetch('/api/v1/analysis', {
+      const response = await apiFetch('/api/v1/analysis', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

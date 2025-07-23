@@ -35,8 +35,7 @@ FROM nginx:alpine
 # Copy built assets from builder - make sure the path exists
 COPY --from=builder /app/apps/frontend/dist /usr/share/nginx/html
 
-# Add a base tag to index.html to fix relative URL issues
-RUN sed -i 's|</head>|<base href="/">\n</head>|' /usr/share/nginx/html/index.html
+# Remove the base tag approach - it doesn't work properly with ports
 
 # Create nginx config inline since COPY is having issues
 RUN echo 'server { \

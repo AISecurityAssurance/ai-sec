@@ -7,6 +7,7 @@ import { NewAnalysisDialog } from './components/NewAnalysisDialog';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { AnalysisWebSocketProvider } from '../../components/analysis/AnalysisWebSocketProvider';
 import { generateUUID } from '../../utils/uuid';
+import { apiFetch } from '../../config/api';
 import './UserApp.css';
 
 export default function UserApp() {
@@ -35,7 +36,7 @@ export default function UserApp() {
       // Create a temporary project ID for now
       const projectId = generateUUID();
       
-      const response = await fetch('/api/v1/analysis', {
+      const response = await apiFetch('/api/v1/analysis', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

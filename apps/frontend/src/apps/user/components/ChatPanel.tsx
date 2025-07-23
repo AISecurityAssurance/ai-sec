@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { ChatMessage } from '@security-platform/types';
 import { useAnalysisStore } from '../../../stores/analysisStore';
+import { apiFetch } from '../../../config/api';
 import './ChatPanel.css';
 
 interface ChatPanelProps {
@@ -297,7 +298,7 @@ export default function ChatPanel({ projectId, activeAnalysis, selectedElement, 
       setIsLoading(true);
       setError(null);
       
-      const response = await fetch(`/api/v1/chat/history?analysis_id=${analysisId}`, {
+      const response = await apiFetch(`/api/v1/chat/history?analysis_id=${analysisId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -440,7 +441,7 @@ export default function ChatPanel({ projectId, activeAnalysis, selectedElement, 
     setError(null);
 
     try {
-      const response = await fetch('/api/v1/chat/', {
+      const response = await apiFetch('/api/v1/chat/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

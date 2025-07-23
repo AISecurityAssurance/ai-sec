@@ -6,6 +6,12 @@ set -e
 echo "🧪 Security Analyst Integration Tests"
 echo "===================================="
 
+# Load environment variables from .env file if it exists
+if [ -f .env ]; then
+    echo "Loading environment variables from .env file..."
+    export $(grep -v '^#' .env | xargs)
+fi
+
 # Colors for output
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -107,6 +113,17 @@ wait_for_frontend() {
 # Configure test models if needed
 configure_test_models() {
     echo -e "\n${YELLOW}Configuring test models...${NC}"
+    
+    # Debug: Show which API keys are available
+    if [ -n "${OPENAI_API_KEY}" ]; then
+        echo -e "${GREEN}✓ OpenAI API key found${NC}"
+    fi
+    if [ -n "${ANTHROPIC_API_KEY}" ]; then
+        echo -e "${GREEN}✓ Anthropic API key found${NC}"
+    fi
+    if [ -n "${OLLAMA_ENDPOINT}" ]; then
+        echo -e "${GREEN}✓ Ollama endpoint found${NC}"
+    fi
     
     # Check for OpenAI API key
     if [ -n "${OPENAI_API_KEY}" ]; then

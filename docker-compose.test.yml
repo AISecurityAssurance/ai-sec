@@ -37,7 +37,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY: test-secret-key-change-in-production
       ENVIRONMENT: development
-      CORS_ORIGINS: '["http://localhost:3000", "http://frontend:3000"]'
+      CORS_ORIGINS: '["http://localhost:3000", "http://frontend:5173", "http://localhost:5173"]'
       # LLM API Keys (set these in .env file)
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
@@ -70,7 +70,7 @@ services:
       VITE_API_URL: http://localhost:8000
       VITE_WS_URL: ws://localhost:8000
     ports:
-      - "3000:3000"
+      - "3000:5173"
     volumes:
       - ./apps/frontend:/app/apps/frontend
       - ./packages:/app/packages

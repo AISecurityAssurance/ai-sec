@@ -543,12 +543,11 @@ export default function ChatPanel({ projectId, activeAnalysis, selectedElement, 
                 )}
                 <div className="message-content">
                   {message.role === 'assistant' ? (
-                    <ReactMarkdown 
-                      remarkPlugins={[remarkGfm]}
-                      className="markdown-content"
-                    >
-                      {message.content}
-                    </ReactMarkdown>
+                    <div className="markdown-content">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
                   ) : (
                     <p>{message.content}</p>
                   )}

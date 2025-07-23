@@ -107,7 +107,7 @@ const defaultSettings = {
     preserveLockedSections: true,
   },
   general: {
-    demoMode: true,
+    demoMode: false,
     theme: 'light' as const,
     autoSaveInterval: 30,
   },

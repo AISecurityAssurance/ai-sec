@@ -103,7 +103,7 @@ export const useAnalysisStore = create<AnalysisState>()(
         'octave': false,
         'cve': false
       },
-      demoMode: true,
+      demoMode: false,
       
       // Actions
       setProjectId: (id) => set({ projectId: id }),

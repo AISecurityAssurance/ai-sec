@@ -29,11 +29,37 @@ export default function UserApp() {
   const handleCreateAnalysis = async (data: { description: string; frameworks: string[] }) => {
     console.log('Creating analysis with:', data);
     setIsAnalyzing(true);
-    // TODO: Call backend API to create analysis
-    // For now, just simulate
-    setTimeout(() => {
+    
+    try {
+      // Create a temporary project ID for now
+      const projectId = crypto.randomUUID();
+      
+      const response = await fetch('http://localhost:8000/api/v1/analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          project_id: projectId,
+          system_description: data.description,
+          frameworks: data.frameworks,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create analysis');
+      }
+      
+      const result = await response.json();
+      console.log('Analysis created:', result);
+      
+      // Update UI to show analysis in progress
+      // The WebSocket connection should handle real-time updates
+      
+    } catch (error) {
+      console.error('Error creating analysis:', error);
       setIsAnalyzing(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -43,9 +69,16 @@ export default function UserApp() {
           <button 
             className="btn-primary"
             onClick={() => setShowNewAnalysisDialog(true)}
+            disabled={isAnalyzing}
           >
             New Analysis
           </button>
+          {isAnalyzing && (
+            <span style={{ marginLeft: '20px', color: 'var(--text-secondary)' }}>
+              Analysis in progress...
+              <span className="progress-indicator" style={{ marginLeft: '10px' }}>⚡</span>
+            </span>
+          )}
         </div>
         <div className="user-layout">
           <Sidebar 

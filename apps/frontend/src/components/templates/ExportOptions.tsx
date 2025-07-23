@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExportOptionsProps, ExportFormat } from './types';
+import type { ExportOptionsProps, ExportFormat } from './types';
 import './ExportOptions.css';
 
 /**

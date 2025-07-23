@@ -134,8 +134,7 @@ export function SystemDescriptionTemplate({
             purpose={data.missionStatement.purpose}
             method={data.missionStatement.method}
             goals={data.missionStatement.goals}
-            constraints={data.missionStatement.constraints}
-            onUpdate={updateMissionStatement}
+            onChange={(updates) => updateMissionStatement(updates)}
             isEditing={isEditing}
           />
         </div>

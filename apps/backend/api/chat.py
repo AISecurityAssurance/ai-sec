@@ -150,15 +150,17 @@ async def create_chat_message(
     If an analysis has been performed, reference the specific findings and provide insights based on the actual results.
     Always maintain a professional, security-focused perspective in your responses."""
     
-    user_prompt = request.message
+    # Combine system prompt with user prompt for now
+    # TODO: Update LLM client to properly handle system prompts
+    combined_prompt = f"{system_prompt}\n\n"
     if context:
-        user_prompt = f"Context:\n{context}\n\nUser Question: {request.message}"
+        combined_prompt += f"Context:\n{context}\n\n"
+    combined_prompt += f"User Question: {request.message}"
     
     # Get AI response
     try:
         response = await llm_manager.generate(
-            user_prompt,
-            system_prompt=system_prompt,
+            combined_prompt,
             temperature=0.7,
             max_tokens=1000
         )

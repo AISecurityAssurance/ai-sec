@@ -37,7 +37,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY: test-secret-key-change-in-production
       ENVIRONMENT: development
-      CORS_ORIGINS: '["http://localhost:3000", "http://frontend:5173", "http://localhost:5173"]'
+      CORS_ORIGINS: '["*"]'  # Allow all origins in development
       # LLM API Keys (set these in .env file)
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}

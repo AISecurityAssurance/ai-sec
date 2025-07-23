@@ -8,17 +8,25 @@ from datetime import datetime
 from uuid import UUID
 import logging
 
-from llama_index.core import Document, VectorStoreIndex, StorageContext
-from llama_index.core.node_parser import SimpleNodeParser
-from llama_index.core.retrievers import VectorIndexRetriever
-from llama_index.core.response_synthesizers import get_response_synthesizer
-from llama_index.core.indices.query.query_transform import HyDEQueryTransform
-from llama_index.core.storage.docstore import SimpleDocumentStore
-from llama_index.core.storage.index_store import SimpleIndexStore
-from llama_index.core.vector_stores import SimpleVectorStore
-from llama_index.core.embeddings import BaseEmbedding
-from llama_index.embeddings.openai import OpenAIEmbedding
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index import Document, VectorStoreIndex, StorageContext
+from llama_index.node_parser import SimpleNodeParser
+from llama_index.retrievers import VectorIndexRetriever
+from llama_index.response_synthesizers import get_response_synthesizer
+from llama_index.indices.query.query_transform import HyDEQueryTransform
+from llama_index.storage.docstore import SimpleDocumentStore
+from llama_index.storage.index_store import SimpleIndexStore
+from llama_index.vector_stores import SimpleVectorStore
+try:
+    from llama_index.embeddings import BaseEmbedding, OpenAIEmbedding
+except ImportError:
+    # Fallback for older versions
+    from llama_index.embeddings.base import BaseEmbedding
+    from llama_index.embeddings.openai import OpenAIEmbedding
+try:
+    from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+except ImportError:
+    # For older versions or if not available
+    HuggingFaceEmbedding = None
 
 from core.models.schemas import AgentContext, ChatMessage
 from config.settings import settings
@@ -51,14 +59,22 @@ class ContextManager:
                 api_key=settings.OPENAI_API_KEY
             )
         elif self.embedding_model.startswith("sentence-transformers"):
-            return HuggingFaceEmbedding(
-                model_name=self.embedding_model
-            )
+            if HuggingFaceEmbedding:
+                return HuggingFaceEmbedding(
+                    model_name=self.embedding_model
+                )
+            else:
+                # Fallback to OpenAI if HuggingFace not available
+                logger.warning("HuggingFace embeddings not available, using OpenAI")
+                return OpenAIEmbedding()
         else:
             # Default to local embedding
-            return HuggingFaceEmbedding(
-                model_name="sentence-transformers/all-MiniLM-L6-v2"
-            )
+            if HuggingFaceEmbedding:
+                return HuggingFaceEmbedding(
+                    model_name="sentence-transformers/all-MiniLM-L6-v2"
+                )
+            else:
+                return OpenAIEmbedding()
     
     async def initialize_analysis_context(
         self, 

@@ -47,7 +47,8 @@ class ContextManager:
     """
     
     def __init__(self, embedding_model: Optional[str] = None):
-        self.embedding_model = embedding_model or getattr(settings, 'EMBEDDING_MODEL', 'text-embedding-ada-002')
+        # Default to OpenAI embeddings to avoid dependency issues
+        self.embedding_model = embedding_model or getattr(settings, 'EMBEDDING_MODEL', 'openai/text-embedding-ada-002')
         self.embedding = self._initialize_embedding()
         self.indices: Dict[str, VectorStoreIndex] = {}
         self.storage_contexts: Dict[str, StorageContext] = {}
@@ -55,8 +56,10 @@ class ContextManager:
     def _initialize_embedding(self) -> BaseEmbedding:
         """Initialize embedding model based on configuration"""
         if self.embedding_model.startswith("openai"):
+            # Extract model name after 'openai/'
+            model_name = self.embedding_model.split('/')[-1] if '/' in self.embedding_model else self.embedding_model
             return OpenAIEmbedding(
-                model=self.embedding_model,
+                model=model_name,
                 api_key=getattr(settings, 'OPENAI_API_KEY', None) or os.getenv('OPENAI_API_KEY')
             )
         elif self.embedding_model.startswith("sentence-transformers"):

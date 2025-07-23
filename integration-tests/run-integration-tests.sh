@@ -66,7 +66,7 @@ wait_for_backend() {
     attempt=0
     
     while [ $attempt -lt $max_attempts ]; do
-        if curl -s http://localhost:8000/api/health > /dev/null 2>&1; then
+        if curl -s http://localhost:8000/health > /dev/null 2>&1; then
             echo -e "${GREEN}✓ Backend API is ready${NC}"
             return 0
         fi

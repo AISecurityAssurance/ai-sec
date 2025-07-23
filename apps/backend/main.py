@@ -10,7 +10,7 @@ import uvicorn
 
 from config.settings import settings
 from core.database import init_db, close_db
-from api import analysis, artifacts, chat, auth, websocket, settings as settings_api
+from api import analysis, artifacts, chat, auth, websocket, settings as settings_api, frameworks
 from core.websocket import websocket_endpoint
 
 # Configure logging
@@ -88,6 +88,7 @@ async def health_check():
     }
 
 # Include routers
+app.include_router(frameworks.router, prefix="/api/v1/analysis", tags=["frameworks"])
 app.include_router(analysis.router, prefix="/api/v1/analysis", tags=["analysis"])
 app.include_router(artifacts.router, prefix="/api/v1/artifacts", tags=["artifacts"])
 app.include_router(chat.router, prefix="/api/v1/chat", tags=["chat"])

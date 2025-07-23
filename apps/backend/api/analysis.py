@@ -16,7 +16,8 @@ from core.database import get_db
 from core.models.database import Analysis, AnalysisResult as DBAnalysisResult
 from core.models.schemas import (
     AnalysisStatus, FrameworkType, AgentContext,
-    AnalysisRequest, AnalysisResponse, SectionResponse
+    AnalysisResponse, AnalysisSectionResponse,
+    AnalysisCreateRequest
 )
 from core.agents.framework_agents.stpa_sec import StpaSecAgent
 from core.agents.websocket_integration import create_agent_notifier

@@ -12,27 +12,26 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Determine docker compose command
+if command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE="docker-compose"
+elif docker compose version &> /dev/null; then
+    DOCKER_COMPOSE="docker compose"
+else
+    echo -e "${RED}Error: Neither 'docker-compose' nor 'docker compose' found${NC}"
+    exit 1
+fi
+
 # Check if required environment variables are set
 check_env_vars() {
-    echo -e "${YELLOW}Checking environment variables...${NC}"
+    echo -e "${YELLOW}Checking test configuration...${NC}"
     
-    required_vars=("OPENAI_API_KEY" "ANTHROPIC_API_KEY")
-    missing_vars=()
-    
-    for var in "${required_vars[@]}"; do
-        if [ -z "${!var}" ]; then
-            missing_vars+=($var)
-        fi
-    done
-    
-    if [ ${#missing_vars[@]} -ne 0 ]; then
-        echo -e "${RED}Error: Missing required environment variables:${NC}"
-        printf '%s\n' "${missing_vars[@]}"
-        echo "Please set these in your .env file or export them"
-        exit 1
+    # Check if we have any LLM configuration (env vars or will use test config)
+    if [ -n "${OLLAMA_ENDPOINT}" ] || [ -n "${ANTHROPIC_API_KEY}" ] || [ -n "${OPENAI_API_KEY}" ]; then
+        echo -e "${GREEN}✓ Found LLM configuration in environment${NC}"
+    else
+        echo -e "${YELLOW}⚠ No LLM configuration in environment, will use mock responses for testing${NC}"
     fi
-    
-    echo -e "${GREEN}✓ Environment variables OK${NC}"
 }
 
 # Start services
@@ -40,19 +39,19 @@ start_services() {
     echo -e "\n${YELLOW}Starting services...${NC}"
     
     # Stop any existing services
-    docker-compose -f docker-compose.test.yml down -v
+    $DOCKER_COMPOSE -f docker-compose.test.yml down -v
     
     # Start services
-    docker-compose -f docker-compose.test.yml up -d --build
+    $DOCKER_COMPOSE -f docker-compose.test.yml up -d --build
     
     # Wait for services to be ready
     echo "Waiting for services to start..."
     sleep 10
     
     # Check if services are running
-    if docker-compose -f docker-compose.test.yml ps | grep -q "Exit"; then
+    if $DOCKER_COMPOSE -f docker-compose.test.yml ps | grep -q "Exit"; then
         echo -e "${RED}Error: Some services failed to start${NC}"
-        docker-compose -f docker-compose.test.yml logs
+        $DOCKER_COMPOSE -f docker-compose.test.yml logs
         exit 1
     fi
     
@@ -78,7 +77,7 @@ wait_for_backend() {
     done
     
     echo -e "${RED}Error: Backend API failed to start${NC}"
-    docker-compose -f docker-compose.test.yml logs backend
+    $DOCKER_COMPOSE -f docker-compose.test.yml logs backend
     exit 1
 }
 
@@ -101,8 +100,38 @@ wait_for_frontend() {
     done
     
     echo -e "${RED}Error: Frontend failed to start${NC}"
-    docker-compose -f docker-compose.test.yml logs frontend
+    $DOCKER_COMPOSE -f docker-compose.test.yml logs frontend
     exit 1
+}
+
+# Configure test models if needed
+configure_test_models() {
+    echo -e "\n${YELLOW}Configuring test models...${NC}"
+    
+    # If we have Ollama endpoint, configure it
+    if [ -n "${OLLAMA_ENDPOINT}" ]; then
+        echo "Configuring Ollama for testing..."
+        curl -X POST http://localhost:8000/api/v1/settings/models/ollama \
+            -H "Content-Type: application/json" \
+            -d '{
+                "provider": "ollama",
+                "api_endpoint": "'${OLLAMA_ENDPOINT}'",
+                "model": "mistral:instruct",
+                "temperature": 0.7,
+                "max_tokens": 4096,
+                "auth_method": "none",
+                "is_enabled": true
+            }' > /dev/null 2>&1
+        
+        # Set Ollama as active provider
+        curl -X POST http://localhost:8000/api/v1/settings/active-provider \
+            -H "Content-Type: application/json" \
+            -d '{"provider": "ollama"}' > /dev/null 2>&1
+        
+        echo -e "${GREEN}✓ Ollama configured for testing${NC}"
+    else
+        echo -e "${YELLOW}⚠ No models configured, tests will use mock LLM responses${NC}"
+    fi
 }
 
 # Run integration tests
@@ -124,7 +153,7 @@ run_tests() {
 # Cleanup
 cleanup() {
     echo -e "\n${YELLOW}Cleaning up...${NC}"
-    docker-compose -f docker-compose.test.yml down -v
+    $DOCKER_COMPOSE -f docker-compose.test.yml down -v
     echo -e "${GREEN}✓ Cleanup complete${NC}"
 }
 
@@ -137,6 +166,7 @@ main() {
     start_services
     wait_for_backend
     wait_for_frontend
+    configure_test_models
     run_tests
 }
 

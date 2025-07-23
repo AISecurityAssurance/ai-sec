@@ -84,9 +84,10 @@ class Settings(BaseSettings):
     
     # API
     api_prefix: str = Field("/api/v1", env="API_PREFIX")
-    allowed_origins: List[str] = Field(
+    port: int = Field(8000, env="PORT")
+    cors_origins: List[str] = Field(
         ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"],
-        env="ALLOWED_ORIGINS"
+        env="CORS_ORIGINS"
     )
     
     # Security

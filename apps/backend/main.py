@@ -10,7 +10,7 @@ import uvicorn
 
 from config.settings import settings
 from core.database import init_db, close_db
-from api import analysis, artifacts, chat, auth, websocket
+from api import analysis, artifacts, chat, auth, websocket, settings as settings_api
 from core.websocket import websocket_endpoint
 
 # Configure logging
@@ -92,6 +92,7 @@ app.include_router(analysis.router, prefix="/api/v1/analysis", tags=["analysis"]
 app.include_router(artifacts.router, prefix="/api/v1/artifacts", tags=["artifacts"])
 app.include_router(chat.router, prefix="/api/v1/chat", tags=["chat"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(settings_api.router, prefix="/api/v1/settings", tags=["settings"])
 
 # WebSocket endpoint
 app.websocket("/ws/{user_id}")(websocket_endpoint)

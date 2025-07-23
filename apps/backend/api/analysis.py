@@ -267,11 +267,12 @@ async def get_analysis(
     if not analysis:
         raise HTTPException(status_code=404, detail="Analysis not found")
         
-    # Get results
-    results = await db.execute(
-        db.query(DBAnalysisResult).filter_by(analysis_id=analysis_id)
-    )
-    analysis_results = results.scalars().all()
+    # Get results (not needed for simple response)
+    # from sqlalchemy import select
+    # result = await db.execute(
+    #     select(DBAnalysisResult).where(DBAnalysisResult.analysis_id == analysis_id)
+    # )
+    # analysis_results = result.scalars().all()
     
     return SimpleAnalysisResponse(
         id=analysis.id,

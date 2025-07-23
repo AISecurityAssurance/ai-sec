@@ -5,6 +5,7 @@ import InputSelectionPanel from '../../components/analysis/InputSelectionPanel';
 import AnalysisCanvas from '../../components/analysis/AnalysisCanvas';
 import ChatPanel from '../user/components/ChatPanel';
 import WelcomeScreen from '../../components/analysis/WelcomeScreen';
+import LoadingOverlay from '../../components/common/LoadingOverlay';
 import { NewAnalysisDialog } from '../user/components/NewAnalysisDialog';
 import { AnalysisWebSocketProvider } from '../../components/analysis/AnalysisWebSocketProvider';
 import { useAnalysisStore } from '../../stores/analysisStore';
@@ -83,9 +84,14 @@ export default function AnalysisApp() {
         setShowWelcome(false);
       }
       
+      // Keep analyzing state true until WebSocket updates indicate completion
+      // The AnalysisWebSocketProvider will handle setting it to false
+      
     } catch (error) {
       console.error('Error creating analysis:', error);
       setIsAnalyzing(false);
+      // Show error to user
+      alert('Failed to create analysis. Please check your connection and try again.');
     }
   };
   
@@ -100,6 +106,9 @@ export default function AnalysisApp() {
   if (showWelcome) {
     return (
       <SimpleLayout>
+        {isAnalyzing && (
+          <LoadingOverlay message="Starting security analysis..." />
+        )}
         <WelcomeScreen 
           onNewAnalysis={() => setShowNewAnalysisDialog(true)}
           onLoadDemo={handleLoadDemo}
@@ -116,6 +125,9 @@ export default function AnalysisApp() {
   return (
     <SimpleLayout>
       <AnalysisWebSocketProvider>
+        {isAnalyzing && (
+          <LoadingOverlay message="Starting security analysis..." />
+        )}
         <div className="analysis-header" style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
           <button 
             className="btn-primary"

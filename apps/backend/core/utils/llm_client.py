@@ -83,21 +83,46 @@ class AnthropicClient(BaseLLMClient):
     async def generate(self, prompt: str, **kwargs) -> LLMResponse:
         start_time = time.time()
         
-        message = await self.client.messages.create(
-            model=self.config.model or "claude-3-opus-20240229",
-            max_tokens=kwargs.get("max_tokens", self.config.max_tokens),
-            temperature=kwargs.get("temperature", self.config.temperature),
-            messages=[{"role": "user", "content": prompt}]
-        )
+        try:
+            # Try new API (anthropic >= 0.18.0)
+            message = await self.client.messages.create(
+                model=self.config.model or "claude-3-opus-20240229",
+                max_tokens=kwargs.get("max_tokens", self.config.max_tokens),
+                temperature=kwargs.get("temperature", self.config.temperature),
+                messages=[{"role": "user", "content": prompt}]
+            )
+        except AttributeError:
+            # Fall back to old API (anthropic < 0.18.0)
+            message = await self.client.completions.create(
+                model=self.config.model or "claude-3-opus-20240229",
+                max_tokens_to_sample=kwargs.get("max_tokens", self.config.max_tokens),
+                temperature=kwargs.get("temperature", self.config.temperature),
+                prompt=f"\n\nHuman: {prompt}\n\nAssistant:"
+            )
+        
+        # Parse response based on API version
+        if hasattr(message, 'content'):
+            # New API
+            content = message.content[0].text
+            model = message.model
+            input_tokens = message.usage.input_tokens
+            output_tokens = message.usage.output_tokens
+        else:
+            # Old API
+            content = message.completion
+            model = self.config.model or "claude-3-opus-20240229"
+            # Estimate tokens for old API
+            input_tokens = len(prompt.split()) * 1.3
+            output_tokens = len(content.split()) * 1.3
         
         response = LLMResponse(
-            content=message.content[0].text,
-            model=message.model,
+            content=content,
+            model=model,
             provider=self.provider,
             usage={
-                "input_tokens": message.usage.input_tokens,
-                "output_tokens": message.usage.output_tokens,
-                "total_tokens": message.usage.input_tokens + message.usage.output_tokens
+                "input_tokens": int(input_tokens),
+                "output_tokens": int(output_tokens),
+                "total_tokens": int(input_tokens + output_tokens)
             },
             latency=time.time() - start_time
         )
@@ -106,17 +131,23 @@ class AnthropicClient(BaseLLMClient):
         return response
     
     async def stream(self, prompt: str, **kwargs) -> AsyncGenerator[str, None]:
-        stream = await self.client.messages.create(
-            model=self.config.model or "claude-3-opus-20240229",
-            max_tokens=kwargs.get("max_tokens", self.config.max_tokens),
-            temperature=kwargs.get("temperature", self.config.temperature),
-            messages=[{"role": "user", "content": prompt}],
-            stream=True
-        )
-        
-        async for chunk in stream:
-            if chunk.delta.text:
-                yield chunk.delta.text
+        try:
+            # Try new API
+            stream = await self.client.messages.create(
+                model=self.config.model or "claude-3-opus-20240229",
+                max_tokens=kwargs.get("max_tokens", self.config.max_tokens),
+                temperature=kwargs.get("temperature", self.config.temperature),
+                messages=[{"role": "user", "content": prompt}],
+                stream=True
+            )
+            
+            async for chunk in stream:
+                if chunk.delta.text:
+                    yield chunk.delta.text
+        except AttributeError:
+            # Fall back to non-streaming for old API
+            response = await self.generate(prompt, **kwargs)
+            yield response.content
 
 
 class OpenAIClient(BaseLLMClient):

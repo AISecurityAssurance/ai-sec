@@ -36,7 +36,7 @@ export default function UserApp() {
       // Create a temporary project ID for now
       const projectId = generateUUID();
       
-      const response = await apiFetch('/api/v1/analysis', {
+      const response = await apiFetch('/api/v1/analysis/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

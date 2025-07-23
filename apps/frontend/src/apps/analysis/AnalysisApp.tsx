@@ -59,7 +59,7 @@ export default function AnalysisApp() {
     try {
       const projectId = generateUUID();
       
-      const response = await apiFetch('/api/v1/analysis', {
+      const response = await apiFetch('/api/v1/analysis/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

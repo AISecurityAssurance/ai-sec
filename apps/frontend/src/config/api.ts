@@ -5,15 +5,15 @@
 // In production, we need to ensure API calls use the correct base URL
 // This handles cases where the app is accessed via hostname:port
 export function getApiUrl(path: string): string {
-  // If we're in development mode (Vite dev server), use relative paths
-  if (import.meta.env.DEV) {
-    return path;
-  }
-  
-  // In production, construct the full URL with the current origin
-  // This ensures the port is included (e.g., http://ubuntusungoddess:3002/api/...)
+  // Always use the current origin to ensure proper port handling
+  // This works for both dev and prod when accessed via hostname:port
   const origin = window.location.origin;
-  return `${origin}${path}`;
+  const url = `${origin}${path}`;
+  
+  // Log for debugging
+  console.log('API URL:', url, 'Origin:', origin, 'Path:', path);
+  
+  return url;
 }
 
 // Helper to make API calls with proper URL handling

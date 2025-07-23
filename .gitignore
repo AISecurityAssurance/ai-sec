@@ -8,6 +8,11 @@ coverage/
 *.lcov
 .nyc_output
 
+# Playwright test results
+integration-tests/playwright-report/
+integration-tests/test-results/
+integration-tests/.last-run.json
+
 # Production
 dist/
 dist-ssr/

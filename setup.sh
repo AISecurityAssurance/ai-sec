@@ -114,7 +114,11 @@ fi
 echo ""
 echo "🔨 Building and starting services..."
 echo "   This may take a few minutes on first run..."
-docker compose -f docker-compose.test.yml up --build -d
+if [ -f docker-compose.override.yml ]; then
+    docker compose -f docker-compose.test.yml -f docker-compose.override.yml up --build -d
+else
+    docker compose -f docker-compose.test.yml up --build -d
+fi
 
 # Wait for services to be ready
 echo ""
@@ -162,12 +166,17 @@ else
 fi
 echo ""
 echo "Useful commands:"
-echo "  View logs:    docker compose -f docker-compose.test.yml logs -f"
-echo "  Stop:         docker compose -f docker-compose.test.yml down"
-echo "  Restart:      docker compose -f docker-compose.test.yml restart"
-echo "  Clean start:  docker compose -f docker-compose.test.yml down -v && ./setup.sh"
 if [ -f docker-compose.override.yml ]; then
+    echo "  View logs:    docker compose -f docker-compose.test.yml -f docker-compose.override.yml logs -f"
+    echo "  Stop:         docker compose -f docker-compose.test.yml -f docker-compose.override.yml down"
+    echo "  Restart:      docker compose -f docker-compose.test.yml -f docker-compose.override.yml restart"
+    echo "  Clean start:  docker compose -f docker-compose.test.yml -f docker-compose.override.yml down -v && rm docker-compose.override.yml && ./setup.sh"
     echo "  Remove override: rm docker-compose.override.yml"
+else
+    echo "  View logs:    docker compose -f docker-compose.test.yml logs -f"
+    echo "  Stop:         docker compose -f docker-compose.test.yml down"
+    echo "  Restart:      docker compose -f docker-compose.test.yml restart"
+    echo "  Clean start:  docker compose -f docker-compose.test.yml down -v && ./setup.sh"
 fi
 echo ""
 echo "To run integration tests:"

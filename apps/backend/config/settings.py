@@ -42,8 +42,7 @@ class ModelConfig(BaseSettings):
     max_tokens: int = 4096
     is_enabled: bool = False
 
-    class Config:
-        env_prefix = "MODEL_"
+    model_config = {"env_prefix": "MODEL_"}
 
 
 class DatabaseConfig(BaseSettings):
@@ -118,10 +117,12 @@ class Settings(BaseSettings):
     prompts_dir: Path = base_dir / "core" / "prompts"
     artifacts_dir: Path = base_dir / "artifacts"
     
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8", 
+        "case_sensitive": False,
+        "protected_namespaces": ("settings_",)
+    }
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

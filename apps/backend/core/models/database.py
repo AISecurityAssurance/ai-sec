@@ -46,7 +46,7 @@ class Project(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    metadata = Column(JSON, default=dict)
+    project_metadata = Column(JSON, default=dict)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
@@ -71,7 +71,7 @@ class Analysis(Base):
     started_at = Column(DateTime(timezone=True), nullable=True)
     completed_at = Column(DateTime(timezone=True), nullable=True)
     error_message = Column(Text, nullable=True)
-    metadata = Column(JSON, default=dict)
+    project_metadata = Column(JSON, default=dict)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relationships
@@ -117,7 +117,7 @@ class ChatMessage(Base):
     analysis_id = Column(UUID(as_uuid=True), ForeignKey("analyses.id"), nullable=True)
     message = Column(Text, nullable=False)
     response = Column(Text, nullable=False)
-    metadata = Column(JSON, default=dict)  # Model info, tokens used, etc.
+    project_metadata = Column(JSON, default=dict)  # Model info, tokens used, etc.
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relationships
@@ -141,7 +141,7 @@ class Artifact(Base):
     artifact_type = Column(String(100), nullable=False)  # e.g., "hazards", "threats", "controls"
     name = Column(String(255), nullable=False)
     data = Column(JSON, nullable=False)
-    metadata = Column(JSON, default=dict)
+    project_metadata = Column(JSON, default=dict)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relationships

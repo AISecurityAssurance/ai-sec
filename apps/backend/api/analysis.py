@@ -22,6 +22,7 @@ from core.agents.framework_agents.stpa_sec import StpaSecAgent
 from core.agents.websocket_integration import create_agent_notifier
 from core.websocket import manager
 from config.settings import settings
+from core.context.manager import context_manager
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,10 @@ from core.agents.framework_agents.stpa_sec import StpaSecAgent
 from core.agents.framework_agents.stride import StrideAgent
 from core.agents.framework_agents.pasta import PastaAgent
 from core.agents.framework_agents.dread import DreadAgent
+from core.agents.framework_agents.maestro import MaestroAgent
+from core.agents.framework_agents.linddun import LinddunAgent
+from core.agents.framework_agents.hazop import HazopAgent
+from core.agents.framework_agents.octave import OctaveAgent
 
 # Agent registry
 AGENT_REGISTRY = {
@@ -59,10 +64,10 @@ AGENT_REGISTRY = {
     FrameworkType.STRIDE: StrideAgent,
     FrameworkType.PASTA: PastaAgent,
     FrameworkType.DREAD: DreadAgent,
-    # FrameworkType.MAESTRO: MaestroAgent,
-    # FrameworkType.LINDDUN: LinddunAgent,
-    # FrameworkType.HAZOP: HazopAgent,
-    # FrameworkType.OCTAVE: OctaveAgent,
+    FrameworkType.MAESTRO: MaestroAgent,
+    FrameworkType.LINDDUN: LinddunAgent,
+    FrameworkType.HAZOP: HazopAgent,
+    FrameworkType.OCTAVE: OctaveAgent,
 }
 
 
@@ -122,6 +127,12 @@ async def run_analysis_task(
         analysis.completed_at = datetime.utcnow()
         await db.commit()
         
+        # Clean up context manager
+        try:
+            await context_manager.cleanup_analysis_context(UUID(analysis_id))
+        except Exception as e:
+            logger.warning(f"Failed to cleanup context manager: {e}")
+        
     except Exception as e:
         logger.error(f"Error in analysis task: {e}", exc_info=True)
         # Update analysis status to failed
@@ -130,6 +141,12 @@ async def run_analysis_task(
             analysis.status = AnalysisStatus.FAILED
             analysis.error_message = str(e)
             await db.commit()
+            
+        # Clean up context manager on failure
+        try:
+            await context_manager.cleanup_analysis_context(UUID(analysis_id))
+        except Exception as e:
+            logger.warning(f"Failed to cleanup context manager: {e}")
 
 
 @router.post("/", response_model=AnalysisResponse)
@@ -151,14 +168,25 @@ async def create_analysis(
     db.add(analysis)
     await db.commit()
     
-    # Create agent context
-    context = AgentContext(
-        analysis_id=analysis.id,
-        project_id=request.project_id,
-        system_description=request.system_description,
-        artifacts={},
-        metadata=request.metadata or {}
-    )
+    # Initialize context manager for this analysis
+    try:
+        context = await context_manager.initialize_analysis_context(
+            analysis.id,
+            request.system_description,
+            existing_artifacts=None
+        )
+        context.project_id = request.project_id
+        context.metadata = request.metadata or {}
+    except Exception as e:
+        logger.warning(f"Failed to initialize context manager: {e}")
+        # Fall back to basic context
+        context = AgentContext(
+            analysis_id=analysis.id,
+            project_id=request.project_id,
+            system_description=request.system_description,
+            artifacts={},
+            metadata=request.metadata or {}
+        )
     
     # Start analysis in background
     background_tasks.add_task(
@@ -305,6 +333,26 @@ async def cancel_analysis(
     )
     
     return {"message": "Analysis cancelled"}
+
+
+@router.get("/{analysis_id}/context")
+async def get_analysis_context(
+    analysis_id: UUID,
+    db: AsyncSession = Depends(get_db)
+):
+    """Get context manager status for an analysis"""
+    # Check if analysis exists
+    analysis = await db.get(Analysis, analysis_id)
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    
+    # Get context stats
+    stats = context_manager.get_context_stats(analysis_id)
+    
+    return {
+        "analysis_id": analysis_id,
+        "context_status": stats
+    }
 
 
 @router.get("/{analysis_id}/export")

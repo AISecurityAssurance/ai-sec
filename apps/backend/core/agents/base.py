@@ -18,6 +18,7 @@ from core.models.schemas import (
 from core.utils.llm_client import llm_manager, LLMResponse
 from config.settings import settings, metrics
 from core.agents.websocket_integration import AgentWebSocketNotifier
+from core.context.manager import context_manager
 
 
 class SectionResult(BaseModel):
@@ -127,7 +128,7 @@ class BaseAnalysisAgent(ABC):
         prompt = await self._load_prompt(section_id)
         
         # Build complete prompt with context
-        full_prompt = self._build_prompt(prompt, context, section_id)
+        full_prompt = await self._build_prompt(prompt, context, section_id)
         
         # Get response from LLM
         response = await llm_manager.generate(full_prompt)
@@ -137,6 +138,21 @@ class BaseAnalysisAgent(ABC):
         
         # Store as artifact in context
         context.artifacts[f"{self.framework.value}_{section_id}"] = structured_content
+        
+        # Add to context manager for future reference
+        try:
+            await context_manager.add_analysis_result(
+                context.analysis_id,
+                self.framework.value,
+                {
+                    "section_id": section_id,
+                    "content": structured_content,
+                    "timestamp": time.time()
+                }
+            )
+        except Exception as e:
+            # Don't fail if context manager has issues
+            pass
         
         return SectionResult(
             section_id=section_id,
@@ -157,23 +173,56 @@ class BaseAnalysisAgent(ABC):
         else:
             return self._get_default_prompt(section_id)
     
-    def _build_prompt(
+    async def _build_prompt(
         self,
         base_prompt: str,
         context: AgentContext,
         section_id: str
     ) -> str:
-        """Build complete prompt with context"""
+        """Build complete prompt with context using LlamaIndex"""
         # Replace placeholders in prompt
         prompt = base_prompt.replace("{{SYSTEM_DESCRIPTION}}", context.system_description)
         
-        # Add relevant artifacts from other analyses
+        # Get relevant context from LlamaIndex
+        try:
+            # Get relevant artifacts from previous analyses
+            relevant_artifacts = await context_manager.get_relevant_context(
+                context.analysis_id,
+                f"{self.framework.value} {section_id} analysis",
+                top_k=3,
+                context_type="artifact"
+            )
+            
+            if relevant_artifacts:
+                artifacts_text = "\n\nRelevant information from previous analyses:\n"
+                for artifact in relevant_artifacts:
+                    artifact_type = artifact["metadata"].get("framework", "unknown")
+                    artifacts_text += f"\n### From {artifact_type}:\n{artifact['content'][:500]}...\n"
+                prompt += artifacts_text
+            
+            # Get relevant conversation history
+            chat_history = await context_manager.get_conversation_history(
+                context.analysis_id,
+                limit=3
+            )
+            
+            if chat_history:
+                chat_text = "\n\nRecent conversation context:\n"
+                for msg in chat_history:
+                    chat_text += f"\n{msg.role}: {msg.content[:200]}...\n"
+                prompt += chat_text
+        
+        except Exception as e:
+            # If context manager fails, continue without enhanced context
+            pass
+        
+        # Add immediate artifacts from current analysis
         if context.artifacts:
             relevant_artifacts = self._get_relevant_artifacts(context.artifacts, section_id)
             if relevant_artifacts:
-                artifacts_text = "\n\nRelevant information from other analyses:\n"
+                artifacts_text = "\n\nRelevant information from current analysis:\n"
                 for key, value in relevant_artifacts.items():
-                    artifacts_text += f"\n{key}:\n{value}\n"
+                    artifacts_text += f"\n{key}:\n{str(value)[:500]}...\n"
                 prompt += artifacts_text
         
         # Add specific instructions for structured output
@@ -214,6 +263,13 @@ class BaseAnalysisAgent(ABC):
             if section["id"] == section_id:
                 return section.get("template", "text")
         return "text"
+    
+    def _load_master_prompt(self) -> str:
+        """Load master prompt for framework"""
+        master_file = self.prompt_dir / "master.txt"
+        if master_file.exists():
+            return master_file.read_text()
+        return ""
     
     def _get_default_prompt(self, section_id: str) -> str:
         """Get default prompt for a section"""

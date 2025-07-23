@@ -16,6 +16,8 @@ from core.database import get_db
 from core.models.database import ChatMessage, Analysis
 from core.utils.llm_client import llm_manager
 from config.settings import settings
+from core.context.manager import context_manager
+from core.models.schemas import ChatMessage as ChatMessageSchema
 
 logger = logging.getLogger(__name__)
 
@@ -47,9 +49,10 @@ class ChatHistoryResponse(BaseModel):
 
 async def build_chat_context(
     analysis_id: Optional[UUID],
-    db: AsyncSession
+    db: AsyncSession,
+    user_message: str
 ) -> str:
-    """Build context for chat based on analysis"""
+    """Build context for chat based on analysis using LlamaIndex"""
     context_parts = []
     
     if analysis_id:
@@ -58,17 +61,47 @@ async def build_chat_context(
         if analysis:
             context_parts.append(f"System Description: {analysis.system_description}")
             
-            # Get analysis results
-            from core.models.database import AnalysisResult
-            results = await db.execute(
-                select(AnalysisResult).where(AnalysisResult.analysis_id == analysis_id)
-            )
-            results = results.scalars().all()
-            
-            for result in results:
-                context_parts.append(f"\n{result.framework.value} Analysis:")
-                for section in result.sections:
-                    context_parts.append(f"- {section['title']}: {section.get('status', 'pending')}")
+            # Get relevant context from LlamaIndex
+            try:
+                # Get relevant artifacts
+                relevant_context = await context_manager.get_relevant_context(
+                    analysis_id,
+                    user_message,
+                    top_k=5
+                )
+                
+                if relevant_context:
+                    context_parts.append("\n## Relevant Analysis Context:")
+                    for item in relevant_context:
+                        metadata = item["metadata"]
+                        content_preview = item["content"][:300] + "..." if len(item["content"]) > 300 else item["content"]
+                        context_parts.append(f"\n### {metadata.get('type', 'Unknown')} - {metadata.get('framework', 'Unknown')}:")
+                        context_parts.append(content_preview)
+                
+                # Get recent conversation history
+                chat_history = await context_manager.get_conversation_history(
+                    analysis_id,
+                    limit=5
+                )
+                
+                if chat_history:
+                    context_parts.append("\n## Recent Conversation:")
+                    for msg in chat_history[-3:]:  # Last 3 messages
+                        context_parts.append(f"\n{msg.role}: {msg.content[:200]}...")
+                        
+            except Exception as e:
+                logger.warning(f"Failed to get LlamaIndex context: {e}")
+                # Fall back to basic context
+                from core.models.database import AnalysisResult
+                results = await db.execute(
+                    select(AnalysisResult).where(AnalysisResult.analysis_id == analysis_id)
+                )
+                results = results.scalars().all()
+                
+                for result in results:
+                    context_parts.append(f"\n{result.framework.value} Analysis:")
+                    for section in result.sections:
+                        context_parts.append(f"- {section['title']}: {section.get('status', 'pending')}")
                     
     return "\n".join(context_parts)
 
@@ -80,7 +113,7 @@ async def create_chat_message(
 ):
     """Send a chat message and get AI response"""
     # Build context
-    context = await build_chat_context(request.analysis_id, db)
+    context = await build_chat_context(request.analysis_id, db, request.message)
     
     # Prepare prompt
     system_prompt = """You are an expert security analyst assistant. 
@@ -115,6 +148,31 @@ async def create_chat_message(
         
         db.add(chat_message)
         await db.commit()
+        
+        # Add to context manager
+        if request.analysis_id:
+            try:
+                # Add user message
+                await context_manager.add_chat_message(
+                    request.analysis_id,
+                    ChatMessageSchema(
+                        role="user",
+                        content=request.message,
+                        timestamp=datetime.utcnow()
+                    )
+                )
+                
+                # Add assistant response
+                await context_manager.add_chat_message(
+                    request.analysis_id,
+                    ChatMessageSchema(
+                        role="assistant",
+                        content=response.content,
+                        timestamp=datetime.utcnow()
+                    )
+                )
+            except Exception as e:
+                logger.warning(f"Failed to add to context manager: {e}")
         
         return ChatResponse(
             id=chat_message.id,
@@ -213,7 +271,7 @@ async def get_chat_suggestions(
 ):
     """Get suggested questions based on analysis"""
     # Get analysis context
-    context = await build_chat_context(analysis_id, db)
+    context = await build_chat_context(analysis_id, db, "Generate question suggestions")
     
     # Generate suggestions
     prompt = f"""Based on this security analysis context:
@@ -231,7 +289,12 @@ async def get_chat_suggestions(
         
         # Parse suggestions (simple approach - could be improved)
         import json
-        suggestions = json.loads(response.content)
+        try:
+            suggestions = json.loads(response.content)
+        except json.JSONDecodeError:
+            # Try to extract suggestions from text
+            lines = response.content.split('\n')
+            suggestions = [line.strip('- 1234567890."') for line in lines if line.strip() and not line.startswith('#')][:5]
         
         return {"suggestions": suggestions[:5]}
         

@@ -78,9 +78,10 @@ class WebSocketClient extends EventEmitter {
     this.userId = localStorage.getItem('userId') || this.generateUserId();
     localStorage.setItem('userId', this.userId);
     
-    // Construct WebSocket URL
-    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
-    this.url = `${wsUrl}/ws/${this.userId}`;
+    // Construct WebSocket URL - use relative URL to work with proxy
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host;
+    this.url = `${protocol}//${host}/ws/${this.userId}`;
   }
   
   private generateUserId(): string {

@@ -1,0 +1,68 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: secanalyst
+      POSTGRES_PASSWORD: secanalyst123
+      POSTGRES_DB: security_analyst
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U secanalyst"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile.dev
+    environment:
+      DATABASE_URL: postgresql+asyncpg://secanalyst:secanalyst123@postgres:5432/security_analyst
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      ENVIRONMENT: production
+      CORS_ORIGINS: '["*"]'  # Configure properly for production
+      # LLM API Keys (set these in .env file)
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Starting production server...' &&
+        uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+      "
+
+  # Frontend Application (Production with nginx)
+  frontend:
+    build:
+      context: .
+      dockerfile: ./apps/frontend/Dockerfile.prod
+    ports:
+      - "${BIND_IP:-0.0.0.0}:${FRONTEND_PORT:-3002}:80"
+    environment:
+      # These are baked in at build time
+      VITE_API_URL: /api
+      VITE_WS_URL: /ws
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

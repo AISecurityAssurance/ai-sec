@@ -38,7 +38,7 @@ export default function AnalysisApp() {
     try {
       const projectId = crypto.randomUUID();
       
-      const response = await fetch('http://localhost:8000/api/v1/analysis', {
+      const response = await fetch('/api/v1/analysis', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

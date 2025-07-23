@@ -19,8 +19,8 @@ test.describe('Create Analysis', () => {
     await page.fill('textarea[placeholder*="Describe your system"]', systemDescription);
     
     // Select frameworks
-    await page.check('input[value="STPA_SEC"]');
-    await page.check('input[value="STRIDE"]');
+    await page.check('input[value="stpa-sec"]');
+    await page.check('input[value="stride"]');
     
     // Start analysis
     await page.click('button:has-text("Start Analysis")');

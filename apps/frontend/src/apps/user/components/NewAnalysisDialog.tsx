@@ -9,14 +9,14 @@ interface NewAnalysisDialogProps {
 }
 
 const FRAMEWORKS = [
-  { id: 'STPA_SEC', name: 'STPA-SEC', description: 'Systems-Theoretic Process Analysis for Security' },
-  { id: 'STRIDE', name: 'STRIDE', description: 'Spoofing, Tampering, Repudiation, Info Disclosure, DoS, Elevation' },
-  { id: 'PASTA', name: 'PASTA', description: 'Process for Attack Simulation and Threat Analysis' },
-  { id: 'DREAD', name: 'DREAD', description: 'Damage, Reproducibility, Exploitability, Affected Users, Discoverability' },
-  { id: 'MAESTRO', name: 'MAESTRO', description: 'AI/ML-specific security framework' },
-  { id: 'LINDDUN', name: 'LINDDUN', description: 'Privacy threat modeling framework' },
-  { id: 'HAZOP', name: 'HAZOP', description: 'Hazard and Operability Study' },
-  { id: 'OCTAVE', name: 'OCTAVE', description: 'Operationally Critical Threat, Asset, and Vulnerability Evaluation' }
+  { id: 'stpa-sec', name: 'STPA-SEC', description: 'Systems-Theoretic Process Analysis for Security' },
+  { id: 'stride', name: 'STRIDE', description: 'Spoofing, Tampering, Repudiation, Info Disclosure, DoS, Elevation' },
+  { id: 'pasta', name: 'PASTA', description: 'Process for Attack Simulation and Threat Analysis' },
+  { id: 'dread', name: 'DREAD', description: 'Damage, Reproducibility, Exploitability, Affected Users, Discoverability' },
+  { id: 'maestro', name: 'MAESTRO', description: 'AI/ML-specific security framework' },
+  { id: 'linddun', name: 'LINDDUN', description: 'Privacy threat modeling framework' },
+  { id: 'hazop', name: 'HAZOP', description: 'Hazard and Operability Study' },
+  { id: 'octave', name: 'OCTAVE', description: 'Operationally Critical Threat, Asset, and Vulnerability Evaluation' }
 ];
 
 export function NewAnalysisDialog({ isOpen, onClose, onSubmit }: NewAnalysisDialogProps) {

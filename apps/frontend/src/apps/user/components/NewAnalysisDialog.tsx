@@ -19,9 +19,21 @@ const FRAMEWORKS = [
   { id: 'octave', name: 'OCTAVE', description: 'Operationally Critical Threat, Asset, and Vulnerability Evaluation' }
 ];
 
+const DEMO_SYSTEM = `An integrated financial services platform that provides online banking, investment management, and payment processing services. The system consists of:
+
+1. Web and mobile applications for customer access
+2. Core banking services handling accounts, transactions, and balances
+3. Investment portfolio management with real-time market data integration
+4. Payment gateway supporting multiple payment methods and currencies
+5. Customer data analytics for personalized financial insights
+6. Third-party integrations with credit bureaus, payment networks, and market data providers
+
+The platform serves 2 million active users and processes over $50M in daily transactions. Security and regulatory compliance are critical requirements.`;
+
 export function NewAnalysisDialog({ isOpen, onClose, onSubmit }: NewAnalysisDialogProps) {
   const [description, setDescription] = useState('');
   const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
+  const [showDemo, setShowDemo] = useState(false);
 
   if (!isOpen) return null;
 
@@ -55,19 +67,46 @@ export function NewAnalysisDialog({ isOpen, onClose, onSubmit }: NewAnalysisDial
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="description">System Description</label>
+            <label htmlFor="description">
+              System Description
+              <button 
+                type="button" 
+                className="demo-button"
+                onClick={() => {
+                  setDescription(DEMO_SYSTEM);
+                  setSelectedFrameworks(['stpa-sec', 'stride', 'pasta', 'dread']);
+                }}
+                style={{
+                  marginLeft: '10px',
+                  fontSize: '12px',
+                  padding: '4px 8px',
+                  background: 'var(--bg-hover)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  color: 'var(--text-secondary)'
+                }}
+              >
+                Load Demo System
+              </button>
+            </label>
             <textarea
               id="description"
-              placeholder="Describe your system..."
+              placeholder="Describe your system architecture, components, boundaries, and security requirements..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={6}
+              rows={8}
               required
             />
           </div>
 
           <div className="form-group">
-            <label>Select Frameworks</label>
+            <label>
+              Select Analysis Frameworks
+              <span style={{ marginLeft: '10px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                (Choose one or more)
+              </span>
+            </label>
             <div className="frameworks-grid">
               {FRAMEWORKS.map(framework => (
                 <label key={framework.id} className="framework-checkbox">

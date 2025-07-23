@@ -1,20 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SimpleLayout from '../../components/common/SimpleLayout';
 import ThreePanelLayout from '../../components/common/ThreePanelLayout';
 import InputSelectionPanel from '../../components/analysis/InputSelectionPanel';
 import AnalysisCanvas from '../../components/analysis/AnalysisCanvas';
 import ChatPanel from '../user/components/ChatPanel';
+import WelcomeScreen from '../../components/analysis/WelcomeScreen';
 import { NewAnalysisDialog } from '../user/components/NewAnalysisDialog';
 import { AnalysisWebSocketProvider } from '../../components/analysis/AnalysisWebSocketProvider';
 import { useAnalysisStore } from '../../stores/analysisStore';
+import { isFirstVisit } from '../../utils/resetStores';
 import './AnalysisApp.css';
 
 export default function AnalysisApp() {
   const [activeAnalysis, setActiveAnalysis] = useState('stpa-sec');
   const [showNewAnalysisDialog, setShowNewAnalysisDialog] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
   
-  const { setCurrentAnalysisId } = useAnalysisStore();
+  const { currentAnalysisId, setCurrentAnalysisId, demoMode, setDemoMode, clearAnalysisResults } = useAnalysisStore();
+  
+  // Check if we should show welcome screen
+  useEffect(() => {
+    // Always show welcome on first visit
+    if (isFirstVisit()) {
+      setShowWelcome(true);
+      // Ensure demo mode is off on first visit
+      setDemoMode(false);
+    } else if (currentAnalysisId || demoMode) {
+      setShowWelcome(false);
+    }
+  }, [currentAnalysisId, demoMode, setDemoMode]);
   
   const handleOpenInNewWindow = (panel: 'left' | 'center' | 'right') => {
     const urls = {
@@ -63,6 +78,7 @@ export default function AnalysisApp() {
       // Store the analysis ID in the global store
       if (result.id) {
         setCurrentAnalysisId(result.id);
+        setShowWelcome(false);
       }
       
     } catch (error) {
@@ -70,6 +86,30 @@ export default function AnalysisApp() {
       setIsAnalyzing(false);
     }
   };
+  
+  const handleLoadDemo = () => {
+    // Clear any existing analysis and enable demo mode
+    clearAnalysisResults();
+    setDemoMode(true);
+    setShowWelcome(false);
+  };
+  
+  // Show welcome screen if no analysis is active
+  if (showWelcome) {
+    return (
+      <SimpleLayout>
+        <WelcomeScreen 
+          onNewAnalysis={() => setShowNewAnalysisDialog(true)}
+          onLoadDemo={handleLoadDemo}
+        />
+        <NewAnalysisDialog
+          isOpen={showNewAnalysisDialog}
+          onClose={() => setShowNewAnalysisDialog(false)}
+          onSubmit={handleCreateAnalysis}
+        />
+      </SimpleLayout>
+    );
+  }
 
   return (
     <SimpleLayout>

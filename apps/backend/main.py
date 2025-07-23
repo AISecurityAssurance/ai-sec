@@ -113,6 +113,14 @@ app.include_router(settings_api.router, prefix="/api/v1/settings", tags=["settin
 # WebSocket endpoint
 app.websocket("/ws/{user_id}")(websocket_endpoint)
 
+# Simple WebSocket endpoint for health checks
+@app.websocket("/ws")
+async def websocket_health_check(websocket):
+    """Simple WebSocket endpoint for health checks"""
+    await websocket.accept()
+    await websocket.send_text("connected")
+    await websocket.close()
+
 
 if __name__ == "__main__":
     uvicorn.run(

@@ -108,8 +108,52 @@ wait_for_frontend() {
 configure_test_models() {
     echo -e "\n${YELLOW}Configuring test models...${NC}"
     
-    # If we have Ollama endpoint, configure it
-    if [ -n "${OLLAMA_ENDPOINT}" ]; then
+    # Check for OpenAI API key
+    if [ -n "${OPENAI_API_KEY}" ]; then
+        echo "Configuring OpenAI for testing..."
+        curl -X POST http://localhost:8000/api/v1/settings/models/openai \
+            -H "Content-Type: application/json" \
+            -d '{
+                "provider": "openai",
+                "api_key": "'${OPENAI_API_KEY}'",
+                "model": "gpt-4o-mini",
+                "temperature": 0.7,
+                "max_tokens": 4096,
+                "auth_method": "api-key",
+                "is_enabled": true
+            }' > /dev/null 2>&1
+        
+        # Set OpenAI as active provider
+        curl -X POST http://localhost:8000/api/v1/settings/active-provider \
+            -H "Content-Type: application/json" \
+            -d '{"provider": "openai"}' > /dev/null 2>&1
+        
+        echo -e "${GREEN}✓ OpenAI configured for testing${NC}"
+        
+    # Check for Anthropic API key
+    elif [ -n "${ANTHROPIC_API_KEY}" ]; then
+        echo "Configuring Anthropic for testing..."
+        curl -X POST http://localhost:8000/api/v1/settings/models/anthropic \
+            -H "Content-Type: application/json" \
+            -d '{
+                "provider": "anthropic",
+                "api_key": "'${ANTHROPIC_API_KEY}'",
+                "model": "claude-3-haiku-20240307",
+                "temperature": 0.7,
+                "max_tokens": 4096,
+                "auth_method": "api-key",
+                "is_enabled": true
+            }' > /dev/null 2>&1
+        
+        # Set Anthropic as active provider
+        curl -X POST http://localhost:8000/api/v1/settings/active-provider \
+            -H "Content-Type: application/json" \
+            -d '{"provider": "anthropic"}' > /dev/null 2>&1
+        
+        echo -e "${GREEN}✓ Anthropic configured for testing${NC}"
+        
+    # Check for Ollama endpoint
+    elif [ -n "${OLLAMA_ENDPOINT}" ]; then
         echo "Configuring Ollama for testing..."
         curl -X POST http://localhost:8000/api/v1/settings/models/ollama \
             -H "Content-Type: application/json" \

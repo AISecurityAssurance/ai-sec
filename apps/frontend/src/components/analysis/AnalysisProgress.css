@@ -1,0 +1,161 @@
+.analysis-progress {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 800px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+}
+
+.progress-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.progress-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  color: var(--text-primary);
+}
+
+.current-framework {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.current-framework strong {
+  color: var(--primary);
+}
+
+.progress-error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.frameworks-progress {
+  display: grid;
+  gap: 20px;
+}
+
+.framework-section {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.framework-title {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.framework-complete {
+  color: var(--color-success);
+  margin-left: auto;
+}
+
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.step-item.pending {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+}
+
+.step-item.in_progress {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.step-item.completed {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.step-item.failed {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.step-icon {
+  flex-shrink: 0;
+}
+
+.step-icon.pending {
+  color: var(--text-secondary);
+}
+
+.step-icon.in-progress {
+  color: var(--primary);
+}
+
+.step-icon.completed {
+  color: var(--color-success);
+}
+
+.step-icon.failed {
+  color: var(--color-danger);
+}
+
+.step-icon.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.step-name {
+  flex: 1;
+}
+
+.step-message {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+.progress-footer {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.progress-footer p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Add missing color variables if not defined */
+:root {
+  --color-success-bg: rgba(16, 185, 129, 0.1);
+  --primary-light: rgba(59, 130, 246, 0.1);
+}

@@ -6,12 +6,14 @@ import AnalysisCanvas from '../../components/analysis/AnalysisCanvas';
 import ChatPanel from '../user/components/ChatPanel';
 import WelcomeScreen from '../../components/analysis/WelcomeScreen';
 import LoadingOverlay from '../../components/common/LoadingOverlay';
+import AnalysisProgress, { AnalysisStep } from '../../components/analysis/AnalysisProgress';
 import { NewAnalysisDialog } from '../user/components/NewAnalysisDialog';
 import { AnalysisWebSocketProvider } from '../../components/analysis/AnalysisWebSocketProvider';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { isFirstVisit } from '../../utils/resetStores';
 import { generateUUID } from '../../utils/uuid';
 import { apiFetch } from '../../config/api';
+import { wsClient } from '../../utils/websocket';
 import './AnalysisApp.css';
 
 export default function AnalysisApp() {
@@ -19,6 +21,10 @@ export default function AnalysisApp() {
   const [showNewAnalysisDialog, setShowNewAnalysisDialog] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
+  const [analysisSteps, setAnalysisSteps] = useState<AnalysisStep[]>([]);
+  const [currentFramework, setCurrentFramework] = useState<string>('');
+  const [analysisFrameworks, setAnalysisFrameworks] = useState<string[]>([]);
+  const [analysisError, setAnalysisError] = useState<string>('');
   
   const { currentAnalysisId, setCurrentAnalysisId, demoMode, setDemoMode, clearAnalysisResults } = useAnalysisStore();
   
@@ -107,7 +113,14 @@ export default function AnalysisApp() {
     return (
       <SimpleLayout>
         {isAnalyzing && (
-          <LoadingOverlay message="Starting security analysis..." />
+          <LoadingOverlay>
+            <AnalysisProgress 
+              frameworks={analysisFrameworks}
+              steps={analysisSteps}
+              currentFramework={currentFramework}
+              error={analysisError}
+            />
+          </LoadingOverlay>
         )}
         <WelcomeScreen 
           onNewAnalysis={() => setShowNewAnalysisDialog(true)}
@@ -126,7 +139,14 @@ export default function AnalysisApp() {
     <SimpleLayout>
       <AnalysisWebSocketProvider>
         {isAnalyzing && (
-          <LoadingOverlay message="Starting security analysis..." />
+          <LoadingOverlay>
+            <AnalysisProgress 
+              frameworks={analysisFrameworks}
+              steps={analysisSteps}
+              currentFramework={currentFramework}
+              error={analysisError}
+            />
+          </LoadingOverlay>
         )}
         <div className="analysis-header" style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
           <button 

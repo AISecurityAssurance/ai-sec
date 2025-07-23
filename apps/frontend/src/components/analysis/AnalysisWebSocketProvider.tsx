@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { useWebSocket } from '../../hooks/useWebSocket';
-import { AnalysisUpdate, SectionUpdate } from '../../utils/websocket';
+import type { AnalysisUpdate, SectionUpdate } from '../../utils/websocket';
 
 interface AnalysisWebSocketProviderProps {
   children: React.ReactNode;

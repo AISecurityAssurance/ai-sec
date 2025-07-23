@@ -3,7 +3,42 @@
  * Handles connection, reconnection, and message routing
  */
 
-import { EventEmitter } from 'events';
+// Simple EventEmitter implementation for browser
+class EventEmitter {
+  private events: Map<string, Array<(...args: any[]) => void>> = new Map();
+
+  on(event: string, listener: (...args: any[]) => void): void {
+    if (!this.events.has(event)) {
+      this.events.set(event, []);
+    }
+    this.events.get(event)!.push(listener);
+  }
+
+  off(event: string, listener: (...args: any[]) => void): void {
+    const listeners = this.events.get(event);
+    if (listeners) {
+      const index = listeners.indexOf(listener);
+      if (index !== -1) {
+        listeners.splice(index, 1);
+      }
+    }
+  }
+
+  emit(event: string, ...args: any[]): void {
+    const listeners = this.events.get(event);
+    if (listeners) {
+      listeners.forEach(listener => listener(...args));
+    }
+  }
+
+  removeAllListeners(event?: string): void {
+    if (event) {
+      this.events.delete(event);
+    } else {
+      this.events.clear();
+    }
+  }
+}
 
 export interface WSMessage {
   type: 'connection' | 'analysis_update' | 'section_update' | 'error' | 'notification' | 'pong';
@@ -34,7 +69,7 @@ class WebSocketClient extends EventEmitter {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000; // Start with 1 second
-  private heartbeatInterval: NodeJS.Timeout | null = null;
+  private heartbeatInterval: number | null = null;
   private subscriptions = new Set<string>();
   
   constructor() {
@@ -44,10 +79,8 @@ class WebSocketClient extends EventEmitter {
     localStorage.setItem('userId', this.userId);
     
     // Construct WebSocket URL
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = process.env.REACT_APP_API_HOST || window.location.hostname;
-    const port = process.env.REACT_APP_API_PORT || '8000';
-    this.url = `${protocol}//${host}:${port}/ws/${this.userId}`;
+    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
+    this.url = `${wsUrl}/ws/${this.userId}`;
   }
   
   private generateUserId(): string {
@@ -153,7 +186,7 @@ class WebSocketClient extends EventEmitter {
   }
   
   private startHeartbeat(): void {
-    this.heartbeatInterval = setInterval(() => {
+    this.heartbeatInterval = window.setInterval(() => {
       if (this.ws?.readyState === WebSocket.OPEN) {
         this.send({ type: 'ping' });
       }
@@ -162,7 +195,7 @@ class WebSocketClient extends EventEmitter {
   
   private stopHeartbeat(): void {
     if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval);
+      window.clearInterval(this.heartbeatInterval);
       this.heartbeatInterval = null;
     }
   }

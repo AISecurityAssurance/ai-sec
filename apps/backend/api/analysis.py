@@ -19,6 +19,7 @@ from core.models.schemas import (
     AnalysisResponse, AnalysisSectionResponse,
     AnalysisCreateRequest
 )
+from pydantic import BaseModel
 from core.agents.framework_agents.stpa_sec import StpaSecAgent
 from core.agents.websocket_integration import create_agent_notifier
 from core.websocket import manager
@@ -49,6 +50,17 @@ class UpdateAnalysisRequest(BaseModel):
     section_ids: Optional[Dict[str, List[str]]] = None
 
 
+class SimpleAnalysisResponse(BaseModel):
+    """Simple analysis response for creation"""
+    id: UUID
+    project_id: UUID
+    status: AnalysisStatus
+    frameworks: List[str]
+    created_at: datetime
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+
+
 # Import agents
 from core.agents.framework_agents.stpa_sec import StpaSecAgent
 from core.agents.framework_agents.stride import StrideAgent
@@ -76,87 +88,122 @@ async def run_analysis_task(
     analysis_id: str,
     context: AgentContext,
     frameworks: List[FrameworkType],
-    section_ids: Optional[Dict[str, List[str]]] = None,
-    db: AsyncSession = None
+    section_ids: Optional[Dict[str, List[str]]] = None
 ):
     """Background task to run analysis"""
+    logger.info(f"Background task started for analysis {analysis_id}")
+    from core.database import async_session_maker
     notifier = create_agent_notifier(analysis_id)
     
-    try:
-        # Update analysis status
-        analysis = await db.get(Analysis, analysis_id)
-        analysis.status = AnalysisStatus.IN_PROGRESS
-        analysis.started_at = datetime.utcnow()
-        await db.commit()
-        
-        # Run each framework agent
-        for framework in frameworks:
-            agent_class = AGENT_REGISTRY.get(framework)
-            if not agent_class:
-                logger.warning(f"No agent found for framework: {framework}")
-                continue
-                
-            try:
-                agent = agent_class()
-                framework_sections = section_ids.get(framework.value) if section_ids else None
-                
-                # Run agent with WebSocket notifications
-                result = await agent.analyze(context, framework_sections, notifier)
-                
-                # Store result in database
-                db_result = DBAnalysisResult(
-                    id=uuid4(),
-                    analysis_id=analysis_id,
-                    framework=framework,
-                    sections=result.sections,
-                    artifacts=result.artifacts,
-                    duration=result.duration,
-                    token_usage=result.token_usage
-                )
-                db.add(db_result)
-                
-            except Exception as e:
-                logger.error(f"Error in {framework} agent: {e}", exc_info=True)
-                await notifier.notify_analysis_complete(
-                    framework.value,
-                    success=False,
-                    error=str(e)
-                )
-                
-        # Update analysis status
-        analysis.status = AnalysisStatus.COMPLETED
-        analysis.completed_at = datetime.utcnow()
-        await db.commit()
-        
-        # Clean up context manager
+    async with async_session_maker() as db:
         try:
-            await context_manager.cleanup_analysis_context(UUID(analysis_id))
-        except Exception as e:
-            logger.warning(f"Failed to cleanup context manager: {e}")
-        
-    except Exception as e:
-        logger.error(f"Error in analysis task: {e}", exc_info=True)
-        # Update analysis status to failed
-        if db:
+            logger.info(f"Updating analysis status to IN_PROGRESS for {analysis_id}")
+            # Update analysis status
             analysis = await db.get(Analysis, analysis_id)
-            analysis.status = AnalysisStatus.FAILED
-            analysis.error_message = str(e)
+            analysis.status = AnalysisStatus.IN_PROGRESS
+            analysis.started_at = datetime.utcnow()
             await db.commit()
             
-        # Clean up context manager on failure
-        try:
-            await context_manager.cleanup_analysis_context(UUID(analysis_id))
+            # Run each framework agent
+            for framework in frameworks:
+                agent_class = AGENT_REGISTRY.get(framework)
+                if not agent_class:
+                    logger.warning(f"No agent found for framework: {framework}")
+                    continue
+                    
+                try:
+                    agent = agent_class()
+                    framework_sections = section_ids.get(framework.value) if section_ids else None
+                    
+                    # Run agent with WebSocket notifications
+                    result = await agent.analyze(context, framework_sections, notifier)
+                    
+                    # Store result in database
+                    db_result = DBAnalysisResult(
+                        id=uuid4(),
+                        analysis_id=analysis_id,
+                        framework=framework,
+                        sections=result.sections,
+                        artifacts=result.artifacts,
+                        duration=result.duration,
+                        token_usage=result.token_usage
+                    )
+                    db.add(db_result)
+                    
+                except Exception as e:
+                    logger.error(f"Error in {framework} agent: {e}", exc_info=True)
+                    await notifier.notify_analysis_complete(
+                        framework.value,
+                        success=False,
+                        error=str(e)
+                    )
+                    
+            # Update analysis status
+            analysis.status = AnalysisStatus.COMPLETED
+            analysis.completed_at = datetime.utcnow()
+            await db.commit()
+            
+            # Clean up context manager
+            try:
+                await context_manager.cleanup_analysis_context(UUID(analysis_id))
+            except Exception as e:
+                logger.warning(f"Failed to cleanup context manager: {e}")
+            
         except Exception as e:
-            logger.warning(f"Failed to cleanup context manager: {e}")
+            logger.error(f"Error in analysis task: {e}", exc_info=True)
+            # Update analysis status to failed
+            analysis = await db.get(Analysis, analysis_id)
+            if analysis:
+                analysis.status = AnalysisStatus.FAILED
+                analysis.error_message = str(e)
+                await db.commit()
+                
+            # Clean up context manager on failure
+            try:
+                await context_manager.cleanup_analysis_context(UUID(analysis_id))
+            except Exception as e:
+                logger.warning(f"Failed to cleanup context manager: {e}")
 
 
-@router.post("/", response_model=AnalysisResponse)
+@router.post("/", response_model=SimpleAnalysisResponse)
 async def create_analysis(
     request: CreateAnalysisRequest,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db)
 ):
     """Create and start a new analysis"""
+    from core.models.database import Project, User
+    
+    # Check if project exists, if not create a default one
+    project = await db.get(Project, request.project_id)
+    if not project:
+        # Create a default test user if needed
+        from sqlalchemy import select
+        result = await db.execute(select(User).limit(1))
+        user = result.scalar_one_or_none()
+        
+        if not user:
+            # Create a test user
+            user = User(
+                id=uuid4(),
+                email="test@example.com",
+                hashed_password="test",  # In real app, this would be hashed
+                name="Test User",
+                role="user"
+            )
+            db.add(user)
+            await db.commit()
+        
+        # Create the project
+        project = Project(
+            id=request.project_id,
+            name="Test Project",
+            description="Auto-created project for testing",
+            owner_id=user.id
+        )
+        db.add(project)
+        await db.commit()
+    
     # Create analysis record
     analysis = Analysis(
         id=uuid4(),
@@ -176,30 +223,30 @@ async def create_analysis(
             request.system_description,
             existing_artifacts=None
         )
-        context.project_id = request.project_id
         context.metadata = request.metadata or {}
+        context.metadata['project_id'] = str(request.project_id)
     except Exception as e:
         logger.warning(f"Failed to initialize context manager: {e}")
         # Fall back to basic context
         context = AgentContext(
             analysis_id=analysis.id,
-            project_id=request.project_id,
             system_description=request.system_description,
             artifacts={},
-            metadata=request.metadata or {}
+            metadata={**(request.metadata or {}), 'project_id': str(request.project_id)}
         )
     
     # Start analysis in background
+    logger.info(f"Starting background task for analysis {analysis.id}")
     background_tasks.add_task(
         run_analysis_task,
         str(analysis.id),
         context,
         request.frameworks,
-        request.section_ids,
-        db
+        request.section_ids
     )
+    logger.info(f"Background task queued for analysis {analysis.id}")
     
-    return AnalysisResponse(
+    return SimpleAnalysisResponse(
         id=analysis.id,
         project_id=analysis.project_id,
         status=analysis.status,

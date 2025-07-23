@@ -51,7 +51,7 @@ test.describe('Create Analysis', () => {
     await page.fill('textarea[placeholder*="Describe your system"]', 'Multi-framework test system');
     
     // Select all frameworks
-    const frameworks = ['STPA_SEC', 'STRIDE', 'PASTA', 'DREAD'];
+    const frameworks = ['stpa-sec', 'stride', 'pasta', 'dread'];
     for (const framework of frameworks) {
       await page.check(`input[value="${framework}"]`);
     }

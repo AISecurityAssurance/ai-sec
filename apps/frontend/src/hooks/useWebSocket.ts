@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import wsClient, { AnalysisUpdate, SectionUpdate } from '../utils/websocket';
+import wsClient from '../utils/websocket';
+import type { AnalysisUpdate, SectionUpdate } from '../utils/websocket';
 
 interface UseWebSocketOptions {
   onAnalysisUpdate?: (update: AnalysisUpdate) => void;

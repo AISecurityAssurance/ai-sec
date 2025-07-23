@@ -30,6 +30,9 @@ import json
 from pydantic import BaseModel
 
 from config.settings import settings, ModelProvider, ModelConfig, metrics
+from core.services.settings_service import settings_service
+from core.database import get_db
+import warnings
 
 
 class LLMResponse(BaseModel):
@@ -329,15 +332,91 @@ class OllamaClient(BaseLLMClient):
         await self.client.aclose()
 
 
+class MockLLMClient(BaseLLMClient):
+    """Mock LLM client for when no providers are configured"""
+    
+    def __init__(self):
+        self.provider = ModelProvider.CUSTOM
+    
+    async def generate(self, prompt: str, **kwargs) -> LLMResponse:
+        """Generate a mock response"""
+        return LLMResponse(
+            content="⚠️ No LLM provider configured. Please go to Settings → Models to configure a model provider (e.g., Ollama for local models).",
+            model="mock",
+            provider=ModelProvider.CUSTOM,
+            usage={"input_tokens": 0, "output_tokens": 0, "total_tokens": 0},
+            latency=0.0
+        )
+    
+    async def stream(self, prompt: str, **kwargs) -> AsyncGenerator[str, None]:
+        """Stream a mock response"""
+        yield "⚠️ No LLM provider configured. Please configure a model in Settings."
+
+
 class LLMManager:
     """Manager for LLM clients with fallback support"""
     
     def __init__(self):
         self.clients: Dict[ModelProvider, BaseLLMClient] = {}
-        self._initialize_clients()
+        self._db_checked = False
+        self._no_llm_warning_shown = False
     
-    def _initialize_clients(self):
-        """Initialize configured LLM clients"""
+    async def _ensure_clients(self):
+        """Ensure clients are initialized, checking DB first"""
+        if self.clients and self._db_checked:
+            return
+        
+        # Get database session
+        try:
+            async for db in get_db():
+                await self._initialize_clients_from_db(db)
+                break
+        except Exception as e:
+            # If DB is not available, fall back to env vars
+            self._initialize_clients_from_env()
+        
+        self._db_checked = True
+        
+        # If still no clients, add mock client
+        if not self.clients:
+            self.clients[ModelProvider.CUSTOM] = MockLLMClient()
+            if not self._no_llm_warning_shown:
+                warnings.warn(
+                    "No LLM providers configured. Please configure a model in Settings → Models. "
+                    "For local models, you can use Ollama with mistral:instruct.",
+                    UserWarning
+                )
+                self._no_llm_warning_shown = True
+    
+    async def _initialize_clients_from_db(self, db):
+        """Initialize clients from database settings"""
+        providers = [
+            ModelProvider.ANTHROPIC,
+            ModelProvider.OPENAI,
+            ModelProvider.GROQ,
+            ModelProvider.GEMINI,
+            ModelProvider.OLLAMA
+        ]
+        
+        for provider in providers:
+            try:
+                config = await settings_service.get_model_config(provider, db)
+                if config and config.is_enabled:
+                    client_class = {
+                        ModelProvider.ANTHROPIC: AnthropicClient,
+                        ModelProvider.OPENAI: OpenAIClient,
+                        ModelProvider.GROQ: GroqClient,
+                        ModelProvider.GEMINI: GeminiClient,
+                        ModelProvider.OLLAMA: OllamaClient,
+                    }.get(provider)
+                    
+                    if client_class:
+                        self.clients[provider] = client_class(config)
+            except Exception as e:
+                print(f"Failed to initialize {provider.value} client from DB: {e}")
+    
+    def _initialize_clients_from_env(self):
+        """Initialize clients from environment variables"""
         for provider_id, config in settings.model_providers.items():
             if not config.is_enabled:
                 continue
@@ -354,16 +433,30 @@ class LLMManager:
                 if client_class:
                     self.clients[config.provider] = client_class(config)
             except Exception as e:
-                print(f"Failed to initialize {provider_id} client: {e}")
+                print(f"Failed to initialize {provider_id} client from env: {e}")
     
     async def generate(self, prompt: str, **kwargs) -> LLMResponse:
         """Generate response with fallback support"""
-        providers = [settings.active_provider]
+        # Ensure clients are initialized
+        await self._ensure_clients()
         
-        if settings.enable_fallback:
+        # Get active provider from DB or settings
+        active_provider = settings.active_provider
+        try:
+            async for db in get_db():
+                db_provider = await settings_service.get_active_provider(db)
+                if db_provider:
+                    active_provider = db_provider
+                break
+        except:
+            pass
+        
+        providers = [active_provider] if active_provider else list(self.clients.keys())
+        
+        if settings.enable_fallback and active_provider:
             providers.extend([
                 p for p in settings.fallback_order 
-                if p != settings.active_provider and p in self.clients
+                if p != active_provider and p in self.clients
             ])
         
         last_error = None
@@ -378,16 +471,34 @@ class LLMManager:
                 print(f"Provider {provider} failed: {e}")
                 continue
         
+        # If all providers failed, return mock response
+        if ModelProvider.CUSTOM in self.clients:
+            return await self.clients[ModelProvider.CUSTOM].generate(prompt, **kwargs)
+        
         raise Exception(f"All providers failed. Last error: {last_error}")
     
     async def stream(self, prompt: str, **kwargs) -> AsyncGenerator[str, None]:
         """Stream response with fallback support"""
-        providers = [settings.active_provider]
+        # Ensure clients are initialized
+        await self._ensure_clients()
         
-        if settings.enable_fallback:
+        # Get active provider from DB or settings
+        active_provider = settings.active_provider
+        try:
+            async for db in get_db():
+                db_provider = await settings_service.get_active_provider(db)
+                if db_provider:
+                    active_provider = db_provider
+                break
+        except:
+            pass
+        
+        providers = [active_provider] if active_provider else list(self.clients.keys())
+        
+        if settings.enable_fallback and active_provider:
             providers.extend([
                 p for p in settings.fallback_order 
-                if p != settings.active_provider and p in self.clients
+                if p != active_provider and p in self.clients
             ])
         
         last_error = None
@@ -403,6 +514,12 @@ class LLMManager:
                 last_error = e
                 print(f"Provider {provider} failed: {e}")
                 continue
+        
+        # If all providers failed, stream mock response
+        if ModelProvider.CUSTOM in self.clients:
+            async for chunk in self.clients[ModelProvider.CUSTOM].stream(prompt, **kwargs):
+                yield chunk
+            return
         
         raise Exception(f"All providers failed. Last error: {last_error}")
 

@@ -1,7 +1,7 @@
 """
 FastAPI main application
 """
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
@@ -115,7 +115,7 @@ app.websocket("/ws/{user_id}")(websocket_endpoint)
 
 # Simple WebSocket endpoint for health checks
 @app.websocket("/ws")
-async def websocket_health_check(websocket):
+async def websocket_health_check(websocket: WebSocket):
     """Simple WebSocket endpoint for health checks"""
     await websocket.accept()
     await websocket.send_text("connected")

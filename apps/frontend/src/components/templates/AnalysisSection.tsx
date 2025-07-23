@@ -11,7 +11,7 @@ interface AnalysisSectionProps {
   collapsible?: boolean;
   defaultExpanded?: boolean;
   editable?: boolean;
-  children: React.ReactNode;
+  children: React.ReactNode | ((props: { isEditing: boolean }) => React.ReactNode);
   onSave?: (id: string, data: any) => void;
 }
 
@@ -53,7 +53,21 @@ export function AnalysisSection({
   };
 
 
-  const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
+  const renderHeading = () => {
+    const className = "section-title";
+    switch (level) {
+      case 1:
+        return <h1 className={className}>{title}</h1>;
+      case 2:
+        return <h2 className={className}>{title}</h2>;
+      case 3:
+        return <h3 className={className}>{title}</h3>;
+      case 4:
+        return <h4 className={className}>{title}</h4>;
+      default:
+        return <h2 className={className}>{title}</h2>;
+    }
+  };
 
   return (
     <div className={`analysis-section-template ${isEditing ? 'editing' : ''}`}>
@@ -73,7 +87,7 @@ export function AnalysisSection({
           className="section-title-link"
           onClick={(e) => e.preventDefault()}
         >
-          <HeadingTag className="section-title">{title}</HeadingTag>
+          {renderHeading()}
         </a>
         
         {editable && (

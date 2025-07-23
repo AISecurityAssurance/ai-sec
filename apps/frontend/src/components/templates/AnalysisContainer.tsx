@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { AnalysisContainerProps, EditState, ExportFormat } from './types';
+import type { AnalysisContainerProps, EditState, ExportFormat } from './types';
 import { ExportOptions } from './ExportOptions';
 import './AnalysisContainer.css';
 

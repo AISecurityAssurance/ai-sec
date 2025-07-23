@@ -1,13 +1,15 @@
-#!/bin/bash
+#\!/bin/bash
 
-# Stop the Security Analyst Platform
+echo "🛑 Stopping all Security Platform services..."
 
-echo "🛑 Stopping Security Analyst Platform..."
+# Stop development services
+docker-compose down 2>/dev/null || true
 
-if [ -f docker-compose.override.yml ]; then
-    docker compose -f docker-compose.test.yml -f docker-compose.override.yml down
-else
-    docker compose -f docker-compose.test.yml down
-fi
+# Stop production services
+docker compose -f docker-compose.prod.yml down 2>/dev/null || true
 
-echo "✅ Services stopped"
+# Stop test services
+docker compose -f docker-compose.test.yml down 2>/dev/null || true
+
+echo "✅ All services stopped."
+EOF < /dev/null

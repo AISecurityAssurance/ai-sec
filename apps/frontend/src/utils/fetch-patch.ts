@@ -18,16 +18,31 @@ window.fetch = function(input: RequestInfo | URL, init?: RequestInit): Promise<R
     url = input.url;
   }
   
+  console.log('[fetch-patch] Intercepting fetch:', url);
+  
   // Check if this is an API call
-  if (url.startsWith('/api/') || url.startsWith('/ws/')) {
-    // Ensure it uses the full origin with port
-    const fullUrl = `${window.location.origin}${url}`;
-    console.log('[fetch-patch] Intercepted API call:', url, '->', fullUrl);
-    return originalFetch(fullUrl, init);
+  if (url.includes('/api/') || url.includes('/ws/')) {
+    // Extract the pathname if it's a full URL
+    let pathname = url;
+    try {
+      const urlObj = new URL(url);
+      pathname = urlObj.pathname;
+      
+      // If the URL is missing the port, fix it
+      if (urlObj.port === '' && window.location.port !== '') {
+        urlObj.port = window.location.port;
+        url = urlObj.toString();
+        console.log('[fetch-patch] Fixed missing port:', url);
+      }
+    } catch (e) {
+      // Not a full URL, construct it
+      url = `${window.location.origin}${pathname}`;
+      console.log('[fetch-patch] Constructed full URL:', url);
+    }
   }
   
-  // For all other requests, use original fetch
-  return originalFetch(input, init);
+  // Call original fetch with potentially modified URL
+  return originalFetch(url, init);
 };
 
 console.log('[fetch-patch] Global fetch patched to handle API URLs');

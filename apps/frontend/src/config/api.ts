@@ -14,11 +14,13 @@ export async function apiFetch(path: string, options?: RequestInit): Promise<Res
     path,
     url,
     origin,
-    method: options?.method || 'GET'
+    method: options?.method || 'GET',
+    port: window.location.port || '80'
   });
   
   try {
-    const response = await fetch(url, options);
+    // Use window.fetch explicitly to ensure we get the patched version
+    const response = await window.fetch(url, options);
     console.log('[apiFetch] Response:', response.status, response.statusText);
     return response;
   } catch (error) {

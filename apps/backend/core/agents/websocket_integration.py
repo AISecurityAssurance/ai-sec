@@ -8,7 +8,7 @@ from uuid import UUID
 
 from core.websocket import manager
 from core.models.schemas import AnalysisStatus
-from core.agents.base import SectionResult
+from core.agents.types import SectionResult
 
 
 class AgentWebSocketNotifier:

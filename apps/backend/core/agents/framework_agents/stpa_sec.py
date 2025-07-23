@@ -8,7 +8,8 @@ import re
 import time
 from uuid import uuid4
 
-from core.agents.base import BaseAnalysisAgent, SectionResult
+from core.agents.base import BaseAnalysisAgent
+from core.agents.types import SectionResult
 from core.models.schemas import FrameworkType, AgentContext, AgentResult
 from core.templates.mapper import TemplateMapper, create_threat_table
 from core.agents.websocket_integration import AgentWebSocketNotifier

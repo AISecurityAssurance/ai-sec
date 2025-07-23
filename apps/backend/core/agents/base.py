@@ -3,7 +3,10 @@ Base agent class for all analysis agents.
 This provides the foundation for structured output that maps to frontend templates.
 """
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional, List, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from core.agents.websocket_integration import AgentWebSocketNotifier
 from uuid import UUID
 import time
 import asyncio
@@ -17,18 +20,8 @@ from core.models.schemas import (
 )
 from core.utils.llm_client import llm_manager, LLMResponse
 from config.settings import settings, metrics
-from core.agents.websocket_integration import AgentWebSocketNotifier
 from core.context.manager import context_manager
-
-
-class SectionResult(BaseModel):
-    """Result from analyzing a section"""
-    section_id: str
-    title: str
-    content: Dict[str, Any]
-    template_type: str
-    status: AnalysisStatus = AnalysisStatus.COMPLETED
-    error: Optional[str] = None  # Changed to match websocket_integration expectations
+from core.agents.types import SectionResult
     
 
 class BaseAnalysisAgent(ABC):
@@ -64,7 +57,7 @@ class BaseAnalysisAgent(ABC):
         self,
         context: AgentContext,
         section_ids: Optional[List[str]] = None,
-        notifier: Optional[AgentWebSocketNotifier] = None
+        notifier: Optional['AgentWebSocketNotifier'] = None
     ) -> List[SectionResult]:
         """Analyze specific sections or all sections"""
         sections_to_analyze = section_ids or [s["id"] for s in self.get_sections()]

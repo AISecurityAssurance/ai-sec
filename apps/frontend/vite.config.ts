@@ -25,17 +25,5 @@ export default defineConfig({
     fs: {
       strict: false, // Allow serving files from outside root
     },
-    // Add custom middleware to bypass any host checking
-    configure: (app) => {
-      app.use((req, res, next) => {
-        // Allow any host
-        res.setHeader('X-Permitted-Cross-Domain-Policies', 'all');
-        next();
-      });
-    },
-  },
-  // Disable any built-in security features that might block hosts
-  legacy: {
-    buildSsrCjsExternalHeuristics: true,
   },
 })

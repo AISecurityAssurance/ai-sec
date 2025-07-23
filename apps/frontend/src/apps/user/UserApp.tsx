@@ -6,6 +6,7 @@ import ChatPanel from './components/ChatPanel';
 import { NewAnalysisDialog } from './components/NewAnalysisDialog';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { AnalysisWebSocketProvider } from '../../components/analysis/AnalysisWebSocketProvider';
+import { generateUUID } from '../../utils/uuid';
 import './UserApp.css';
 
 export default function UserApp() {
@@ -32,7 +33,7 @@ export default function UserApp() {
     
     try {
       // Create a temporary project ID for now
-      const projectId = crypto.randomUUID();
+      const projectId = generateUUID();
       
       const response = await fetch('/api/v1/analysis', {
         method: 'POST',

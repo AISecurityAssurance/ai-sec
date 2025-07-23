@@ -9,6 +9,7 @@ import { NewAnalysisDialog } from '../user/components/NewAnalysisDialog';
 import { AnalysisWebSocketProvider } from '../../components/analysis/AnalysisWebSocketProvider';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { isFirstVisit } from '../../utils/resetStores';
+import { generateUUID } from '../../utils/uuid';
 import './AnalysisApp.css';
 
 export default function AnalysisApp() {
@@ -54,7 +55,7 @@ export default function AnalysisApp() {
     setIsAnalyzing(true);
     
     try {
-      const projectId = crypto.randomUUID();
+      const projectId = generateUUID();
       
       const response = await fetch('/api/v1/analysis', {
         method: 'POST',

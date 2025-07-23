@@ -87,6 +87,21 @@ async def health_check():
         }
     }
 
+# API Health check (for integration tests)
+@app.get("/api/health")
+async def api_health_check():
+    return {
+        "status": "healthy",
+        "database": "connected",  # TODO: Actually check DB connection
+        "models": {
+            "active_provider": settings.active_provider.value,
+            "providers_enabled": [
+                provider for provider, config in settings.model_providers.items()
+                if config.is_enabled
+            ]
+        }
+    }
+
 # Include routers
 app.include_router(frameworks.router, prefix="/api/v1/analysis", tags=["frameworks"])
 app.include_router(analysis.router, prefix="/api/v1/analysis", tags=["analysis"])

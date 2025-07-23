@@ -1,0 +1,64 @@
+# Page snapshot
+
+```yaml
+- navigation:
+  - link "Security Analysis Platform":
+    - /url: /
+  - link "Analysis":
+    - /url: /analysis
+  - link "Prompt Settings":
+    - /url: /prompts
+  - link "Settings":
+    - /url: /settings
+  - link "Admin":
+    - /url: /admin
+  - link "Feedback":
+    - /url: /feedback
+  - button "Switch to light mode"
+- link "Selections":
+  - /url: /analysis/input-selection
+  - heading "Selections" [level=3]
+- button "Fullscreen"
+- button "Collapse"
+- text: 0 / 250,000 tokens Inputs Analysis Plugins (4)
+- button "Exit Demo Mode"
+- paragraph: Demo mode shows example analysis results
+- separator
+- link "Analysis Canvas":
+  - /url: /analysis/canvas
+  - heading "Analysis Canvas" [level=3]
+- button "Fullscreen"
+- heading "Security Analysis Results" [level=2]
+- button "Export"
+- link "STPA-Sec Analysis":
+  - /url: /analysis/plugin/stpa-sec
+  - heading "STPA-Sec Analysis" [level=3]
+- link "STRIDE Analysis":
+  - /url: /analysis/plugin/stride
+  - heading "STRIDE Analysis" [level=3]
+- link "PASTA Analysis":
+  - /url: /analysis/plugin/pasta
+  - heading "PASTA Analysis" [level=3]
+- link "DREAD Analysis":
+  - /url: /analysis/plugin/dread
+  - heading "DREAD Analysis" [level=3]
+- separator
+- link "Security Analyst Agent":
+  - /url: /analysis/agent
+  - heading "Security Analyst Agent" [level=3]
+- button "Fullscreen"
+- button "Collapse"
+- complementary:
+  - text: 🤖
+  - paragraph:
+    - text: Ready to help analyze your security findings. Would you like to
+    - link "\udd0d explore financial breach scenarios":
+      - /url: "#"
+    - text: or
+    - link "️ show critical vulnerabilities":
+      - /url: "#"
+    - text: or ask me something else?
+  - button "Attach file"
+  - textbox "Ask about the analysis or request refinements..."
+  - button [disabled]
+```

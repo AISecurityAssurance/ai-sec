@@ -83,16 +83,53 @@ pnpm generate-types   # Generate TypeScript types from Python models
 
 The platform includes comprehensive integration tests that verify all components work together correctly.
 
-#### Prerequisites for Integration Tests
+#### Option 1: Testing WITHOUT Docker (Recommended for Quick Testing)
 
-1. **Docker and Docker Compose** installed
-2. **Environment variables** - Create a `.env` file in the root directory:
+**Prerequisites:**
+- Python 3.8+
+- Node.js 18+
+
+**Running Tests Locally:**
+
+1. **Start the backend** (in one terminal):
    ```bash
-   OPENAI_API_KEY=your-openai-api-key
-   ANTHROPIC_API_KEY=your-anthropic-api-key
-   GROQ_API_KEY=your-groq-api-key  # Optional
-   GOOGLE_API_KEY=your-google-api-key  # Optional
+   # With Ollama (recommended)
+   export OLLAMA_ENDPOINT=http://localhost:11434
+   ./run-backend-local.sh
+   
+   # Or without any LLM (uses mock responses)
+   ./run-backend-local.sh
    ```
+
+2. **Start the frontend** (in another terminal):
+   ```bash
+   cd apps/web
+   npm run dev
+   ```
+
+3. **Run the tests**:
+   ```bash
+   # Simple Python tests (no Node.js required)
+   python test_backend.py
+   
+   # Or full integration tests with Playwright
+   ./run-tests-local.sh
+   ```
+
+**Configuring Models:**
+- You can configure models through the Settings UI (no .env required)
+- Or set environment variables before starting the backend:
+  ```bash
+  export ANTHROPIC_API_KEY=your-key  # Optional
+  export OPENAI_API_KEY=your-key     # Optional
+  export OLLAMA_ENDPOINT=http://localhost:11434  # For local models
+  ```
+
+#### Option 2: Testing WITH Docker (Full Integration)
+
+**Prerequisites:**
+- Docker and Docker Compose installed
+- API keys in `.env` file (optional with new settings system)
 
 #### Running Integration Tests
 

@@ -2,21 +2,22 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies (cached unless apt packages change)
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv
+# Install uv for faster pip installs (cached)
 RUN pip install uv
 
-# Copy all backend code first
-COPY . .
-
-# Install dependencies
+# Copy only requirements first (cached unless requirements change)
+COPY requirements.txt .
 RUN uv pip install --system -r requirements.txt
+
+# Copy application code (this layer rebuilds when code changes)
+COPY . .
 
 # Expose port
 EXPOSE 8000

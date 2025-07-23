@@ -2,21 +2,28 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Install pnpm
+# Install pnpm (cached)
 RUN npm install -g pnpm@8
 
-# Copy root workspace files first
-COPY package.json pnpm-workspace.yaml ./
+# Copy workspace config files first (rarely change, well cached)
+COPY pnpm-workspace.yaml package.json ./
+
+# Copy lockfile for dependency resolution
 COPY pnpm-lock.yaml ./
 
-# Copy frontend package.json
-COPY apps/frontend/package.json ./apps/frontend/
+# Create directory structure
+RUN mkdir -p apps/frontend packages/types
 
-# Install dependencies using workspace
+# Copy package.json files for each workspace
+COPY apps/frontend/package.json ./apps/frontend/
+COPY packages/types/package.json ./packages/types/
+
+# Install dependencies (cached unless package.json or lockfile changes)
 RUN pnpm install --frozen-lockfile
 
-# Copy application code
+# Copy application code (this layer rebuilds when code changes)
 COPY apps/frontend ./apps/frontend
+COPY packages/types ./packages/types
 
 # Change to frontend directory
 WORKDIR /app/apps/frontend

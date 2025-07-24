@@ -114,6 +114,7 @@
 
 .step-icon.in-progress {
   color: var(--primary);
+  animation: spin 1s linear infinite;
 }
 
 .step-icon.completed {

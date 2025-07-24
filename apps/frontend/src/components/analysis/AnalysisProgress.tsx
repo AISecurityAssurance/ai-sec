@@ -103,7 +103,8 @@ export default function AnalysisProgress({
           <div key={framework} className="framework-section">
             <h3 className="framework-title">
               {frameworkNames[framework] || framework}
-              {stepsByFramework[framework]?.every(s => s.status === 'completed') && (
+              {stepsByFramework[framework]?.length > 0 && 
+               stepsByFramework[framework].every(s => s.status === 'completed') && (
                 <Check className="framework-complete" size={18} />
               )}
             </h3>

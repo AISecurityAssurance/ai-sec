@@ -208,6 +208,7 @@ export default function AnalysisApp() {
       const frameworkSteps = getFrameworkSteps(framework);
       initialSteps.push(...frameworkSteps);
     });
+    console.log('Setting initial steps:', initialSteps);
     setAnalysisSteps(initialSteps);
     
     try {
@@ -235,11 +236,67 @@ export default function AnalysisApp() {
       // Store the analysis ID in the global store
       if (result.id) {
         setCurrentAnalysisId(result.id);
-        setShowWelcome(false);
+        // Delay hiding welcome to ensure state is preserved
+        setTimeout(() => {
+          setShowWelcome(false);
+        }, 100);
       }
       
       // Keep analyzing state true until WebSocket updates indicate completion
       // The AnalysisWebSocketProvider will handle setting it to false
+      
+      // Mock progress simulation for demo/testing
+      // This simulates what the WebSocket would normally do
+      if (!result.id || process.env.NODE_ENV === 'development') {
+        console.log('Starting mock progress simulation');
+        let stepIndex = 0;
+        const totalSteps = initialSteps.length;
+        
+        const progressInterval = setInterval(() => {
+          if (stepIndex < totalSteps) {
+            const currentStep = initialSteps[stepIndex];
+            const frameworkName = currentStep.id.split('-')[0];
+            
+            // Mark current step as in progress
+            setAnalysisSteps(prevSteps => 
+              prevSteps.map(step => 
+                step.id === currentStep.id 
+                  ? { ...step, status: 'in_progress' as const }
+                  : step.status === 'in_progress' 
+                    ? { ...step, status: 'completed' as const }
+                    : step
+              )
+            );
+            
+            // Update current framework
+            setCurrentFramework(frameworkName);
+            
+            // After 1.5 seconds, mark as completed and move to next
+            setTimeout(() => {
+              setAnalysisSteps(prevSteps =>
+                prevSteps.map(step =>
+                  step.id === currentStep.id
+                    ? { ...step, status: 'completed' as const }
+                    : step
+                )
+              );
+              stepIndex++;
+              
+              // If all steps completed, finish analysis
+              if (stepIndex >= totalSteps) {
+                clearInterval(progressInterval);
+                setTimeout(() => {
+                  setIsAnalyzing(false);
+                  console.log('Mock analysis completed');
+                }, 1000);
+              }
+            }, 1500);
+          }
+        }, 2000);
+        
+        // Store interval ID for cleanup if needed
+        (window as any).__analysisProgressInterval = progressInterval;
+      }
       
     } catch (error) {
       console.error('Error creating analysis:', error);

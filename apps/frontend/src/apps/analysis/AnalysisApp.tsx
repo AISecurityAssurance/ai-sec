@@ -281,7 +281,11 @@ export default function AnalysisApp() {
           
           if (stepIndex < totalSteps) {
             const currentStep = initialSteps[stepIndex];
-            const frameworkName = currentStep.id.split('-')[0];
+            // Handle framework names with hyphens (like stpa-sec)
+            const stepParts = currentStep.id.split('-');
+            const frameworkName = stepParts[0] === 'stpa' && stepParts[1] === 'sec' 
+              ? 'stpa-sec' 
+              : stepParts[0];
             console.log('Processing step:', currentStep.id, 'from framework:', frameworkName);
             
             // Mark current step as in progress
@@ -300,7 +304,7 @@ export default function AnalysisApp() {
             // Update current framework
             setCurrentFramework(frameworkName);
             
-            // After 1.5 seconds, mark as completed and move to next
+            // After 2.5 seconds, mark as completed and move to next
             setTimeout(() => {
               setAnalysisSteps(prevSteps =>
                 prevSteps.map(step =>
@@ -319,7 +323,7 @@ export default function AnalysisApp() {
                   console.log('Mock analysis completed');
                 }, 1000);
               }
-            }, 1500);
+            }, 2500);
           }
         }, 2000);
         

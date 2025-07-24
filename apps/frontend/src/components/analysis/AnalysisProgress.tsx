@@ -47,7 +47,11 @@ export default function AnalysisProgress({
 
   // Group steps by framework
   const stepsByFramework = steps.reduce((acc, step) => {
-    const framework = step.id.split('-')[0];
+    // Handle framework names with hyphens (like stpa-sec)
+    const stepParts = step.id.split('-');
+    const framework = stepParts[0] === 'stpa' && stepParts[1] === 'sec' 
+      ? 'stpa-sec' 
+      : stepParts[0];
     if (!acc[framework]) acc[framework] = [];
     acc[framework].push(step);
     return acc;

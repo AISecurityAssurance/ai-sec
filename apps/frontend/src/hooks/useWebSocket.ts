@@ -32,10 +32,14 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     
     const handleAnalysisUpdate = (update: AnalysisUpdate) => {
       options.onAnalysisUpdate?.(update);
+      // Dispatch custom event for other components to listen to
+      window.dispatchEvent(new CustomEvent('analysis-update', { detail: update }));
     };
     
     const handleSectionUpdate = (update: SectionUpdate) => {
       options.onSectionUpdate?.(update);
+      // Dispatch custom event for other components to listen to
+      window.dispatchEvent(new CustomEvent('section-update', { detail: update }));
     };
     
     const handleNotification = (data: any) => {

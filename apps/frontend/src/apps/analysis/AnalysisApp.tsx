@@ -41,6 +41,142 @@ export default function AnalysisApp() {
     }
   }, [currentAnalysisId, demoMode, setDemoMode]);
   
+  // Helper function to get framework-specific analysis steps
+  const getFrameworkSteps = (framework: string): AnalysisStep[] => {
+    const baseSteps: Record<string, AnalysisStep[]> = {
+      'stpa-sec': [
+        { id: `${framework}-system-modeling`, name: 'System Modeling', status: 'pending' as const },
+        { id: `${framework}-hazard-analysis`, name: 'Hazard Analysis', status: 'pending' as const },
+        { id: `${framework}-control-structure`, name: 'Control Structure', status: 'pending' as const },
+        { id: `${framework}-unsafe-actions`, name: 'Unsafe Control Actions', status: 'pending' as const },
+        { id: `${framework}-loss-scenarios`, name: 'Loss Scenarios', status: 'pending' as const },
+      ],
+      'stride': [
+        { id: `${framework}-data-flow`, name: 'Data Flow Analysis', status: 'pending' as const },
+        { id: `${framework}-threat-modeling`, name: 'Threat Modeling', status: 'pending' as const },
+        { id: `${framework}-threat-categorization`, name: 'Threat Categorization', status: 'pending' as const },
+        { id: `${framework}-mitigation`, name: 'Mitigation Strategies', status: 'pending' as const },
+      ],
+      'pasta': [
+        { id: `${framework}-business-objectives`, name: 'Business Objectives', status: 'pending' as const },
+        { id: `${framework}-tech-scope`, name: 'Technical Scope', status: 'pending' as const },
+        { id: `${framework}-app-decomposition`, name: 'Application Decomposition', status: 'pending' as const },
+        { id: `${framework}-threat-analysis`, name: 'Threat Analysis', status: 'pending' as const },
+        { id: `${framework}-vulnerability-analysis`, name: 'Vulnerability Analysis', status: 'pending' as const },
+        { id: `${framework}-attack-modeling`, name: 'Attack Modeling', status: 'pending' as const },
+        { id: `${framework}-risk-analysis`, name: 'Risk Analysis', status: 'pending' as const },
+      ],
+      'dread': [
+        { id: `${framework}-damage-potential`, name: 'Damage Potential', status: 'pending' as const },
+        { id: `${framework}-reproducibility`, name: 'Reproducibility', status: 'pending' as const },
+        { id: `${framework}-exploitability`, name: 'Exploitability', status: 'pending' as const },
+        { id: `${framework}-affected-users`, name: 'Affected Users', status: 'pending' as const },
+        { id: `${framework}-discoverability`, name: 'Discoverability', status: 'pending' as const },
+      ],
+      'maestro': [
+        { id: `${framework}-mission-critical`, name: 'Mission Critical Analysis', status: 'pending' as const },
+        { id: `${framework}-attack-vectors`, name: 'Attack Vectors', status: 'pending' as const },
+        { id: `${framework}-exploit-scenarios`, name: 'Exploit Scenarios', status: 'pending' as const },
+        { id: `${framework}-security-testing`, name: 'Security Testing', status: 'pending' as const },
+        { id: `${framework}-risk-optimization`, name: 'Risk Optimization', status: 'pending' as const },
+      ],
+      'linddun': [
+        { id: `${framework}-data-flow-diagram`, name: 'Data Flow Diagram', status: 'pending' as const },
+        { id: `${framework}-privacy-threats`, name: 'Privacy Threats', status: 'pending' as const },
+        { id: `${framework}-threat-mapping`, name: 'Threat Mapping', status: 'pending' as const },
+        { id: `${framework}-elicitation`, name: 'Threat Elicitation', status: 'pending' as const },
+        { id: `${framework}-privacy-controls`, name: 'Privacy Controls', status: 'pending' as const },
+      ],
+      'hazop': [
+        { id: `${framework}-parameter-identification`, name: 'Parameter Identification', status: 'pending' as const },
+        { id: `${framework}-guide-words`, name: 'Guide Word Application', status: 'pending' as const },
+        { id: `${framework}-deviation-analysis`, name: 'Deviation Analysis', status: 'pending' as const },
+        { id: `${framework}-consequence-assessment`, name: 'Consequence Assessment', status: 'pending' as const },
+        { id: `${framework}-safeguards`, name: 'Safeguards', status: 'pending' as const },
+      ],
+      'octave': [
+        { id: `${framework}-asset-identification`, name: 'Asset Identification', status: 'pending' as const },
+        { id: `${framework}-threat-profiling`, name: 'Threat Profiling', status: 'pending' as const },
+        { id: `${framework}-vulnerability-identification`, name: 'Vulnerability Identification', status: 'pending' as const },
+        { id: `${framework}-risk-measurement`, name: 'Risk Measurement', status: 'pending' as const },
+        { id: `${framework}-protection-strategy`, name: 'Protection Strategy', status: 'pending' as const },
+      ],
+    };
+    
+    return baseSteps[framework] || [
+      { id: `${framework}-analysis`, name: 'Analysis', status: 'pending' as const }
+    ];
+  };
+  
+  // Listen for WebSocket updates to update progress
+  useEffect(() => {
+    if (!currentAnalysisId || !isAnalyzing) return;
+    
+    const handleAnalysisUpdate = (event: CustomEvent) => {
+      const { status, progress, message, framework } = event.detail;
+      
+      if (framework) {
+        setCurrentFramework(framework);
+      }
+      
+      // Update step status based on progress message
+      if (message && analysisSteps.length > 0) {
+        setAnalysisSteps(prevSteps => 
+          prevSteps.map(step => {
+            // Check if this step is mentioned in the message
+            if (message.toLowerCase().includes(step.name.toLowerCase())) {
+              return { ...step, status: 'in_progress' as const, message };
+            }
+            // Mark previous steps as completed if we're past them
+            if (step.status === 'in_progress') {
+              return { ...step, status: 'completed' as const };
+            }
+            return step;
+          })
+        );
+      }
+      
+      // Handle completion
+      if (status === 'completed') {
+        setAnalysisSteps(prevSteps =>
+          prevSteps.map(step => ({ ...step, status: 'completed' as const }))
+        );
+        setIsAnalyzing(false);
+      } else if (status === 'failed') {
+        setAnalysisError(message || 'Analysis failed');
+        setIsAnalyzing(false);
+      }
+    };
+    
+    const handleSectionUpdate = (event: CustomEvent) => {
+      const { framework, section_id, status } = event.detail;
+      
+      setAnalysisSteps(prevSteps =>
+        prevSteps.map(step => {
+          if (step.id === `${framework}-${section_id}`) {
+            return { 
+              ...step, 
+              status: status === 'completed' ? 'completed' : 
+                      status === 'failed' ? 'failed' : 
+                      status === 'in_progress' ? 'in_progress' : 
+                      'pending' as const
+            };
+          }
+          return step;
+        })
+      );
+    };
+    
+    // Listen for WebSocket events
+    window.addEventListener('analysis-update', handleAnalysisUpdate as EventListener);
+    window.addEventListener('section-update', handleSectionUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('analysis-update', handleAnalysisUpdate as EventListener);
+      window.removeEventListener('section-update', handleSectionUpdate as EventListener);
+    };
+  }, [currentAnalysisId, isAnalyzing, analysisSteps]);
+  
   const handleOpenInNewWindow = (panel: 'left' | 'center' | 'right') => {
     const urls = {
       left: '/analysis/input-selection',
@@ -62,6 +198,17 @@ export default function AnalysisApp() {
   const handleCreateAnalysis = async (data: { description: string; frameworks: string[] }) => {
     console.log('Creating analysis with:', data);
     setIsAnalyzing(true);
+    setAnalysisFrameworks(data.frameworks);
+    setAnalysisError('');
+    
+    // Initialize analysis steps based on selected frameworks
+    const initialSteps: AnalysisStep[] = [];
+    data.frameworks.forEach(framework => {
+      // Add framework-specific steps
+      const frameworkSteps = getFrameworkSteps(framework);
+      initialSteps.push(...frameworkSteps);
+    });
+    setAnalysisSteps(initialSteps);
     
     try {
       const projectId = generateUUID();
@@ -97,8 +244,7 @@ export default function AnalysisApp() {
     } catch (error) {
       console.error('Error creating analysis:', error);
       setIsAnalyzing(false);
-      // Show error to user
-      alert('Failed to create analysis. Please check your connection and try again.');
+      setAnalysisError('Failed to create analysis. Please check your connection and try again.');
     }
   };
   

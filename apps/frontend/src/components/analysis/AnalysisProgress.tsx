@@ -53,6 +53,27 @@ export default function AnalysisProgress({
     return acc;
   }, {} as Record<string, AnalysisStep[]>);
 
+  // Show loading state if no frameworks or steps yet
+  if (frameworks.length === 0 || steps.length === 0) {
+    return (
+      <div className="analysis-progress">
+        <div className="progress-header">
+          <h2>Starting Security Analysis</h2>
+        </div>
+        <div className="frameworks-progress">
+          <div className="framework-section">
+            <div className="steps-list">
+              <div className="step-item in_progress">
+                <Loader2 className="step-icon in-progress spinning" size={16} />
+                <span className="step-name">Initializing analysis...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="analysis-progress">
       <div className="progress-header">

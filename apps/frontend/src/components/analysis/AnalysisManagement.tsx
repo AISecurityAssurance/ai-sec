@@ -54,11 +54,7 @@ export default function AnalysisManagement({ onNewAnalysis, onAddAnalysis }: Ana
   
   return (
     <div className="analysis-management">
-      <div className="management-header">
-        <h3>Analysis Tools</h3>
-      </div>
-      
-      <div className="management-actions">
+      <div className="management-actions-list">
         <button 
           className="management-btn"
           onClick={handleNewAnalysis}

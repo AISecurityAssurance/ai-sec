@@ -28,6 +28,7 @@ interface InputSelectionPanelProps {
 export default function InputSelectionPanel({ onNewAnalysis, onAddAnalysis }: InputSelectionPanelProps = {}) {
   const { tokenEstimation } = useSettingsStore();
   const { enabledAnalyses, setEnabledAnalyses, demoMode, setDemoMode, analysisResults, currentAnalysisId } = useAnalysisStore();
+  const [analysisToolsExpanded, setAnalysisToolsExpanded] = useState(false);
   const [inputSelectionExpanded, setInputSelectionExpanded] = useState(true);
   const [analysisPluginsExpanded, setAnalysisPluginsExpanded] = useState(true);
   
@@ -66,13 +67,23 @@ export default function InputSelectionPanel({ onNewAnalysis, onAddAnalysis }: In
 
   return (
     <div className="input-selection-panel">
-      {/* Analysis Management Section */}
-      {onNewAnalysis && onAddAnalysis && (
-        <AnalysisManagement 
-          onNewAnalysis={onNewAnalysis}
-          onAddAnalysis={onAddAnalysis}
-        />
-      )}
+      {/* Analysis Tools Section */}
+      <div className="panel-section">
+        <div 
+          className="section-header-link"
+          onClick={() => setAnalysisToolsExpanded(!analysisToolsExpanded)}
+        >
+          {analysisToolsExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          <span className="section-title-link">Analysis Tools</span>
+        </div>
+        
+        {analysisToolsExpanded && onNewAnalysis && onAddAnalysis && (
+          <AnalysisManagement 
+            onNewAnalysis={onNewAnalysis}
+            onAddAnalysis={onAddAnalysis}
+          />
+        )}
+      </div>
       
       {/* Input Selection Section */}
       <div className="panel-section">

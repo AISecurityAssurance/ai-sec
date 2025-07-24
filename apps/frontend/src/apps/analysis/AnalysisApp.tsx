@@ -6,14 +6,15 @@ import AnalysisCanvas from '../../components/analysis/AnalysisCanvas';
 import ChatPanel from '../user/components/ChatPanel';
 import WelcomeScreen from '../../components/analysis/WelcomeScreen';
 import LoadingOverlay from '../../components/common/LoadingOverlay';
-import AnalysisProgress, { AnalysisStep } from '../../components/analysis/AnalysisProgress';
+import AnalysisProgress from '../../components/analysis/AnalysisProgress';
+import type { AnalysisStep } from '../../components/analysis/AnalysisProgress';
 import { NewAnalysisDialog } from '../user/components/NewAnalysisDialog';
 import { AnalysisWebSocketProvider } from '../../components/analysis/AnalysisWebSocketProvider';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { isFirstVisit } from '../../utils/resetStores';
 import { generateUUID } from '../../utils/uuid';
 import { apiFetch } from '../../config/api';
-import { wsClient } from '../../utils/websocket';
+import wsClient from '../../utils/websocket';
 import './AnalysisApp.css';
 
 export default function AnalysisApp() {

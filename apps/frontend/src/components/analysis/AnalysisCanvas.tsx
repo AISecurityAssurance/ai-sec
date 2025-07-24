@@ -55,24 +55,6 @@ export default function AnalysisCanvas() {
     alert(`Export to ${format.toUpperCase()} - Coming soon!`);
   };
 
-  // Only show content in demo mode or standalone mode
-  if (!demoMode && !isStandalone) {
-    return (
-      <div className="analysis-canvas empty">
-        <div className="empty-state">
-          <h3>Welcome to Security Analysis Platform</h3>
-          <p>To get started:</p>
-          <ol>
-            <li>Select input files or links in the Input Selection panel</li>
-            <li>Choose analysis plugins to run</li>
-            <li>Click "Run Analysis" to begin</li>
-          </ol>
-          <p className="demo-hint">Or enable Demo Mode to see example analysis results</p>
-        </div>
-      </div>
-    );
-  }
-
   // Get list of enabled analyses in order
   const enabledAnalysesList = analysisOrder
     .filter(id => enabledAnalyses[id]);

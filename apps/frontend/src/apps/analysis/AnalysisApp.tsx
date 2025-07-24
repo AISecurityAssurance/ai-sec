@@ -321,6 +321,23 @@ export default function AnalysisApp() {
                 setTimeout(() => {
                   setIsAnalyzing(false);
                   console.log('Mock analysis completed');
+                  
+                  // Enable the analyzed frameworks in the store
+                  const { setEnabledAnalyses } = useAnalysisStore.getState();
+                  const enabledFrameworks: Record<string, boolean> = {};
+                  data.frameworks.forEach(fw => {
+                    enabledFrameworks[fw] = true;
+                  });
+                  setEnabledAnalyses(enabledFrameworks);
+                  console.log('Enabled frameworks:', enabledFrameworks);
+                  
+                  // In a real system, analysis results would be fetched from the backend
+                  // For now, we can enable demo mode to show sample results
+                  if (USE_MOCK_PROGRESS) {
+                    console.log('Enabling demo mode to show sample results');
+                    const { setDemoMode } = useAnalysisStore.getState();
+                    setDemoMode(true);
+                  }
                 }, 1000);
               }
             }, 2500);

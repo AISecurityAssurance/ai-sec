@@ -16,7 +16,7 @@ interface AnalysisProgressProps {
 }
 
 const frameworkNames: Record<string, string> = {
-  'stpa-sec': 'STPA-SEC',
+  'stpa-sec': 'STPA-Sec',
   'stride': 'STRIDE',
   'pasta': 'PASTA',
   'dread': 'DREAD',
@@ -52,6 +52,13 @@ export default function AnalysisProgress({
     acc[framework].push(step);
     return acc;
   }, {} as Record<string, AnalysisStep[]>);
+  
+  // Ensure all selected frameworks are represented
+  frameworks.forEach(framework => {
+    if (!stepsByFramework[framework]) {
+      stepsByFramework[framework] = [];
+    }
+  });
 
   // Show loading state if no frameworks or steps yet
   if (frameworks.length === 0 || steps.length === 0) {
@@ -124,7 +131,7 @@ export default function AnalysisProgress({
       </div>
 
       <div className="progress-footer">
-        <p>This may take a few minutes. You can continue using the application while the analysis runs.</p>
+        <p>This may take a few minutes. Please wait while the analysis completes.</p>
       </div>
     </div>
   );

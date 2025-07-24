@@ -87,7 +87,7 @@ export function NewAnalysisDialog({ isOpen, onClose, onSubmit }: NewAnalysisDial
                   color: 'var(--text-secondary)'
                 }}
               >
-                Load Demo System
+                Try Example System
               </button>
             </label>
             <textarea

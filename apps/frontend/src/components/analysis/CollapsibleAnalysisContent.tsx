@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { ChevronRight, ChevronDown, FileText, Users, AlertTriangle, ShieldAlert, GitBranch, Zap, Target, Shield } from 'lucide-react';
 import CollapsibleTable from './CollapsibleTable';
+import { useAnalysisStore } from '../../stores/analysisStore';
+import { sampleAnalysisData } from '../../data/sampleAnalysisData';
 import './CollapsibleAnalysisContent.css';
 
 interface SubSection {
@@ -67,6 +69,7 @@ export default function CollapsibleAnalysisContent({
 }: CollapsibleAnalysisContentProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [expandedTables, setExpandedTables] = useState<Set<string>>(new Set());
+  const { demoMode } = useAnalysisStore();
   const subsections = analysisSubsections[analysisId] || [];
 
   const toggleSection = (sectionId: string) => {
@@ -100,7 +103,68 @@ export default function CollapsibleAnalysisContent({
     expandedTables: Set<string>, 
     toggleTable: (id: string) => void
   ) => {
-    // For demo purposes, show placeholder content with collapsible tables
+    // If in demo mode, show sample data
+    if (demoMode && sampleAnalysisData[analysisId]?.[subsectionId]) {
+      const section = sampleAnalysisData[analysisId][subsectionId];
+      
+      if (section.type === 'table') {
+        return (
+          <CollapsibleTable
+            title={section.title}
+            isExpanded={expandedTables.has(`${analysisId}-${subsectionId}-table`)}
+            onToggle={() => toggleTable(`${analysisId}-${subsectionId}-table`)}
+          >
+            <table className="analysis-table">
+              <thead>
+                <tr>
+                  {section.content.headers.map((header: string, idx: number) => (
+                    <th key={idx}>{header}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {section.content.rows.map((row: string[], rowIdx: number) => (
+                  <tr key={rowIdx}>
+                    {row.map((cell: string, cellIdx: number) => (
+                      <td key={cellIdx}>{cell}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </CollapsibleTable>
+        );
+      } else if (section.type === 'text') {
+        return (
+          <div className="analysis-text-content">
+            <div dangerouslySetInnerHTML={{ __html: section.content.replace(/\n/g, '<br />').replace(/•/g, '&bull;') }} />
+          </div>
+        );
+      } else if (section.type === 'list') {
+        return (
+          <div className="analysis-list-content">
+            <ul>
+              {section.content.map((item: string, idx: number) => (
+                <li key={idx} dangerouslySetInnerHTML={{ __html: item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+              ))}
+            </ul>
+          </div>
+        );
+      } else if (section.type === 'diagram') {
+        return (
+          <div className="analysis-diagram-content">
+            <p>{section.content.description}</p>
+            <div className="diagram-elements">
+              {section.content.elements.map((element: string, idx: number) => (
+                <div key={idx} className="diagram-element">{element}</div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+    }
+    
+    // Original placeholder content for non-demo mode
     // In a real implementation, this would render the actual analysis content
     
     if (analysisId === 'stpa-sec') {

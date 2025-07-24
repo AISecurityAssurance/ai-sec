@@ -103,3 +103,96 @@
 .collapsible-analysis-content .analysis-content {
   padding: 0;
 }
+
+/* Analysis Table Styles */
+.analysis-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.analysis-table th {
+  background: var(--color-surface-secondary);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.analysis-table td {
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.analysis-table tr:last-child td {
+  border-bottom: none;
+}
+
+.analysis-table tr:hover td {
+  background: var(--color-surface-hover);
+}
+
+/* Analysis Content Styles */
+.analysis-text-content {
+  padding: var(--space-3);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.analysis-text-content strong {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+}
+
+.analysis-list-content {
+  padding: var(--space-3);
+}
+
+.analysis-list-content ul {
+  margin: 0;
+  padding-left: var(--space-4);
+  list-style: disc;
+}
+
+.analysis-list-content li {
+  margin-bottom: var(--space-2);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.analysis-list-content li:last-child {
+  margin-bottom: 0;
+}
+
+.analysis-list-content strong {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Diagram Content Styles */
+.analysis-diagram-content {
+  padding: var(--space-3);
+}
+
+.analysis-diagram-content p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.diagram-elements {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.diagram-element {
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-secondary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  border-left: 3px solid var(--color-primary);
+}

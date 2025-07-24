@@ -337,10 +337,10 @@ export default function InputSelectionPanel() {
           className={`demo-mode-btn ${demoMode ? 'active' : ''}`}
           onClick={toggleDemoMode}
         >
-          {demoMode ? 'Exit Demo Mode' : 'Enable Demo Mode'}
+          {demoMode ? 'Exit Sample Results' : 'View Sample Results'}
         </button>
         {demoMode && (
-          <p className="demo-mode-hint">Demo mode shows example analysis results</p>
+          <p className="demo-mode-hint">Viewing pre-populated sample analysis (no AI processing)</p>
         )}
       </div>
     </div>

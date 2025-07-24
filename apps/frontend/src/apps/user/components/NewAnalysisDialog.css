@@ -120,29 +120,28 @@
 }
 
 .frameworks-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  max-height: 200px;
+  max-height: 240px;
   overflow-y: auto;
-  padding: 4px 8px 4px 4px;
-  margin-right: -4px;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
 }
 
 .framework-checkbox {
   display: flex;
   align-items: center;
-  padding: 8px 10px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
+  transition: background-color 0.2s;
+  border-radius: 4px;
 }
 
 .framework-checkbox:hover {
-  border-color: var(--accent-primary);
   background: var(--bg-hover);
 }
 
@@ -443,6 +442,13 @@
   font-weight: 500;
   color: var(--text-primary);
   font-size: 14px;
+}
+
+.framework-brief {
+  font-size: 14px;
+  color: var(--text-secondary);
+  opacity: 0.8;
+  margin-left: var(--space-1);
 }
 
 /* Scrollbar styling for framework list */

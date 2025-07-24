@@ -16,14 +16,14 @@ interface NewAnalysisDialogProps {
 }
 
 const FRAMEWORKS = [
-  { id: 'stpa-sec', name: 'STPA-SEC', description: 'Systems-Theoretic Process Analysis for Security' },
-  { id: 'stride', name: 'STRIDE', description: 'Spoofing, Tampering, Repudiation, Info Disclosure, DoS, Elevation' },
-  { id: 'pasta', name: 'PASTA', description: 'Process for Attack Simulation and Threat Analysis' },
-  { id: 'dread', name: 'DREAD', description: 'Damage, Reproducibility, Exploitability, Affected Users, Discoverability' },
-  { id: 'maestro', name: 'MAESTRO', description: 'AI/ML-specific security framework' },
-  { id: 'linddun', name: 'LINDDUN', description: 'Privacy threat modeling framework' },
-  { id: 'hazop', name: 'HAZOP', description: 'Hazard and Operability Study' },
-  { id: 'octave', name: 'OCTAVE', description: 'Operationally Critical Threat, Asset, and Vulnerability Evaluation' }
+  { id: 'stpa-sec', name: 'STPA-SEC', brief: 'Systems-theoretic security', description: 'Systems-Theoretic Process Analysis for Security' },
+  { id: 'stride', name: 'STRIDE', brief: 'Threat categorization', description: 'Spoofing, Tampering, Repudiation, Info Disclosure, DoS, Elevation' },
+  { id: 'pasta', name: 'PASTA', brief: 'Risk-centric threat modeling', description: 'Process for Attack Simulation and Threat Analysis' },
+  { id: 'dread', name: 'DREAD', brief: 'Risk rating methodology', description: 'Damage, Reproducibility, Exploitability, Affected Users, Discoverability' },
+  { id: 'maestro', name: 'MAESTRO', brief: 'AI/ML security', description: 'AI/ML-specific security framework' },
+  { id: 'linddun', name: 'LINDDUN', brief: 'Privacy threats', description: 'Privacy threat modeling framework' },
+  { id: 'hazop', name: 'HAZOP', brief: 'Hazard analysis', description: 'Hazard and Operability Study' },
+  { id: 'octave', name: 'OCTAVE', brief: 'Risk assessment', description: 'Operationally Critical Threat, Asset, and Vulnerability Evaluation' }
 ];
 
 const DEMO_SYSTEM = `An integrated financial services platform that provides online banking, investment management, and payment processing services. The system consists of:
@@ -295,6 +295,7 @@ export function NewAnalysisDialogEnhanced({ isOpen, onClose, onSubmit }: NewAnal
                       onChange={() => toggleFramework(framework.id)}
                     />
                     <span className="framework-name">{framework.name}</span>
+                    <span className="framework-brief">– {framework.brief}</span>
                   </label>
                 ))}
               </div>

@@ -190,4 +190,119 @@ Update Todos
 
   # Future iterations
   https://www.datagravity.dev/p/agent-infrastructure-and-control?utm_source=tldrdata
-  
+
+
+
+   Hm.  I'm thinking something more intuitive.  Users are accustomed to seeing a dropdown filepicker menu when saving to local storage.  For saving to 
+  Cloud, the should provide a bucket address.  To export (no clue what they'd export it to), let's leave this our for now because we don't know any other 
+  formats they could export it to.  On that note, we'll need a file extension for our app.  Since our app saves multiple components (i.e., tables, txt, 
+  images, databases, whatelse?), we need to save everything in a way that it can be re-loaded in the app framework.  We should also consider saving the SA
+   Agent context and/or indexing so a user can restore a previous state they were working on.  Security analysis is a long task.  Until it's automated, 
+  it's likely that a human would complete the analysis in multiple sessions (shutting off their computer when they leave work) and may want to revisite 
+  and rework this after some time has passed and designs have changd.  Do NOT start coding yet.  First, is this a good time to start on the save feature 
+  of the app?  Second, let's discuss options and their implications for the user, app complexiting, and future growth of the app.
+
+⏺ You're absolutely right to pause and think this through carefully. Let me analyze whether this is the right time and what our options are.
+
+  Is this a good time to implement save functionality?
+
+  Maybe not yet. Here's why:
+
+  1. Incomplete Analysis Flow: We don't have actual analysis results being generated yet - we're using mock data
+  2. Unknown Data Structure: We haven't fully defined what data needs to be saved (analysis results, agent context, conversation history, etc.)
+  3. No Backend: Without a backend, we're limited to browser storage or file downloads
+  4. Early Architecture: The app structure might change significantly as we build out real functionality
+
+  Options for Save/Load Implementation
+
+  Option 1: Simple JSON Export/Import (Quick Win)
+
+  - Format: .secanalysis or .seca file (JSON-based)
+  - Contents: Current state snapshot
+  - Pros:
+    - Quick to implement
+    - Works offline
+    - User has full control of their data
+  - Cons:
+    - No collaboration features
+    - Manual file management
+    - Risk of losing files
+
+  Option 2: Browser-Based Storage First
+
+  - Use: IndexedDB for large data, localStorage for settings
+  - Pros:
+    - No backend needed
+    - Automatic saving
+    - Works offline
+  - Cons:
+    - Data tied to browser/device
+    - Storage limits
+    - No cross-device sync
+
+  Option 3: Full Backend Implementation
+
+  - Architecture: REST API + PostgreSQL/MongoDB
+  - Features: User accounts, cloud sync, collaboration
+  - Pros:
+    - Professional solution
+    - Scalable
+    - Enables team features
+  - Cons:
+    - Significant development effort
+    - Requires authentication system
+    - Hosting costs
+
+  What Needs to Be Saved?
+
+  1. Analysis Configuration
+    - Selected frameworks
+    - Input files/sources
+    - Analysis parameters
+  2. Analysis Results
+    - Framework outputs
+    - Generated diagrams
+    - Risk assessments
+    - Recommendations
+  3. Working State
+    - Agent conversation history
+    - User annotations
+    - Custom modifications
+    - View preferences
+  4. Metadata
+    - Creation/modification dates
+    - Version information
+    - User notes
+
+  Recommended Approach
+
+  Phase 1 (Now): Focus on core functionality
+  - Complete the analysis pipeline with real data
+  - Define the data models clearly
+  - Implement in-memory state management
+
+  Phase 2 (Soon): Simple persistence
+  - Add .seca file format (ZIP with JSON + assets)
+  - Implement export/import functionality
+  - Use IndexedDB for auto-save during sessions
+
+  Phase 3 (Later): Full solution
+  - Add backend with user accounts
+  - Implement proper file picker (using File System Access API)
+  - Add collaboration features
+
+  File Format Proposal
+
+  .seca (ZIP archive)
+  ├── manifest.json      # Version, metadata, file index
+  ├── analysis.json      # Analysis configuration and results
+  ├── state.json         # UI state, preferences
+  ├── conversations/     # Agent conversation history
+  ├── inputs/           # Original input files
+  ├── outputs/          # Generated diagrams, reports
+  └── attachments/      # User-added files
+
+  Would you like to:
+  1. Continue with the current mock implementation to flesh out the UI?
+  2. Start defining the data models and file format?
+  3. Build out the actual analysis functionality first?

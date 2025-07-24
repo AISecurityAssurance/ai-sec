@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Save, X, HardDrive, Cloud, Download, FolderOpen } from 'lucide-react';
+import { Save, X } from 'lucide-react';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import './Dialog.css';
 
@@ -84,11 +84,8 @@ export default function SaveAnalysisDialog({ isOpen, onClose, onSave }: SaveAnal
                     checked={saveLocation === 'local'}
                     onChange={(e) => setSaveLocation(e.target.value as SaveLocation)}
                   />
-                  <HardDrive size={18} />
-                  <div className="location-info">
-                    <span className="location-name">Local Storage</span>
-                    <span className="location-desc">Save to browser storage</span>
-                  </div>
+                  <span className="location-name">Local Storage</span>
+                  <span className="location-desc">– Save to browser storage</span>
                 </label>
                 
                 <label className="location-option">
@@ -99,11 +96,8 @@ export default function SaveAnalysisDialog({ isOpen, onClose, onSave }: SaveAnal
                     checked={saveLocation === 'cloud'}
                     onChange={(e) => setSaveLocation(e.target.value as SaveLocation)}
                   />
-                  <Cloud size={18} />
-                  <div className="location-info">
-                    <span className="location-name">Cloud Storage</span>
-                    <span className="location-desc">Sync across devices</span>
-                  </div>
+                  <span className="location-name">Cloud Storage</span>
+                  <span className="location-desc">– Sync across devices</span>
                 </label>
                 
                 <label className="location-option">
@@ -114,11 +108,8 @@ export default function SaveAnalysisDialog({ isOpen, onClose, onSave }: SaveAnal
                     checked={saveLocation === 'export'}
                     onChange={(e) => setSaveLocation(e.target.value as SaveLocation)}
                   />
-                  <Download size={18} />
-                  <div className="location-info">
-                    <span className="location-name">Export File</span>
-                    <span className="location-desc">Download as JSON file</span>
-                  </div>
+                  <span className="location-name">Export File</span>
+                  <span className="location-desc">– Download as JSON file</span>
                 </label>
               </div>
             </div>

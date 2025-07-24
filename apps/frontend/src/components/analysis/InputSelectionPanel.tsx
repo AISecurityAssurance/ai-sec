@@ -29,7 +29,7 @@ export default function InputSelectionPanel({ onNewAnalysis, onAddAnalysis }: In
   const { tokenEstimation } = useSettingsStore();
   const { enabledAnalyses, setEnabledAnalyses, demoMode, setDemoMode, analysisResults, currentAnalysisId } = useAnalysisStore();
   const [analysisToolsExpanded, setAnalysisToolsExpanded] = useState(false);
-  const [inputSelectionExpanded, setInputSelectionExpanded] = useState(true);
+  const [inputSelectionExpanded, setInputSelectionExpanded] = useState(false);
   const [analysisPluginsExpanded, setAnalysisPluginsExpanded] = useState(true);
   
   // Use mock tokens for demo - in real app would calculate from actual inputs

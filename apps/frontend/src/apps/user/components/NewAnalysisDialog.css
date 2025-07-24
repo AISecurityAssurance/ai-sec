@@ -132,13 +132,13 @@
 .framework-checkbox {
   display: flex;
   align-items: center;
-  gap: 8px;
   padding: 8px 10px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .framework-checkbox:hover {
@@ -242,6 +242,7 @@
   width: 16px;
   height: 16px;
   flex-shrink: 0;
+  margin-right: var(--space-2);
 }
 
 /* Responsive layout for smaller dialogs */
@@ -413,12 +414,12 @@
 .framework-option {
   display: flex;
   align-items: center;
-  gap: 12px;
   padding: 10px 16px;
   background: transparent;
   border: none;
   cursor: pointer;
   transition: background-color 0.2s;
+  white-space: nowrap;
 }
 
 .framework-option:not(:last-child) {
@@ -431,23 +432,17 @@
 
 .framework-option input[type="checkbox"] {
   margin: 0;
+  margin-right: var(--space-2);
   cursor: pointer;
   flex-shrink: 0;
-}
-
-.framework-info {
-  flex: 1;
-  min-width: 0;
+  width: 16px;
+  height: 16px;
 }
 
 .framework-name {
   font-weight: 500;
   color: var(--text-primary);
   font-size: 14px;
-}
-
-.framework-option .framework-desc {
-  display: none; /* Hide descriptions for cleaner list */
 }
 
 /* Scrollbar styling for framework list */

@@ -120,10 +120,7 @@ export function NewAnalysisDialog({ isOpen, onClose, onSubmit }: NewAnalysisDial
                     checked={selectedFrameworks.includes(framework.id)}
                     onChange={() => toggleFramework(framework.id)}
                   />
-                  <div className="framework-info">
-                    <span className="framework-name">{framework.name}</span>
-                    <span className="framework-desc">{framework.description}</span>
-                  </div>
+                  <span className="framework-name">{framework.name}</span>
                 </label>
               ))}
             </div>

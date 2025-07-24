@@ -284,16 +284,17 @@ export function NewAnalysisDialogEnhanced({ isOpen, onClose, onSubmit }: NewAnal
               <label>Select Analysis Frameworks</label>
               <div className="framework-grid">
                 {FRAMEWORKS.map(framework => (
-                  <label key={framework.id} className="framework-option">
+                  <label 
+                    key={framework.id} 
+                    className="framework-option"
+                    title={framework.description}
+                  >
                     <input
                       type="checkbox"
                       checked={selectedFrameworks.includes(framework.id)}
                       onChange={() => toggleFramework(framework.id)}
                     />
-                    <div className="framework-info">
-                      <span className="framework-name">{framework.name}</span>
-                      <span className="framework-desc">{framework.description}</span>
-                    </div>
+                    <span className="framework-name">{framework.name}</span>
                   </label>
                 ))}
               </div>

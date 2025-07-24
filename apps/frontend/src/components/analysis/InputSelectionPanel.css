@@ -27,21 +27,29 @@
   background: var(--color-border-secondary);
 }
 
-/* Compact Context Window */
-.context-window-compact {
-  margin-bottom: var(--space-3);
+/* Input Token Summary */
+.input-token-summary {
+  padding: var(--space-2);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-2);
 }
 
-.context-bar-thin {
+.token-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.token-bar {
   position: relative;
   height: 4px;
   background: var(--color-border);
   border-radius: 2px;
   overflow: hidden;
-  margin-bottom: var(--space-1);
 }
 
-.context-fill-thin {
+.token-fill {
   position: absolute;
   left: 0;
   top: 0;
@@ -51,18 +59,62 @@
   transition: width var(--transition-normal), background-color var(--transition-fast);
 }
 
-.context-fill-thin.warning {
+.token-fill.warning {
   background: var(--color-warning);
 }
 
-.context-fill-thin.error {
+.token-fill.error {
   background: var(--color-error);
 }
 
-.context-info-compact {
+.token-info {
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
   text-align: center;
+}
+
+/* Selected Inputs List */
+.selected-inputs-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.input-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.input-item svg {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.input-item span:first-of-type {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.input-size {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-xs);
+  flex-shrink: 0;
+}
+
+.no-inputs-message {
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-sm);
+  padding: var(--space-4) var(--space-2);
+  font-style: italic;
 }
 
 /* Context Window Status - OLD - Keeping for now */

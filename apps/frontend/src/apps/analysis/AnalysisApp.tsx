@@ -240,14 +240,25 @@ export default function AnalysisApp() {
         setTimeout(() => {
           setShowWelcome(false);
         }, 100);
+      } else {
+        console.error('No analysis ID returned from API');
+        setAnalysisError('Failed to create analysis - no ID returned');
       }
       
       // Keep analyzing state true until WebSocket updates indicate completion
       // The AnalysisWebSocketProvider will handle setting it to false
       
+      // Add timeout to handle stuck analysis
+      setTimeout(() => {
+        if (isAnalyzing && analysisSteps.every(step => step.status === 'pending')) {
+          console.warn('Analysis appears stuck - no progress after 10 seconds');
+          setAnalysisError('Analysis is taking longer than expected. The backend may not be processing requests.');
+        }
+      }, 10000);
+      
       // Mock progress simulation for demo/testing
       // This simulates what the WebSocket would normally do
-      const USE_MOCK_PROGRESS = false; // Set to false when backend is ready
+      const USE_MOCK_PROGRESS = true; // TEMPORARILY ON for testing - set to false when backend is ready
       
       if (USE_MOCK_PROGRESS && (!result.id || process.env.NODE_ENV === 'development')) {
         console.log('Starting mock progress simulation');

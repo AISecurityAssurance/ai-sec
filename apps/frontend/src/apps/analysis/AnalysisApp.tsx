@@ -323,10 +323,17 @@ export default function AnalysisApp() {
                   console.log('Mock analysis completed');
                   
                   // Enable the analyzed frameworks in the store
-                  const { setEnabledAnalyses } = useAnalysisStore.getState();
+                  const { setEnabledAnalyses, updateAnalysisResult } = useAnalysisStore.getState();
                   const enabledFrameworks: Record<string, boolean> = {};
                   data.frameworks.forEach(fw => {
                     enabledFrameworks[fw] = true;
+                    // Mark frameworks as completed in the store
+                    updateAnalysisResult(fw, {
+                      framework: fw,
+                      sections: [],
+                      status: { status: 'completed', progress: 100 },
+                      completedAt: new Date().toISOString()
+                    });
                   });
                   setEnabledAnalyses(enabledFrameworks);
                   console.log('Enabled frameworks:', enabledFrameworks);

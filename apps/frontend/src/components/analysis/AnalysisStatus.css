@@ -1,0 +1,44 @@
+.analysis-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.analysis-status.completed {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.analysis-status.running {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.analysis-status.queued {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+.analysis-status.not-started {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Add to existing CSS variables if not defined */
+:root {
+  --color-warning-bg: rgba(251, 191, 36, 0.1);
+  --color-warning: #f59e0b;
+  --color-info-bg: rgba(59, 130, 246, 0.1);
+  --color-info: #3b82f6;
+}

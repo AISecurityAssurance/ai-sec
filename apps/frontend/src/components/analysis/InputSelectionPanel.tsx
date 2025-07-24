@@ -72,13 +72,19 @@ const analysisPlugins = [
 
 export default function InputSelectionPanel() {
   const { tokenEstimation } = useSettingsStore();
-  const { enabledAnalyses, setEnabledAnalyses, demoMode, setDemoMode } = useAnalysisStore();
+  const { enabledAnalyses, setEnabledAnalyses, demoMode, setDemoMode, analysisResults } = useAnalysisStore();
   const [fileTree, setFileTree] = useState<FileNode[]>(mockFileStructure);
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [totalTokens, setTotalTokens] = useState(0);
   const [selectedTokens, setSelectedTokens] = useState(0);
   const [inputSelectionExpanded, setInputSelectionExpanded] = useState(false);
   const [analysisPluginsExpanded, setAnalysisPluginsExpanded] = useState(false);
+  
+  // Check which analyses are completed
+  const isAnalysisCompleted = (analysisId: string) => {
+    return !!analysisResults[analysisId] && 
+           analysisResults[analysisId].status.status === 'completed';
+  };
 
   // Toggle demo mode
   const toggleDemoMode = () => {
@@ -311,22 +317,28 @@ export default function InputSelectionPanel() {
         {analysisPluginsExpanded && (
           <div className="section-content">
             <div className="analysis-plugins-list">
-              {analysisPlugins.map(plugin => (
-                <label key={plugin.id} className="analysis-plugin-item">
-                  <input
-                    type="checkbox"
-                    checked={enabledAnalyses[plugin.id] || false}
-                    onChange={() => toggleAnalysisPlugin(plugin.id)}
-                  />
-                  <a 
-                    href={`/analysis/plugin/${plugin.id}`}
-                    className="plugin-label-link"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <span className="plugin-label">{plugin.label}</span>
-                  </a>
-                </label>
-              ))}
+              {analysisPlugins.map(plugin => {
+                const isCompleted = isAnalysisCompleted(plugin.id);
+                return (
+                  <label key={plugin.id} className={`analysis-plugin-item ${isCompleted ? 'completed' : 'not-run'}`}>
+                    <input
+                      type="checkbox"
+                      checked={enabledAnalyses[plugin.id] || false}
+                      onChange={() => toggleAnalysisPlugin(plugin.id)}
+                    />
+                    <a 
+                      href={`/analysis/plugin/${plugin.id}`}
+                      className="plugin-label-link"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <span className="plugin-label">
+                        {plugin.label}
+                        {isCompleted && <span className="completed-indicator"> ✓</span>}
+                      </span>
+                    </a>
+                  </label>
+                );
+              })}
             </div>
           </div>
         )}

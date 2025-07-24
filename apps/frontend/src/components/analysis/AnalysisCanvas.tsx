@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Download } from 'lucide-react';
+import { Download, Plus } from 'lucide-react';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import CollapsibleAnalysisSection from './CollapsibleAnalysisSection';
 import ExportDialog from './ExportDialog';
+import { AddAnalysisDialog } from './AddAnalysisDialog';
 import './AnalysisCanvas.css';
 
 // Analysis plugin order (matches the order in InputSelectionPanel)
@@ -18,9 +19,10 @@ const analysisOrder = [
 ];
 
 export default function AnalysisCanvas() {
-  const { enabledAnalyses, demoMode } = useAnalysisStore();
+  const { enabledAnalyses, demoMode, analysisResults } = useAnalysisStore();
   const [expandedAnalyses, setExpandedAnalyses] = useState<Set<string>>(new Set());
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showAddAnalysisDialog, setShowAddAnalysisDialog] = useState(false);
   
   // Check if we're in standalone mode (opened in new window)
   const isStandalone = window.location.pathname === '/analysis/canvas';
@@ -54,6 +56,16 @@ export default function AnalysisCanvas() {
     // TODO: Implement actual export functionality
     alert(`Export to ${format.toUpperCase()} - Coming soon!`);
   };
+  
+  const handleAddAnalysis = (frameworks: string[]) => {
+    console.log('Adding additional analyses:', frameworks);
+    // TODO: Trigger new analysis for selected frameworks
+    alert(`Running additional analyses: ${frameworks.join(', ')}`);
+  };
+  
+  // Get completed frameworks
+  const completedFrameworks = Object.keys(analysisResults)
+    .filter(fw => analysisResults[fw]?.status?.status === 'completed');
 
   // Get list of enabled analyses in order
   const enabledAnalysesList = analysisOrder
@@ -74,15 +86,27 @@ export default function AnalysisCanvas() {
     <div className="analysis-canvas">
       <div className="canvas-header">
         <h2>Security Analysis Results</h2>
-        {enabledAnalysesList.length > 0 && (
-          <button 
-            className="export-btn"
-            onClick={() => setShowExportDialog(true)}
-          >
-            <Download size={16} />
-            Export
-          </button>
-        )}
+        <div className="canvas-actions">
+          {completedFrameworks.length < analysisOrder.length && (
+            <button 
+              className="add-analysis-btn"
+              onClick={() => setShowAddAnalysisDialog(true)}
+              title="Run additional security analyses"
+            >
+              <Plus size={16} />
+              Add Analysis
+            </button>
+          )}
+          {enabledAnalysesList.length > 0 && (
+            <button 
+              className="export-btn"
+              onClick={() => setShowExportDialog(true)}
+            >
+              <Download size={16} />
+              Export
+            </button>
+          )}
+        </div>
       </div>
       
       <div className="canvas-content">
@@ -111,6 +135,13 @@ export default function AnalysisCanvas() {
         isOpen={showExportDialog}
         onClose={() => setShowExportDialog(false)}
         onExport={handleExport}
+      />
+      
+      <AddAnalysisDialog
+        isOpen={showAddAnalysisDialog}
+        onClose={() => setShowAddAnalysisDialog(false)}
+        onSubmit={handleAddAnalysis}
+        completedFrameworks={completedFrameworks}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import { useAnalysisStore } from '../../stores/analysisStore';
+import './Dialog.css';
 import './AddAnalysisDialog.css';
 
 interface AddAnalysisDialogProps {
@@ -56,30 +57,32 @@ export function AddAnalysisDialog({ isOpen, onClose, onSubmit, completedFramewor
         </div>
         
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Select Additional Analyses to Run</label>
-            {availableFrameworks.length === 0 ? (
-              <p className="no-frameworks">All available analyses have been completed.</p>
-            ) : (
-              <div className="frameworks-list">
-                {availableFrameworks.map(framework => (
-                  <label key={framework.id} className="framework-option">
-                    <input
-                      type="checkbox"
-                      checked={selectedFrameworks.includes(framework.id)}
-                      onChange={() => toggleFramework(framework.id)}
-                    />
-                    <div className="framework-info">
-                      <span className="framework-name">{framework.name}</span>
-                      <span className="framework-desc">{framework.description}</span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            )}
+          <div className="dialog-body">
+            <div className="form-group">
+              <label>Select Additional Analyses to Run</label>
+              {availableFrameworks.length === 0 ? (
+                <p className="no-frameworks">All available analyses have been completed.</p>
+              ) : (
+                <div className="frameworks-list">
+                  {availableFrameworks.map(framework => (
+                    <label key={framework.id} className="framework-option">
+                      <input
+                        type="checkbox"
+                        checked={selectedFrameworks.includes(framework.id)}
+                        onChange={() => toggleFramework(framework.id)}
+                      />
+                      <div className="framework-info">
+                        <span className="framework-name">{framework.name}</span>
+                        <span className="framework-desc">{framework.description}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           
-          <div className="dialog-actions">
+          <div className="dialog-footer">
             <button type="button" className="btn-secondary" onClick={onClose}>
               Cancel
             </button>
@@ -88,6 +91,7 @@ export function AddAnalysisDialog({ isOpen, onClose, onSubmit, completedFramewor
               className="btn-primary"
               disabled={selectedFrameworks.length === 0}
             >
+              <Plus size={16} />
               Run Analysis ({selectedFrameworks.length})
             </button>
           </div>

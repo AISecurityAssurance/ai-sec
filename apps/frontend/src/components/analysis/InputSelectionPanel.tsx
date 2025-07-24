@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Folder, File, ChevronRight, ChevronDown, Check, Minus } from 'lucide-react';
 import { useSettingsStore, calculateTokens } from '../../stores/settingsStore';
 import { useAnalysisStore } from '../../stores/analysisStore';
+import AnalysisManagement from './AnalysisManagement';
 import './InputSelectionPanel.css';
 
 interface FileNode {
@@ -70,7 +71,12 @@ const analysisPlugins = [
   { id: 'octave', label: 'OCTAVE' },
 ];
 
-export default function InputSelectionPanel() {
+interface InputSelectionPanelProps {
+  onNewAnalysis?: () => void;
+  onAddAnalysis?: () => void;
+}
+
+export default function InputSelectionPanel({ onNewAnalysis, onAddAnalysis }: InputSelectionPanelProps = {}) {
   const { tokenEstimation } = useSettingsStore();
   const { enabledAnalyses, setEnabledAnalyses, demoMode, setDemoMode, analysisResults } = useAnalysisStore();
   const [fileTree, setFileTree] = useState<FileNode[]>(mockFileStructure);
@@ -271,6 +277,14 @@ export default function InputSelectionPanel() {
 
   return (
     <div className="input-selection-panel">
+      {/* Analysis Management Section */}
+      {onNewAnalysis && onAddAnalysis && (
+        <AnalysisManagement 
+          onNewAnalysis={onNewAnalysis}
+          onAddAnalysis={onAddAnalysis}
+        />
+      )}
+      
       {/* Context Window Progress Bar */}
       <div className="context-window-compact">
         <div className="context-bar-thin">

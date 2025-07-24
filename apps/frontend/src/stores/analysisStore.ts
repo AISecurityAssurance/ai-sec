@@ -56,6 +56,7 @@ interface AnalysisState {
   // UI state
   enabledAnalyses: Record<string, boolean>;
   demoMode: boolean;
+  hasUnsavedChanges: boolean;
   
   // Actions
   setProjectId: (id: string | null) => void;
@@ -73,6 +74,7 @@ interface AnalysisState {
   updateScenarios: (data: typeof initialScenarios) => void;
   setEnabledAnalyses: (analyses: Record<string, boolean>) => void;
   setDemoMode: (enabled: boolean) => void;
+  setHasUnsavedChanges: (hasChanges: boolean) => void;
   clearAnalysisResults: () => void;
 }
 
@@ -104,6 +106,7 @@ export const useAnalysisStore = create<AnalysisState>()(
         'cve': false
       },
       demoMode: false,
+      hasUnsavedChanges: false,
       
       // Actions
       setProjectId: (id) => set({ projectId: id }),
@@ -114,7 +117,8 @@ export const useAnalysisStore = create<AnalysisState>()(
         analysisResults: {
           ...state.analysisResults,
           [framework]: result
-        }
+        },
+        hasUnsavedChanges: true
       })),
       updateSectionResult: (framework, sectionId, section) => set((state) => {
         const frameworkResult = state.analysisResults[framework];
@@ -131,7 +135,8 @@ export const useAnalysisStore = create<AnalysisState>()(
               ...frameworkResult,
               sections: updatedSections
             }
-          }
+          },
+          hasUnsavedChanges: true
         };
       }),
       updateSystemDescription: (data) => set((state) => ({
@@ -145,10 +150,12 @@ export const useAnalysisStore = create<AnalysisState>()(
       updateScenarios: (data) => set({ scenarios: data }),
       setEnabledAnalyses: (analyses) => set({ enabledAnalyses: analyses }),
       setDemoMode: (enabled) => set({ demoMode: enabled }),
+      setHasUnsavedChanges: (hasChanges) => set({ hasUnsavedChanges: hasChanges }),
       clearAnalysisResults: () => set({ 
         analysisResults: {}, 
         analysisStatus: { status: 'pending', progress: 0 },
-        currentAnalysisId: null 
+        currentAnalysisId: null,
+        hasUnsavedChanges: false 
       })
     }),
     {

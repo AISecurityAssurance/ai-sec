@@ -1,0 +1,79 @@
+.analysis-management {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.management-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.management-header h3 {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.management-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.management-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.management-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.management-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.management-btn span {
+  font-weight: var(--font-weight-medium);
+}
+
+/* Warning Dialog */
+.warning-dialog {
+  max-width: 400px;
+}
+
+.warning-dialog .dialog-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.warning-icon {
+  color: var(--color-warning);
+}
+
+.warning-dialog .dialog-body {
+  padding: var(--space-3) 0;
+}
+
+.warning-dialog .dialog-actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}

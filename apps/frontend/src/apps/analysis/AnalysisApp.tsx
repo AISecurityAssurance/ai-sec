@@ -9,6 +9,8 @@ import LoadingOverlay from '../../components/common/LoadingOverlay';
 import AnalysisProgress from '../../components/analysis/AnalysisProgress';
 import type { AnalysisStep } from '../../components/analysis/AnalysisProgress';
 import { NewAnalysisDialog } from '../user/components/NewAnalysisDialog';
+import { NewAnalysisDialogEnhanced } from '../user/components/NewAnalysisDialogEnhanced';
+import { AddAnalysisDialog } from '../../components/analysis/AddAnalysisDialog';
 import { AnalysisWebSocketProvider } from '../../components/analysis/AnalysisWebSocketProvider';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { isFirstVisit } from '../../utils/resetStores';
@@ -20,14 +22,16 @@ import './AnalysisApp.css';
 export default function AnalysisApp() {
   const [activeAnalysis, setActiveAnalysis] = useState('stpa-sec');
   const [showNewAnalysisDialog, setShowNewAnalysisDialog] = useState(false);
+  const [showAddAnalysisDialog, setShowAddAnalysisDialog] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const [analysisSteps, setAnalysisSteps] = useState<AnalysisStep[]>([]);
   const [currentFramework, setCurrentFramework] = useState<string>('');
   const [analysisFrameworks, setAnalysisFrameworks] = useState<string[]>([]);
   const [analysisError, setAnalysisError] = useState<string>('');
+  const [useEnhancedDialog, setUseEnhancedDialog] = useState(true); // Toggle for enhanced dialog
   
-  const { currentAnalysisId, setCurrentAnalysisId, demoMode, setDemoMode, clearAnalysisResults } = useAnalysisStore();
+  const { currentAnalysisId, setCurrentAnalysisId, demoMode, setDemoMode, clearAnalysisResults, analysisResults } = useAnalysisStore();
   
   // Check if we should show welcome screen
   useEffect(() => {
@@ -195,7 +199,13 @@ export default function AnalysisApp() {
     window.open(urls[panel], `analysis-${panel}`, features);
   };
 
-  const handleCreateAnalysis = async (data: { description: string; frameworks: string[] }) => {
+  const handleCreateAnalysis = async (data: { 
+    description: string; 
+    frameworks: string[];
+    inputType?: 'text' | 'file' | 'repo' | 'url';
+    inputSource?: string;
+    files?: File[];
+  }) => {
     console.log('Creating analysis with:', data);
     setIsAnalyzing(true);
     setAnalysisFrameworks(data.frameworks);
@@ -369,6 +379,20 @@ export default function AnalysisApp() {
     setShowWelcome(false);
   };
   
+  const handleAddAnalysis = (frameworks: string[]) => {
+    console.log('Adding additional analyses:', frameworks);
+    // In real implementation, this would trigger analysis for the additional frameworks
+    // For now, just close the dialog
+    setShowAddAnalysisDialog(false);
+    
+    // TODO: Implement actual additional analysis
+    alert(`Would run additional analyses: ${frameworks.join(', ')}`);
+  };
+  
+  // Get completed frameworks
+  const completedFrameworks = Object.keys(analysisResults)
+    .filter(fw => analysisResults[fw]?.status?.status === 'completed');
+  
   // Show welcome screen if no analysis is active
   if (showWelcome) {
     return (
@@ -387,11 +411,19 @@ export default function AnalysisApp() {
           onNewAnalysis={() => setShowNewAnalysisDialog(true)}
           onLoadDemo={handleLoadDemo}
         />
-        <NewAnalysisDialog
-          isOpen={showNewAnalysisDialog}
-          onClose={() => setShowNewAnalysisDialog(false)}
-          onSubmit={handleCreateAnalysis}
-        />
+        {useEnhancedDialog ? (
+          <NewAnalysisDialogEnhanced
+            isOpen={showNewAnalysisDialog}
+            onClose={() => setShowNewAnalysisDialog(false)}
+            onSubmit={handleCreateAnalysis}
+          />
+        ) : (
+          <NewAnalysisDialog
+            isOpen={showNewAnalysisDialog}
+            onClose={() => setShowNewAnalysisDialog(false)}
+            onSubmit={handleCreateAnalysis}
+          />
+        )}
       </SimpleLayout>
     );
   }
@@ -409,32 +441,37 @@ export default function AnalysisApp() {
             />
           </LoadingOverlay>
         )}
-        <div className="analysis-header" style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
-          <button 
-            className="btn-primary"
-            onClick={() => setShowNewAnalysisDialog(true)}
-            disabled={isAnalyzing}
-          >
-            New Analysis
-          </button>
-          {isAnalyzing && (
-            <span style={{ marginLeft: '20px', color: 'var(--text-secondary)' }}>
-              Analysis in progress...
-              <span className="progress-indicator" style={{ marginLeft: '10px' }}>⚡</span>
-            </span>
-          )}
-        </div>
         <ThreePanelLayout
-          leftPanel={<InputSelectionPanel />}
+          leftPanel={
+            <InputSelectionPanel 
+              onNewAnalysis={() => setShowNewAnalysisDialog(true)}
+              onAddAnalysis={() => setShowAddAnalysisDialog(true)}
+            />
+          }
           centerPanel={<AnalysisCanvas />}
           rightPanel={<ChatPanel activeAnalysis={activeAnalysis} />}
           onOpenInNewWindow={handleOpenInNewWindow}
         />
         
-        <NewAnalysisDialog
-          isOpen={showNewAnalysisDialog}
-          onClose={() => setShowNewAnalysisDialog(false)}
-          onSubmit={handleCreateAnalysis}
+        {useEnhancedDialog ? (
+          <NewAnalysisDialogEnhanced
+            isOpen={showNewAnalysisDialog}
+            onClose={() => setShowNewAnalysisDialog(false)}
+            onSubmit={handleCreateAnalysis}
+          />
+        ) : (
+          <NewAnalysisDialog
+            isOpen={showNewAnalysisDialog}
+            onClose={() => setShowNewAnalysisDialog(false)}
+            onSubmit={handleCreateAnalysis}
+          />
+        )}
+        
+        <AddAnalysisDialog
+          isOpen={showAddAnalysisDialog}
+          onClose={() => setShowAddAnalysisDialog(false)}
+          onSubmit={handleAddAnalysis}
+          completedFrameworks={completedFrameworks}
         />
       </AnalysisWebSocketProvider>
     </SimpleLayout>

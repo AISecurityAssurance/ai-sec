@@ -1,0 +1,179 @@
+{
+  "system": {
+    "name": "Connected Healthcare IoT Platform",
+    "version": "3.1.0",
+    "description": "Integrated IoT platform for remote patient monitoring and healthcare delivery",
+    "compliance": ["HIPAA", "FDA 510(k)", "ISO 13485", "IEC 62304"]
+  },
+  "architecture": {
+    "edge_devices": [
+      {
+        "type": "Vital Signs Monitor",
+        "models": ["VSM-2000", "VSM-3000"],
+        "sensors": ["Heart Rate", "Blood Pressure", "SpO2", "Temperature"],
+        "connectivity": ["Bluetooth LE", "WiFi", "Cellular LTE-M"],
+        "security": {
+          "encryption": "AES-128",
+          "authentication": "Device certificates",
+          "secure_boot": true
+        }
+      },
+      {
+        "type": "Continuous Glucose Monitor",
+        "models": ["CGM-X1"],
+        "data_frequency": "5 minutes",
+        "battery_life": "14 days",
+        "security": {
+          "data_encryption": "ChaCha20-Poly1305",
+          "pairing": "Encrypted BLE pairing"
+        }
+      },
+      {
+        "type": "Smart Medication Dispenser",
+        "features": ["Dose tracking", "Reminder alerts", "Inventory management"],
+        "connectivity": ["WiFi", "Cellular backup"],
+        "tamper_protection": true
+      }
+    ],
+    "gateway_layer": {
+      "home_hub": {
+        "model": "HealthHub-Pro",
+        "os": "Embedded Linux",
+        "capabilities": [
+          "Device management",
+          "Local data aggregation",
+          "Edge analytics",
+          "Offline operation mode"
+        ],
+        "security": {
+          "firewall": true,
+          "vpn_tunnel": "IPSec",
+          "automatic_updates": true
+        }
+      },
+      "mobile_gateway": {
+        "platforms": ["iOS", "Android"],
+        "features": [
+          "Device pairing",
+          "Data synchronization",
+          "Emergency alerts",
+          "Caregiver notifications"
+        ]
+      }
+    },
+    "cloud_platform": {
+      "infrastructure": {
+        "provider": "AWS",
+        "regions": ["us-east-1", "eu-west-1"],
+        "services": [
+          "EC2", "RDS", "S3", "Lambda", "IoT Core", "Kinesis"
+        ]
+      },
+      "microservices": [
+        {
+          "name": "Device Registry Service",
+          "responsibility": "Device lifecycle management",
+          "technology": "Node.js",
+          "database": "DynamoDB"
+        },
+        {
+          "name": "Data Ingestion Service",
+          "responsibility": "Real-time data processing",
+          "technology": "Python",
+          "stream_processing": "Apache Kafka"
+        },
+        {
+          "name": "Analytics Engine",
+          "responsibility": "Anomaly detection and predictions",
+          "technology": "Python with TensorFlow",
+          "features": [
+            "Real-time alerts",
+            "Trend analysis",
+            "Predictive health scores"
+          ]
+        },
+        {
+          "name": "Clinical Integration Service",
+          "responsibility": "EHR/EMR integration",
+          "protocols": ["HL7 FHIR", "DICOM"],
+          "security": "OAuth 2.0 with SMART on FHIR"
+        }
+      ],
+      "data_storage": {
+        "time_series_db": "InfluxDB",
+        "patient_records": "PostgreSQL with encryption",
+        "medical_images": "S3 with lifecycle policies",
+        "audit_logs": "CloudWatch Logs"
+      }
+    },
+    "security_architecture": {
+      "data_protection": {
+        "encryption_at_rest": "AES-256-GCM",
+        "encryption_in_transit": "TLS 1.3",
+        "key_management": "AWS KMS with HSM"
+      },
+      "access_control": {
+        "patient_portal": "Multi-factor authentication",
+        "clinical_access": "SAML SSO with hospital systems",
+        "api_access": "OAuth 2.0 with scopes"
+      },
+      "compliance_features": {
+        "audit_trail": "Immutable audit logs",
+        "data_retention": "Configurable per regulation",
+        "consent_management": "Granular patient consent tracking",
+        "data_anonymization": "De-identification pipeline"
+      },
+      "threat_protection": {
+        "ddos_protection": "CloudFlare",
+        "waf": "AWS WAF with custom rules",
+        "ids_ips": "Snort-based detection",
+        "vulnerability_scanning": "Weekly automated scans"
+      }
+    },
+    "integrations": {
+      "healthcare_systems": [
+        {
+          "type": "Electronic Health Records",
+          "vendors": ["Epic", "Cerner", "Allscripts"],
+          "protocol": "HL7 FHIR R4"
+        },
+        {
+          "type": "Telehealth Platforms",
+          "integration_points": ["Video consultation", "Data sharing"],
+          "security": "End-to-end encryption"
+        }
+      ],
+      "third_party_services": [
+        {
+          "service": "Emergency Response",
+          "trigger": "Critical vital signs",
+          "integration": "API with 911 dispatch"
+        },
+        {
+          "service": "Pharmacy Networks",
+          "purpose": "Prescription management",
+          "protocol": "NCPDP SCRIPT"
+        }
+      ]
+    }
+  },
+  "operational_aspects": {
+    "monitoring": {
+      "infrastructure": "Datadog",
+      "application": "New Relic",
+      "security": "Splunk SIEM"
+    },
+    "disaster_recovery": {
+      "rpo": "1 hour",
+      "rto": "4 hours",
+      "backup_frequency": "Continuous replication"
+    },
+    "support": {
+      "levels": ["24/7 critical", "Business hours standard"],
+      "sla": {
+        "uptime": "99.9%",
+        "response_time": "< 500ms p95"
+      }
+    }
+  }
+}

@@ -181,6 +181,7 @@
   background: transparent;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  white-space: nowrap;
 }
 
 .location-option:not(:last-child) {
@@ -193,15 +194,19 @@
 
 .location-option input[type="radio"] {
   margin: 0;
+  margin-right: var(--space-2);
   cursor: pointer;
   flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
 
 .location-name {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--text-primary);
-  margin-right: var(--space-2);
+  margin-right: var(--space-1);
+  flex-shrink: 0;
 }
 
 .location-desc {

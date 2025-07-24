@@ -247,7 +247,9 @@ export default function AnalysisApp() {
       
       // Mock progress simulation for demo/testing
       // This simulates what the WebSocket would normally do
-      if (!result.id || process.env.NODE_ENV === 'development') {
+      const USE_MOCK_PROGRESS = false; // Set to false when backend is ready
+      
+      if (USE_MOCK_PROGRESS && (!result.id || process.env.NODE_ENV === 'development')) {
         console.log('Starting mock progress simulation');
         let stepIndex = 0;
         const totalSteps = initialSteps.length;

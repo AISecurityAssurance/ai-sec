@@ -248,38 +248,54 @@ export default function AnalysisApp() {
       // Keep analyzing state true until WebSocket updates indicate completion
       // The AnalysisWebSocketProvider will handle setting it to false
       
-      // Add timeout to handle stuck analysis
-      setTimeout(() => {
-        if (isAnalyzing && analysisSteps.every(step => step.status === 'pending')) {
-          console.warn('Analysis appears stuck - no progress after 10 seconds');
-          setAnalysisError('Analysis is taking longer than expected. The backend may not be processing requests.');
-        }
+      // Add timeout to handle stuck analysis  
+      const stuckCheckTimeout = setTimeout(() => {
+        // Use a ref or check current state properly
+        setAnalysisSteps(currentSteps => {
+          if (currentSteps.every(step => step.status === 'pending')) {
+            console.warn('Analysis appears stuck - no progress after 10 seconds');
+            setAnalysisError('Analysis is taking longer than expected. The backend may not be processing requests.');
+          }
+          return currentSteps;
+        });
       }, 10000);
       
       // Mock progress simulation for demo/testing
       // This simulates what the WebSocket would normally do
       const USE_MOCK_PROGRESS = true; // TEMPORARILY ON for testing - set to false when backend is ready
       
-      if (USE_MOCK_PROGRESS && (!result.id || process.env.NODE_ENV === 'development')) {
-        console.log('Starting mock progress simulation');
+      console.log('Mock progress check:', {
+        USE_MOCK_PROGRESS,
+        hasResultId: !!result.id,
+        nodeEnv: process.env.NODE_ENV,
+        willRunMock: USE_MOCK_PROGRESS && (!result.id || process.env.NODE_ENV === 'development')
+      });
+      
+      if (USE_MOCK_PROGRESS) {
+        console.log('Starting mock progress simulation (forced ON for testing)');
         let stepIndex = 0;
         const totalSteps = initialSteps.length;
         
         const progressInterval = setInterval(() => {
+          console.log(`Mock progress tick: step ${stepIndex}/${totalSteps}`);
+          
           if (stepIndex < totalSteps) {
             const currentStep = initialSteps[stepIndex];
             const frameworkName = currentStep.id.split('-')[0];
+            console.log('Processing step:', currentStep.id, 'from framework:', frameworkName);
             
             // Mark current step as in progress
-            setAnalysisSteps(prevSteps => 
-              prevSteps.map(step => 
+            setAnalysisSteps(prevSteps => {
+              const newSteps = prevSteps.map(step => 
                 step.id === currentStep.id 
                   ? { ...step, status: 'in_progress' as const }
                   : step.status === 'in_progress' 
                     ? { ...step, status: 'completed' as const }
                     : step
-              )
-            );
+              );
+              console.log('Updated steps:', newSteps.filter(s => s.status !== 'pending'));
+              return newSteps;
+            });
             
             // Update current framework
             setCurrentFramework(frameworkName);

@@ -1,18 +1,21 @@
 import { useState } from 'react';
-import { Save, X } from 'lucide-react';
+import { Save, X, HardDrive, Cloud, Download, FolderOpen } from 'lucide-react';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import './Dialog.css';
 
 interface SaveAnalysisDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (name: string, description?: string) => void;
+  onSave: (name: string, location: 'local' | 'cloud' | 'export', description?: string) => void;
 }
+
+type SaveLocation = 'local' | 'cloud' | 'export';
 
 export default function SaveAnalysisDialog({ isOpen, onClose, onSave }: SaveAnalysisDialogProps) {
   const { currentAnalysisId, analysisResults } = useAnalysisStore();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [saveLocation, setSaveLocation] = useState<SaveLocation>('local');
   
   const completedFrameworks = Object.keys(analysisResults)
     .filter(fw => analysisResults[fw]?.status?.status === 'completed');
@@ -20,7 +23,7 @@ export default function SaveAnalysisDialog({ isOpen, onClose, onSave }: SaveAnal
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
-      onSave(name.trim(), description.trim() || undefined);
+      onSave(name.trim(), saveLocation, description.trim() || undefined);
       handleClose();
     }
   };
@@ -28,6 +31,7 @@ export default function SaveAnalysisDialog({ isOpen, onClose, onSave }: SaveAnal
   const handleClose = () => {
     setName('');
     setDescription('');
+    setSaveLocation('local');
     onClose();
   };
   
@@ -67,6 +71,56 @@ export default function SaveAnalysisDialog({ isOpen, onClose, onSave }: SaveAnal
                 placeholder="Optional description of this analysis..."
                 rows={3}
               />
+            </div>
+            
+            <div className="form-group">
+              <label>Save Location</label>
+              <div className="save-location-options">
+                <label className="location-option">
+                  <input
+                    type="radio"
+                    name="save-location"
+                    value="local"
+                    checked={saveLocation === 'local'}
+                    onChange={(e) => setSaveLocation(e.target.value as SaveLocation)}
+                  />
+                  <HardDrive size={18} />
+                  <div className="location-info">
+                    <span className="location-name">Local Storage</span>
+                    <span className="location-desc">Save to browser storage</span>
+                  </div>
+                </label>
+                
+                <label className="location-option">
+                  <input
+                    type="radio"
+                    name="save-location"
+                    value="cloud"
+                    checked={saveLocation === 'cloud'}
+                    onChange={(e) => setSaveLocation(e.target.value as SaveLocation)}
+                  />
+                  <Cloud size={18} />
+                  <div className="location-info">
+                    <span className="location-name">Cloud Storage</span>
+                    <span className="location-desc">Sync across devices</span>
+                  </div>
+                </label>
+                
+                <label className="location-option">
+                  <input
+                    type="radio"
+                    name="save-location"
+                    value="export"
+                    checked={saveLocation === 'export'}
+                    onChange={(e) => setSaveLocation(e.target.value as SaveLocation)}
+                  />
+                  <Download size={18} />
+                  <div className="location-info">
+                    <span className="location-name">Export File</span>
+                    <span className="location-desc">Download as JSON file</span>
+                  </div>
+                </label>
+              </div>
             </div>
             
             <div className="save-info">

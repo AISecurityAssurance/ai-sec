@@ -133,10 +133,28 @@ export default function AnalysisManagement({ onNewAnalysis, onAddAnalysis }: Ana
       <SaveAnalysisDialog
         isOpen={showSaveDialog}
         onClose={() => setShowSaveDialog(false)}
-        onSave={(name, description) => {
-          console.log('Saving analysis:', { name, description });
+        onSave={(name, location, description) => {
+          console.log('Saving analysis:', { name, location, description });
           // TODO: Implement actual save to backend
-          alert(`Analysis "${name}" saved successfully!`);
+          if (location === 'export') {
+            // Export as JSON file
+            const analysisData = {
+              name,
+              description,
+              date: new Date().toISOString(),
+              results: analysisResults
+            };
+            const blob = new Blob([JSON.stringify(analysisData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_analysis.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('Analysis exported successfully!');
+          } else {
+            alert(`Analysis "${name}" saved to ${location} storage!`);
+          }
           setHasUnsavedChanges?.(false);
           setShowSaveDialog(false);
         }}

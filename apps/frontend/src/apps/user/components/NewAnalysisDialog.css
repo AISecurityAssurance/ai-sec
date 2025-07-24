@@ -35,6 +35,12 @@
   flex-shrink: 0;
 }
 
+.dialog-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .dialog-header h2 {
   margin: 0;
   font-size: 24px;
@@ -57,6 +63,30 @@
 
 .dialog-close:hover {
   background: var(--bg-hover);
+}
+
+.load-existing-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.load-existing-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.load-existing-btn svg {
+  flex-shrink: 0;
 }
 
 .form-group {

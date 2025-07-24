@@ -163,6 +163,58 @@
 }
 
 /* Save Analysis Dialog specific */
+.save-location-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.location-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.location-option:hover {
+  border-color: var(--primary);
+  background: var(--bg-hover);
+}
+
+.location-option input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.location-option svg {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.location-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+}
+
+.location-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.location-desc {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
 .save-info {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);

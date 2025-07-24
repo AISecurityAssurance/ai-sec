@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, FileText, Github, Globe, Upload, Folder } from 'lucide-react';
+import { X, FileText, Github, Globe, Upload, Folder, FolderOpen } from 'lucide-react';
+import LoadAnalysisDialog from '../../../components/analysis/LoadAnalysisDialog';
 import './NewAnalysisDialog.css';
 
 interface NewAnalysisDialogProps {
@@ -43,6 +44,7 @@ export function NewAnalysisDialogEnhanced({ isOpen, onClose, onSubmit }: NewAnal
   const [docUrl, setDocUrl] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
+  const [showLoadDialog, setShowLoadDialog] = useState(false);
 
   if (!isOpen) return null;
 
@@ -121,9 +123,20 @@ export function NewAnalysisDialogEnhanced({ isOpen, onClose, onSubmit }: NewAnal
       <div className="dialog-content new-analysis-enhanced" onClick={e => e.stopPropagation()}>
         <div className="dialog-header">
           <h2>New Analysis</h2>
-          <button className="dialog-close" onClick={handleClose}>
-            <X size={20} />
-          </button>
+          <div className="dialog-header-actions">
+            <button 
+              type="button"
+              className="load-existing-btn"
+              onClick={() => setShowLoadDialog(true)}
+              title="Load an existing analysis"
+            >
+              <FolderOpen size={16} />
+              Load Existing
+            </button>
+            <button className="dialog-close" onClick={handleClose}>
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -301,6 +314,20 @@ export function NewAnalysisDialogEnhanced({ isOpen, onClose, onSubmit }: NewAnal
           </div>
         </form>
       </div>
+      
+      {/* Load Analysis Dialog */}
+      <LoadAnalysisDialog
+        isOpen={showLoadDialog}
+        onClose={() => setShowLoadDialog(false)}
+        onLoad={(analysisId) => {
+          console.log('Loading analysis:', analysisId);
+          // Close both dialogs and notify parent
+          setShowLoadDialog(false);
+          handleClose();
+          // TODO: Implement actual loading logic
+          alert(`Loading analysis ${analysisId}...`);
+        }}
+      />
     </div>
   );
 }

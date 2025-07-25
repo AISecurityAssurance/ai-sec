@@ -15,6 +15,7 @@ import { linddunThreats, dataFlows, privacyControls, linddunCategories, getThrea
 import { hazopNodes, hazopDeviations, hazopActions, hazopGuideWords, getDeviationsByNode, getCriticalDeviations, getOpenActions } from '../../apps/user/mockData/hazopData';
 import { octaveAssets, octaveThreats, octaveVulnerabilities, octaveRisks, octaveProtectionStrategies, getCriticalRisks as getOctaveCriticalRisks, getHighValueAssets, getThreatsByAsset } from '../../apps/user/mockData/octaveData';
 import { useAnalysisStore } from '../../stores/analysisStore';
+import { useUCAData } from '../../hooks/useUCAData';
 import './CollapsibleAnalysisContent.css';
 
 interface SubSection {
@@ -117,6 +118,9 @@ export default function CollapsibleAnalysisContent({
   // Get analysis results from store
   const { analysisResults, demoMode } = useAnalysisStore();
   const frameworkResults = analysisResults[analysisId];
+  
+  // Use the UCA data hook for reactive updates
+  const { ucaData, heatMapData, updateUCAData } = useUCAData(analysisId);
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => {
@@ -405,51 +409,7 @@ Built on a **microservices foundation** with:
                 config={{
                   rows: controlActions.map(ca => ca.action),
                   cols: ['Not Provided', 'Provided Unsafely', 'Wrong Timing', 'Wrong Duration'],
-                  cells: (() => {
-                    // Use the same data source as the table
-                    const ucasRaw = frameworkResults?.sections.find(s => s.id === 'ucas')?.content?.ucas || ucas;
-                    
-                    // Map UCA types for display
-                    const typeMap: Record<string, string> = {
-                      'not-provided': 'Not Provided',
-                      'provided': 'Provided Unsafely',
-                      'wrong-timing': 'Wrong Timing',
-                      'wrong-duration': 'Wrong Duration'
-                    };
-                    
-                    // Create cells for heat map based on actual data
-                    const cells: any[] = [];
-                    controlActions.forEach(ca => {
-                      ['not-provided', 'provided', 'wrong-timing', 'wrong-duration'].forEach(type => {
-                        // Find UCAs for this control action/type combination
-                        const ucasForCell = ucasRaw.filter(u => 
-                          u.controlActionId === ca.id && u.type === type
-                        );
-                        
-                        // Calculate risk value based on severity
-                        let value = 0;
-                        if (ucasForCell.length > 0) {
-                          const severityScores = ucasForCell.map(u => 
-                            u.severity === 'critical' ? 5 :
-                            u.severity === 'high' ? 4 :
-                            u.severity === 'medium' ? 3 : 2
-                          );
-                          value = Math.round(severityScores.reduce((a, b) => a + b, 0) / severityScores.length);
-                        }
-                        
-                        cells.push({
-                          row: ca.action,
-                          col: typeMap[type],
-                          value,
-                          label: ucasForCell.length.toString(),
-                          tooltip: `${ucasForCell.length} UCA${ucasForCell.length !== 1 ? 's' : ''} identified`,
-                          data: ucasForCell
-                        });
-                      });
-                    });
-                    
-                    return cells;
-                  })(),
+                  cells: heatMapData, // Use data from hook - automatically updates when ucaData changes
                   colorScale: {
                     min: { value: 1, color: '#27ae60', label: 'Very Low' },
                     low: { value: 2, color: '#2ecc71', label: 'Low' },
@@ -494,8 +454,8 @@ Built on a **microservices foundation** with:
                 id={`${analysisId}-uca-details`}
                 title="Detailed Unsafe Control Actions"
                 data={(() => {
-                  const ucasRaw = frameworkResults?.sections.find(s => s.id === 'ucas')?.content?.ucas || ucas;
-                  return ucasRaw.map(u => {
+                  // Use ucaData from hook instead of separate source
+                  return ucaData.map(u => {
                     const ca = controlActions.find(ca => ca.id === u.controlActionId);
                     return {
                       ...u,
@@ -533,13 +493,8 @@ Built on a **microservices foundation** with:
                     };
                   });
                   
-                  // Update the analysis store with new UCAs
-                  const analysisStore = useAnalysisStore.getState();
-                  analysisStore.updateSectionResult(analysisId, 'ucas', {
-                    content: { ucas: transformedData },
-                    status: 'completed'
-                  });
-                  
+                  // Update through the hook - this will update store and trigger heat map re-render
+                  updateUCAData(transformedData);
                   handleSave(id, transformedData);
                 }}
                 sortable

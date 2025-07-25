@@ -7,6 +7,7 @@ interface HeatMapCell {
   value: number;
   label?: string;
   tooltip?: string;
+  data?: any; // Additional data for click handling
 }
 
 interface HeatMapConfig {
@@ -29,13 +30,15 @@ interface AnalysisHeatMapProps {
   title: string;
   config: HeatMapConfig;
   onSave?: (id: string, data: any) => void;
+  onCellClick?: (cell: HeatMapCell) => void;
 }
 
 export function AnalysisHeatMap({
   id,
   title,
   config,
-  onSave
+  onSave,
+  onCellClick
 }: AnalysisHeatMapProps) {
   const { rows, cols, cells, colorScale, xAxisLabel, yAxisLabel } = config;
 
@@ -131,14 +134,33 @@ export function AnalysisHeatMap({
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      cursor: cell.tooltip ? 'pointer' : 'default',
-                      position: 'relative'
+                      cursor: (onCellClick && cell.label && cell.label !== '0') ? 'pointer' : 'default',
+                      position: 'relative',
+                      transition: 'opacity 0.2s'
                     }}
                     title={cell.tooltip}
+                    onClick={() => {
+                      if (onCellClick && cell.label && cell.label !== '0') {
+                        onCellClick(cell);
+                      }
+                    }}
+                    onMouseEnter={(e) => {
+                      if (onCellClick && cell.label && cell.label !== '0') {
+                        e.currentTarget.style.opacity = '0.8';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = '1';
+                    }}
                   >
                     {cell.label && (
                       <span style={{ fontSize: '20px', fontWeight: 'bold', color: 'white' }}>
                         {cell.label}
+                      </span>
+                    )}
+                    {onCellClick && cell.label && cell.label !== '0' && (
+                      <span style={{ fontSize: '11px', color: 'white', marginTop: '2px' }}>
+                        Click for details
                       </span>
                     )}
                   </div>

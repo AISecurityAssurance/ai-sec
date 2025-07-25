@@ -111,6 +111,7 @@ export default function CollapsibleAnalysisContent({
   const [selectedDetail, setSelectedDetail] = useState<{ title: string; data: any } | null>(null);
   const [selectedThreats, setSelectedThreats] = useState<{ title: string; threats: any[] } | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<any | null>(null);
+  const [selectedHeatMapCell, setSelectedHeatMapCell] = useState<{ title: string; items: any[] } | null>(null);
   const subsections = analysisSubsections[analysisId] || [];
   
   // Get analysis results from store
@@ -1813,28 +1814,37 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
                 config={{
                   rows: ['Adversarial Risk', 'Bias Risk', 'Privacy Risk', 'Reliability Risk'],
                   cols: ['Fraud Detection', 'Chatbot', 'Credit Scoring', 'Investment Advisor', 'AML Monitor'],
-                  cells: [
-                    { row: 'Adversarial Risk', col: 'Fraud Detection', value: 3, label: '3' },
-                    { row: 'Adversarial Risk', col: 'Chatbot', value: 4, label: '4' },
-                    { row: 'Adversarial Risk', col: 'Credit Scoring', value: 2, label: '2' },
-                    { row: 'Adversarial Risk', col: 'Investment Advisor', value: 2, label: '2' },
-                    { row: 'Adversarial Risk', col: 'AML Monitor', value: 1, label: '1' },
-                    { row: 'Bias Risk', col: 'Fraud Detection', value: 2, label: '2' },
-                    { row: 'Bias Risk', col: 'Chatbot', value: 1, label: '1' },
-                    { row: 'Bias Risk', col: 'Credit Scoring', value: 5, label: '5' },
-                    { row: 'Bias Risk', col: 'Investment Advisor', value: 3, label: '3' },
-                    { row: 'Bias Risk', col: 'AML Monitor', value: 2, label: '2' },
-                    { row: 'Privacy Risk', col: 'Fraud Detection', value: 3, label: '3' },
-                    { row: 'Privacy Risk', col: 'Chatbot', value: 2, label: '2' },
-                    { row: 'Privacy Risk', col: 'Credit Scoring', value: 4, label: '4' },
-                    { row: 'Privacy Risk', col: 'Investment Advisor', value: 3, label: '3' },
-                    { row: 'Privacy Risk', col: 'AML Monitor', value: 4, label: '4' },
-                    { row: 'Reliability Risk', col: 'Fraud Detection', value: 4, label: '4' },
-                    { row: 'Reliability Risk', col: 'Chatbot', value: 3, label: '3' },
-                    { row: 'Reliability Risk', col: 'Credit Scoring', value: 3, label: '3' },
-                    { row: 'Reliability Risk', col: 'Investment Advisor', value: 3, label: '3' },
-                    { row: 'Reliability Risk', col: 'AML Monitor', value: 4, label: '4' }
-                  ],
+                  cells: (() => {
+                    // Create cells with threat data for each risk/model combination
+                    const riskData = [
+                      { row: 'Adversarial Risk', col: 'Fraud Detection', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'adversarial' && t.affectedModels.includes('fraud-detection')) },
+                      { row: 'Adversarial Risk', col: 'Chatbot', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'adversarial' && t.affectedModels.includes('chatbot')) },
+                      { row: 'Adversarial Risk', col: 'Credit Scoring', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'adversarial' && t.affectedModels.includes('credit-scoring')) },
+                      { row: 'Adversarial Risk', col: 'Investment Advisor', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'adversarial' && t.affectedModels.includes('investment-advisor')) },
+                      { row: 'Adversarial Risk', col: 'AML Monitor', value: 1, label: '1', threats: maestroThreats.filter(t => t.category === 'adversarial' && t.affectedModels.includes('aml-monitor')) },
+                      { row: 'Bias Risk', col: 'Fraud Detection', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'bias' && t.affectedModels.includes('fraud-detection')) },
+                      { row: 'Bias Risk', col: 'Chatbot', value: 1, label: '1', threats: maestroThreats.filter(t => t.category === 'bias' && t.affectedModels.includes('chatbot')) },
+                      { row: 'Bias Risk', col: 'Credit Scoring', value: 5, label: '5', threats: maestroThreats.filter(t => t.category === 'bias' && t.affectedModels.includes('credit-scoring')) },
+                      { row: 'Bias Risk', col: 'Investment Advisor', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'bias' && t.affectedModels.includes('investment-advisor')) },
+                      { row: 'Bias Risk', col: 'AML Monitor', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'bias' && t.affectedModels.includes('aml-monitor')) },
+                      { row: 'Privacy Risk', col: 'Fraud Detection', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'privacy' && t.affectedModels.includes('fraud-detection')) },
+                      { row: 'Privacy Risk', col: 'Chatbot', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'privacy' && t.affectedModels.includes('chatbot')) },
+                      { row: 'Privacy Risk', col: 'Credit Scoring', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'privacy' && t.affectedModels.includes('credit-scoring')) },
+                      { row: 'Privacy Risk', col: 'Investment Advisor', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'privacy' && t.affectedModels.includes('investment-advisor')) },
+                      { row: 'Privacy Risk', col: 'AML Monitor', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'privacy' && t.affectedModels.includes('aml-monitor')) },
+                      { row: 'Reliability Risk', col: 'Fraud Detection', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'reliability' && t.affectedModels.includes('fraud-detection')) },
+                      { row: 'Reliability Risk', col: 'Chatbot', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'reliability' && t.affectedModels.includes('chatbot')) },
+                      { row: 'Reliability Risk', col: 'Credit Scoring', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'reliability' && t.affectedModels.includes('credit-scoring')) },
+                      { row: 'Reliability Risk', col: 'Investment Advisor', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'reliability' && t.affectedModels.includes('investment-advisor')) },
+                      { row: 'Reliability Risk', col: 'AML Monitor', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'reliability' && t.affectedModels.includes('aml-monitor')) }
+                    ];
+                    
+                    return riskData.map(cell => ({
+                      ...cell,
+                      data: cell.threats,
+                      tooltip: `Risk Score: ${cell.value} - ${cell.threats.length} threat${cell.threats.length !== 1 ? 's' : ''}`
+                    }));
+                  })(),
                   colorScale: {
                     min: { value: 1, color: '#27ae60', label: 'Very Low' },
                     low: { value: 2, color: '#2ecc71', label: 'Low' },
@@ -1846,6 +1856,14 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
                   yAxisLabel: 'Risk Categories'
                 }}
                 onSave={handleSave}
+                onCellClick={(cell) => {
+                  if (cell.data && cell.data.length > 0) {
+                    setSelectedHeatMapCell({
+                      title: `${cell.row} - ${cell.col}`,
+                      items: cell.data
+                    });
+                  }
+                }}
               />
 
               <AnalysisText
@@ -1866,6 +1884,25 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
                 onSave={handleSave}
                 format="markdown"
               />
+              
+              {selectedHeatMapCell && selectedHeatMapCell.items.length > 0 && (
+                <div style={{ marginTop: 'var(--space-4)' }}>
+                  <ThreatListInline
+                    title={selectedHeatMapCell.title}
+                    threats={selectedHeatMapCell.items.map(threat => ({
+                      id: threat.id,
+                      component: threat.affectedModels.join(', '),
+                      threatType: threat.category,
+                      description: threat.description,
+                      impact: threat.impact,
+                      likelihood: threat.likelihood,
+                      riskLevel: threat.riskLevel,
+                      mitigations: threat.mitigations
+                    }))}
+                    onClose={() => setSelectedHeatMapCell(null)}
+                  />
+                </div>
+              )}
             </AnalysisSection>
           );
 
@@ -2329,17 +2366,21 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
                   rows: ['Critical', 'High', 'Medium', 'Low'],
                   cols: ['Rare', 'Unlikely', 'Possible', 'Likely', 'Almost Certain'],
                   cells: (() => {
-                    // Count deviations for each cell
-                    const cellCounts: Record<string, number> = {};
+                    // Count deviations for each cell and store the actual deviations
+                    const cellData: Record<string, { count: number; deviations: typeof hazopDeviations }> = {};
                     hazopDeviations.forEach(dev => {
                       const row = dev.severity.charAt(0).toUpperCase() + dev.severity.slice(1);
                       const col = dev.likelihood.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                       const key = `${row}-${col}`;
-                      cellCounts[key] = (cellCounts[key] || 0) + 1;
+                      if (!cellData[key]) {
+                        cellData[key] = { count: 0, deviations: [] };
+                      }
+                      cellData[key].count++;
+                      cellData[key].deviations.push(dev);
                     });
                     
-                    // Create cells with counts
-                    return Object.entries(cellCounts).map(([key, count]) => {
+                    // Create cells with counts and data
+                    return Object.entries(cellData).map(([key, data]) => {
                       const [row, col] = key.split('-');
                       const severity = row.toLowerCase();
                       const likelihood = col.toLowerCase();
@@ -2355,8 +2396,9 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
                         row,
                         col,
                         value,
-                        label: count.toString(),
-                        tooltip: `${count} deviation${count > 1 ? 's' : ''} at ${row} severity, ${col} likelihood`
+                        label: data.count.toString(),
+                        tooltip: `${data.count} deviation${data.count > 1 ? 's' : ''} at ${row} severity, ${col} likelihood`,
+                        data: data.deviations
                       };
                     });
                   })(),
@@ -2364,6 +2406,14 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
                   yAxisLabel: 'Severity →'
                 }}
                 onSave={handleSave}
+                onCellClick={(cell) => {
+                  if (cell.data && cell.data.length > 0) {
+                    setSelectedHeatMapCell({
+                      title: `${cell.row} Severity / ${cell.col} Likelihood Deviations`,
+                      items: cell.data
+                    });
+                  }
+                }}
               />
 
               <AnalysisText
@@ -2388,6 +2438,25 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
                 onSave={handleSave}
                 format="markdown"
               />
+              
+              {selectedHeatMapCell && selectedHeatMapCell.items.length > 0 && (
+                <div style={{ marginTop: 'var(--space-4)' }}>
+                  <ThreatListInline
+                    title={selectedHeatMapCell.title}
+                    threats={selectedHeatMapCell.items.map(dev => ({
+                      id: dev.id,
+                      component: dev.node,
+                      threatType: dev.guideWord,
+                      description: dev.deviation,
+                      impact: dev.consequence,
+                      likelihood: dev.likelihood,
+                      riskLevel: dev.riskRating,
+                      mitigations: dev.safeguards
+                    }))}
+                    onClose={() => setSelectedHeatMapCell(null)}
+                  />
+                </div>
+              )}
             </AnalysisSection>
           );
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { useVersionStore } from '../../../stores/versionStore';
 import './NewAnalysisDialog.css';
 
 interface NewAnalysisDialogProps {
@@ -34,12 +35,21 @@ export function NewAnalysisDialog({ isOpen, onClose, onSubmit }: NewAnalysisDial
   const [description, setDescription] = useState('');
   const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
   const [showDemo, setShowDemo] = useState(false);
+  const { createVersion, switchVersion, activeVersionId } = useVersionStore();
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (description.trim() && selectedFrameworks.length > 0) {
+      // Create a new version for the analysis
+      const newVersionId = createVersion(
+        `Analysis ${new Date().toLocaleDateString()}`,
+        `New analysis with ${selectedFrameworks.join(', ')}`,
+        activeVersionId === 'demo-v1' ? 'demo-v1' : activeVersionId
+      );
+      switchVersion(newVersionId);
+      
       onSubmit({ description, frameworks: selectedFrameworks });
       setDescription('');
       setSelectedFrameworks([]);
@@ -74,7 +84,8 @@ export function NewAnalysisDialog({ isOpen, onClose, onSubmit }: NewAnalysisDial
                 className="demo-button"
                 onClick={() => {
                   setDescription(DEMO_SYSTEM);
-                  setSelectedFrameworks(['stpa-sec', 'stride', 'pasta', 'dread']);
+                  // Don't auto-select frameworks - let user choose
+                  // setSelectedFrameworks(['stpa-sec', 'stride', 'pasta', 'dread']);
                 }}
                 style={{
                   marginLeft: '10px',

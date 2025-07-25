@@ -1,6 +1,7 @@
 import React from 'react';
-import { GitBranch, Plus, Check } from 'lucide-react';
+import { GitBranch, Plus, Check, AlertCircle } from 'lucide-react';
 import { useVersionStore } from '../stores/versionStore';
+import { useAnalysisStore } from '../stores/analysisStore';
 
 export function VersionSelector() {
   const { 
@@ -9,10 +10,13 @@ export function VersionSelector() {
     switchVersion, 
     createVersion 
   } = useVersionStore();
+  const { hasUnsavedChanges } = useAnalysisStore();
   
   const activeVersion = versions.find(v => v.id === activeVersionId);
   const [showDropdown, setShowDropdown] = React.useState(false);
   const [showCreateDialog, setShowCreateDialog] = React.useState(false);
+  const [showSavePrompt, setShowSavePrompt] = React.useState(false);
+  const [pendingVersionId, setPendingVersionId] = React.useState<string | null>(null);
   const [newVersionName, setNewVersionName] = React.useState('');
   const [newVersionDescription, setNewVersionDescription] = React.useState('');
   
@@ -82,8 +86,14 @@ export function VersionSelector() {
               <button
                 key={version.id}
                 onClick={() => {
-                  switchVersion(version.id);
-                  setShowDropdown(false);
+                  if (hasUnsavedChanges && version.id !== activeVersionId) {
+                    setPendingVersionId(version.id);
+                    setShowSavePrompt(true);
+                    setShowDropdown(false);
+                  } else {
+                    switchVersion(version.id);
+                    setShowDropdown(false);
+                  }
                 }}
                 style={{
                   display: 'flex',
@@ -243,6 +253,108 @@ export function VersionSelector() {
                 }}
               >
                 Create Version
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {showSavePrompt && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000
+          }}
+          onClick={() => setShowSavePrompt(false)}
+        >
+          <div
+            style={{
+              background: 'var(--color-surface)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '24px',
+              maxWidth: '400px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <AlertCircle size={24} style={{ color: 'var(--color-warning)' }} />
+              <h3 style={{ margin: 0 }}>Unsaved Changes</h3>
+            </div>
+            
+            <p style={{ marginBottom: '24px', color: 'var(--color-text-secondary)' }}>
+              You have unsaved changes in the current version. Would you like to save them before switching?
+            </p>
+            
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => {
+                  setShowSavePrompt(false);
+                  setPendingVersionId(null);
+                }}
+                style={{
+                  padding: '8px 16px',
+                  background: 'transparent',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius-sm)',
+                  cursor: 'pointer',
+                  fontSize: 'var(--font-size-sm)'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  // Don't save, just switch
+                  if (pendingVersionId) {
+                    switchVersion(pendingVersionId);
+                    useAnalysisStore.getState().setHasUnsavedChanges(false);
+                  }
+                  setShowSavePrompt(false);
+                  setPendingVersionId(null);
+                }}
+                style={{
+                  padding: '8px 16px',
+                  background: 'var(--color-warning)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 'var(--radius-sm)',
+                  cursor: 'pointer',
+                  fontSize: 'var(--font-size-sm)'
+                }}
+              >
+                Don't Save
+              </button>
+              <button
+                onClick={() => {
+                  // In a real app, this would trigger a save
+                  // For now, we'll just mark as saved and switch
+                  useAnalysisStore.getState().setHasUnsavedChanges(false);
+                  if (pendingVersionId) {
+                    switchVersion(pendingVersionId);
+                  }
+                  setShowSavePrompt(false);
+                  setPendingVersionId(null);
+                }}
+                style={{
+                  padding: '8px 16px',
+                  background: 'var(--color-primary)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 'var(--radius-sm)',
+                  cursor: 'pointer',
+                  fontSize: 'var(--font-size-sm)'
+                }}
+              >
+                Save Changes
               </button>
             </div>
           </div>

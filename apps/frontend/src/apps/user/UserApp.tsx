@@ -61,6 +61,13 @@ export default function UserApp() {
         setCurrentAnalysisId(result.id);
       }
       
+      // Update enabled analyses to only show selected frameworks
+      const newEnabledAnalyses: Record<string, boolean> = {};
+      ['stpa-sec', 'stride', 'pasta', 'dread', 'maestro', 'linddun', 'hazop', 'octave'].forEach(framework => {
+        newEnabledAnalyses[framework] = data.frameworks.includes(framework);
+      });
+      setEnabledAnalyses(newEnabledAnalyses);
+      
       // Update UI to show analysis in progress
       // The WebSocket connection should handle real-time updates
       

@@ -400,7 +400,7 @@ Built on a **microservices foundation** with:
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Unsafe Control Actions Analysis"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisHeatMap
@@ -579,7 +579,7 @@ Each control action should be analyzed for all four UCA types to ensure complete
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Stakeholder Analysis"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable
@@ -690,7 +690,7 @@ Each control action should be analyzed for all four UCA types to ensure complete
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Wargaming & Security Exercises"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable
@@ -883,7 +883,7 @@ Each control action should be analyzed for all four UCA types to ensure complete
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Risk Analysis Charts"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <div style={{ 
@@ -1063,7 +1063,7 @@ STRIDE helps identify and categorize threats systematically during the design ph
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Threats by Category"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               {strideThreatTypes.map(category => {
@@ -1073,7 +1073,7 @@ STRIDE helps identify and categorize threats systematically during the design ph
                     key={category.type}
                     id={`${analysisId}-${category.type.toLowerCase().replace(/\s+/g, '-')}`}
                     title={`${category.type} ${category.icon}`}
-                    level={4}
+                    level={3}
                     onSave={handleSave}
                     collapsible
                     defaultExpanded={false}
@@ -1167,7 +1167,7 @@ STRIDE helps identify and categorize threats systematically during the design ph
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Risk Matrix Visualization"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <RiskMatrixWithDetails 
@@ -1284,7 +1284,7 @@ PASTA aligns technical threats with business impact, helping organizations make 
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Stage 3: Application Decomposition"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisFlow
@@ -1336,7 +1336,7 @@ PASTA aligns technical threats with business impact, helping organizations make 
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Stage 4: Threat Analysis"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable
@@ -1404,7 +1404,7 @@ PASTA aligns technical threats with business impact, helping organizations make 
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Stage 6: Attack Modeling"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable
@@ -1662,7 +1662,7 @@ PASTA aligns technical threats with business impact, helping organizations make 
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Stage 7: Risk & Impact Analysis"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable
@@ -1820,7 +1820,7 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="AI Threat Analysis"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable
@@ -1907,7 +1907,7 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Model Risk Assessment"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisHeatMap
@@ -2084,7 +2084,7 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="AI Security Controls"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable
@@ -2192,7 +2192,7 @@ LINDDUN helps organizations build privacy-preserving systems while ensuring regu
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Privacy Threat Analysis"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable
@@ -2277,7 +2277,7 @@ LINDDUN helps organizations build privacy-preserving systems while ensuring regu
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="LINDDUN Threat Categories"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisBarChart
@@ -2342,7 +2342,7 @@ ${categoryThreats.slice(0, 2).map(t => `- ${t.scenario}`).join('\n')}`}
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="GDPR Compliance Mapping"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable
@@ -2455,7 +2455,7 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Deviation Analysis"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable
@@ -2505,7 +2505,7 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Risk Assessment Matrix"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisHeatMap
@@ -2614,7 +2614,7 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Action Items"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable
@@ -2708,7 +2708,7 @@ OCTAVE focuses on organizational risk and strategic, practice-related issues, di
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Critical Asset Identification"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable
@@ -2770,7 +2770,7 @@ ${getHighValueAssets().map(asset => `### ${asset.name}
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Threat Profile Analysis"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable
@@ -2852,7 +2852,7 @@ ${getHighValueAssets().map(asset => `### ${asset.name}
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Organizational Risk Analysis"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable
@@ -2950,7 +2950,7 @@ ${getHighValueAssets().map(asset => `### ${asset.name}
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
               title="Protection Strategy Development"
-              level={4}
+              level={3}
               onSave={handleSave}
             >
               <AnalysisTable

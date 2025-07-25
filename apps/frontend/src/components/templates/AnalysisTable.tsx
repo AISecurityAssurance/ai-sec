@@ -46,6 +46,7 @@ export function AnalysisTable({
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [newRow, setNewRow] = useState<any>({});
+  const [currentPageSize, setCurrentPageSize] = useState<number | undefined>(pageSize || undefined);
 
   // Sync tableData with props when data changes
   useEffect(() => {
@@ -213,19 +214,44 @@ export function AnalysisTable({
         )}
       </div>
 
-      {filterable && (
-        <div className="table-filter">
-          <input
-            type="text"
-            placeholder="Filter..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="filter-input"
-          />
+      {(filterable || pageSize !== undefined) && (
+        <div className="table-controls">
+          <div className="table-info">
+            <span className="row-count">{sortedData.length} rows</span>
+            {pageSize !== undefined && (
+              <div className="page-size-selector">
+                <label htmlFor={`${id}-page-size`}>Show:</label>
+                <select
+                  id={`${id}-page-size`}
+                  value={currentPageSize || 'all'}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCurrentPageSize(value === 'all' ? undefined : parseInt(value));
+                  }}
+                  className="page-size-select"
+                >
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
+            )}
+          </div>
+          {filterable && (
+            <input
+              type="text"
+              placeholder="Filter..."
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="filter-input"
+            />
+          )}
         </div>
       )}
 
-      <div className="table-container" style={{ maxHeight: pageSize ? `${pageSize * 50 + 100}px` : 'auto', overflowY: pageSize ? 'auto' : 'visible' }}>
+      <div className="table-container" style={{ maxHeight: currentPageSize ? `${currentPageSize * 50 + 100}px` : 'auto', overflowY: currentPageSize ? 'auto' : 'visible' }}>
         <table className="analysis-table">
           <thead>
             <tr>
@@ -249,7 +275,7 @@ export function AnalysisTable({
             </tr>
           </thead>
           <tbody>
-            {(pageSize ? sortedData : sortedData).map((row, idx) => {
+            {(currentPageSize ? sortedData.slice(0, currentPageSize) : sortedData).map((row, idx) => {
               // Find the original index in tableData
               const originalIndex = tableData.findIndex(item => item === row);
               return (

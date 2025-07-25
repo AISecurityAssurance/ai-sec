@@ -1041,18 +1041,14 @@ STRIDE helps identify and categorize threats systematically during the design ph
               <AnalysisBarChart
                 id={`${analysisId}-threat-distribution`}
                 title="Threat Category Distribution"
-                data={{
-                  labels: Object.keys(threatCategorySummary).map(key => 
-                    key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())
-                  ),
-                  values: Object.values(threatCategorySummary) as number[]
-                }}
-                config={{
-                  xAxisLabel: 'Threat Category',
-                  yAxisLabel: 'Number of Threats',
-                  color: 'var(--primary)',
-                  showValues: true
-                }}
+                data={Object.entries(threatCategorySummary).map(([key, value]) => ({
+                  label: key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
+                  value: value as number
+                }))}
+                xAxisLabel="Threat Category"
+                yAxisLabel="Number of Threats"
+                horizontal={true}
+                defaultColor="var(--primary)"
                 onSave={handleSave}
               />
             </AnalysisSection>

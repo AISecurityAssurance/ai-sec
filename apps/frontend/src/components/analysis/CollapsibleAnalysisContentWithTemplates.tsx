@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronRight, ChevronDown, FileText, Users, AlertTriangle, ShieldAlert, GitBranch, Zap, Target, Shield } from 'lucide-react';
-import { AnalysisSection, AnalysisTable, AnalysisText, AnalysisDiagram, SystemDescriptionTemplate, AnalysisFlow, AnalysisChart, AnalysisDetail, AnalysisBarChart, AnalysisHeatMap } from '../templates';
+import { AnalysisSection, AnalysisTable, AnalysisText, AnalysisDiagram, SystemDescriptionTemplate, AnalysisFlow, AnalysisChart, AnalysisDetail, AnalysisBarChart, AnalysisHeatMap, ThreatListDetail } from '../templates';
 import { losses, hazards, ucas, causalScenarios, controllers, controlActions } from '../../apps/user/mockData/stpaSecData';
 import { dreadThreats, getRiskDistribution } from '../../apps/user/mockData/dreadData';
 import { strideThreats, strideComponents, strideThreatTypes, getStrideByType, componentThreats, threatCategorySummary, riskMatrix } from '../../apps/user/mockData/strideData';
@@ -108,6 +108,7 @@ export default function CollapsibleAnalysisContent({
 }: CollapsibleAnalysisContentProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [selectedDetail, setSelectedDetail] = useState<{ title: string; data: any } | null>(null);
+  const [selectedThreats, setSelectedThreats] = useState<{ title: string; threats: any[] } | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<any | null>(null);
   const subsections = analysisSubsections[analysisId] || [];
   
@@ -911,9 +912,9 @@ STRIDE helps identify and categorize threats systematically during the design ph
               clickableRows
               onRowClick={(row) => {
                 const threats = strideThreats.filter(t => t.component === row.component);
-                setSelectedDetail({
+                setSelectedThreats({
                   title: `${row.component} Threats`,
-                  data: threats
+                  threats: threats
                 });
               }}
             />
@@ -1097,9 +1098,9 @@ STRIDE helps identify and categorize threats systematically during the design ph
                             }}
                             onClick={() => {
                               if (cellThreats.length > 0) {
-                                setSelectedDetail({
+                                setSelectedThreats({
                                   title: `${likelihoodLabel} Likelihood / ${impact.charAt(0).toUpperCase() + impact.slice(1)} Impact Threats`,
-                                  data: cellThreats
+                                  threats: cellThreats
                                 });
                               }
                             }}
@@ -2701,6 +2702,14 @@ ${getHighValueAssets().map(asset => `### ${asset.name}
           title={selectedDetail.title}
           data={selectedDetail.data}
           onClose={() => setSelectedDetail(null)}
+        />
+      )}
+      
+      {selectedThreats && (
+        <ThreatListDetail
+          title={selectedThreats.title}
+          threats={selectedThreats.threats}
+          onClose={() => setSelectedThreats(null)}
         />
       )}
     </div>

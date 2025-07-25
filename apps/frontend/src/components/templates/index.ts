@@ -10,3 +10,4 @@ export { AnalysisChart } from './AnalysisChart';
 export { AnalysisDetail } from './AnalysisDetail';
 export { AnalysisBarChart } from './AnalysisBarChart';
 export { AnalysisHeatMap } from './AnalysisHeatMap';
+export { ThreatListDetail } from './ThreatListDetail';

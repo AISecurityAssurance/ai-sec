@@ -1024,6 +1024,14 @@ STRIDE helps identify and categorize threats systematically during the design ph
           );
 
         case 'risk-matrix':
+          // Calculate threat counts for each cell
+          const threatsByRisk = strideThreats.reduce((acc, threat) => {
+            const key = `${threat.likelihood}-${threat.impact}`;
+            if (!acc[key]) acc[key] = [];
+            acc[key].push(threat);
+            return acc;
+          }, {} as Record<string, typeof strideThreats>);
+
           return (
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
@@ -1031,68 +1039,81 @@ STRIDE helps identify and categorize threats systematically during the design ph
               level={4}
               onSave={handleSave}
             >
-              <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '10px', marginTop: '20px' }}>
-                <div style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: '100px repeat(4, 1fr)', gap: '10px' }}>
+              <div style={{ marginTop: '20px' }}>
+                {/* Header row */}
+                <div style={{ display: 'grid', gridTemplateColumns: '120px repeat(4, 1fr)', gap: '2px', marginBottom: '2px' }}>
                   <div></div>
-                  <div style={{ textAlign: 'center', fontWeight: 'bold' }}>Low Impact</div>
-                  <div style={{ textAlign: 'center', fontWeight: 'bold' }}>Medium Impact</div>
-                  <div style={{ textAlign: 'center', fontWeight: 'bold' }}>High Impact</div>
-                  <div style={{ textAlign: 'center', fontWeight: 'bold' }}>Critical Impact</div>
+                  <div style={{ textAlign: 'center', fontWeight: 'bold', padding: '8px', backgroundColor: '#f5f5f5' }}>Low Impact</div>
+                  <div style={{ textAlign: 'center', fontWeight: 'bold', padding: '8px', backgroundColor: '#f5f5f5' }}>Medium Impact</div>
+                  <div style={{ textAlign: 'center', fontWeight: 'bold', padding: '8px', backgroundColor: '#f5f5f5' }}>High Impact</div>
+                  <div style={{ textAlign: 'center', fontWeight: 'bold', padding: '8px', backgroundColor: '#f5f5f5' }}>Critical Impact</div>
                 </div>
                 
-                {['High', 'Medium', 'Low'].map(likelihood => (
-                  <>
-                    <div style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-                      {likelihood}<br/>Likelihood
+                {/* Risk matrix rows */}
+                {['high', 'medium', 'low'].map(likelihood => {
+                  const likelihoodLabel = likelihood.charAt(0).toUpperCase() + likelihood.slice(1);
+                  return (
+                    <div key={likelihood} style={{ display: 'grid', gridTemplateColumns: '120px repeat(4, 1fr)', gap: '2px', marginBottom: '2px' }}>
+                      <div style={{ 
+                        fontWeight: 'bold', 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        padding: '8px',
+                        backgroundColor: '#f5f5f5'
+                      }}>
+                        {likelihoodLabel} Likelihood
+                      </div>
+                      {['low', 'medium', 'high', 'critical'].map(impact => {
+                        const cellThreats = threatsByRisk[`${likelihood}-${impact}`] || [];
+                        const cellColor = 
+                          (likelihood === 'high' && (impact === 'high' || impact === 'critical')) ? '#ff4444' :
+                          (likelihood === 'high' && impact === 'medium') || (likelihood === 'medium' && (impact === 'high' || impact === 'critical')) ? '#ff9944' :
+                          (likelihood === 'medium' && impact === 'medium') || (likelihood === 'low' && (impact === 'high' || impact === 'critical')) ? '#ffdd44' :
+                          '#44ff44';
+                        
+                        return (
+                          <div
+                            key={`${likelihood}-${impact}`}
+                            style={{
+                              backgroundColor: cellColor,
+                              padding: '10px',
+                              border: '1px solid #ccc',
+                              minHeight: '80px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: cellThreats.length > 0 ? 'pointer' : 'default',
+                              transition: 'opacity 0.2s',
+                              opacity: cellThreats.length > 0 ? 1 : 0.6
+                            }}
+                            onMouseEnter={(e) => {
+                              if (cellThreats.length > 0) {
+                                e.currentTarget.style.opacity = '0.8';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.opacity = cellThreats.length > 0 ? '1' : '0.6';
+                            }}
+                            onClick={() => {
+                              if (cellThreats.length > 0) {
+                                setSelectedDetail({
+                                  title: `${likelihoodLabel} Likelihood / ${impact.charAt(0).toUpperCase() + impact.slice(1)} Impact Threats`,
+                                  data: cellThreats
+                                });
+                              }
+                            }}
+                          >
+                            <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{cellThreats.length}</div>
+                            {cellThreats.length > 0 && (
+                              <div style={{ fontSize: '12px', marginTop: '5px' }}>Click for details</div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                    {['Low', 'Medium', 'High', 'Critical'].map(impact => {
-                      const cellThreats = riskMatrix[likelihood as keyof typeof riskMatrix][impact as keyof typeof riskMatrix[keyof typeof riskMatrix]] || [];
-                      const cellColor = 
-                        (likelihood === 'High' && (impact === 'High' || impact === 'Critical')) ? '#ff4444' :
-                        (likelihood === 'High' && impact === 'Medium') || (likelihood === 'Medium' && (impact === 'High' || impact === 'Critical')) ? '#ff9944' :
-                        (likelihood === 'Medium' && impact === 'Medium') || (likelihood === 'Low' && (impact === 'High' || impact === 'Critical')) ? '#ffdd44' :
-                        '#44ff44';
-                      
-                      return (
-                        <div
-                          key={`${likelihood}-${impact}`}
-                          style={{
-                            backgroundColor: cellColor,
-                            padding: '10px',
-                            border: '1px solid #ccc',
-                            minHeight: '60px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: cellThreats.length > 0 ? 'pointer' : 'default'
-                          }}
-                          onClick={() => {
-                            if (cellThreats.length > 0) {
-                              const threats = cellThreats.map(id => strideThreats.find(t => t.id === id)).filter(Boolean);
-                              setSelectedDetail({
-                                title: `${likelihood} Likelihood / ${impact} Impact Threats`,
-                                data: threats.map(threat => ({
-                                  id: threat.id,
-                                  component: threat.component,
-                                  threatType: threat.threatType,
-                                  description: threat.description,
-                                  impact: threat.impact,
-                                  likelihood: threat.likelihood,
-                                  riskLevel: threat.riskLevel,
-                                  status: threat.status
-                                }))
-                              });
-                            }
-                          }}
-                        >
-                          <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{cellThreats.length}</div>
-                          {cellThreats.length > 0 && <div style={{ fontSize: '12px' }}>Click for details</div>}
-                        </div>
-                      );
-                    })}
-                  </>
-                ))}
+                  );
+                })}
               </div>
               
               <div style={{ marginTop: '20px' }}>

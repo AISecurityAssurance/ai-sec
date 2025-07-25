@@ -337,6 +337,227 @@ export const maestroThreats: MaestroThreat[] = [
       'Unusual list changes',
       'Verification failures'
     ]
+  },
+  // Additional Comprehensive Threats for Demo
+  
+  // More Fraud Detection Threats
+  {
+    id: 'MT-011',
+    agentId: 'MA-002',
+    category: 'Adversarial',
+    threat: 'Evasion attacks to bypass fraud detection',
+    scenario: 'Attackers use adversarial examples to make fraudulent transactions appear legitimate',
+    likelihood: 'high',
+    impact: 'critical',
+    detectionDifficulty: 'very hard',
+    mitigations: [
+      'Adversarial training',
+      'Input preprocessing and normalization',
+      'Ensemble models with diverse architectures',
+      'Anomaly detection layers'
+    ],
+    monitoringRequired: [
+      'Model confidence distributions',
+      'False negative rate trends',
+      'Transaction pattern analysis'
+    ]
+  },
+  {
+    id: 'MT-012',
+    agentId: 'MA-002',
+    category: 'Bias',
+    threat: 'Discriminatory fraud flagging based on demographics',
+    scenario: 'Model unfairly targets certain demographic groups leading to service denial',
+    likelihood: 'medium',
+    impact: 'high',
+    detectionDifficulty: 'moderate',
+    mitigations: [
+      'Fairness-aware training',
+      'Regular bias audits',
+      'Demographic parity constraints',
+      'Human review for edge cases'
+    ],
+    monitoringRequired: [
+      'Demographic disparity metrics',
+      'False positive rates by group',
+      'Customer complaint analysis'
+    ]
+  },
+  
+  // More Credit Scoring Threats
+  {
+    id: 'MT-013',
+    agentId: 'MA-003',
+    category: 'Privacy Breach',
+    threat: 'Model inversion attacks revealing training data',
+    scenario: 'Attackers extract sensitive customer financial data from model parameters',
+    likelihood: 'low',
+    impact: 'critical',
+    detectionDifficulty: 'very hard',
+    mitigations: [
+      'Differential privacy in training',
+      'Model parameter encryption',
+      'Access control and monitoring',
+      'Regular security audits'
+    ],
+    monitoringRequired: [
+      'Model query patterns',
+      'Unusual API access attempts',
+      'Parameter extraction attempts'
+    ]
+  },
+  {
+    id: 'MT-014',
+    agentId: 'MA-003',
+    category: 'Adversarial',
+    threat: 'Credit score manipulation through synthetic data',
+    scenario: 'Attackers create synthetic financial histories to manipulate credit scores',
+    likelihood: 'medium',
+    impact: 'high',
+    detectionDifficulty: 'hard',
+    mitigations: [
+      'Data authenticity verification',
+      'Cross-reference with external sources',
+      'Synthetic data detection models',
+      'Manual review triggers'
+    ],
+    monitoringRequired: [
+      'Data source validation',
+      'Unusual score improvements',
+      'Synthetic pattern detection'
+    ]
+  },
+  
+  // More Investment Advisor Threats
+  {
+    id: 'MT-015',
+    agentId: 'MA-004',
+    category: 'Bias',
+    threat: 'Biased investment recommendations favoring certain sectors',
+    scenario: 'Model systematically recommends investments that benefit specific industries',
+    likelihood: 'medium',
+    impact: 'medium',
+    detectionDifficulty: 'moderate',
+    mitigations: [
+      'Portfolio diversity requirements',
+      'Regular recommendation audits',
+      'Multi-objective optimization',
+      'Transparency reports'
+    ],
+    monitoringRequired: [
+      'Recommendation distribution',
+      'Portfolio performance tracking',
+      'Sector allocation patterns'
+    ]
+  },
+  {
+    id: 'MT-016',
+    agentId: 'MA-004',
+    category: 'Adversarial',
+    threat: 'Market manipulation through coordinated attacks',
+    scenario: 'Attackers manipulate model inputs to cause specific investment recommendations',
+    likelihood: 'low',
+    impact: 'critical',
+    detectionDifficulty: 'hard',
+    mitigations: [
+      'Market data validation',
+      'Anomaly detection in inputs',
+      'Human oversight for large trades',
+      'Multi-source data verification'
+    ],
+    monitoringRequired: [
+      'Input data anomalies',
+      'Recommendation volatility',
+      'Market impact analysis'
+    ]
+  },
+  
+  // More AML Monitor Threats
+  {
+    id: 'MT-017',
+    agentId: 'MA-005',
+    category: 'Privacy Breach',
+    threat: 'Unauthorized access to transaction monitoring data',
+    scenario: 'Attackers gain access to sensitive transaction patterns and customer relationships',
+    likelihood: 'medium',
+    impact: 'high',
+    detectionDifficulty: 'moderate',
+    mitigations: [
+      'Strict access controls',
+      'Data encryption at rest and in transit',
+      'Audit logging',
+      'Zero-trust architecture'
+    ],
+    monitoringRequired: [
+      'Access patterns',
+      'Data exfiltration attempts',
+      'Privilege escalation'
+    ]
+  },
+  {
+    id: 'MT-018',
+    agentId: 'MA-005',
+    category: 'Hallucination',
+    threat: 'False positive money laundering alerts',
+    scenario: 'Model generates excessive false alerts overwhelming compliance teams',
+    likelihood: 'high',
+    impact: 'medium',
+    detectionDifficulty: 'easy',
+    mitigations: [
+      'Alert tuning and optimization',
+      'Machine learning feedback loops',
+      'Risk-based alert prioritization',
+      'Continuous model refinement'
+    ],
+    monitoringRequired: [
+      'False positive rates',
+      'Alert volume trends',
+      'Investigation outcomes'
+    ]
+  },
+  
+  // Additional cross-cutting threats
+  {
+    id: 'MT-019',
+    agentId: 'MA-001',
+    category: 'Data Poisoning',
+    threat: 'Contaminated conversation logs corrupt chatbot training',
+    scenario: 'Attackers inject malicious conversations to influence future model behavior',
+    likelihood: 'medium',
+    impact: 'high',
+    detectionDifficulty: 'hard',
+    mitigations: [
+      'Training data validation',
+      'Anomaly detection in conversations',
+      'Human review of training samples',
+      'Incremental learning controls'
+    ],
+    monitoringRequired: [
+      'Training data quality metrics',
+      'Conversation pattern analysis',
+      'Model drift detection'
+    ]
+  },
+  {
+    id: 'MT-020',
+    agentId: 'MA-003',
+    category: 'Hallucination',
+    threat: 'Unreliable creditworthiness assessments',
+    scenario: 'Model provides inconsistent or arbitrary credit decisions',
+    likelihood: 'medium',
+    impact: 'high',
+    detectionDifficulty: 'moderate',
+    mitigations: [
+      'Decision consistency checks',
+      'Explainable AI requirements',
+      'Human review for borderline cases',
+      'Model calibration'
+    ],
+    monitoringRequired: [
+      'Decision consistency metrics',
+      'Appeal rates',
+      'Model explanation quality'
+    ]
   }
 ];
 

@@ -1820,8 +1820,8 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
                       'MA-001': 'chatbot',
                       'MA-002': 'fraud-detection',
                       'MA-003': 'credit-scoring',
-                      'MA-004': 'aml-monitor',
-                      'MA-005': 'investment-advisor'
+                      'MA-004': 'investment-advisor',
+                      'MA-005': 'aml-monitor'
                     };
                     
                     // Map risk categories to threat categories
@@ -1856,23 +1856,28 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
                           agentToModel[t.agentId] === modelKey
                         );
                         
-                        // Determine risk value based on risk type and model
-                        let value = 2; // default
-                        if (risk === 'Adversarial Risk') {
-                          value = model === 'Chatbot' ? 4 : model === 'Fraud Detection' ? 3 : model === 'AML Monitor' ? 1 : 2;
-                        } else if (risk === 'Bias Risk') {
-                          value = model === 'Credit Scoring' ? 5 : model === 'Investment Advisor' ? 3 : model === 'Fraud Detection' || model === 'AML Monitor' ? 2 : 1;
-                        } else if (risk === 'Privacy Risk') {
-                          value = model === 'Credit Scoring' || model === 'AML Monitor' ? 4 : model === 'Fraud Detection' || model === 'Investment Advisor' ? 3 : 2;
-                        } else if (risk === 'Reliability Risk') {
-                          value = model === 'Fraud Detection' || model === 'AML Monitor' ? 4 : 3;
+                        // Use actual threat count as the value
+                        const threatCount = threats.length;
+                        
+                        // Calculate risk value based on threat count and severity
+                        // If there are threats, minimum value is 1, max is 5
+                        let value = 0;
+                        if (threatCount > 0) {
+                          // Calculate average severity based on impact/likelihood
+                          const avgSeverity = threats.reduce((sum, t) => {
+                            const impactScore = t.impact === 'critical' ? 4 : t.impact === 'high' ? 3 : t.impact === 'medium' ? 2 : 1;
+                            const likelihoodScore = t.likelihood === 'high' ? 3 : t.likelihood === 'medium' ? 2 : 1;
+                            return sum + (impactScore + likelihoodScore) / 2;
+                          }, 0) / threatCount;
+                          
+                          value = Math.min(5, Math.max(1, Math.round(avgSeverity)));
                         }
                         
                         riskData.push({
                           row: risk,
                           col: model,
                           value,
-                          label: value.toString(),
+                          label: threatCount.toString(), // Show actual count
                           threats,
                           data: threats
                         });
@@ -1882,7 +1887,9 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
                     return riskData.map(cell => ({
                       ...cell,
                       data: cell.threats,
-                      tooltip: `Risk Score: ${cell.value} - ${cell.threats.length} threat${cell.threats.length !== 1 ? 's' : ''}`
+                      tooltip: cell.threats.length > 0 
+                        ? `${cell.threats.length} threat${cell.threats.length !== 1 ? 's' : ''} identified`
+                        : 'No threats identified'
                     }));
                   })(),
                   colorScale: {

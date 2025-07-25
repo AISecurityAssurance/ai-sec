@@ -1038,19 +1038,34 @@ STRIDE helps identify and categorize threats systematically during the design ph
                 onSave={handleSave}
               />
               
-              <AnalysisBarChart
-                id={`${analysisId}-threat-distribution`}
-                title="Threat Category Distribution"
-                data={Object.entries(threatCategorySummary).map(([key, value]) => ({
-                  label: key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
-                  value: value as number
-                }))}
-                xAxisLabel="Threat Category"
-                yAxisLabel="Number of Threats"
-                horizontal={true}
-                defaultColor="var(--primary)"
-                onSave={handleSave}
-              />
+              {/* STRIDE category colors */}
+              {(() => {
+                const strideColors: Record<string, string> = {
+                  'spoofing': '#e74c3c',
+                  'tampering': '#e67e22',
+                  'repudiation': '#f39c12',
+                  'informationDisclosure': '#9b59b6',
+                  'denialOfService': '#3498db',
+                  'elevationOfPrivilege': '#2ecc71'
+                };
+                
+                return (
+                  <AnalysisBarChart
+                    id={`${analysisId}-threat-distribution`}
+                    title="Threat Category Distribution"
+                    data={Object.entries(threatCategorySummary).map(([key, value]) => ({
+                      label: key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
+                      value: value as number,
+                      color: strideColors[key] || '#95a5a6'
+                    }))}
+                    xAxisLabel="Threat Category"
+                    yAxisLabel="Number of Threats"
+                    horizontal={true}
+                    useColors={true}
+                    onSave={handleSave}
+                  />
+                );
+              })()}
             </AnalysisSection>
           );
 

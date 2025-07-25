@@ -16,6 +16,7 @@ interface AnalysisBarChartProps {
   horizontal?: boolean;
   useColors?: boolean;
   defaultColor?: string;
+  showPercentage?: boolean;
   onSave?: (id: string, data: any) => void;
 }
 
@@ -28,10 +29,12 @@ export function AnalysisBarChart({
   horizontal = true,
   useColors = false,
   defaultColor = '#3498db',
+  showPercentage = false,
   onSave
 }: AnalysisBarChartProps) {
   const [isEditing, setIsEditing] = useState(false);
   const maxValue = Math.max(...data.map(item => item.value));
+  const totalValue = data.reduce((sum, item) => sum + item.value, 0);
   
   const handleExport = () => {
     console.log('Export chart:', id);
@@ -57,7 +60,8 @@ export function AnalysisBarChart({
             textAlign: 'center', 
             marginBottom: '10px',
             fontSize: '12px',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            color: 'var(--text-primary, #000)'
           }}>
             {xAxisLabel}
           </div>
@@ -75,7 +79,8 @@ export function AnalysisBarChart({
               transformOrigin: 'center',
               fontSize: '12px',
               fontWeight: 'bold',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              color: 'var(--text-primary, #000)'
             }}>
               {yAxisLabel}
             </div>
@@ -98,7 +103,8 @@ export function AnalysisBarChart({
                     paddingRight: '15px',
                     textAlign: 'right',
                     fontSize: '12px',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    color: 'var(--text-primary, #000)'
                   }}>
                     {item.label}
                   </div>
@@ -128,9 +134,13 @@ export function AnalysisBarChart({
                         fontSize: '11px',
                         fontWeight: 'bold',
                         paddingLeft: '5px',
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
+                        color: 'var(--text-primary, #000)'
                       }}>
-                        {item.value}
+                        {showPercentage 
+                          ? `${((item.value / totalValue) * 100).toFixed(1)}%`
+                          : item.value
+                        }
                       </span>
                     </div>
                   </div>
@@ -154,7 +164,7 @@ export function AnalysisBarChart({
                 left: `${percent}%`,
                 top: 0,
                 bottom: 0,
-                borderLeft: '1px solid #e0e0e0',
+                borderLeft: '1px solid var(--border-color, #e0e0e0)',
                 zIndex: -1
               }} />
             ))}
@@ -171,11 +181,11 @@ export function AnalysisBarChart({
 
   return (
     <div style={{
-      backgroundColor: 'white',
-      border: '1px solid #ddd',
-      borderRadius: '8px',
-      padding: '20px',
-      marginBottom: '16px'
+      backgroundColor: 'var(--bg-primary, white)',
+      border: '1px solid var(--border-color, #ddd)',
+      borderRadius: 'var(--radius-lg, 8px)',
+      padding: 'var(--space-4, 20px)',
+      marginBottom: 'var(--space-4, 16px)'
     }}>
       <div style={{
         display: 'flex',
@@ -183,7 +193,7 @@ export function AnalysisBarChart({
         alignItems: 'center',
         marginBottom: '16px'
       }}>
-        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 'bold' }}>{title}</h3>
+        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary, #000)' }}>{title}</h3>
         <div style={{ display: 'flex', gap: '8px' }}>
           {isEditing ? (
             <>
@@ -193,7 +203,8 @@ export function AnalysisBarChart({
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  padding: '4px'
+                  padding: '4px',
+                  color: 'var(--text-secondary, #666)'
                 }}
                 title="Save"
               >
@@ -205,7 +216,8 @@ export function AnalysisBarChart({
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  padding: '4px'
+                  padding: '4px',
+                  color: 'var(--text-secondary, #666)'
                 }}
                 title="Cancel"
               >
@@ -220,7 +232,8 @@ export function AnalysisBarChart({
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  padding: '4px'
+                  padding: '4px',
+                  color: 'var(--text-secondary, #666)'
                 }}
                 title="Edit"
               >
@@ -232,7 +245,8 @@ export function AnalysisBarChart({
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  padding: '4px'
+                  padding: '4px',
+                  color: 'var(--text-secondary, #666)'
                 }}
                 title="Export"
               >

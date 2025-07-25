@@ -13,6 +13,7 @@ import { maestroAgents, maestroThreats, maestroControls, maestroCategories, getT
 import { linddunThreats, dataFlows, privacyControls, linddunCategories, getThreatsByCategory as getLinddunThreatsByCategory, getCriticalThreats as getLinddunCriticalThreats } from '../../apps/user/mockData/linddunData';
 import { hazopNodes, hazopDeviations, hazopActions, hazopGuideWords, getDeviationsByNode, getCriticalDeviations, getOpenActions } from '../../apps/user/mockData/hazopData';
 import { octaveAssets, octaveThreats, octaveVulnerabilities, octaveRisks, octaveProtectionStrategies, getCriticalRisks as getOctaveCriticalRisks, getHighValueAssets, getThreatsByAsset } from '../../apps/user/mockData/octaveData';
+import { useAnalysisStore } from '../../stores/analysisStore';
 import './CollapsibleAnalysisContent.css';
 
 interface SubSection {
@@ -109,6 +110,10 @@ export default function CollapsibleAnalysisContent({
   const [selectedDetail, setSelectedDetail] = useState<{ title: string; data: any } | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<any | null>(null);
   const subsections = analysisSubsections[analysisId] || [];
+  
+  // Get analysis results from store
+  const { analysisResults, demoMode } = useAnalysisStore();
+  const frameworkResults = analysisResults[analysisId];
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => {
@@ -293,11 +298,14 @@ The architecture is built on a microservices foundation, deployed across multipl
             { key: 'severity', label: 'Severity', sortable: true, type: 'dropdown' as const, options: ['critical', 'high', 'medium', 'low'] }
           ];
           
+          // Use data from analysis results if available, otherwise use mock data
+          const lossesData = frameworkResults?.sections.find(s => s.id === 'losses')?.content?.losses || losses;
+          
           return (
             <AnalysisTable
               id={`${analysisId}-${subsectionId}`}
               title="Identified Losses"
-              data={losses}
+              data={lossesData}
               columns={lossColumns}
               onSave={handleSave}
               sortable
@@ -320,11 +328,14 @@ The architecture is built on a microservices foundation, deployed across multipl
             { key: 'severity', label: 'Severity', sortable: true, type: 'dropdown' as const, options: ['critical', 'high', 'medium', 'low'] }
           ];
           
+          // Use data from analysis results if available, otherwise use mock data
+          const hazardsData = frameworkResults?.sections.find(s => s.id === 'hazards')?.content?.hazards || hazards;
+          
           return (
             <AnalysisTable
               id={`${analysisId}-${subsectionId}`}
               title="Security Hazards/Vulnerabilities"
-              data={hazards}
+              data={hazardsData}
               columns={hazardColumns}
               onSave={handleSave}
               sortable
@@ -352,13 +363,16 @@ The architecture is built on a microservices foundation, deployed across multipl
             { key: 'relatedHazards', label: 'Related Hazards' }
           ];
           
+          // Use data from analysis results if available, otherwise use mock data
+          const ucasRaw = frameworkResults?.sections.find(s => s.id === 'ucas')?.content?.ucas || ucas;
+          
           // Transform data to include control action name and hazards as string
-          const ucasData = ucas.map(u => {
+          const ucasData = ucasRaw.map(u => {
             const ca = controlActions.find(ca => ca.id === u.controlActionId);
             return {
               ...u,
-              controlAction: ca?.action || u.controlActionId,
-              relatedHazards: u.hazards.join(', ')
+              controlAction: u.controlAction || ca?.action || u.controlActionId,
+              relatedHazards: Array.isArray(u.hazards) ? u.hazards.join(', ') : (u.relatedHazards || '')
             };
           });
           
@@ -385,14 +399,17 @@ The architecture is built on a microservices foundation, deployed across multipl
             { key: 'mitigations', label: 'Mitigations' }
           ];
           
+          // Use data from analysis results if available, otherwise use mock data
+          const scenariosRaw = frameworkResults?.sections.find(s => s.id === 'scenarios')?.content?.scenarios || causalScenarios;
+          
           // Transform data to include UCA reference and convert arrays to strings
-          const scenariosData = causalScenarios.map(s => ({
+          const scenariosData = scenariosRaw.map(s => ({
             id: s.id,
-            uca: s.ucaId,
+            uca: s.ucaId || s.uca,
             description: s.description,
-            causalFactors: s.causalFactors.join('; '),
-            strideCategory: s.strideCategory,
-            mitigations: s.mitigations.join('; ')
+            causalFactors: Array.isArray(s.causalFactors) ? s.causalFactors.join('; ') : (s.causalFactors || ''),
+            strideCategory: s.strideCategory || '',
+            mitigations: Array.isArray(s.mitigations) ? s.mitigations.join('; ') : (s.mitigations || '')
           }));
           
           return (
@@ -680,6 +697,9 @@ The architecture is built on a microservices foundation, deployed across multipl
     if (analysisId === 'dread') {
       switch (subsectionId) {
         case 'ratings':
+          // Use data from analysis results if available
+          const dreadThreatsRaw = frameworkResults?.sections.find(s => s.id === 'ratings')?.content?.threats || dreadThreats;
+          
           const dreadColumns = [
             { key: 'id', label: 'ID', sortable: true },
             { key: 'threat', label: 'Threat' },
@@ -694,13 +714,16 @@ The architecture is built on a microservices foundation, deployed across multipl
           ];
           
           // Flatten the dreadThreats data to make scores accessible
-          const flattenedDreadData = dreadThreats.map(threat => ({
+          const flattenedDreadData = dreadThreatsRaw.map(threat => ({
             ...threat,
-            damage: threat.scores.damage,
-            reproducibility: threat.scores.reproducibility,
-            exploitability: threat.scores.exploitability,
-            affectedUsers: threat.scores.affectedUsers,
-            discoverability: threat.scores.discoverability
+            damage: threat.damage || threat.scores?.damage || 0,
+            reproducibility: threat.reproducibility || threat.scores?.reproducibility || 0,
+            exploitability: threat.exploitability || threat.scores?.exploitability || 0,
+            affectedUsers: threat.affectedUsers || threat.scores?.affectedUsers || 0,
+            discoverability: threat.discoverability || threat.scores?.discoverability || 0,
+            totalScore: threat.totalScore || threat.scores?.total || 0,
+            threat: threat.threat || threat.name || '',
+            riskLevel: threat.riskLevel || 'Medium'
           }));
           
           return (
@@ -863,6 +886,9 @@ STRIDE helps identify and categorize threats systematically during the design ph
           );
 
         case 'threats-by-component':
+          // Use data from analysis results if available
+          const strideThreatsData = frameworkResults?.sections.find(s => s.id === 'threats')?.content?.threats || strideThreats;
+          
           const componentColumns = [
             { key: 'component', label: 'Component' },
             { key: 'spoofing', label: 'S', sortable: true },

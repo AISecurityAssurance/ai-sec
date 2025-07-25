@@ -1,6 +1,4 @@
-import { 
-  AnalysisResult, 
-  AnalysisSection,
+import type { 
   STPASecAnalysis,
   STRIDEAnalysis,
   Loss,
@@ -13,6 +11,29 @@ import {
   DataFlow,
   TrustBoundary
 } from '@security-platform/types';
+
+// Import from the store where these types are defined
+interface AnalysisStatus {
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  progress: number;
+  message?: string;
+}
+
+interface AnalysisSection {
+  id: string;
+  title: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  content?: any;
+  error?: string;
+}
+
+interface AnalysisResult {
+  framework: string;
+  sections: AnalysisSection[];
+  status: AnalysisStatus;
+  startedAt?: string;
+  completedAt?: string;
+}
 
 // Transform backend analysis results to frontend format
 export function transformAnalysisResults(
@@ -103,7 +124,7 @@ function transformSTPASecResults(
       title: 'Loss Scenarios',
       status: 'completed',
       content: {
-        scenarios: data?.lossScenarios || []
+        scenarios: data?.lossSenarios || []
       }
     },
     {
@@ -458,7 +479,7 @@ export function generateSampleAnalysisData(framework: string): any {
   }
 }
 
-function generateSampleSTPASecData(): Partial<STPASecAnalysis> {
+function generateSampleSTPASecData(): any {
   return {
     losses: [
       {
@@ -568,7 +589,7 @@ function generateSampleSTPASecData(): Partial<STPASecAnalysis> {
         strideCategories: ['tampering']
       }
     ],
-    lossScenarios: [
+    lossSenarios: [
       {
         id: 'LS1',
         ucaId: 'UCA1',
@@ -592,7 +613,7 @@ function generateSampleSTPASecData(): Partial<STPASecAnalysis> {
   };
 }
 
-function generateSampleSTRIDEData(): Partial<STRIDEAnalysis> {
+function generateSampleSTRIDEData(): any {
   return {
     threats: [
       {

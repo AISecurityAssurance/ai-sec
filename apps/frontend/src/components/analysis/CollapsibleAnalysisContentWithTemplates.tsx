@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronRight, ChevronDown, FileText, Users, AlertTriangle, ShieldAlert, GitBranch, Zap, Target, Shield } from 'lucide-react';
-import { AnalysisSection, AnalysisTable, AnalysisText, AnalysisDiagram, SystemDescriptionTemplate, AnalysisFlow, AnalysisChart, AnalysisDetail, AnalysisBarChart, AnalysisHeatMap, ThreatListDetail } from '../templates';
+import { AnalysisSection, AnalysisTable, AnalysisText, AnalysisDiagram, SystemDescriptionTemplate, AnalysisFlow, AnalysisChart, AnalysisDetail, AnalysisBarChart, AnalysisHeatMap, ThreatListDetail, ThreatListInline } from '../templates';
+import { RiskMatrixWithDetails } from './RiskMatrixWithDetails';
 import { losses, hazards, ucas, causalScenarios, controllers, controlActions } from '../../apps/user/mockData/stpaSecData';
 import { dreadThreats, getRiskDistribution } from '../../apps/user/mockData/dreadData';
 import { strideThreats, strideComponents, strideThreatTypes, getStrideByType, componentThreats, threatCategorySummary, riskMatrix } from '../../apps/user/mockData/strideData';
@@ -1025,14 +1026,6 @@ STRIDE helps identify and categorize threats systematically during the design ph
           );
 
         case 'risk-matrix':
-          // Calculate threat counts for each cell
-          const threatsByRisk = strideThreats.reduce((acc, threat) => {
-            const key = `${threat.likelihood}-${threat.impact}`;
-            if (!acc[key]) acc[key] = [];
-            acc[key].push(threat);
-            return acc;
-          }, {} as Record<string, typeof strideThreats>);
-
           return (
             <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
@@ -1040,118 +1033,25 @@ STRIDE helps identify and categorize threats systematically during the design ph
               level={4}
               onSave={handleSave}
             >
-              <div style={{ marginTop: '20px' }}>
-                {/* Header row */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px repeat(4, 1fr)', gap: '2px', marginBottom: '2px' }}>
-                  <div></div>
-                  <div style={{ textAlign: 'center', fontWeight: 'bold', padding: '8px', backgroundColor: '#f5f5f5' }}>Low Impact</div>
-                  <div style={{ textAlign: 'center', fontWeight: 'bold', padding: '8px', backgroundColor: '#f5f5f5' }}>Medium Impact</div>
-                  <div style={{ textAlign: 'center', fontWeight: 'bold', padding: '8px', backgroundColor: '#f5f5f5' }}>High Impact</div>
-                  <div style={{ textAlign: 'center', fontWeight: 'bold', padding: '8px', backgroundColor: '#f5f5f5' }}>Critical Impact</div>
-                </div>
-                
-                {/* Risk matrix rows */}
-                {['high', 'medium', 'low'].map(likelihood => {
-                  const likelihoodLabel = likelihood.charAt(0).toUpperCase() + likelihood.slice(1);
-                  return (
-                    <div key={likelihood} style={{ display: 'grid', gridTemplateColumns: '120px repeat(4, 1fr)', gap: '2px', marginBottom: '2px' }}>
-                      <div style={{ 
-                        fontWeight: 'bold', 
-                        display: 'flex', 
-                        alignItems: 'center',
-                        padding: '8px',
-                        backgroundColor: '#f5f5f5'
-                      }}>
-                        {likelihoodLabel} Likelihood
-                      </div>
-                      {['low', 'medium', 'high', 'critical'].map(impact => {
-                        const cellThreats = threatsByRisk[`${likelihood}-${impact}`] || [];
-                        const cellColor = 
-                          (likelihood === 'high' && (impact === 'high' || impact === 'critical')) ? '#ff4444' :
-                          (likelihood === 'high' && impact === 'medium') || (likelihood === 'medium' && (impact === 'high' || impact === 'critical')) ? '#ff9944' :
-                          (likelihood === 'medium' && impact === 'medium') || (likelihood === 'low' && (impact === 'high' || impact === 'critical')) ? '#ffdd44' :
-                          '#44ff44';
-                        
-                        return (
-                          <div
-                            key={`${likelihood}-${impact}`}
-                            style={{
-                              backgroundColor: cellColor,
-                              padding: '10px',
-                              border: '1px solid #ccc',
-                              minHeight: '80px',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              cursor: cellThreats.length > 0 ? 'pointer' : 'default',
-                              transition: 'opacity 0.2s',
-                              opacity: cellThreats.length > 0 ? 1 : 0.6
-                            }}
-                            onMouseEnter={(e) => {
-                              if (cellThreats.length > 0) {
-                                e.currentTarget.style.opacity = '0.8';
-                              }
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.opacity = cellThreats.length > 0 ? '1' : '0.6';
-                            }}
-                            onClick={() => {
-                              if (cellThreats.length > 0) {
-                                setSelectedThreats({
-                                  title: `${likelihoodLabel} Likelihood / ${impact.charAt(0).toUpperCase() + impact.slice(1)} Impact Threats`,
-                                  threats: cellThreats
-                                });
-                              }
-                            }}
-                          >
-                            <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{cellThreats.length}</div>
-                            {cellThreats.length > 0 && (
-                              <div style={{ fontSize: '12px', marginTop: '5px' }}>Click for details</div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
-              </div>
+              <RiskMatrixWithDetails 
+                threats={strideThreats}
+                onSave={handleSave}
+              />
               
-              <div style={{ marginTop: '20px' }}>
-                <h5>Risk Matrix Legend:</h5>
-                <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <div style={{ width: '20px', height: '20px', backgroundColor: '#ff4444', border: '1px solid #ccc' }}></div>
-                    <span>Critical Risk</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <div style={{ width: '20px', height: '20px', backgroundColor: '#ff9944', border: '1px solid #ccc' }}></div>
-                    <span>High Risk</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <div style={{ width: '20px', height: '20px', backgroundColor: '#ffdd44', border: '1px solid #ccc' }}></div>
-                    <span>Medium Risk</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <div style={{ width: '20px', height: '20px', backgroundColor: '#44ff44', border: '1px solid #ccc' }}></div>
-                    <span>Low Risk</span>
-                  </div>
-                </div>
-              </div>
-              
-              <AnalysisChart
+              <AnalysisBarChart
                 id={`${analysisId}-threat-distribution`}
                 title="Threat Category Distribution"
-                type="pie"
                 data={{
                   labels: Object.keys(threatCategorySummary).map(key => 
                     key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())
                   ),
-                  datasets: [{
-                    label: 'Number of Threats',
-                    data: Object.values(threatCategorySummary),
-                    backgroundColor: ['#e74c3c', '#f39c12', '#9b59b6', '#3498db', '#95a5a6', '#2ecc71']
-                  }]
+                  values: Object.values(threatCategorySummary) as number[]
+                }}
+                config={{
+                  xAxisLabel: 'Threat Category',
+                  yAxisLabel: 'Number of Threats',
+                  color: 'var(--primary)',
+                  showValues: true
                 }}
                 onSave={handleSave}
               />

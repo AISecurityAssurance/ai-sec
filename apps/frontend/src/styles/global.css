@@ -54,6 +54,17 @@ button {
   --color-error-light: #fee2e2;
   --color-info: #3b82f6;
   
+  /* Risk Level Colors */
+  --risk-critical: #ef4444;
+  --risk-high: #f97316;
+  --risk-medium: #eab308;
+  --risk-low: #22c55e;
+  
+  /* Additional semantic colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  
   /* Gradients */
   --gradient-primary: linear-gradient(135deg, #3b82f6, #8b5cf6);
   
@@ -119,7 +130,9 @@ button {
   --bg-dark: var(--color-surface-tertiary);
   --text-primary: var(--color-text);
   --text-secondary: var(--color-text-secondary);
+  --text-tertiary: var(--color-text-tertiary);
   --border-color: var(--color-border);
+  --border-light: var(--color-border);
   --primary: var(--color-primary);
   --primary-dark: var(--color-primary-hover);
   --primary-rgb: var(--color-primary-rgb);
@@ -127,6 +140,13 @@ button {
   --accent-primary-dark: var(--color-primary-hover);
   --color-danger: var(--color-error);
   --color-danger-bg: var(--color-error-light);
+  --background: var(--color-background);
+  --surface: var(--color-surface);
+  --border: var(--color-border);
+  --font-mono: var(--font-family-mono);
+  --font-xs: var(--font-size-xs);
+  --font-sm: var(--font-size-sm);
+  --font-lg: var(--font-size-lg);
 }
 
 /* Dark Theme */
@@ -158,6 +178,17 @@ button {
   --color-error-rgb: 220, 38, 38;
   --color-error-light: #451a1a;
   --color-info: #3b82f6;
+  
+  /* Risk Level Colors for Dark Theme */
+  --risk-critical: #dc2626;
+  --risk-high: #ea580c;
+  --risk-medium: #ca8a04;
+  --risk-low: #16a34a;
+  
+  /* Additional semantic colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #dc2626;
   
   /* Dark theme shadows are lighter */
   --shadow-sm: 0 1px 2px 0 rgba(255, 255, 255, 0.05);

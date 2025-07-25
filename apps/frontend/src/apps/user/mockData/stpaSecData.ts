@@ -206,58 +206,165 @@ export const controlActions: ControlAction[] = [
 
 // Step 3: Unsafe Control Actions
 export const ucas: UCA[] = [
+  // CA1: Grant Authentication - All 4 types
   {
-    id: 'UCA1',
-    controlActionId: 'CA1',
-    type: 'provided',
-    description: 'Authentication granted with invalid or stolen credentials',
-    hazards: ['H1'],
-    context: 'Credential stuffing attack or insider threat',
-    severity: 'critical'
-  },
-  {
-    id: 'UCA2',
+    id: 'UCA1-1',
     controlActionId: 'CA1',
     type: 'not-provided',
     description: 'Authentication not granted to legitimate user',
     hazards: ['H3'],
-    context: 'System overload or false positive in fraud detection',
+    context: 'System overload, false positive in fraud detection, or service outage',
+    severity: 'high'
+  },
+  {
+    id: 'UCA1-2',
+    controlActionId: 'CA1',
+    type: 'provided',
+    description: 'Authentication granted with invalid or stolen credentials',
+    hazards: ['H1'],
+    context: 'Credential stuffing attack, insider threat, or compromised credentials',
+    severity: 'critical'
+  },
+  {
+    id: 'UCA1-3',
+    controlActionId: 'CA1',
+    type: 'wrong-timing',
+    description: 'Authentication granted after session should have expired',
+    hazards: ['H1', 'H4'],
+    context: 'Session timeout not enforced or clock synchronization issues',
+    severity: 'high'
+  },
+  {
+    id: 'UCA1-4',
+    controlActionId: 'CA1',
+    type: 'wrong-duration',
+    description: 'Authentication session active for excessive duration',
+    hazards: ['H1'],
+    context: 'No session timeout or improper session management',
+    severity: 'medium'
+  },
+
+  // CA2: Approve Transaction - All 4 types
+  {
+    id: 'UCA2-1',
+    controlActionId: 'CA2',
+    type: 'not-provided',
+    description: 'Transaction not approved for legitimate request',
+    hazards: ['H2', 'H3'],
+    context: 'False positive in fraud detection or system unavailability',
     severity: 'medium'
   },
   {
-    id: 'UCA3',
+    id: 'UCA2-2',
     controlActionId: 'CA2',
     type: 'provided',
     description: 'Transaction approved despite fraud indicators',
     hazards: ['H2'],
-    context: 'Fraud detection bypassed or rules outdated',
+    context: 'Fraud detection bypassed, rules outdated, or insider threat',
+    severity: 'critical'
+  },
+  {
+    id: 'UCA2-3',
+    controlActionId: 'CA2',
+    type: 'wrong-timing',
+    description: 'Transaction approved after account closure or freeze',
+    hazards: ['H2', 'H4'],
+    context: 'Race condition or synchronization failure',
     severity: 'high'
   },
   {
-    id: 'UCA4',
+    id: 'UCA2-4',
+    controlActionId: 'CA2',
+    type: 'wrong-duration',
+    description: 'Transaction processing takes excessive time',
+    hazards: ['H3'],
+    context: 'System overload or deadlock conditions',
+    severity: 'medium'
+  },
+
+  // CA3: Block Suspicious IP - All 4 types
+  {
+    id: 'UCA3-1',
+    controlActionId: 'CA3',
+    type: 'not-provided',
+    description: 'Malicious IP not blocked when detected',
+    hazards: ['H1', 'H5'],
+    context: 'Detection failure or manual intervention required but not available',
+    severity: 'high'
+  },
+  {
+    id: 'UCA3-2',
+    controlActionId: 'CA3',
+    type: 'provided',
+    description: 'Legitimate IP blocked incorrectly',
+    hazards: ['H3'],
+    context: 'False positive or misconfigured rules',
+    severity: 'medium'
+  },
+  {
+    id: 'UCA3-3',
     controlActionId: 'CA3',
     type: 'wrong-timing',
     description: 'Suspicious IP blocked too late after breach',
     hazards: ['H1', 'H5'],
     context: 'Delayed incident detection or response',
+    severity: 'critical'
+  },
+  {
+    id: 'UCA3-4',
+    controlActionId: 'CA3',
+    type: 'wrong-duration',
+    description: 'IP block expires too soon allowing re-attack',
+    hazards: ['H1'],
+    context: 'Improper timeout configuration',
+    severity: 'medium'
+  },
+
+  // CA4: Apply Rate Limit - All 4 types
+  {
+    id: 'UCA4-1',
+    controlActionId: 'CA4',
+    type: 'not-provided',
+    description: 'Rate limit not applied during DDoS attack',
+    hazards: ['H3'],
+    context: 'Rate limiting disabled or threshold too high',
     severity: 'high'
   },
   {
-    id: 'UCA5',
+    id: 'UCA4-2',
+    controlActionId: 'CA4',
+    type: 'provided',
+    description: 'Rate limit applied to legitimate high-volume user',
+    hazards: ['H3'],
+    context: 'Legitimate business surge or whitelisting failure',
+    severity: 'medium'
+  },
+  {
+    id: 'UCA4-3',
+    controlActionId: 'CA4',
+    type: 'wrong-timing',
+    description: 'Rate limit applied after service already degraded',
+    hazards: ['H3'],
+    context: 'Reactive instead of proactive limiting',
+    severity: 'high'
+  },
+  {
+    id: 'UCA4-4',
     controlActionId: 'CA4',
     type: 'wrong-duration',
     description: 'Rate limit applied for excessive duration',
     hazards: ['H3'],
-    context: 'Legitimate traffic surge misidentified as attack',
+    context: 'No automatic reset or manual intervention required',
     severity: 'medium'
   }
 ];
 
-// Step 4: Causal Scenarios
+// Step 4: Causal Scenarios - Comprehensive coverage for critical UCAs
 export const causalScenarios: CausalScenario[] = [
+  // Authentication scenarios
   {
     id: 'CS1',
-    ucaId: 'UCA1',
+    ucaId: 'UCA1-2',
     description: 'Attacker uses credential stuffing with previously breached passwords',
     causalFactors: [
       'No password complexity enforcement',
@@ -282,7 +389,34 @@ export const causalScenarios: CausalScenario[] = [
   },
   {
     id: 'CS2',
-    ucaId: 'UCA3',
+    ucaId: 'UCA1-3',
+    description: 'Session hijacking through expired session reuse',
+    causalFactors: [
+      'Session tokens not invalidated server-side',
+      'Clock drift between servers',
+      'Session state not synchronized',
+      'Token validation logic flawed'
+    ],
+    strideCategory: 'Spoofing',
+    d4Score: {
+      detectability: 2,
+      difficulty: 3,
+      damage: 4,
+      deniability: 3
+    },
+    mitigations: [
+      'Server-side session invalidation',
+      'Time synchronization (NTP)',
+      'Distributed session management',
+      'Short-lived tokens with refresh'
+    ],
+    confidence: 80
+  },
+  
+  // Transaction scenarios
+  {
+    id: 'CS3',
+    ucaId: 'UCA2-2',
     description: 'Insider manipulates fraud rules to allow malicious transactions',
     causalFactors: [
       'Insufficient segregation of duties',
@@ -306,8 +440,35 @@ export const causalScenarios: CausalScenario[] = [
     confidence: 90
   },
   {
-    id: 'CS3',
-    ucaId: 'UCA4',
+    id: 'CS4',
+    ucaId: 'UCA2-3',
+    description: 'Race condition allows transaction on frozen account',
+    causalFactors: [
+      'Lack of distributed locking',
+      'Eventual consistency delays',
+      'Missing transaction ordering',
+      'Cache invalidation issues'
+    ],
+    strideCategory: 'Tampering',
+    d4Score: {
+      detectability: 1,
+      difficulty: 4,
+      damage: 4,
+      deniability: 1
+    },
+    mitigations: [
+      'Implement distributed locks',
+      'Strong consistency for critical operations',
+      'Transaction sequencing',
+      'Real-time cache synchronization'
+    ],
+    confidence: 75
+  },
+  
+  // IP blocking scenarios
+  {
+    id: 'CS5',
+    ucaId: 'UCA3-3',
     description: 'APT establishes persistence before detection',
     causalFactors: [
       'Limited visibility into encrypted traffic',
@@ -329,6 +490,33 @@ export const causalScenarios: CausalScenario[] = [
       'Regular threat hunting exercises'
     ],
     confidence: 75
+  },
+  
+  // Rate limiting scenarios
+  {
+    id: 'CS6',
+    ucaId: 'UCA4-1',
+    description: 'DDoS attack overwhelms service before rate limiting engages',
+    causalFactors: [
+      'Rate limit thresholds too high',
+      'Detection algorithms too slow',
+      'Geographic distribution not considered',
+      'Botnet detection failures'
+    ],
+    strideCategory: 'Denial of Service',
+    d4Score: {
+      detectability: 4,
+      difficulty: 2,
+      damage: 4,
+      deniability: 5
+    },
+    mitigations: [
+      'Dynamic rate limit adjustment',
+      'Machine learning for anomaly detection',
+      'Geographic rate limiting',
+      'Cloud-based DDoS protection'
+    ],
+    confidence: 85
   }
 ];
 

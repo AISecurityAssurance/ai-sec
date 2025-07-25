@@ -392,38 +392,164 @@ Built on a **microservices foundation** with:
           );
 
         case 'ucas':
-          const ucaColumns = [
-            { key: 'id', label: 'ID', sortable: true },
-            { key: 'controlAction', label: 'Control Action' },
-            { key: 'type', label: 'Type', sortable: true, type: 'dropdown' as const, options: ['not-provided', 'provided', 'wrong-timing', 'wrong-duration'] },
-            { key: 'context', label: 'Context' },
-            { key: 'relatedHazards', label: 'Related Hazards' }
-          ];
-          
-          // Use data from analysis results if available, otherwise use mock data
-          const ucasRaw = frameworkResults?.sections.find(s => s.id === 'ucas')?.content?.ucas || ucas;
-          
-          // Transform data to include control action name and hazards as string
-          const ucasData = ucasRaw.map(u => {
-            const ca = controlActions.find(ca => ca.id === u.controlActionId);
-            return {
-              ...u,
-              controlAction: u.controlAction || ca?.action || u.controlActionId,
-              relatedHazards: Array.isArray(u.hazards) ? u.hazards.join(', ') : (u.relatedHazards || '')
-            };
-          });
-          
           return (
-            <AnalysisTable
+            <AnalysisSection
               id={`${analysisId}-${subsectionId}`}
-              title="Unsafe/Unsecure Control Actions"
-              data={ucasData}
-              columns={ucaColumns}
+              title="Unsafe Control Actions Analysis"
+              level={4}
               onSave={handleSave}
-              sortable
-              filterable
-              pageSize={10}
-            />
+            >
+              <AnalysisHeatMap
+                id={`${analysisId}-uca-heatmap`}
+                title="UCA Risk Heat Map"
+                config={{
+                  rows: ['Authentication Service', 'Transaction Processor', 'Security Operations', 'API Gateway'],
+                  cols: ['Not Provided', 'Provided Unsafely', 'Wrong Timing', 'Wrong Duration'],
+                  cells: (() => {
+                    // Import comprehensive UCAs when available
+                    const comprehensiveUCAs = ucas; // Will be replaced with import
+                    
+                    // Map controllers to display names
+                    const controllerMap: Record<string, string> = {
+                      'C1': 'Authentication Service',
+                      'C2': 'Transaction Processor',
+                      'C3': 'Security Operations',
+                      'C4': 'API Gateway'
+                    };
+                    
+                    // Map UCA types for display
+                    const typeMap: Record<string, string> = {
+                      'not-provided': 'Not Provided',
+                      'provided': 'Provided Unsafely',
+                      'wrong-timing': 'Wrong Timing',
+                      'wrong-duration': 'Wrong Duration'
+                    };
+                    
+                    // Create cells for heat map
+                    const cells: any[] = [];
+                    ['C1', 'C2', 'C3', 'C4'].forEach(controllerId => {
+                      ['not-provided', 'provided', 'wrong-timing', 'wrong-duration'].forEach(type => {
+                        // Find UCAs for this controller/type combination
+                        const controlActionId = controllerId.replace('C', 'CA');
+                        const ucasForCell = comprehensiveUCAs.filter(u => 
+                          u.controlActionId === controlActionId && u.type === type
+                        );
+                        
+                        // Calculate risk value
+                        let value = 0;
+                        if (ucasForCell.length > 0) {
+                          const severityScores = ucasForCell.map(u => 
+                            u.severity === 'critical' ? 5 :
+                            u.severity === 'high' ? 4 :
+                            u.severity === 'medium' ? 3 : 2
+                          );
+                          value = Math.round(severityScores.reduce((a, b) => a + b, 0) / severityScores.length);
+                        }
+                        
+                        cells.push({
+                          row: controllerMap[controllerId],
+                          col: typeMap[type],
+                          value,
+                          label: ucasForCell.length.toString(),
+                          tooltip: `${ucasForCell.length} UCA${ucasForCell.length !== 1 ? 's' : ''} identified`,
+                          data: ucasForCell
+                        });
+                      });
+                    });
+                    
+                    return cells;
+                  })(),
+                  colorScale: {
+                    min: { value: 1, color: '#27ae60', label: 'Very Low' },
+                    low: { value: 2, color: '#2ecc71', label: 'Low' },
+                    medium: { value: 3, color: '#f1c40f', label: 'Medium' },
+                    high: { value: 4, color: '#f39c12', label: 'High' },
+                    max: { value: 5, color: '#e74c3c', label: 'Critical' }
+                  },
+                  xAxisLabel: 'UCA Types',
+                  yAxisLabel: 'Controllers'
+                }}
+                onSave={handleSave}
+                onCellClick={(cell) => {
+                  if (cell.data && cell.data.length > 0) {
+                    setSelectedHeatMapCell({
+                      title: `${cell.row} - ${cell.col}`,
+                      items: cell.data
+                    });
+                  }
+                }}
+              />
+              
+              {selectedHeatMapCell && selectedHeatMapCell.items.length > 0 && (
+                <div style={{ marginTop: 'var(--space-4)' }}>
+                  <ThreatListInline
+                    title={selectedHeatMapCell.title}
+                    threats={selectedHeatMapCell.items.map(uca => ({
+                      id: uca.id,
+                      component: controlActions.find(ca => ca.id === uca.controlActionId)?.action || uca.controlActionId,
+                      threatType: uca.type,
+                      description: uca.description,
+                      impact: uca.severity,
+                      likelihood: 'medium',
+                      riskLevel: uca.severity,
+                      mitigations: [`Context: ${uca.context}`, `Hazards: ${uca.hazards.join(', ')}`]
+                    }))}
+                    onClose={() => setSelectedHeatMapCell(null)}
+                  />
+                </div>
+              )}
+              
+              <AnalysisTable
+                id={`${analysisId}-uca-details`}
+                title="Detailed Unsafe Control Actions"
+                data={(() => {
+                  const ucasRaw = frameworkResults?.sections.find(s => s.id === 'ucas')?.content?.ucas || ucas;
+                  return ucasRaw.map(u => {
+                    const ca = controlActions.find(ca => ca.id === u.controlActionId);
+                    return {
+                      ...u,
+                      controlAction: u.controlAction || ca?.action || u.controlActionId,
+                      relatedHazards: Array.isArray(u.hazards) ? u.hazards.join(', ') : (u.relatedHazards || '')
+                    };
+                  });
+                })()}
+                columns={[
+                  { key: 'id', label: 'ID', sortable: true },
+                  { key: 'controlAction', label: 'Control Action' },
+                  { key: 'type', label: 'Type', sortable: true, type: 'dropdown' as const, options: ['not-provided', 'provided', 'wrong-timing', 'wrong-duration'] },
+                  { key: 'context', label: 'Context' },
+                  { key: 'relatedHazards', label: 'Related Hazards' },
+                  { key: 'severity', label: 'Severity', sortable: true, type: 'dropdown' as const, options: ['critical', 'high', 'medium', 'low'] }
+                ]}
+                onSave={handleSave}
+                sortable
+                filterable
+                pageSize={10}
+              />
+              
+              <AnalysisText
+                id={`${analysisId}-uca-guidance`}
+                title="UCA Analysis Guidance"
+                content={`## Unsafe Control Action Types
+
+**Not Provided**: Control action is not provided when it should be to prevent a hazard
+- Example: Authentication not granted to legitimate user
+
+**Provided Unsafely**: Control action is provided when it creates a hazard
+- Example: Authentication granted with invalid credentials
+
+**Wrong Timing**: Control action has correct intent but wrong timing (too early/late)
+- Example: IP blocked after attack already succeeded
+
+**Wrong Duration**: Control action applied for wrong duration (too long/short)
+- Example: Rate limit applied indefinitely to legitimate traffic
+
+## Comprehensive Analysis
+Each control action should be analyzed for all four UCA types to ensure complete coverage. Consider both security (STRIDE) and safety perspectives when identifying UCAs.`}
+                onSave={handleSave}
+                format="markdown"
+              />
+            </AnalysisSection>
           );
 
         case 'scenarios':

@@ -101,10 +101,15 @@ export function AnalysisHeatMap({
                   fontSize: '12px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'flex-end',
+                  justifyContent: 'flex-start',
+                  paddingLeft: '10px',
                   paddingRight: '10px',
-                  backgroundColor: 'white'
+                  backgroundColor: 'white',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
                 }}
+                title={row}
               >
                 {row}
               </div>

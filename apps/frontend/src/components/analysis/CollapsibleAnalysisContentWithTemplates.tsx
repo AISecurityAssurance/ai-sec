@@ -499,23 +499,53 @@ Built on a **microservices foundation** with:
                     const ca = controlActions.find(ca => ca.id === u.controlActionId);
                     return {
                       ...u,
-                      controlAction: u.controlAction || ca?.action || u.controlActionId,
+                      controlAction: ca?.action || u.controlActionId,
                       relatedHazards: Array.isArray(u.hazards) ? u.hazards.join(', ') : (u.relatedHazards || '')
                     };
                   });
                 })()}
                 columns={[
                   { key: 'id', label: 'ID', sortable: true },
-                  { key: 'controlAction', label: 'Control Action' },
-                  { key: 'type', label: 'Type', sortable: true, type: 'dropdown' as const, options: ['not-provided', 'provided', 'wrong-timing', 'wrong-duration'] },
+                  { key: 'controlAction', label: 'Control Action', type: 'dropdown' as const,
+                    options: controlActions.map(ca => ca.action)
+                  },
+                  { key: 'type', label: 'Type', sortable: true, type: 'dropdown' as const, 
+                    options: ['not-provided', 'provided', 'wrong-timing', 'wrong-duration']
+                  },
+                  { key: 'description', label: 'Description' },
                   { key: 'context', label: 'Context' },
                   { key: 'relatedHazards', label: 'Related Hazards' },
-                  { key: 'severity', label: 'Severity', sortable: true, type: 'dropdown' as const, options: ['critical', 'high', 'medium', 'low'] }
+                  { key: 'severity', label: 'Severity', sortable: true, type: 'dropdown' as const, 
+                    options: ['critical', 'high', 'medium', 'low']
+                  }
                 ]}
-                onSave={handleSave}
+                onSave={(id, updatedData) => {
+                  // Transform the data back to the correct format
+                  const transformedData = updatedData.map((row: any) => {
+                    // Find control action ID from the action name
+                    const ca = controlActions.find(c => c.action === row.controlAction);
+                    return {
+                      ...row,
+                      controlActionId: ca?.id || row.controlActionId || controlActions[0]?.id,
+                      hazards: typeof row.relatedHazards === 'string' 
+                        ? row.relatedHazards.split(',').map((h: string) => h.trim()).filter((h: string) => h)
+                        : (row.hazards || [])
+                    };
+                  });
+                  
+                  // Update the analysis store with new UCAs
+                  const analysisStore = useAnalysisStore.getState();
+                  analysisStore.updateSectionResult(analysisId, 'ucas', {
+                    content: { ucas: transformedData },
+                    status: 'completed'
+                  });
+                  
+                  handleSave(id, transformedData);
+                }}
                 sortable
                 filterable
                 pageSize={10}
+                editable={true}
               />
               
               <AnalysisText

@@ -275,7 +275,7 @@ export function AnalysisTable({
             </tr>
           </thead>
           <tbody>
-            {(currentPageSize ? sortedData.slice(0, currentPageSize) : sortedData).map((row, idx) => {
+            {sortedData.map((row, idx) => {
               // Find the original index in tableData
               const originalIndex = tableData.findIndex(item => item === row);
               return (

@@ -52,11 +52,40 @@
 .table-container {
   overflow-x: auto;
   max-width: 100%;
+  position: relative;
+}
+
+/* When pageSize is set, enable vertical scrolling */
+.table-container[style*="maxHeight"] {
+  border-bottom: 1px solid var(--color-border);
 }
 
 /* Ensure table maintains minimum width */
 .table-container .analysis-table {
   min-width: max-content;
+}
+
+/* Sticky table header when scrolling */
+.table-container[style*="maxHeight"] .analysis-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-surface);
+}
+
+.table-container[style*="maxHeight"] .analysis-table thead th {
+  background: var(--color-surface-secondary);
+  position: relative;
+}
+
+.table-container[style*="maxHeight"] .analysis-table thead::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--color-border);
 }
 
 .analysis-table {

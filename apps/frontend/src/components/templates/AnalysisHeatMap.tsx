@@ -105,9 +105,10 @@ export function AnalysisHeatMap({
                   paddingLeft: '10px',
                   paddingRight: '10px',
                   backgroundColor: 'white',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
+                  wordBreak: 'break-word',
+                  whiteSpace: 'normal',
+                  lineHeight: '1.4',
+                  minHeight: '60px'
                 }}
                 title={row}
               >

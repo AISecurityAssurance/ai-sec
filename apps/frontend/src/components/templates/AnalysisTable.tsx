@@ -93,8 +93,25 @@ export function AnalysisTable({
         newRowData[col.key] = '';
       }
     });
+    // Generate a unique ID if not provided
+    if (!newRowData.id) {
+      const existingIds = tableData.map(row => row.id).filter(id => id && id.startsWith('UCA'));
+      const maxId = existingIds.reduce((max, id) => {
+        const match = id.match(/UCA(\d+)/);
+        if (match) {
+          const num = parseInt(match[1]);
+          return num > max ? num : max;
+        }
+        return max;
+      }, 0);
+      newRowData.id = `UCA${maxId + 1}`;
+    }
     setTableData([...tableData, newRowData]);
     setNewRow({});
+    // If we're in edit mode and have onSave, save immediately
+    if (isEditing && onSave) {
+      onSave(id, [...tableData, newRowData]);
+    }
   };
 
   const handleDeleteRow = (index: number) => {
@@ -208,7 +225,7 @@ export function AnalysisTable({
         </div>
       )}
 
-      <div className="table-container">
+      <div className="table-container" style={{ maxHeight: pageSize ? `${pageSize * 50 + 100}px` : 'auto', overflowY: pageSize ? 'auto' : 'visible' }}>
         <table className="analysis-table">
           <thead>
             <tr>
@@ -232,7 +249,7 @@ export function AnalysisTable({
             </tr>
           </thead>
           <tbody>
-            {sortedData.slice(0, pageSize).map((row, idx) => {
+            {(pageSize ? sortedData : sortedData).map((row, idx) => {
               // Find the original index in tableData
               const originalIndex = tableData.findIndex(item => item === row);
               return (
@@ -302,6 +319,12 @@ export function AnalysisTable({
                       <select
                         value={newRow[col.key] || ''}
                         onChange={(e) => setNewRow({ ...newRow, [col.key]: e.target.value })}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddRow();
+                          }
+                        }}
                         className="cell-select"
                       >
                         <option value="">Select...</option>
@@ -314,6 +337,12 @@ export function AnalysisTable({
                         type="text"
                         value={newRow[col.key] || ''}
                         onChange={(e) => setNewRow({ ...newRow, [col.key]: e.target.value })}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddRow();
+                          }
+                        }}
                         placeholder={`New ${col.label}`}
                         className="cell-input"
                       />

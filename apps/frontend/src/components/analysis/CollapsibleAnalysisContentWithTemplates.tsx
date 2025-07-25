@@ -403,19 +403,11 @@ Built on a **microservices foundation** with:
                 id={`${analysisId}-uca-heatmap`}
                 title="UCA Risk Heat Map"
                 config={{
-                  rows: ['Authentication Service', 'Transaction Processor', 'Security Operations', 'API Gateway'],
+                  rows: controlActions.map(ca => ca.action),
                   cols: ['Not Provided', 'Provided Unsafely', 'Wrong Timing', 'Wrong Duration'],
                   cells: (() => {
-                    // Import comprehensive UCAs when available
-                    const comprehensiveUCAs = ucas; // Will be replaced with import
-                    
-                    // Map controllers to display names
-                    const controllerMap: Record<string, string> = {
-                      'C1': 'Authentication Service',
-                      'C2': 'Transaction Processor',
-                      'C3': 'Security Operations',
-                      'C4': 'API Gateway'
-                    };
+                    // Use the same data source as the table
+                    const ucasRaw = frameworkResults?.sections.find(s => s.id === 'ucas')?.content?.ucas || ucas;
                     
                     // Map UCA types for display
                     const typeMap: Record<string, string> = {
@@ -425,17 +417,16 @@ Built on a **microservices foundation** with:
                       'wrong-duration': 'Wrong Duration'
                     };
                     
-                    // Create cells for heat map
+                    // Create cells for heat map based on actual data
                     const cells: any[] = [];
-                    ['C1', 'C2', 'C3', 'C4'].forEach(controllerId => {
+                    controlActions.forEach(ca => {
                       ['not-provided', 'provided', 'wrong-timing', 'wrong-duration'].forEach(type => {
-                        // Find UCAs for this controller/type combination
-                        const controlActionId = controllerId.replace('C', 'CA');
-                        const ucasForCell = comprehensiveUCAs.filter(u => 
-                          u.controlActionId === controlActionId && u.type === type
+                        // Find UCAs for this control action/type combination
+                        const ucasForCell = ucasRaw.filter(u => 
+                          u.controlActionId === ca.id && u.type === type
                         );
                         
-                        // Calculate risk value
+                        // Calculate risk value based on severity
                         let value = 0;
                         if (ucasForCell.length > 0) {
                           const severityScores = ucasForCell.map(u => 
@@ -447,7 +438,7 @@ Built on a **microservices foundation** with:
                         }
                         
                         cells.push({
-                          row: controllerMap[controllerId],
+                          row: ca.action,
                           col: typeMap[type],
                           value,
                           label: ucasForCell.length.toString(),
@@ -467,7 +458,7 @@ Built on a **microservices foundation** with:
                     max: { value: 5, color: '#e74c3c', label: 'Critical' }
                   },
                   xAxisLabel: 'UCA Types',
-                  yAxisLabel: 'Controllers'
+                  yAxisLabel: 'Control Actions'
                 }}
                 onSave={handleSave}
                 onCellClick={(cell) => {

@@ -144,6 +144,7 @@ export function SystemDescriptionTemplate({
             id={`${id}-full-description`}
             title="Full System Description"
             content={data.fullDescription}
+            format="markdown"
             onSave={(id, textData) => setData(prev => ({ ...prev, fullDescription: textData.content }))}
             editable={isEditing}
           />

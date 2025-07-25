@@ -250,13 +250,47 @@ export default function CollapsibleAnalysisContent({
                   "Response time must be under 2 seconds"
                 ]
               }}
-              fullDescription={`The Digital Banking Platform is a comprehensive online financial services system designed to provide secure, reliable, and user-friendly banking services to millions of customers. The system encompasses web and mobile applications, backend services, and integrations with various financial institutions and payment processors.
+              fullDescription={`## System Overview
+The Digital Banking Platform is a comprehensive online financial services system designed to provide secure, reliable, and user-friendly banking services to millions of customers.
 
-The platform processes over 10 million transactions daily, ranging from simple balance inquiries to complex international wire transfers. It serves both retail and business customers, offering features such as account management, bill payments, fund transfers, loan applications, and investment services.
+## Key Components
+• **Customer Applications**: Web and mobile applications for account access
+• **Backend Services**: Microservices architecture for transaction processing  
+• **API Gateway**: Centralized service orchestration and routing
+• **Authentication Service**: Multi-factor authentication and session management
+• **Transaction Engine**: Core processing system for financial operations
+• **Fraud Detection**: Real-time monitoring and anomaly detection
+• **Banking Integrations**: Connections to core banking and payment systems
 
-Security is paramount in the system design, with multiple layers of protection including multi-factor authentication, end-to-end encryption, fraud detection algorithms, and continuous monitoring. The system must comply with strict regulatory requirements including PCI DSS, SOX, and regional banking regulations.
+## Operations and Scale
+The platform processes over **10 million transactions daily**, serving both retail and business customers with:
+• Account management and balance inquiries
+• Bill payments and scheduled transfers
+• Domestic and international fund transfers
+• Loan applications and management
+• Investment services and portfolio tracking
 
-The architecture is built on a microservices foundation, deployed across multiple geographic regions for redundancy and performance. Key components include the customer-facing applications, API gateway, authentication service, transaction processing engine, fraud detection system, and core banking integrations.`}
+## Security Architecture
+### Multi-Layered Protection
+• **Authentication**: Multi-factor authentication (MFA) for all users
+• **Encryption**: End-to-end encryption for data in transit and at rest
+• **Monitoring**: 24/7 security operations center (SOC)
+• **Detection**: Machine learning-based fraud detection
+• **Testing**: Regular penetration testing and vulnerability assessments
+
+### Compliance
+• PCI DSS Level 1 certified
+• SOX compliant
+• GDPR compliant
+• Regional banking regulations adherence
+
+## Technical Architecture
+Built on a **microservices foundation** with:
+• Multi-region deployment for high availability
+• Kubernetes orchestration for container management
+• Auto-scaling to handle peak loads
+• Disaster recovery sites with RPO < 1 hour
+• Global load balancing for optimal performance`}
               systemGoals={[
                 "Prevent unauthorized access to user accounts",
                 "Detect and prevent fraudulent transactions",
@@ -1291,8 +1325,8 @@ PASTA aligns technical threats with business impact, helping organizations make 
               />
 
               <AnalysisDiagram
-                id={`${analysisId}-attack-tree`}
-                title="Attack Tree Example: Steal Customer Financial Data"
+                id={`${analysisId}-attack-tree-1`}
+                title="Attack Tree 1: Steal Customer Financial Data"
               >
                 <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
                     {/* Root Goal */}
@@ -1364,6 +1398,159 @@ PASTA aligns technical threats with business impact, helping organizations make 
                     <text x="540" y="475" fontSize="12">AND Gate</text>
                   </svg>
               </AnalysisDiagram>
+              
+              <AnalysisDiagram
+                id={`${analysisId}-attack-tree-2`}
+                title="Attack Tree 2: Denial of Service Attack"
+              >
+                <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+                    {/* Root Goal */}
+                    <rect x="300" y="20" width="200" height="40" fill="#e74c3c" stroke="#333" strokeWidth="2"/>
+                    <text x="400" y="45" textAnchor="middle" fill="white" fontWeight="bold">Disrupt Service</text>
+                    
+                    {/* OR Gate */}
+                    <circle cx="400" cy="100" r="20" fill="#f39c12" stroke="#333" strokeWidth="2"/>
+                    <text x="400" y="107" textAnchor="middle" fill="white" fontWeight="bold">OR</text>
+                    
+                    {/* Branch 1: DDoS Attack */}
+                    <rect x="50" y="160" width="150" height="40" fill="#3498db" stroke="#333" strokeWidth="2"/>
+                    <text x="125" y="185" textAnchor="middle" fill="white">DDoS Attack</text>
+                    
+                    {/* Branch 2: Resource Exhaustion */}
+                    <rect x="225" y="160" width="150" height="40" fill="#3498db" stroke="#333" strokeWidth="2"/>
+                    <text x="300" y="185" textAnchor="middle" fill="white">Resource Exhaustion</text>
+                    
+                    {/* Branch 3: Infrastructure Attack */}
+                    <rect x="400" y="160" width="150" height="40" fill="#3498db" stroke="#333" strokeWidth="2"/>
+                    <text x="475" y="185" textAnchor="middle" fill="white">Infrastructure Attack</text>
+                    
+                    {/* Branch 4: Logic Bomb */}
+                    <rect x="575" y="160" width="150" height="40" fill="#3498db" stroke="#333" strokeWidth="2"/>
+                    <text x="650" y="185" textAnchor="middle" fill="white">Logic Bomb</text>
+                    
+                    {/* DDoS Sub-branches */}
+                    <rect x="20" y="240" width="90" height="30" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="65" y="260" textAnchor="middle" fill="white" fontSize="12">Volume Attack</text>
+                    
+                    <rect x="120" y="240" width="90" height="30" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="165" y="260" textAnchor="middle" fill="white" fontSize="12">Protocol Attack</text>
+                    
+                    {/* Resource Exhaustion Sub-branches */}
+                    <rect x="195" y="240" width="90" height="30" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="240" y="260" textAnchor="middle" fill="white" fontSize="12">API Abuse</text>
+                    
+                    <rect x="295" y="240" width="90" height="30" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="340" y="260" textAnchor="middle" fill="white" fontSize="12">Memory Leak</text>
+                    
+                    {/* Infrastructure Sub-branches */}
+                    <rect x="370" y="240" width="90" height="30" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="415" y="260" textAnchor="middle" fill="white" fontSize="12">DNS Attack</text>
+                    
+                    <rect x="470" y="240" width="90" height="30" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="515" y="260" textAnchor="middle" fill="white" fontSize="12">CDN Attack</text>
+                    
+                    {/* Logic Bomb Sub-branches */}
+                    <rect x="545" y="240" width="90" height="30" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="590" y="260" textAnchor="middle" fill="white" fontSize="12">Time Trigger</text>
+                    
+                    <rect x="645" y="240" width="90" height="30" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="690" y="260" textAnchor="middle" fill="white" fontSize="12">Event Trigger</text>
+                    
+                    {/* Connections */}
+                    <line x1="400" y1="60" x2="400" y2="80" stroke="#333" strokeWidth="2"/>
+                    <line x1="400" y1="120" x2="125" y2="160" stroke="#333" strokeWidth="2"/>
+                    <line x1="400" y1="120" x2="300" y2="160" stroke="#333" strokeWidth="2"/>
+                    <line x1="400" y1="120" x2="475" y2="160" stroke="#333" strokeWidth="2"/>
+                    <line x1="400" y1="120" x2="650" y2="160" stroke="#333" strokeWidth="2"/>
+                    
+                    {/* DDoS connections */}
+                    <line x1="125" y1="200" x2="65" y2="240" stroke="#333" strokeWidth="2"/>
+                    <line x1="125" y1="200" x2="165" y2="240" stroke="#333" strokeWidth="2"/>
+                    
+                    {/* Resource connections */}
+                    <line x1="300" y1="200" x2="240" y2="240" stroke="#333" strokeWidth="2"/>
+                    <line x1="300" y1="200" x2="340" y2="240" stroke="#333" strokeWidth="2"/>
+                    
+                    {/* Infrastructure connections */}
+                    <line x1="475" y1="200" x2="415" y2="240" stroke="#333" strokeWidth="2"/>
+                    <line x1="475" y1="200" x2="515" y2="240" stroke="#333" strokeWidth="2"/>
+                    
+                    {/* Logic Bomb connections */}
+                    <line x1="650" y1="200" x2="590" y2="240" stroke="#333" strokeWidth="2"/>
+                    <line x1="650" y1="200" x2="690" y2="240" stroke="#333" strokeWidth="2"/>
+                </svg>
+              </AnalysisDiagram>
+              
+              <AnalysisDiagram
+                id={`${analysisId}-attack-tree-3`}
+                title="Attack Tree 3: Account Takeover"
+              >
+                <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+                    {/* Root Goal */}
+                    <rect x="300" y="20" width="200" height="40" fill="#e74c3c" stroke="#333" strokeWidth="2"/>
+                    <text x="400" y="45" textAnchor="middle" fill="white" fontWeight="bold">Account Takeover</text>
+                    
+                    {/* OR Gate */}
+                    <circle cx="400" cy="100" r="20" fill="#f39c12" stroke="#333" strokeWidth="2"/>
+                    <text x="400" y="107" textAnchor="middle" fill="white" fontWeight="bold">OR</text>
+                    
+                    {/* Branch 1: Credential Theft */}
+                    <rect x="100" y="160" width="150" height="40" fill="#3498db" stroke="#333" strokeWidth="2"/>
+                    <text x="175" y="185" textAnchor="middle" fill="white">Credential Theft</text>
+                    
+                    {/* Branch 2: Session Hijacking */}
+                    <rect x="325" y="160" width="150" height="40" fill="#3498db" stroke="#333" strokeWidth="2"/>
+                    <text x="400" y="185" textAnchor="middle" fill="white">Session Hijacking</text>
+                    
+                    {/* Branch 3: Social Engineering */}
+                    <rect x="550" y="160" width="150" height="40" fill="#3498db" stroke="#333" strokeWidth="2"/>
+                    <text x="625" y="185" textAnchor="middle" fill="white">Social Engineering</text>
+                    
+                    {/* AND Gate for Credential Theft */}
+                    <circle cx="175" cy="240" r="20" fill="#9b59b6" stroke="#333" strokeWidth="2"/>
+                    <text x="175" y="247" textAnchor="middle" fill="white" fontWeight="bold">AND</text>
+                    
+                    {/* Credential Theft Sub-branches */}
+                    <rect x="50" y="290" width="100" height="30" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="100" y="310" textAnchor="middle" fill="white" fontSize="12">Phishing</text>
+                    
+                    <rect x="200" y="290" width="100" height="30" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="250" y="310" textAnchor="middle" fill="white" fontSize="12">Keylogger</text>
+                    
+                    {/* Session Hijacking Sub-branches */}
+                    <rect x="275" y="240" width="100" height="30" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="325" y="260" textAnchor="middle" fill="white" fontSize="12">XSS Attack</text>
+                    
+                    <rect x="425" y="240" width="100" height="30" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="475" y="260" textAnchor="middle" fill="white" fontSize="12">MITM Attack</text>
+                    
+                    {/* Social Engineering Sub-branches */}
+                    <rect x="500" y="240" width="100" height="30" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="550" y="260" textAnchor="middle" fill="white" fontSize="12">Pretexting</text>
+                    
+                    <rect x="650" y="240" width="100" height="30" fill="#2ecc71" stroke="#333" strokeWidth="2"/>
+                    <text x="700" y="260" textAnchor="middle" fill="white" fontSize="12">Vishing</text>
+                    
+                    {/* Connections */}
+                    <line x1="400" y1="60" x2="400" y2="80" stroke="#333" strokeWidth="2"/>
+                    <line x1="400" y1="120" x2="175" y2="160" stroke="#333" strokeWidth="2"/>
+                    <line x1="400" y1="120" x2="400" y2="160" stroke="#333" strokeWidth="2"/>
+                    <line x1="400" y1="120" x2="625" y2="160" stroke="#333" strokeWidth="2"/>
+                    
+                    {/* Credential Theft connections */}
+                    <line x1="175" y1="200" x2="175" y2="220" stroke="#333" strokeWidth="2"/>
+                    <line x1="175" y1="260" x2="100" y2="290" stroke="#333" strokeWidth="2"/>
+                    <line x1="175" y1="260" x2="250" y2="290" stroke="#333" strokeWidth="2"/>
+                    
+                    {/* Session Hijacking connections */}
+                    <line x1="400" y1="200" x2="325" y2="240" stroke="#333" strokeWidth="2"/>
+                    <line x1="400" y1="200" x2="475" y2="240" stroke="#333" strokeWidth="2"/>
+                    
+                    {/* Social Engineering connections */}
+                    <line x1="625" y1="200" x2="550" y2="240" stroke="#333" strokeWidth="2"/>
+                    <line x1="625" y1="200" x2="700" y2="240" stroke="#333" strokeWidth="2"/>
+                </svg>
+              </AnalysisDiagram>
             </AnalysisSection>
           );
 
@@ -1394,30 +1581,49 @@ PASTA aligns technical threats with business impact, helping organizations make 
                 filterable
               />
 
-              <AnalysisChart
-                id={`${analysisId}-risk-heatmap`}
-                title="Risk Heat Map by Component"
-                type="bar"
-                data={{
-                  labels: riskHeatMap.map(r => r.component),
-                  datasets: [
-                    {
-                      label: 'Confidentiality Risk',
-                      data: riskHeatMap.map(r => r.risks.confidentiality),
-                      backgroundColor: '#e74c3c'
-                    },
-                    {
-                      label: 'Integrity Risk',
-                      data: riskHeatMap.map(r => r.risks.integrity),
-                      backgroundColor: '#f39c12'
-                    },
-                    {
-                      label: 'Availability Risk',
-                      data: riskHeatMap.map(r => r.risks.availability),
-                      backgroundColor: '#3498db'
-                    }
-                  ]
-                }}
+              {/* Risk Heat Map - showing each risk category separately */}
+              <AnalysisBarChart
+                id={`${analysisId}-risk-heatmap-confidentiality`}
+                title="Confidentiality Risk by Component"
+                data={riskHeatMap.map(r => ({
+                  label: r.component,
+                  value: r.risks.confidentiality,
+                  color: '#e74c3c'
+                }))}
+                xAxisLabel="Risk Score"
+                yAxisLabel="Component"
+                horizontal={true}
+                useColors={true}
+                onSave={handleSave}
+              />
+              
+              <AnalysisBarChart
+                id={`${analysisId}-risk-heatmap-integrity`}
+                title="Integrity Risk by Component"
+                data={riskHeatMap.map(r => ({
+                  label: r.component,
+                  value: r.risks.integrity,
+                  color: '#f39c12'
+                }))}
+                xAxisLabel="Risk Score"
+                yAxisLabel="Component"
+                horizontal={true}
+                useColors={true}
+                onSave={handleSave}
+              />
+              
+              <AnalysisBarChart
+                id={`${analysisId}-risk-heatmap-availability`}
+                title="Availability Risk by Component"
+                data={riskHeatMap.map(r => ({
+                  label: r.component,
+                  value: r.risks.availability,
+                  color: '#3498db'
+                }))}
+                xAxisLabel="Risk Score"
+                yAxisLabel="Component"
+                horizontal={true}
+                useColors={true}
                 onSave={handleSave}
               />
 
@@ -2122,13 +2328,38 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
                 config={{
                   rows: ['Critical', 'High', 'Medium', 'Low'],
                   cols: ['Rare', 'Unlikely', 'Possible', 'Likely', 'Almost Certain'],
-                  cells: hazopDeviations.map((dev, idx) => ({
-                    row: dev.severity.charAt(0).toUpperCase() + dev.severity.slice(1),
-                    col: dev.likelihood.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-                    value: dev.riskRating === 'critical' ? 5 : dev.riskRating === 'high' ? 4 : dev.riskRating === 'medium' ? 3 : 2,
-                    label: '',
-                    tooltip: `Deviation: ${dev.deviation}\nRisk: ${dev.riskRating}`
-                  })),
+                  cells: (() => {
+                    // Count deviations for each cell
+                    const cellCounts: Record<string, number> = {};
+                    hazopDeviations.forEach(dev => {
+                      const row = dev.severity.charAt(0).toUpperCase() + dev.severity.slice(1);
+                      const col = dev.likelihood.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                      const key = `${row}-${col}`;
+                      cellCounts[key] = (cellCounts[key] || 0) + 1;
+                    });
+                    
+                    // Create cells with counts
+                    return Object.entries(cellCounts).map(([key, count]) => {
+                      const [row, col] = key.split('-');
+                      const severity = row.toLowerCase();
+                      const likelihood = col.toLowerCase();
+                      
+                      // Determine risk level based on severity and likelihood
+                      let value = 2; // default medium
+                      if (severity === 'critical' && (likelihood === 'likely' || likelihood === 'almost certain')) value = 5;
+                      else if (severity === 'critical' || (severity === 'high' && likelihood !== 'rare')) value = 4;
+                      else if (severity === 'high' || (severity === 'medium' && likelihood !== 'rare')) value = 3;
+                      else if (severity === 'low') value = 1;
+                      
+                      return {
+                        row,
+                        col,
+                        value,
+                        label: count.toString(),
+                        tooltip: `${count} deviation${count > 1 ? 's' : ''} at ${row} severity, ${col} likelihood`
+                      };
+                    });
+                  })(),
                   xAxisLabel: 'Likelihood →',
                   yAxisLabel: 'Severity →'
                 }}
@@ -2434,13 +2665,36 @@ ${getHighValueAssets().map(asset => `### ${asset.name}
                 config={{
                   rows: ['Severe', 'Major', 'Moderate', 'Minor', 'Negligible'],
                   cols: ['Very Low', 'Low', 'Medium', 'High', 'Very High'],
-                  cells: octaveRisks.map((risk, idx) => ({
-                    row: risk.impact.charAt(0).toUpperCase() + risk.impact.slice(1),
-                    col: risk.likelihood.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-                    value: risk.riskLevel === 'critical' ? 5 : risk.riskLevel === 'high' ? 4 : risk.riskLevel === 'medium' ? 3 : 2,
-                    label: String(idx + 1),
-                    tooltip: `Risk #${idx + 1}: ${risk.description}`
-                  })),
+                  cells: (() => {
+                    // Count risks for each cell
+                    const cellCounts: Record<string, { count: number; risks: typeof octaveRisks }> = {};
+                    octaveRisks.forEach(risk => {
+                      const row = risk.impact.charAt(0).toUpperCase() + risk.impact.slice(1);
+                      const col = risk.likelihood.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                      const key = `${row}-${col}`;
+                      if (!cellCounts[key]) {
+                        cellCounts[key] = { count: 0, risks: [] };
+                      }
+                      cellCounts[key].count++;
+                      cellCounts[key].risks.push(risk);
+                    });
+                    
+                    // Create cells with counts
+                    return Object.entries(cellCounts).map(([key, data]) => {
+                      const [row, col] = key.split('-');
+                      const avgRiskLevel = data.risks.reduce((sum, r) => 
+                        sum + (r.riskLevel === 'critical' ? 5 : r.riskLevel === 'high' ? 4 : r.riskLevel === 'medium' ? 3 : 2), 0
+                      ) / data.count;
+                      
+                      return {
+                        row,
+                        col,
+                        value: Math.round(avgRiskLevel),
+                        label: data.count.toString(),
+                        tooltip: `${data.count} risk${data.count > 1 ? 's' : ''} at ${row} impact, ${col} likelihood`
+                      };
+                    });
+                  })(),
                   xAxisLabel: 'Likelihood →',
                   yAxisLabel: 'Impact →'
                 }}

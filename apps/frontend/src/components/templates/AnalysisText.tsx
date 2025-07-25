@@ -5,27 +5,36 @@ import './AnalysisText.css';
 
 // Simple markdown to HTML converter
 function renderMarkdown(text: string): string {
-  return text
+  // Split by double newlines to handle paragraphs
+  const blocks = text.split(/\n\n+/);
+  
+  return blocks.map(block => {
     // Headers
-    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-    // Bold
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    if (block.match(/^#{1,6}\s/)) {
+      return block
+        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1>$1</h1>');
+    }
+    
     // Lists
-    .replace(/^\* (.+)/gm, '<li>$1</li>')
-    .replace(/^\- (.+)/gm, '<li>$1</li>')
-    .replace(/^\d+\. (.+)/gm, '<li>$1</li>')
-    // Wrap lists
-    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-    // Line breaks
-    .replace(/\n\n/g, '</p><p>')
-    // Wrap in paragraphs
-    .replace(/^([^<].*)$/gm, '<p>$1</p>')
-    // Clean up
-    .replace(/<p><\/p>/g, '')
-    .replace(/<p>(<h[1-6]>)/g, '$1')
-    .replace(/(<\/h[1-6]>)<\/p>/g, '$1');
+    const listItems = block.split('\n').filter(line => line.match(/^[\*\-•]\s/) || line.match(/^\d+\.\s/));
+    if (listItems.length > 0) {
+      const items = listItems.map(item => {
+        const content = item
+          .replace(/^[\*\-•]\s/, '')
+          .replace(/^\d+\.\s/, '')
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        return `<li>${content}</li>`;
+      }).join('\n');
+      return `<ul>${items}</ul>`;
+    }
+    
+    // Regular paragraph with bold
+    return `<p>${block.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</p>`;
+  })
+  .filter(block => block && block !== '<p></p>')
+  .join('\n');
 }
 
 interface AnalysisTextProps {

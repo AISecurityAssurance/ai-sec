@@ -51,8 +51,8 @@ export default function PastaAnalysis({ onElementSelect }: PastaAnalysisProps) {
           onElementSelect?.(item, 'pasta-objective');
         }}
         selectedRowId={selectedItem?.id}
-        itemType="pasta-objective"
-        linkable={true}
+        // itemType="pasta-objective"
+        // linkable={true}
       />
     </div>
   );

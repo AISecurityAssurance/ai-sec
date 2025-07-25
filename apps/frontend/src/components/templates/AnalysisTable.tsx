@@ -23,6 +23,7 @@ interface AnalysisTableProps {
   onSave?: (id: string, data: any) => void;
   onRowClick?: (row: any) => void;
   clickableRows?: boolean;
+  autoScroll?: boolean | number;  // true = 10 rows, number = custom threshold
 }
 
 type SortDirection = 'asc' | 'desc' | null;
@@ -38,7 +39,8 @@ export function AnalysisTable({
   editable = true,
   onSave,
   onRowClick,
-  clickableRows = false
+  clickableRows = false,
+  autoScroll = true
 }: AnalysisTableProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [tableData, setTableData] = useState(data);
@@ -251,7 +253,20 @@ export function AnalysisTable({
         </div>
       )}
 
-      <div className="table-container" style={{ maxHeight: currentPageSize ? `${currentPageSize * 50 + 100}px` : 'auto', overflowY: currentPageSize ? 'auto' : 'visible' }}>
+      <div className="table-container" style={{ 
+        maxHeight: (() => {
+          if (currentPageSize) return `${currentPageSize * 50 + 100}px`;
+          if (autoScroll === false) return 'auto';
+          const threshold = typeof autoScroll === 'number' ? autoScroll : 10;
+          return sortedData.length > threshold ? '600px' : 'auto';
+        })(),
+        overflowY: (() => {
+          if (currentPageSize) return 'auto';
+          if (autoScroll === false) return 'visible';
+          const threshold = typeof autoScroll === 'number' ? autoScroll : 10;
+          return sortedData.length > threshold ? 'auto' : 'visible';
+        })()
+      }}>
         <table className="analysis-table">
           <thead>
             <tr>

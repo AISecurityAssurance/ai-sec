@@ -524,8 +524,8 @@ export default function AnalysisPanel({
           selectedRowId={selectedElement?.type === 'loss' ? selectedElement.id : null}
           onUpdate={isEditMode ? updateLosses : undefined}
           isEditMode={isEditMode}
-          itemType="loss"
-          linkable={!isEditMode}
+          // itemType="loss"
+          // linkable={!isEditMode}
         />
       </div>
     );
@@ -557,8 +557,8 @@ export default function AnalysisPanel({
           selectedRowId={selectedElement?.type === 'hazard' ? selectedElement.id : null}
           onUpdate={isEditMode ? updateHazards : undefined}
           isEditMode={isEditMode}
-          itemType="hazard"
-          linkable={!isEditMode}
+          // itemType="hazard"
+          // linkable={!isEditMode}
         />
       </div>
     );
@@ -582,8 +582,8 @@ export default function AnalysisPanel({
           selectedRowId={selectedElement?.type === 'controller' ? selectedElement.id : null}
           onUpdate={isEditMode ? updateControllers : undefined}
           isEditMode={isEditMode}
-          itemType="controller"
-          linkable={!isEditMode}
+          // itemType="controller"
+          // linkable={!isEditMode}
         />
       </div>
     );
@@ -608,8 +608,8 @@ export default function AnalysisPanel({
           selectedRowId={selectedElement?.type === 'controlAction' ? selectedElement.id : null}
           onUpdate={isEditMode ? updateControlActions : undefined}
           isEditMode={isEditMode}
-          itemType="control-action"
-          linkable={!isEditMode}
+          // itemType="control-action"
+          // linkable={!isEditMode}
         />
       </div>
     );
@@ -659,8 +659,8 @@ export default function AnalysisPanel({
         selectedRowId={selectedElement?.type === 'uca' ? selectedElement.id : null}
         onUpdate={isEditMode ? updateUcas : undefined}
         isEditMode={isEditMode}
-        itemType="uca"
-        linkable={!isEditMode}
+        // itemType="uca"
+        // linkable={!isEditMode}
       />
     );
   };
@@ -711,8 +711,8 @@ export default function AnalysisPanel({
           updateScenarios(updatedScenarios);
         } : undefined}
         isEditMode={isEditMode}
-        itemType="scenario"
-        linkable={!isEditMode}
+        // itemType="scenario"
+        // linkable={!isEditMode}
       />
     );
   };

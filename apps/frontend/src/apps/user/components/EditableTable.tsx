@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Edit2, Check, X, ChevronUp, ChevronDown } from 'lucide-react';
-import type { TableColumn, TableRow } from './AnalysisTable';
+import type { TableColumn, TableRow } from './legacyTypes';
 import './EditableTable.css';
 
 interface EnumOption {

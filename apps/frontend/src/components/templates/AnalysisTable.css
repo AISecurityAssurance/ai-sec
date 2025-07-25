@@ -93,27 +93,27 @@
   position: relative;
 }
 
-/* When pageSize is set, enable vertical scrolling */
-.table-container[style*="maxHeight"] {
-  border-bottom: 1px solid var(--color-border);
-}
-
 /* Ensure table maintains minimum width */
 .table-container .analysis-table {
   min-width: max-content;
 }
 
-/* Sticky table header when scrolling */
-.table-container[style*="maxHeight"] .analysis-table thead {
+/* Always apply sticky table header */
+.table-container .analysis-table thead {
   position: sticky;
   top: 0;
   z-index: 10;
   background: var(--color-surface);
 }
 
-.table-container[style*="maxHeight"] .analysis-table thead th {
+.table-container .analysis-table thead th {
   background: var(--color-surface-secondary);
   position: relative;
+}
+
+/* Additional styling when scrolling is enabled */
+.table-container[style*="maxHeight"] {
+  border-bottom: 1px solid var(--color-border);
 }
 
 .table-container[style*="maxHeight"] .analysis-table thead::after {

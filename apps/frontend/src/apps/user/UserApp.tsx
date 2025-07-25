@@ -6,6 +6,7 @@ import ChatPanel from './components/ChatPanel';
 import { NewAnalysisDialog } from './components/NewAnalysisDialog';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { AnalysisWebSocketProvider } from '../../components/analysis/AnalysisWebSocketProvider';
+import { VersionSelector } from '../../components/VersionSelector';
 import { generateUUID } from '../../utils/uuid';
 import { apiFetch } from '../../config/api';
 import './UserApp.css';
@@ -73,13 +74,16 @@ export default function UserApp() {
     <SimpleLayout>
       <AnalysisWebSocketProvider>
         <div className="user-layout-header">
-          <button 
-            className="btn-primary"
-            onClick={() => setShowNewAnalysisDialog(true)}
-            disabled={isAnalyzing}
-          >
-            New Analysis
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <VersionSelector />
+            <button 
+              className="btn-primary"
+              onClick={() => setShowNewAnalysisDialog(true)}
+              disabled={isAnalyzing}
+            >
+              New Analysis
+            </button>
+          </div>
           {isAnalyzing && (
             <span style={{ marginLeft: '20px', color: 'var(--text-secondary)' }}>
               Analysis in progress...

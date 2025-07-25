@@ -1,5 +1,6 @@
 import { useAnalysisStore } from '../stores/analysisStore';
-import { useMemo } from 'react';
+import { useVersionStore } from '../stores/versionStore';
+import { useMemo, useEffect } from 'react';
 import type { UCA } from '../apps/user/mockData/stpaSecData';
 import { controlActions, ucas as defaultUCAs } from '../apps/user/mockData/stpaSecData';
 
@@ -15,14 +16,26 @@ interface HeatMapCell {
 export function useUCAData(analysisId: string) {
   const { analysisResults } = useAnalysisStore();
   const updateSectionResult = useAnalysisStore(state => state.updateSectionResult);
+  const { activeVersionId, getActiveVersionData, updateVersionData, createVersion } = useVersionStore();
   
   // Single source of truth for UCA data
   const ucaData = useMemo(() => {
+    // First check if we have versioned data
+    const versionData = getActiveVersionData();
+    if (versionData?.analyses?.[analysisId]?.ucas) {
+      return versionData.analyses[analysisId].ucas;
+    }
+    
+    // Then check analysis results in store
     const frameworkResult = analysisResults[analysisId];
     const ucasSection = frameworkResult?.sections.find(s => s.id === 'ucas');
-    // Use default UCAs if no data in store yet
-    return ucasSection?.content?.ucas || defaultUCAs;
-  }, [analysisResults, analysisId]);
+    if (ucasSection?.content?.ucas) {
+      return ucasSection.content.ucas;
+    }
+    
+    // Finally use default UCAs for demo
+    return defaultUCAs;
+  }, [analysisResults, analysisId, activeVersionId, getActiveVersionData]);
   
   // Map UCA types for display
   const typeMap: Record<string, string> = {
@@ -69,6 +82,33 @@ export function useUCAData(analysisId: string) {
   }, [ucaData]);
   
   const updateUCAData = (newData: any[]) => {
+    // If we're on demo version, create a new version first
+    let versionId = activeVersionId;
+    if (activeVersionId === 'demo-v1') {
+      versionId = createVersion(
+        'Modified Analysis',
+        'Modified from demo data',
+        'demo-v1'
+      );
+      // Switch to the new version
+      useVersionStore.getState().switchVersion(versionId);
+    }
+    
+    // Update versioned data
+    const currentVersionData = getActiveVersionData() || {};
+    const updatedData = {
+      ...currentVersionData,
+      analyses: {
+        ...currentVersionData.analyses,
+        [analysisId]: {
+          ...currentVersionData.analyses?.[analysisId],
+          ucas: newData
+        }
+      }
+    };
+    updateVersionData(versionId, updatedData);
+    
+    // Also update the analysis store for immediate UI updates
     updateSectionResult(analysisId, 'ucas', {
       content: { ucas: newData },
       status: 'completed'

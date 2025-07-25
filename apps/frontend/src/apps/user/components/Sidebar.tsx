@@ -133,38 +133,26 @@ export default function Sidebar({ selectedProject, onProjectSelect, onAnalysisTy
       <div className="sidebar-section">
         <div className="sidebar-title">Analysis Types</div>
         <div className="analysis-options">
-          {analysisTypes.map(type => {
-            const Icon = type.icon;
-            const isRecommended = recommendedAnalyses.includes(type.id);
-            return (
-              <Link
-                key={type.id}
-                to={`/analysis/view/${type.id}`}
-                className={`analysis-option ${enabledAnalyses[type.id] ? 'active' : ''} ${isRecommended && showRecommendations ? 'recommended' : ''}`}
-                title={type.description}
-                onClick={(e) => {
-                  // Allow normal click to toggle checkbox
-                  if (!e.ctrlKey && !e.metaKey && e.button === 0) {
-                    e.preventDefault();
-                    toggleAnalysis(type.id);
-                  }
-                  // Right-click or ctrl/cmd-click will use browser's default behavior
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={enabledAnalyses[type.id]}
-                  onChange={() => toggleAnalysis(type.id)}
-                  onClick={(e) => e.stopPropagation()}
-                />
-                <Icon size={16} />
-                <span>{type.name}</span>
-                {isRecommended && showRecommendations && (
-                  <span className="recommendation-badge" title="Recommended for your system">★</span>
-                )}
-              </Link>
-            );
-          })}
+          {analysisTypes
+            .filter(type => enabledAnalyses[type.id]) // Only show enabled analyses
+            .map(type => {
+              const Icon = type.icon;
+              const isRecommended = recommendedAnalyses.includes(type.id);
+              return (
+                <Link
+                  key={type.id}
+                  to={`/analysis/view/${type.id}`}
+                  className={`analysis-option active ${isRecommended && showRecommendations ? 'recommended' : ''}`}
+                  title={type.description}
+                >
+                  <Icon size={16} />
+                  <span>{type.name}</span>
+                  {isRecommended && showRecommendations && (
+                    <span className="recommendation-badge" title="Recommended for your system">★</span>
+                  )}
+                </Link>
+              );
+            })}
         </div>
         {showRecommendations && (
           <div className="recommendation-note">

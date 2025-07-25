@@ -213,19 +213,34 @@ export const useAnalysisStore = create<AnalysisState>()(
     }),
     {
       name: 'analysis-storage',
-      partialize: (state) => ({
-        projectId: state.projectId,
-        projectVersion: state.projectVersion,
-        systemDescription: state.systemDescription,
-        losses: state.losses,
-        hazards: state.hazards,
-        controllers: state.controllers,
-        controlActions: state.controlActions,
-        ucas: state.ucas,
-        scenarios: state.scenarios,
-        enabledAnalyses: state.enabledAnalyses,
-        demoMode: state.demoMode
-      })
+      partialize: (state) => {
+        // Don't persist demo data to prevent modifications from carrying over
+        const versionStore = useVersionStore.getState();
+        if (versionStore.activeVersionId === 'demo-v1' || state.demoMode) {
+          // Only persist non-data settings for demo mode
+          return {
+            projectId: state.projectId,
+            projectVersion: state.projectVersion,
+            enabledAnalyses: state.enabledAnalyses,
+            demoMode: state.demoMode
+          };
+        }
+        
+        // For non-demo versions, persist everything
+        return {
+          projectId: state.projectId,
+          projectVersion: state.projectVersion,
+          systemDescription: state.systemDescription,
+          losses: state.losses,
+          hazards: state.hazards,
+          controllers: state.controllers,
+          controlActions: state.controlActions,
+          ucas: state.ucas,
+          scenarios: state.scenarios,
+          enabledAnalyses: state.enabledAnalyses,
+          demoMode: state.demoMode
+        };
+      }
     }
   )
   )
@@ -236,3 +251,14 @@ useVersionStore.subscribe((state) => {
   // Load data when active version changes
   useAnalysisStore.getState().loadVersionData(state.activeVersionId);
 });
+
+// Initialize with correct data on app load
+if (typeof window !== 'undefined') {
+  const versionStore = useVersionStore.getState();
+  const analysisStore = useAnalysisStore.getState();
+  
+  // If we're on demo version, ensure we have clean demo data
+  if (versionStore.activeVersionId === 'demo-v1') {
+    analysisStore.resetToDemoData();
+  }
+}

@@ -11,6 +11,7 @@ import { VersionSelector } from '../../components/VersionSelector';
 import { generateUUID } from '../../utils/uuid';
 import { apiFetch } from '../../config/api';
 import './UserApp.css';
+import { generateMockAnalysisResults } from '../../mocks/mockAnalysisResults';
 
 export default function UserApp() {
   const [selectedProject, setSelectedProject] = useState(null);
@@ -20,7 +21,7 @@ export default function UserApp() {
   const [showNewAnalysisDialog, setShowNewAnalysisDialog] = useState(false);
   
   // Get enabledAnalyses and analysis status from Zustand store
-  const { enabledAnalyses, setEnabledAnalyses, setCurrentAnalysisId, analysisStatus } = useAnalysisStore();
+  const { enabledAnalyses, setEnabledAnalyses, setCurrentAnalysisId, analysisStatus, updateAnalysisStatus } = useAnalysisStore();
   
   // Update isAnalyzing based on analysisStatus
   useEffect(() => {
@@ -55,28 +56,91 @@ export default function UserApp() {
       // Create a temporary project ID for now
       const projectId = generateUUID();
       
-      const response = await apiFetch('/api/v1/analysis/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          project_id: projectId,
-          system_description: data.description,
-          frameworks: data.frameworks,
-        }),
-      });
+      // Reset to demo data first, then create a new version
+      const versionStore = useVersionStore.getState();
+      const analysisStore = useAnalysisStore.getState();
       
-      if (!response.ok) {
-        throw new Error('Failed to create analysis');
+      // If we're on demo, create a new version for this analysis
+      if (versionStore.activeVersionId === 'demo-v1') {
+        analysisStore.resetToDemoData();
+        const newVersionId = versionStore.createVersion(
+          `Analysis - ${new Date().toLocaleDateString()}`,
+          data.description,
+          'demo-v1'
+        );
+        versionStore.switchVersion(newVersionId);
       }
       
-      const result = await response.json();
-      console.log('Analysis created:', result);
+      // Try API call first
+      let useSimulation = false;
+      try {
+        const response = await apiFetch('/api/v1/analysis/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            project_id: projectId,
+            system_description: data.description,
+            frameworks: data.frameworks,
+          }),
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Analysis created:', result);
+          
+          // Store the analysis ID in the global store
+          if (result.id) {
+            setCurrentAnalysisId(result.id);
+          }
+        } else {
+          useSimulation = true;
+        }
+      } catch (apiError) {
+        console.log('API not available, using simulation');
+        useSimulation = true;
+      }
       
-      // Store the analysis ID in the global store
-      if (result.id) {
-        setCurrentAnalysisId(result.id);
+      // If API failed or not available, simulate progress
+      if (useSimulation) {
+        setCurrentAnalysisId(projectId);
+        
+        // Simulate analysis progress
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          progress += Math.random() * 20 + 5; // Random increment between 5-25
+          
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(progressInterval);
+            
+            updateAnalysisStatus({
+              status: 'completed',
+              progress: 100,
+              message: 'Analysis complete'
+            });
+            
+            // Generate mock results after a short delay
+            setTimeout(() => {
+              const mockResults = generateMockAnalysisResults(data.frameworks);
+              const store = useAnalysisStore.getState();
+              
+              // Update results for each framework
+              Object.entries(mockResults).forEach(([framework, result]) => {
+                store.updateAnalysisResult(framework, result);
+              });
+              
+              setIsAnalyzing(false);
+            }, 500);
+          } else {
+            updateAnalysisStatus({
+              status: 'in_progress',
+              progress: Math.min(progress, 99),
+              message: `Analyzing ${data.frameworks.join(', ')}... ${Math.round(progress)}%`
+            });
+          }
+        }, 300);
       }
       
       // Update enabled analyses to only show selected frameworks

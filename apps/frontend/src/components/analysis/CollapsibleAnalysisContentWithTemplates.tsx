@@ -1815,28 +1815,37 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
                   rows: ['Adversarial Risk', 'Bias Risk', 'Privacy Risk', 'Reliability Risk'],
                   cols: ['Fraud Detection', 'Chatbot', 'Credit Scoring', 'Investment Advisor', 'AML Monitor'],
                   cells: (() => {
+                    // Map agent IDs to model names
+                    const agentToModel: Record<string, string> = {
+                      'MA-001': 'chatbot',
+                      'MA-002': 'fraud-detection',
+                      'MA-003': 'credit-scoring',
+                      'MA-004': 'aml-monitor',
+                      'MA-005': 'investment-advisor'
+                    };
+                    
                     // Create cells with threat data for each risk/model combination
                     const riskData = [
-                      { row: 'Adversarial Risk', col: 'Fraud Detection', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'adversarial' && t.affectedModels.includes('fraud-detection')) },
-                      { row: 'Adversarial Risk', col: 'Chatbot', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'adversarial' && t.affectedModels.includes('chatbot')) },
-                      { row: 'Adversarial Risk', col: 'Credit Scoring', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'adversarial' && t.affectedModels.includes('credit-scoring')) },
-                      { row: 'Adversarial Risk', col: 'Investment Advisor', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'adversarial' && t.affectedModels.includes('investment-advisor')) },
-                      { row: 'Adversarial Risk', col: 'AML Monitor', value: 1, label: '1', threats: maestroThreats.filter(t => t.category === 'adversarial' && t.affectedModels.includes('aml-monitor')) },
-                      { row: 'Bias Risk', col: 'Fraud Detection', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'bias' && t.affectedModels.includes('fraud-detection')) },
-                      { row: 'Bias Risk', col: 'Chatbot', value: 1, label: '1', threats: maestroThreats.filter(t => t.category === 'bias' && t.affectedModels.includes('chatbot')) },
-                      { row: 'Bias Risk', col: 'Credit Scoring', value: 5, label: '5', threats: maestroThreats.filter(t => t.category === 'bias' && t.affectedModels.includes('credit-scoring')) },
-                      { row: 'Bias Risk', col: 'Investment Advisor', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'bias' && t.affectedModels.includes('investment-advisor')) },
-                      { row: 'Bias Risk', col: 'AML Monitor', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'bias' && t.affectedModels.includes('aml-monitor')) },
-                      { row: 'Privacy Risk', col: 'Fraud Detection', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'privacy' && t.affectedModels.includes('fraud-detection')) },
-                      { row: 'Privacy Risk', col: 'Chatbot', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'privacy' && t.affectedModels.includes('chatbot')) },
-                      { row: 'Privacy Risk', col: 'Credit Scoring', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'privacy' && t.affectedModels.includes('credit-scoring')) },
-                      { row: 'Privacy Risk', col: 'Investment Advisor', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'privacy' && t.affectedModels.includes('investment-advisor')) },
-                      { row: 'Privacy Risk', col: 'AML Monitor', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'privacy' && t.affectedModels.includes('aml-monitor')) },
-                      { row: 'Reliability Risk', col: 'Fraud Detection', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'reliability' && t.affectedModels.includes('fraud-detection')) },
-                      { row: 'Reliability Risk', col: 'Chatbot', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'reliability' && t.affectedModels.includes('chatbot')) },
-                      { row: 'Reliability Risk', col: 'Credit Scoring', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'reliability' && t.affectedModels.includes('credit-scoring')) },
-                      { row: 'Reliability Risk', col: 'Investment Advisor', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'reliability' && t.affectedModels.includes('investment-advisor')) },
-                      { row: 'Reliability Risk', col: 'AML Monitor', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'reliability' && t.affectedModels.includes('aml-monitor')) }
+                      { row: 'Adversarial Risk', col: 'Fraud Detection', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'Adversarial' && agentToModel[t.agentId] === 'fraud-detection') },
+                      { row: 'Adversarial Risk', col: 'Chatbot', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'Adversarial' && agentToModel[t.agentId] === 'chatbot') },
+                      { row: 'Adversarial Risk', col: 'Credit Scoring', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'Adversarial' && agentToModel[t.agentId] === 'credit-scoring') },
+                      { row: 'Adversarial Risk', col: 'Investment Advisor', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'Adversarial' && agentToModel[t.agentId] === 'investment-advisor') },
+                      { row: 'Adversarial Risk', col: 'AML Monitor', value: 1, label: '1', threats: maestroThreats.filter(t => t.category === 'Adversarial' && agentToModel[t.agentId] === 'aml-monitor') },
+                      { row: 'Bias Risk', col: 'Fraud Detection', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'Bias' && agentToModel[t.agentId] === 'fraud-detection') },
+                      { row: 'Bias Risk', col: 'Chatbot', value: 1, label: '1', threats: maestroThreats.filter(t => t.category === 'Bias' && agentToModel[t.agentId] === 'chatbot') },
+                      { row: 'Bias Risk', col: 'Credit Scoring', value: 5, label: '5', threats: maestroThreats.filter(t => t.category === 'Bias' && agentToModel[t.agentId] === 'credit-scoring') },
+                      { row: 'Bias Risk', col: 'Investment Advisor', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'Bias' && agentToModel[t.agentId] === 'investment-advisor') },
+                      { row: 'Bias Risk', col: 'AML Monitor', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'Bias' && agentToModel[t.agentId] === 'aml-monitor') },
+                      { row: 'Privacy Risk', col: 'Fraud Detection', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'Privacy Breach' && agentToModel[t.agentId] === 'fraud-detection') },
+                      { row: 'Privacy Risk', col: 'Chatbot', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'Privacy Breach' && agentToModel[t.agentId] === 'chatbot') },
+                      { row: 'Privacy Risk', col: 'Credit Scoring', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'Privacy Breach' && agentToModel[t.agentId] === 'credit-scoring') },
+                      { row: 'Privacy Risk', col: 'Investment Advisor', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'Privacy Breach' && agentToModel[t.agentId] === 'investment-advisor') },
+                      { row: 'Privacy Risk', col: 'AML Monitor', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'Privacy Breach' && agentToModel[t.agentId] === 'aml-monitor') },
+                      { row: 'Reliability Risk', col: 'Fraud Detection', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'Hallucination' && agentToModel[t.agentId] === 'fraud-detection') },
+                      { row: 'Reliability Risk', col: 'Chatbot', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'Hallucination' && agentToModel[t.agentId] === 'chatbot') },
+                      { row: 'Reliability Risk', col: 'Credit Scoring', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'Hallucination' && agentToModel[t.agentId] === 'credit-scoring') },
+                      { row: 'Reliability Risk', col: 'Investment Advisor', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'Hallucination' && agentToModel[t.agentId] === 'investment-advisor') },
+                      { row: 'Reliability Risk', col: 'AML Monitor', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'Hallucination' && agentToModel[t.agentId] === 'aml-monitor') }
                     ];
                     
                     return riskData.map(cell => ({
@@ -1891,12 +1900,12 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
                     title={selectedHeatMapCell.title}
                     threats={selectedHeatMapCell.items.map(threat => ({
                       id: threat.id,
-                      component: threat.affectedModels.join(', '),
+                      component: maestroAgents.find(a => a.id === threat.agentId)?.name || threat.agentId,
                       threatType: threat.category,
-                      description: threat.description,
+                      description: threat.threat,
                       impact: threat.impact,
                       likelihood: threat.likelihood,
-                      riskLevel: threat.riskLevel,
+                      riskLevel: `${threat.impact === 'critical' ? 'critical' : threat.impact === 'high' && threat.likelihood === 'high' ? 'high' : 'medium'}`,
                       mitigations: threat.mitigations
                     }))}
                     onClose={() => setSelectedHeatMapCell(null)}

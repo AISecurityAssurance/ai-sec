@@ -182,7 +182,20 @@ export const useAnalysisStore = create<AnalysisState>()(
         
         // If demo version or no version data, reset to demo data
         if (versionId === 'demo-v1' || !versionData) {
-          get().resetToDemoData();
+          // Call resetToDemoData directly
+          set({
+            systemDescription: initialSystemDescription,
+            losses: initialLosses,
+            hazards: initialHazards,
+            controllers: initialControllers,
+            controlActions: initialControlActions,
+            ucas: initialUcas,
+            scenarios: initialScenarios,
+            hasUnsavedChanges: false,
+            analysisResults: {},
+            analysisStatus: { status: 'pending', progress: 0 },
+            currentAnalysisId: null
+          });
         } else if (versionData) {
           // Load the versioned data
           set({
@@ -219,9 +232,7 @@ export const useAnalysisStore = create<AnalysisState>()(
 );
 
 // Subscribe to version changes
-useVersionStore.subscribe(
-  (state) => state.activeVersionId,
-  (activeVersionId) => {
-    useAnalysisStore.getState().loadVersionData(activeVersionId);
-  }
-);
+useVersionStore.subscribe((state) => {
+  // Load data when active version changes
+  useAnalysisStore.getState().loadVersionData(state.activeVersionId);
+});

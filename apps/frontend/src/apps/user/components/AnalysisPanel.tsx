@@ -75,6 +75,7 @@ export default function AnalysisPanel({
   const [stakeholders, setStakeholders] = useState(initialStakeholders);
   const [automationLevel, setAutomationLevel] = useState<'manual' | 'assisted' | 'semi-auto' | 'fully-auto'>('assisted');
   const [hasValidationErrors, setHasValidationErrors] = useState(false);
+  const [showDemoWarning, setShowDemoWarning] = useState(false);
   
   // Get data from store
   const {
@@ -98,8 +99,10 @@ export default function AnalysisPanel({
   useBroadcastSync();
   useVersionSync();
   
-  // Get active version from store
+  // Get version store functions
   const activeVersionId = useVersionStore((state) => state.activeVersionId);
+  const createVersion = useVersionStore((state) => state.createVersion);
+  const switchVersion = useVersionStore((state) => state.switchVersion);
   
   const originalSystemDescriptionRef = useRef(systemDescription);
   const originalStakeholdersRef = useRef(stakeholders);
@@ -832,6 +835,10 @@ export default function AnalysisPanel({
               className="btn-toolbar"
               onClick={() => {
                 setIsEditMode(true);
+                // Show warning if editing demo data
+                if (activeVersionId === 'demo-v1') {
+                  setShowDemoWarning(true);
+                }
               }}
               title="Enter edit mode"
             >

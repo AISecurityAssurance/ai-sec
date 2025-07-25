@@ -1824,29 +1824,60 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
                       'MA-005': 'investment-advisor'
                     };
                     
+                    // Map risk categories to threat categories
+                    const riskToThreatCategory: Record<string, string[]> = {
+                      'Adversarial Risk': ['Adversarial'],
+                      'Bias Risk': ['Bias'],
+                      'Privacy Risk': ['Privacy Breach', 'Data Poisoning'],
+                      'Reliability Risk': ['Hallucination', 'Model Theft']
+                    };
+                    
                     // Create cells with threat data for each risk/model combination
-                    const riskData = [
-                      { row: 'Adversarial Risk', col: 'Fraud Detection', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'Adversarial' && agentToModel[t.agentId] === 'fraud-detection') },
-                      { row: 'Adversarial Risk', col: 'Chatbot', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'Adversarial' && agentToModel[t.agentId] === 'chatbot') },
-                      { row: 'Adversarial Risk', col: 'Credit Scoring', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'Adversarial' && agentToModel[t.agentId] === 'credit-scoring') },
-                      { row: 'Adversarial Risk', col: 'Investment Advisor', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'Adversarial' && agentToModel[t.agentId] === 'investment-advisor') },
-                      { row: 'Adversarial Risk', col: 'AML Monitor', value: 1, label: '1', threats: maestroThreats.filter(t => t.category === 'Adversarial' && agentToModel[t.agentId] === 'aml-monitor') },
-                      { row: 'Bias Risk', col: 'Fraud Detection', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'Bias' && agentToModel[t.agentId] === 'fraud-detection') },
-                      { row: 'Bias Risk', col: 'Chatbot', value: 1, label: '1', threats: maestroThreats.filter(t => t.category === 'Bias' && agentToModel[t.agentId] === 'chatbot') },
-                      { row: 'Bias Risk', col: 'Credit Scoring', value: 5, label: '5', threats: maestroThreats.filter(t => t.category === 'Bias' && agentToModel[t.agentId] === 'credit-scoring') },
-                      { row: 'Bias Risk', col: 'Investment Advisor', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'Bias' && agentToModel[t.agentId] === 'investment-advisor') },
-                      { row: 'Bias Risk', col: 'AML Monitor', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'Bias' && agentToModel[t.agentId] === 'aml-monitor') },
-                      { row: 'Privacy Risk', col: 'Fraud Detection', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'Privacy Breach' && agentToModel[t.agentId] === 'fraud-detection') },
-                      { row: 'Privacy Risk', col: 'Chatbot', value: 2, label: '2', threats: maestroThreats.filter(t => t.category === 'Privacy Breach' && agentToModel[t.agentId] === 'chatbot') },
-                      { row: 'Privacy Risk', col: 'Credit Scoring', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'Privacy Breach' && agentToModel[t.agentId] === 'credit-scoring') },
-                      { row: 'Privacy Risk', col: 'Investment Advisor', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'Privacy Breach' && agentToModel[t.agentId] === 'investment-advisor') },
-                      { row: 'Privacy Risk', col: 'AML Monitor', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'Privacy Breach' && agentToModel[t.agentId] === 'aml-monitor') },
-                      { row: 'Reliability Risk', col: 'Fraud Detection', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'Hallucination' && agentToModel[t.agentId] === 'fraud-detection') },
-                      { row: 'Reliability Risk', col: 'Chatbot', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'Hallucination' && agentToModel[t.agentId] === 'chatbot') },
-                      { row: 'Reliability Risk', col: 'Credit Scoring', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'Hallucination' && agentToModel[t.agentId] === 'credit-scoring') },
-                      { row: 'Reliability Risk', col: 'Investment Advisor', value: 3, label: '3', threats: maestroThreats.filter(t => t.category === 'Hallucination' && agentToModel[t.agentId] === 'investment-advisor') },
-                      { row: 'Reliability Risk', col: 'AML Monitor', value: 4, label: '4', threats: maestroThreats.filter(t => t.category === 'Hallucination' && agentToModel[t.agentId] === 'aml-monitor') }
-                    ];
+                    const riskData: any[] = [];
+                    
+                    // Generate cells for each risk/model combination
+                    ['Adversarial Risk', 'Bias Risk', 'Privacy Risk', 'Reliability Risk'].forEach(risk => {
+                      ['Fraud Detection', 'Chatbot', 'Credit Scoring', 'Investment Advisor', 'AML Monitor'].forEach(model => {
+                        // Map model display name to internal name
+                        const modelMap: Record<string, string> = {
+                          'Fraud Detection': 'fraud-detection',
+                          'Chatbot': 'chatbot',
+                          'Credit Scoring': 'credit-scoring',
+                          'Investment Advisor': 'investment-advisor',
+                          'AML Monitor': 'aml-monitor'
+                        };
+                        
+                        const modelKey = modelMap[model];
+                        const categories = riskToThreatCategory[risk] || [];
+                        
+                        // Find all threats matching this risk/model combination
+                        const threats = maestroThreats.filter(t => 
+                          categories.includes(t.category) && 
+                          agentToModel[t.agentId] === modelKey
+                        );
+                        
+                        // Determine risk value based on risk type and model
+                        let value = 2; // default
+                        if (risk === 'Adversarial Risk') {
+                          value = model === 'Chatbot' ? 4 : model === 'Fraud Detection' ? 3 : model === 'AML Monitor' ? 1 : 2;
+                        } else if (risk === 'Bias Risk') {
+                          value = model === 'Credit Scoring' ? 5 : model === 'Investment Advisor' ? 3 : model === 'Fraud Detection' || model === 'AML Monitor' ? 2 : 1;
+                        } else if (risk === 'Privacy Risk') {
+                          value = model === 'Credit Scoring' || model === 'AML Monitor' ? 4 : model === 'Fraud Detection' || model === 'Investment Advisor' ? 3 : 2;
+                        } else if (risk === 'Reliability Risk') {
+                          value = model === 'Fraud Detection' || model === 'AML Monitor' ? 4 : 3;
+                        }
+                        
+                        riskData.push({
+                          row: risk,
+                          col: model,
+                          value,
+                          label: value.toString(),
+                          threats,
+                          data: threats
+                        });
+                      });
+                    });
                     
                     return riskData.map(cell => ({
                       ...cell,
@@ -1874,25 +1905,6 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
                   }
                 }}
               />
-
-              <AnalysisText
-                id={`${analysisId}-risk-summary`}
-                title="Risk Summary"
-                content={`## Critical Risk Areas
-
-### High-Risk Components:
-1. **Credit Risk Scoring Engine** - High bias risk affecting loan decisions
-2. **Fraud Detection Model** - Vulnerable to adversarial attacks
-3. **Customer Chatbot** - Prone to prompt injection and hallucination
-
-### Key Mitigation Priorities:
-- Implement comprehensive bias testing for all decision-making models
-- Deploy adversarial defenses for critical ML systems
-- Enhance input validation and output filtering for LLM-based agents
-- Establish continuous monitoring for model drift and performance degradation`}
-                onSave={handleSave}
-                format="markdown"
-              />
               
               {selectedHeatMapCell && selectedHeatMapCell.items.length > 0 && (
                 <div style={{ marginTop: 'var(--space-4)' }}>
@@ -1912,6 +1924,25 @@ MAESTRO helps organizations secure their AI/ML infrastructure against emerging t
                   />
                 </div>
               )}
+
+              <AnalysisText
+                id={`${analysisId}-risk-summary`}
+                title="Risk Summary"
+                content={`## Critical Risk Areas
+
+### High-Risk Components:
+1. **Credit Risk Scoring Engine** - High bias risk affecting loan decisions
+2. **Fraud Detection Model** - Vulnerable to adversarial attacks
+3. **Customer Chatbot** - Prone to prompt injection and hallucination
+
+### Key Mitigation Priorities:
+- Implement comprehensive bias testing for all decision-making models
+- Deploy adversarial defenses for critical ML systems
+- Enhance input validation and output filtering for LLM-based agents
+- Establish continuous monitoring for model drift and performance degradation`}
+                onSave={handleSave}
+                format="markdown"
+              />
             </AnalysisSection>
           );
 
@@ -2424,6 +2455,25 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
                   }
                 }}
               />
+              
+              {selectedHeatMapCell && selectedHeatMapCell.items.length > 0 && (
+                <div style={{ marginTop: 'var(--space-4)' }}>
+                  <ThreatListInline
+                    title={selectedHeatMapCell.title}
+                    threats={selectedHeatMapCell.items.map(dev => ({
+                      id: dev.id,
+                      component: dev.node,
+                      threatType: dev.guideWord,
+                      description: dev.deviation,
+                      impact: dev.consequence,
+                      likelihood: dev.likelihood,
+                      riskLevel: dev.riskRating,
+                      mitigations: dev.safeguards
+                    }))}
+                    onClose={() => setSelectedHeatMapCell(null)}
+                  />
+                </div>
+              )}
 
               <AnalysisText
                 id={`${analysisId}-risk-summary`}
@@ -2447,25 +2497,6 @@ HAZOP helps identify what can go wrong before it happens, enabling proactive ris
                 onSave={handleSave}
                 format="markdown"
               />
-              
-              {selectedHeatMapCell && selectedHeatMapCell.items.length > 0 && (
-                <div style={{ marginTop: 'var(--space-4)' }}>
-                  <ThreatListInline
-                    title={selectedHeatMapCell.title}
-                    threats={selectedHeatMapCell.items.map(dev => ({
-                      id: dev.id,
-                      component: dev.node,
-                      threatType: dev.guideWord,
-                      description: dev.deviation,
-                      impact: dev.consequence,
-                      likelihood: dev.likelihood,
-                      riskLevel: dev.riskRating,
-                      mitigations: dev.safeguards
-                    }))}
-                    onClose={() => setSelectedHeatMapCell(null)}
-                  />
-                </div>
-              )}
             </AnalysisSection>
           );
 

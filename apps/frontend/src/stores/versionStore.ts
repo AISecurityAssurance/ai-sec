@@ -102,10 +102,16 @@ export const useVersionStore = create<VersionStore>()(
       },
       
       updateVersionData: (versionId, data) => {
-        // Don't allow updating demo data
+        // Don't allow updating demo data - create a new version instead
         if (versionId === DEMO_VERSION_ID) {
-          console.warn('Cannot modify demo data. Create a new version first.');
-          return;
+          console.warn('Cannot modify demo data. Creating a new version...');
+          const newVersionId = get().createVersion(
+            `Modified ${new Date().toLocaleDateString()}`,
+            'Auto-created from demo modifications',
+            DEMO_VERSION_ID
+          );
+          get().switchVersion(newVersionId);
+          versionId = newVersionId;
         }
         
         set(state => ({

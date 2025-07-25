@@ -49,6 +49,8 @@ button {
   --color-success: #10b981;
   --color-success-rgb: 16, 185, 129;
   --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-warning-dark: #92400e;
   --color-error: #ef4444;
   --color-error-rgb: 239, 68, 68;
   --color-error-light: #fee2e2;
@@ -174,6 +176,8 @@ button {
   --color-success: #10b981;
   --color-success-rgb: 16, 185, 129;
   --color-warning: #f59e0b;
+  --color-warning-light: #451a03;
+  --color-warning-dark: #fbbf24;
   --color-error: #dc2626;
   --color-error-rgb: 220, 38, 38;
   --color-error-light: #451a1a;

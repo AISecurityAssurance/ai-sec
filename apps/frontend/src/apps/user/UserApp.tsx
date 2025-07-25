@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SimpleLayout from '../../components/common/SimpleLayout';
 import Sidebar from './components/Sidebar';
 import AnalysisPanel from './components/AnalysisPanel';
 import ChatPanel from './components/ChatPanel';
 import { NewAnalysisDialog } from './components/NewAnalysisDialog';
 import { useAnalysisStore } from '../../stores/analysisStore';
+import { useVersionStore } from '../../stores/versionStore';
 import { AnalysisWebSocketProvider } from '../../components/analysis/AnalysisWebSocketProvider';
 import { VersionSelector } from '../../components/VersionSelector';
 import { generateUUID } from '../../utils/uuid';
@@ -18,8 +19,25 @@ export default function UserApp() {
   const [selectedElement, setSelectedElement] = useState<any>(null);
   const [showNewAnalysisDialog, setShowNewAnalysisDialog] = useState(false);
   
-  // Get enabledAnalyses from Zustand store
-  const { enabledAnalyses, setEnabledAnalyses, setCurrentAnalysisId } = useAnalysisStore();
+  // Get enabledAnalyses and analysis status from Zustand store
+  const { enabledAnalyses, setEnabledAnalyses, setCurrentAnalysisId, analysisStatus } = useAnalysisStore();
+  
+  // Update isAnalyzing based on analysisStatus
+  useEffect(() => {
+    if (analysisStatus.status === 'in_progress') {
+      setIsAnalyzing(true);
+    } else if (analysisStatus.status === 'completed' || analysisStatus.status === 'failed') {
+      setIsAnalyzing(false);
+    }
+  }, [analysisStatus.status]);
+  
+  // Load demo data on mount if on demo version
+  useEffect(() => {
+    const versionStore = useVersionStore.getState();
+    if (versionStore.activeVersionId === 'demo-v1') {
+      useAnalysisStore.getState().resetToDemoData();
+    }
+  }, []);
 
   const handleRunAnalysis = async () => {
     setIsAnalyzing(true);
@@ -68,8 +86,8 @@ export default function UserApp() {
       });
       setEnabledAnalyses(newEnabledAnalyses);
       
-      // Update UI to show analysis in progress
-      // The WebSocket connection should handle real-time updates
+      // The WebSocket connection will handle real-time updates
+      // and update the analysisStatus which will trigger the useEffect
       
     } catch (error) {
       console.error('Error creating analysis:', error);

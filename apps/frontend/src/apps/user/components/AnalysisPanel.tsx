@@ -22,6 +22,8 @@ import type { CausalScenario } from '../mockData/stpaSecData';
 import { stakeholders as initialStakeholders, getMissionStatementString } from '../mockData/systemData';
 import { useAnalysisStore } from '../../../stores/analysisStore';
 import { useBroadcastSync } from '../hooks/useBroadcastChannel';
+import { useVersionSync } from '../../../hooks/useVersionSync';
+import { useVersionStore } from '../../../stores/versionStore';
 import './AnalysisPanel.css';
 
 // Mapping of subtab IDs to component types for standalone windows
@@ -92,8 +94,12 @@ export default function AnalysisPanel({
     updateScenarios
   } = useAnalysisStore();
   
-  // Set up broadcast sync
+  // Set up broadcast sync and version sync
   useBroadcastSync();
+  useVersionSync();
+  
+  // Get active version from store
+  const activeVersionId = useVersionStore((state) => state.activeVersionId);
   
   const originalSystemDescriptionRef = useRef(systemDescription);
   const originalStakeholdersRef = useRef(stakeholders);
@@ -781,6 +787,44 @@ export default function AnalysisPanel({
 
   return (
     <main className="analysis-panel">
+      {showDemoWarning && (
+        <div style={{
+          background: 'var(--color-warning-light)',
+          border: '1px solid var(--color-warning)',
+          borderRadius: 'var(--radius-md)',
+          padding: '12px',
+          margin: '0 0 16px 0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <span style={{ color: 'var(--color-warning-dark)' }}>
+            You're editing demo data. Create a new version to save your changes.
+          </span>
+          <button
+            onClick={() => {
+              const newVersionId = createVersion(
+                `Analysis ${new Date().toLocaleDateString()}`,
+                'Created from demo data modifications',
+                'demo-v1'
+              );
+              switchVersion(newVersionId);
+              setShowDemoWarning(false);
+            }}
+            style={{
+              padding: '6px 12px',
+              background: 'var(--color-primary)',
+              color: 'white',
+              border: 'none',
+              borderRadius: 'var(--radius-sm)',
+              cursor: 'pointer',
+              fontSize: 'var(--font-size-sm)'
+            }}
+          >
+            Create New Version
+          </button>
+        </div>
+      )}
       <div className="analysis-toolbar">
         <div className="toolbar-left">
           {!isEditMode ? (

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, subscribeWithSelector } from 'zustand/middleware';
 import { 
   losses as initialLosses,
   hazards as initialHazards,
@@ -9,6 +9,7 @@ import {
   causalScenarios as initialScenarios
 } from '../apps/user/mockData/stpaSecData';
 import { systemDescription as initialSystemDescription } from '../apps/user/mockData/systemData';
+import { useVersionStore } from './versionStore';
 
 interface AnalysisStatus {
   status: 'pending' | 'in_progress' | 'completed' | 'failed';
@@ -76,10 +77,13 @@ interface AnalysisState {
   setDemoMode: (enabled: boolean) => void;
   setHasUnsavedChanges: (hasChanges: boolean) => void;
   clearAnalysisResults: () => void;
+  resetToDemoData: () => void;
+  loadVersionData: (versionId: string) => void;
 }
 
 export const useAnalysisStore = create<AnalysisState>()(
-  persist(
+  subscribeWithSelector(
+    persist(
     (set) => ({
       // Initial state
       projectId: null,
@@ -156,7 +160,43 @@ export const useAnalysisStore = create<AnalysisState>()(
         analysisStatus: { status: 'pending', progress: 0 },
         currentAnalysisId: null,
         hasUnsavedChanges: false 
-      })
+      }),
+      
+      resetToDemoData: () => set({
+        systemDescription: initialSystemDescription,
+        losses: initialLosses,
+        hazards: initialHazards,
+        controllers: initialControllers,
+        controlActions: initialControlActions,
+        ucas: initialUcas,
+        scenarios: initialScenarios,
+        hasUnsavedChanges: false,
+        analysisResults: {},
+        analysisStatus: { status: 'pending', progress: 0 },
+        currentAnalysisId: null
+      }),
+      
+      loadVersionData: (versionId) => {
+        const versionStore = useVersionStore.getState();
+        const versionData = versionStore.getVersionData(versionId);
+        
+        // If demo version or no version data, reset to demo data
+        if (versionId === 'demo-v1' || !versionData) {
+          get().resetToDemoData();
+        } else if (versionData) {
+          // Load the versioned data
+          set({
+            systemDescription: versionData.systemDescription || initialSystemDescription,
+            losses: versionData.losses || initialLosses,
+            hazards: versionData.hazards || initialHazards,
+            controllers: versionData.controllers || initialControllers,
+            controlActions: versionData.controlActions || initialControlActions,
+            ucas: versionData.ucas || initialUcas,
+            scenarios: versionData.scenarios || initialScenarios,
+            hasUnsavedChanges: false
+          });
+        }
+      }
     }),
     {
       name: 'analysis-storage',
@@ -175,4 +215,13 @@ export const useAnalysisStore = create<AnalysisState>()(
       })
     }
   )
+  )
+);
+
+// Subscribe to version changes
+useVersionStore.subscribe(
+  (state) => state.activeVersionId,
+  (activeVersionId) => {
+    useAnalysisStore.getState().loadVersionData(activeVersionId);
+  }
 );

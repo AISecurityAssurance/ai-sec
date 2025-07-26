@@ -10,6 +10,7 @@ const mockSelectedTokens = 15234; // Approximate tokens for 4 demo files
 
 // Analysis plugin options
 const analysisPlugins = [
+  { id: 'stpa-sec-plus', label: 'STPA-Sec+ Orchestrator' },
   { id: 'stpa-sec', label: 'STPA-Sec' },
   { id: 'stride', label: 'STRIDE' },
   { id: 'pasta', label: 'PASTA' },

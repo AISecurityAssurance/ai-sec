@@ -31,7 +31,7 @@ export interface Analysis {
   error?: string;
 }
 
-export type AnalysisType = 'stpa-sec' | 'stride' | 'pasta' | 'maestro' | 'combined';
+export type AnalysisType = 'stpa-sec' | 'stpa-sec-plus' | 'stride' | 'pasta' | 'maestro' | 'combined';
 
 // STPA-Sec Types
 export interface STPASecAnalysis {
@@ -176,4 +176,44 @@ export interface Recommendation {
   relatedFindings: string[];
   estimatedEffort?: 'low' | 'medium' | 'high';
   implementationGuidance?: string;
+}
+
+// Analysis Plugin System
+export interface AnalysisPlugin {
+  id: string;
+  name: string;
+  version: string;
+  description: string;
+  capabilities?: PluginCapabilities;
+  initialize(context: AnalysisContext): Promise<void>;
+  analyze(options: AnalysisOptions): Promise<AnalysisResult>;
+}
+
+export interface PluginCapabilities {
+  import?: boolean;
+  export?: boolean;
+  synthesis?: boolean;
+  native?: boolean;
+  realtime?: boolean;
+  compliance?: boolean;
+  cve?: boolean;
+}
+
+export interface AnalysisContext {
+  analysisStore: any;
+  entityStore?: any;
+  userContext?: any;
+}
+
+export interface AnalysisOptions {
+  mode: 'import' | 'native' | 'synthesis' | 'hybrid';
+  data?: any;
+  config?: any;
+}
+
+export interface AnalysisResult {
+  success: boolean;
+  data?: any;
+  errors?: string[];
+  warnings?: string[];
 }

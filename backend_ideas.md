@@ -191,7 +191,11 @@ Update Todos
   # Future iterations
   https://www.datagravity.dev/p/agent-infrastructure-and-control?utm_source=tldrdata
 
+  # Related to STPA-Sec:  
+  https://www.reco.ai/blog/how-to-align-stakeholders-and-get-budget-for-saas-security
 
+
+# Prompt-response saved planning.
 
    Hm.  I'm thinking something more intuitive.  Users are accustomed to seeing a dropdown filepicker menu when saving to local storage.  For saving to 
   Cloud, the should provide a bucket address.  To export (no clue what they'd export it to), let's leave this our for now because we don't know any other 

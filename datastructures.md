@@ -1,0 +1,364 @@
+# Are your changes working?
+ 1. Demo Data Persistence:
+    - Modified the store's partialize function to not persist demo data to localStorage.
+    - Added initialization logic to reset to clean demo data on app load when using demo version
+    - Demo modifications no longer carry over between sessions
+The current demo data probably saved the two UCAs I added before we made this change.  You'll need to delete UCA4-5 and UCA4-6.  Actually, let's work on this.  1) move the demo data to the root directory.  This will make it easier for a user to experiment with the data input options, such as loading files, a description, or a diagram.  These are demo inputs to the system.  We will likely want to run the demo using the pre-analyzed analysis (i.e., to see what a good analysis looks like) as well as to run an analysis on the demo data (i.e., a live analysis to see how well various models/providers perform on the analysis using).  (We're also adding a Testing Arena to compare different analyses side-by-side.  But we'll work on that later, once the everything else is working.)
+2) Let's create a demo-output directory that will store versions of the demo.  This should be in the root directory.  It will be generated when the user runs the demo.  It will store all the analysis artifacts and files here.  This will make it easier for me to inspect the artifacts and data during testing.  It will also allow the user to save artifacts in a fixed place when they run the data. (Users can also select to save the demo or any other analysis to a separate directory using the filepicker built in to their OS.)
+
+Do NOT start coding.  Let's discuss the data structures, source of truth structure for each section, and the different views.
+
+
+  2. Analysis Progress Animation:
+    - Added mock progress simulation when the API is unavailable
+    - Progress animation now shows properly with incremental updates.  I see the mock progress. Good.
+    - Completes after ~3 seconds with realistic progress increments
+  3. New Analysis Flow:
+    - When starting from demo, it automatically creates a new version
+    - Resets to clean demo data before creating the new version
+    - Properly switches to the new version for the analysis
+  4. Analysis Plugin Filtering:
+    - Sidebar now only shows the frameworks you selected during analysis creation
+    - Removed checkboxes since only enabled analyses are shown
+    - The enabledAnalyses state is properly updated based on your selection
+
+All analysis plugins are in the sidebar.  However, Only STPA-Sec has a green        │
+│   checkmark. At the same time STRIDE is checked (muted) and shows up in the Analysis Canvas, even though I didn't select it.  This is     │
+│   not a deal breaker.  We'll deal with this later and focus on the data structures and setting up the single source of truth for all of   │
+│   them and which analysis. 
+
+
+
+# Responses
+  Current Issues
+
+  1. Demo data contamination: The UCAs I added (UCA4-5, UCA4-6) are persisted in the current demo.  (We'll remove these later.)
+  2. All analysis plugins showing: Despite selecting only STPA-Sec, all plugins appear in sidebar (with STRIDE mysteriously enabled) (We'll deal with this later)
+  3. No clear separation between demo inputs and outputs (We'll deal with this now.)
+
+  Proposed Architecture:
+  1. Demo Data Structure
+
+  /demo-data/                    # Root level - demo inputs
+  ├── system-description.md      # System description text
+  ├── diagrams/                  # Input diagrams
+  │   ├── control-structure.svg
+  │   ├── data-flow.png
+  │   └── architecture.pdf
+  ├── documents/                 # Input documents
+  │   ├── requirements.pdf
+  │   ├── threat-model.xlsx
+  │   └── security-policy.docx
+  └── config.json               # Demo configuration (which analyses to run, etc.)
+
+  /demo-output/                 # Generated at runtime - demo outputs
+  ├── v1-[timestamp]/           # Each run creates versioned output
+  │   ├── analysis-results.json # Complete analysis results
+  │   ├── stpa-sec/
+  │   │   ├── losses.json
+  │   │   ├── hazards.json
+  │   │   ├── ucas.json
+  │   │   └── scenarios.json
+  │   ├── stride/
+  │   │   └── threats.json
+  │   └── artifacts/           # Generated diagrams, reports, etc.
+  └── current -> v3-[timestamp] # Symlink to latest version
+
+  For STPA-Sec, we also need the relational data:
+  This data is the source of truth for the diagram.  We should be able to generate any type of diagram using the controllers and targets as the source of truth.
+  - controllers -> targets
+  Both controllers and targets have properties/attributes.  This information is stored in the relation database and can be added to the diagram if the users requests it. Ideally, the user should be able to click on a controller, target, or edges to view/modify/delete properties which are then updated in the relational database and possibly the diagram (depending on the diagram).  Ideally, the diagram is generated by an agent that determines which tools to use for the diagram (i.e., React Flow, https://diagrams.mingrammer.com/docs/getting-started/installation, or reach out to an MCP server that can draw the diagrams and return it. The diagrams are critical because humans understand things better with a good visual representation.).  Before we focus on drawing the diagrams, let's focus on building the datastructure that we serve as the source of truth for the diagrams.  
+
+  For the current STPA-Sec, I see four controllers.  But the diagram suggests 21 entities.  Let's work on this next.   (We'll need to work on each component of each analysis plugin to ensure that we're using the correct source of truth.)
+
+  How should we represent the controllers, targets, relationships, and properties of each in the output? Will json work?
+
+
+  2. Source of Truth Architecture
+
+  For Demo Mode:
+  - Input Source: /demo-data/ - immutable demo inputs (good)
+  - Runtime State: In-memory only (no localStorage for demo) Why?  In-memory is good until the user saves it.  But the user will want to look at the outputs and view the files to understand what the system saves.
+  - Output Persistence: /demo-output/v[n]-[timestamp]/ for each run.  Use this as a default.  But allow the user to provide there own name.  For example, they may want to save it to a local directory where they have better access. If the users tries to overwrite and existing demo-output, warn them. (For a realworld situtation, we would want to ensure that a user can't overwrite another user's demo-output.  For now, let's keep it simple and keep this option in mind when coding so we can easily modify it later to handle this.)
+
+  For User Projects:
+  - Input Source: User-provided files/data. Good.
+  - Runtime State: Zustand stores + localStorage (for non-demo versions).  Good. Also use it for the demo.
+  - Output Persistence: User-selected directory.  Good.
+
+  3. Data Flow & Views
+This is great. 
+  Input Data → Analysis Engine → Results Store → Multiple Views
+                                       ↓
+                              Single Source of Truth
+                                       ↓
+                      ┌────────────────┼────────────────┐
+                      ↓                ↓                ↓
+                Table View      Heat Map View    Diagram View
+
+Key Principles:
+  1. Single Source of Truth: Each data type has ONE authoritative store. Good.
+  2. Derived Views: Heat maps, diagrams, etc. are computed from source data. Good.
+  3. Immutable Inputs: Demo inputs never change. Good.
+  4. Versioned Outputs: Each analysis run creates a new version. Good.
+
+4. Source of Truth Mapping
+
+  | Data Type | Source of Truth          | Derived Views                                              |
+  |-----------|--------------------------|------------------------------------------------------------|
+  | Losses    | losses array in store    | - Losses table- Risk matrix- Stakeholder impact view       |
+  | Hazards   | hazards array in store   | - Hazards table- Severity distribution- Loss linkage graph |
+  | UCAs      | ucas array in store      | - UCA table- Risk heat map- Control action matrix          |
+  | Scenarios | scenarios array in store | - Scenarios table- Attack trees- Mitigation matrix         |
+  | STRIDE    | strideThreats array      | - Threats table- Component heat map- STRIDE category view  |
+
+For STPA-Sec UCAs:
+We need to connect the UCAs to the control actions in the diagram (and relational data).
+That is, for each relation (control -> target, and feedback target -> control), the STPA-Sec analysis considers whether or not an UCA of one or more of the four types of UCAs exists.  This means the relations between the control structures and targets becomes the source of truth for the UCA table, which becomes the source of truth for the different views (i.e., table view, heat map).  
+
+If we have 21 controllers/targets and each pair has one or more relations, then we should see more UCAs.  This is critical.  Also, this is a very systematic approach to doing the analysis.  For example, we could even batch the AI Agent calls for the UCAs by asking it to identify unsafe control actions for each of the relations between controller and target (and feedback between target and controller).  For example, for each relation, the AI agent evaluates each of the four unsafe control actions, causal scenarios, and mitigation strategies.  Again, this is a thorough and comprehensive analysis framework (which is why its so time consuming for humans).  Step 2 (defining the control flow diagram, i.e., describing the relations between controllers and targets) is really the ground truth for steps 3 and 4 of the analysis. 
+
+Do not start coding. Let's discuss this a make sure we get this correct.
+
+5. Questions to Resolve
+
+  1. Pre-analyzed vs Live Analysis:
+    - Should we ship pre-analyzed results for instant demo? Yes. (This is to show the view what the results look like in the Analysis Canvas and provide a basis of comparison for live analysis with other models.)
+    - Or always run live analysis to show real performance? No, not always.  But the user can choose to do a live analysis on the demo data, otherwise, we use pre-analyzed results.
+    - Or both with a toggle? Yes.  Toggle is best.
+  2. Version Management:
+    - How many demo versions to keep?  If we save the versions in a directory at the root level, I can delete old ones manually.  We should only save a version if the user selects Save.  However, we'll need to keep a copy of changes in local memory until the user decides to save.  For large edits (i.e., larger than fits in memory, we may need to save a temporary copy.)
+    - Auto-cleanup of old versions?  No.  The user will delete old versions.
+    - Version comparison features?  We'll add this later in the Testing Arena.  For now, don't worry about it.
+  3. Data Relationships:
+    - How to maintain referential integrity between data types?  Let's discuss.
+    - Should we use IDs or names for relationships?  Let's discuss based on the new information I provided above.
+    - How to handle cascading updates? Good question.  Let's discuss options.
+  4. Testing Arena Integration:
+    - How will demo data feed into the testing arena?  We will probably load an analysis plugin side-by-side to the same plugin and provide a way for users to comment on different sections.  We'll do this later, after we figure out the datastructures.
+    - Separate test scenarios or reuse demo data? User will select which to compare or comment on.
+    - Performance metrics to track?  We'll decide this later.
+
+    Do NOT start coding yet.
+
+
+# Discussion
+
+ Your "Proposed Relational Data Structure" is good.  One thing to keep in mind is that the targets can also be controllers. For example, if one controller sends a control action to a target, and the feedback is actually a control action for the sender (i.e., a back and forth type of thing like a TCP handshake), then there isn't a clear distinction between controller and target.  
+
+ Also, there can be numerous control actions between two entities.  STPA-Sec delineates all control actions and feedback and and genreates the UCAs based on this.  It's actually a huge analysis endeavor.  This also creates potential issues with the heat map.  For a real system, the heat map will not fit in a single view.  We'll need to scroll (add this to the template with a max number of rows option similar to the table).  Additionally, a human-in-the-loop will probably want to filter the heat map for a particular controller/target.  Perhaps we need a separate heat map for the UCAs.  I'm not sure because the STRIDE analysis will also be comprehensive.
+
+ On the note of the STRIDE analysis, STPA-Sec includes a STRIDE analysis on each UCA.  This is one adaptation of STPA to STPA-Sec.  (Ideally, the we could also analyze the UCAs for PASTA and MAESTRO.  Let's keep in mind.  We'll come back to this.)  The idea behind the UCA analysis for STPA-Sec is that it is an exhaustive analysis of all interactions between system components.  Even a small system can have hundreds of control actions, each with four UCAs and a STRIDE analysis.  (Note that the UCAs only determine if a hazard/vulnerability exists for a particular action in a worst case scenario, that is, for some control actions there may not be a UCA for provide/not-provides or any other).  Essentially, STPA-Sec (+STRIDE) essentially asks "what, if anything, could possibly ever go wrong?  And how can we mitigate this through design, patching, etc?".  
+
+ Our small demo with it's 21 components (should there be more) is really a huge analysis task.  The step-by-step (four step) process makes it easier to break it down.
+
+ Here are some other considerations. For each UCA, one mitigation may be to use a different technology.  For example, if the user provides information about the implementation of a component or the service we're using, this needs to be listed as a property.  We could look up CVEs related to that component and suggest component-specific mitigations.  
+
+
+Data Flow Architecture
+This looks right. Add the STRIDE for now. 
+  1. Entities & Relationships (Source of Truth)
+     ↓
+  2. Control Actions (derived from relationships)
+     ↓
+  3. UCAs (4 types × each control action) + STRIDE (for each control action) (optional + PASTA + MAESTRO--we'll consider these later.)
+     ↓
+  4. Causal Scenarios (for each UCA) + STRIDE (for each control action) (optional + PASTA + MAESTRO--we'll consider these later.)
+     ↓
+  5. Mitigations (for each scenario) + STRIDE (for each control action) (optional + PASTA + MAESTRO--we'll consider these later.)
+
+
+Key Architectural Decisions
+
+  1. IDs vs Names:  Good!
+  - Use IDs for relationships (immutable, unique)
+  - Display names in UI (human-readable)
+  - Store both for flexibility
+
+  2. Cascading Updates:  This should work.
+  Option A: Soft Dependencies
+  - Delete controller → Mark related UCAs as "orphaned"
+  - Allow manual cleanup
+  - Preserves analysis history
+
+  Option B: Hard Cascades (Recommended)
+  - Delete controller → Delete all dependent data.  This should work.
+  - Maintain referential integrity.   Good.
+  - Clear user warnings before deletion.  Yes.
+
+  3. Batching Strategy:
+  Add STRIDE. 
+  For each relationship:
+  AI Agent Call: analyzeControlAction({
+    relationship: R-001,
+    context: {
+      source: controller,
+      target: target,
+      systemContext: overall_system
+    },
+    analyze: [
+      "uca_type_1",
+      "uca_type_2",
+      "uca_type_3",
+      "uca_type_4",
+      "Spoofing",
+      "Tampering",
+      "Repudiation",
+      "Information Discloser",
+      "Denial of Service",
+      "Elevation of Privilege",
+      "causal_scenarios", # There will likely be multiple causal scenarios. How do we handle this?
+      "mitigations" # There may be multiple mitigations for EACH causal scenario.  How do we handle this? 
+    ]
+  })
+Do we need a separate agent to handle mitigations?  Causal scenarios?
+Causal scenarios are linked to UCA/STRIDE. Mitigation are linked to causal scenarios.
+
+Output Structure
+
+  /demo-output/v1-[timestamp]/
+  ├── stpa-sec/
+  │   ├── entities.json          # Controllers & targets
+  │   ├── relationships.json     # All edges
+  │   ├── control-actions.json   # Derived from relationships
+  │   ├── ucas.json             # 4 types × each control action
+  |   |-- stride.json           # 6 types x each control action
+  │   ├── scenarios.json        # Causal analysis
+  │   └── mitigations.json      # Countermeasures
+
+
+Questions for Clarification
+
+  1. Entity Types: Should we distinguish between:
+    - Human controllers (operators).  We should add these as properties of the controllers.
+    - Software controllers (systems). We should add these as properties of the controllers.
+    - Physical controllers (actuators). We should add these as properties of the controllers.
+    - Or keep it generic? No. More details is better.
+  2. Relationship Properties: What metadata should we track?
+    - Protocols/channels. Yes.
+    - Timing constraints. Yes.
+    - Data formats. Yes.
+    - Security properties. Yes.
+Essentially, this is a worst-case scenario.  The more information we have about everything the better.  This requires viewing options so that the user can select properties to view.  Often viewers may want to see information based on some property (i.e., controller == human and uca-type == provider and etc. ).  Analysts will toggle between different views of the data to understand the system better (in the future, AI will handle everything.  But for the next year or so, a human needs to remain in the loop and they need to look at the data from different view points).  We include as much information about the entities and relations in the data (should we switch to a relational database or is json good enough).  We will provide default views that most users will want to look at most of the time.  But we need options so users can change those views when they want to focus on a specific part of the the analysis.  They may want to import the data into their own databases and view the data using their existing tools.  It would also be great if the SA Agent could call a tool to answer specific questions about the data, possibly even allowing the tool to add a new diagram to the analysis canvas or generate a diagram in the SA Agent chat response. 
+  
+  3. Diagram Generation: For the 21 entities:
+    - Are these all from the banking demo?  For now.  But a real analysis will require an AI agent to extract the controllers and relations based on whatever inputs the user provides.  We actually want to work on this now.  We want to draw the diagram using the relations and NOT use a saved diagram.  This is a critical piece of the app.  The diagram needs to be drawn from the relations data.
+    - Should we auto-layout or preserve manual positions?  This make be a good first step. But, we'll need to make this more flexible.  The user should be able to move this around in the diagram (we'll use a default view).  The diagram should be savable. That is, the user should be able to save THEIR version of the diagram by clicking export.  (We'll also save diagrams and charts in the final version, but these are just human-friendly artifacts derived from the data.  They won't change the ground truth.  If the user wants to change the ground truth by changing the diagram we should include an pop up that asks if they want to delete the entity and all its relations from the source of truth.  But let's work on that later.  For now, let's focus on defining the ground truth and generating a diagram from it.  If a user modifies the ground truth (i.e., the table), then the diagram should be redrawn to reflect that change.  We'll figure out later how to change the ground truth based on changes to the diagram.  
+    - How to handle diagram complexity (hierarchical views)? That is a great question.  A human can only take in so much.  We should limit the diagram to something that can fit into the diagram window and allow the user to click to expand nested diagrams.  For large diagram the user may need to export the data and import it into a different app. Or, we may need to allow the user to open a diagramming app in a new window and populate it with the data from the app and make sure they're synchronized.  This can get very complicated very fast.
+
+
+    Do NOT start coding.  Let's continue discussing the design, data structures, and how to handle the relationships that form the heart of the analysis.
+
+
+    # Discussions
+
+    # Refined Data Architecture
+    This looks much better.
+    ## entities
+    - I see entities have a list of different roles, categorized as "controller_in" and "target_in", each listing the respective relationships.
+    - I see a list of properties including owner, tehcnology, subtype, trust_level, deployment, dependencies.
+    This looks good.
+
+    ## relationships
+    - I see relationships include the type of relation "control" versus "feedback".  
+    - I see each relationship includes the "action" and a list of "properties".  
+    - I see there can be more than one relation between the same entities in the same roles.
+    This looks good
+
+    ## analyses
+    - I see each links to a relationship. 
+    - I see  "ucas" and "stride" for each relationship (which would make it easy to add PASTA and MASTRO in future iterations)
+    - I see each UCA and STRIDE has an "exists".
+    - I see each UCA/STRIDE has a "description" and "severity" as well as additional options such as "cves".
+     
+    ### scenarios
+    - I see each scenario references a "uca_ref" and a  "stride_ref".  The "stride_ref" is a list whereas the "uca_ref" is a single uca.  Should the "uca_ref" also be a list? Or should the "stride_ref" be a single value?  That is, do we expect multiple uca/stride apply to the same scenario?  
+    - I see "mitigations" is a list, allowing for multiple mitigations.  Each mitigation has it's own ID. I assume a mitigation can be assigned to different scenarios. For example, one mitigation strategy my address more than one uca/stride scenario.  This is a really good idea.  Use case: a user searches for mitigations that have the greatest impact by, for example, addressing the greatest number of scenarios and/or  addressing those with a certain likelihood or impact.
+    - I see that each mitigation has a "type" and "description" as well as additional information when appropriate such as "cost" and "effectiveness".  This is good.
+
+    # View Management Architecture
+    ## filter/Query System
+    - Should we use a query (i.e., instead of a filter) for a user? Or, should we allow the user to ask the SA Agent to generate a query that the user can cut-n-paste into a query dialog? Or, both?  What are the complexities involved?
+
+    ## Scalability
+    - Identifying frontend versus backend systems is a good idea.  We should add this to the system description--identify frontend, backend components.
+    - What if the system is not software? Or, what if the system is a cyber-physical system?
+    - Perhaps we should figure out the maximum number of entities and relationships that fit into the diagram.  If our system exceeds that, show collapsible/expandable nesting.  
+
+    ### Pagination for heat maps
+    - Let's see what this looks like.
+
+    # Storage Considerations
+    Option A: JSON + Indexing (Start here)
+    Option B: SQLite (Future migration)
+    Option C: Graph Database (Ultimate goal)
+    I like the JSON files because they are easy for humans to work with. But even for small systems, we can quickly get up to 1000 relationships.  Should we skip A and go straight to B?  Or, is there still value in starting with Option A?  That is, how much work is involved in converting our system from a JSON + Indexing to a SQLite or PostgreSQL database?  Or, should we start with PostgreSQL+JSON?  That is, users may prefer to save their data in JSON format for portability.  But our system may work better with PostgreSQL, which can handle JSON data as well.  Which is better?  
+
+    I'm assuming a graph database is best to handle complex relationships, but maybe PostgreSQL with JSON can handle it all.  What do you think?  
+
+    # New Design Decisions
+1. Relationship-Centric: Everything derives from relationships.  Yes.  This is key to the top-down approach of STPA-Sec.  Not only are the UCAs connected to the control/target relations, but the UCA analysis is connected to the stakeholder's definitions of what needs to be protected (i.e., step 1 of STPA-Sec, defining hazards and losses based on the stakeholder's definition of security.  This top-down approach is a key theme in STPA-Sec.  That is, we only need to protect that which needs to be protected.  For example, if we're building an open source tool that anyone can download and use with no restrictions, then we don't need to protect the code source from being downloaded and used/copied/modified.  On the other hand, if we're building a proprietary system that we're commercializing, then protecting the code source is critical.  The purpose of the system (and the analysis) and the stakeholders derived from this are key to linking the uca/stride analysis to the top-level stakeholder definition of security.  Somehow, this information needs to be passed down to subsequent AI agents OR another agent needs to filter out uca/stride scenarios that don't align with the stakeholder's definition of security.)
+  2. Property-Rich: Store all metadata for future analysis.  Yes.
+  3. View-Flexible: Support multiple perspectives on same data. Yes.  Ideally.  We can add more complexity to this the project evolves.
+  4. Scale-Ready: Design for 100s of entities, 1000s of relationships.  Yes.  Critical.
+  5. Tool-Friendly: Export formats for external analysis.  Yes.  Ideally, users care more about the analysis that using our tool.  They should be able to export our analyses into their own tools--in the future, they may not need to.  But, for now, assume the user has their own in-house standards and format for their analysis products.
+
+
+  Do NOT start coding. Let's continue the discussion.
+
+
+
+  # Scnario References
+  Good.  Keep this.
+
+  # Storage Decision
+  Good. Keep this. PostgreSQL wtih JSONB is good.
+
+  # Stakeholder Context Integration
+  Let's rethink this.  STPA-Sec's four step structure already threads the stakeholder context throughout the entire analysis.
+  - In step 1, we identify the stakeholders (primary, secondary, threat actors)
+  - We then define the (unacceptable) losses
+  - We then define the hazards that cause these losses
+  - We then link each uca/stride causal scenario to a hazard (which links it to a loss, which links it to the stakeholder context).  We need a "hazard" category for each uca/stride causal scenario.
+  - Also, in step 1, we describe the system.  This includes what the system does as well as system boundaries
+  - We use this to identify all the system entities and their properties.
+  - These entities and properties are then used to "draw" the control flow diagram--i.e., to describe the relations among the entities defined in step 1.
+  
+  By following the four steps, we are already threading stakeholder context into the subsequent analyses.  For humans, this is an iterative process.  For example, you may realize that you need to add an entity to the description in step 1 in order to complete the control flow diagram.  You may discover a uca in step 3 and realize that it should have been covered in the hazards list because it leads to a loss.   For our AI system, a nice to have is an iterative review (i.e., a second pass) of the analysis.  Let's keep that in mind for future iterations, making sure our app is defined so something like this can be added.  For now, let's focus on a single pass.
+
+  Do NOT start coding. Let's continue the discussion.
+
+  # Query System Architecture
+  A hybrid approach is good.
+
+  # Diagram Scalability Strategy
+  This is good. 
+
+  # Mitigation Path
+  Great.  Let's Start with PostgreSQL + JSONB.
+
+  Key Decision Points
+
+  1. Start with PostgreSQL+JSONB - Best balance of flexibility and performance.  Yes.
+  2. Thread stakeholder context throughout - Essential for meaningful analysis.  Discuss. Do not start coding.
+  3. Support both structured queries and natural language - Accessibility + power.  Yes.
+  4. Design for 1000s of relationships from day one - Realistic for even small systems.Yes.
+  5. Implement progressive diagram detail - Manage visual complexity. Yes.
+
+  
+
+  # STPA-Sec Context Threading
+  This looks good. Be sure to include all the details for the entities, uca, stride, mitigations, losses, etc. that we covered a few prompts ago.  Also, for step-1, the mission statement is critical: A system to [PURPOSE] by means of [METHOD] in order to [GOALS] while [CONSTRAINTS/RESTRAINTS].  
+  Review "documentation/STPA-Sec-Tutorial.pdf" as a refresher.
+
+  The current demo provides all of this information.  It's just not complete and not correctly linked from the bottom up. Also, we don't expect all the properties of the entities to be displayed in the diagram.  But we do need to be able to click on them and see them.  We also, don't expect all of the additional properties to show in the UCA table (we need a STRIDE table also).  But they should be viewable somewhere.  For example, click on a row to see a pop of additional properties or click on show them in the heat map "Click for details" view or something.  Displaying the information for humans to view and review is important.  At the same time, we want to re-focus on what data to collect and how to collect it and how to store BEFORE we shift focus back to the UI.  This also means we'll need something we can check and verify outside of the UI, i.e., we'll need to test that all the entities are in the data base.
+
+
+  Don't forget step-2 ('draw" the diagram, i.e., describe the relations between entities).  You previous iterations on this looked good.  
+
+  # Key Insights
+  Yes.  Exactly.  
+
+  Let's Detail the PostgreSQL documentation and how we will handle the relations (i.e., step 2).  Remember to keep all the additional details regarding properties, types, technologies, etc, from the previous discussions.
+
+  Let's document this.

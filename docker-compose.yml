@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  # Core database services - always needed
+  postgres:
+    image: postgres:16-alpine
+    container_name: sa_postgres
+    environment:
+      POSTGRES_USER: sa_user
+      POSTGRES_PASSWORD: sa_password
+      POSTGRES_DB: security_analyst
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sa_user -d security_analyst"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sa_network
+
+  # Backend API service
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    container_name: sa_backend
+    profiles: ["web", "full", "demo"]
+    environment:
+      DATABASE_URL: postgresql://sa_user:sa_password@postgres:5432/security_analyst
+      REDIS_URL: redis://redis:6379
+      PYTHONPATH: /app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./apps/backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - sa_network
+
+  # Frontend service
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+    container_name: sa_frontend
+    profiles: ["web", "full", "demo"]
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    command: npm run dev
+    networks:
+      - sa_network
+
+  # CLI service for running analysis
+  cli:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile.cli
+    container_name: sa_cli
+    profiles: ["cli"]
+    environment:
+      DATABASE_URL: postgresql://sa_user:sa_password@postgres:5432/security_analyst
+      PYTHONPATH: /app
+    volumes:
+      - ./apps/backend:/app
+      - ./analyses:/analyses  # For saving analysis results
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sa_network
+    stdin_open: true
+    tty: true
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: sa_redis
+    profiles: ["full", "cache"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sa_network
+
+  # Database management UI (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: sa_pgadmin
+    profiles: ["dev", "tools"]
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@securityanalyst.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - sa_network
+
+volumes:
+  postgres_data:
+  redis_data:
+  pgadmin_data:
+
+networks:
+  sa_network:
+    name: security_analyst_network

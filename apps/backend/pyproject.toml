@@ -51,6 +51,11 @@ dependencies = [
     "aiofiles==23.2.1",
     "pandas==2.1.4",
     "numpy==1.26.2",
+    
+    # CLI and Step 1 Analysis
+    "rich==13.7.0",
+    "pyyaml==6.0.1",
+    "click==8.1.7",
 ]
 
 [project.optional-dependencies]

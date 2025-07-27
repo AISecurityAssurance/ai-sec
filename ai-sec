@@ -1,0 +1,112 @@
+#!/bin/bash
+# AI Security Analysis CLI wrapper
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Check if docker is running
+if ! docker info > /dev/null 2>&1; then
+    echo -e "${RED}Error: Docker is not running${NC}"
+    echo "Please start Docker Desktop or Docker daemon"
+    exit 1
+fi
+
+# Function to ensure services are running
+ensure_services() {
+    # Check if postgres is running
+    if ! docker ps | grep -q sa_postgres; then
+        echo -e "${YELLOW}Starting database services...${NC}"
+        docker compose up -d postgres
+        
+        # Wait for postgres to be ready
+        echo "Waiting for PostgreSQL to be ready..."
+        sleep 5
+    fi
+}
+
+# Main command handling
+case "$1" in
+    "demo")
+        echo -e "${GREEN}Loading demo analysis...${NC}"
+        ensure_services
+        docker compose run --rm cli python cli.py demo "${@:2}"
+        ;;
+        
+    "analyze")
+        echo -e "${GREEN}Running Step 1 analysis...${NC}"
+        ensure_services
+        docker compose run --rm cli python cli.py analyze "${@:2}"
+        ;;
+        
+    "test")
+        echo -e "${GREEN}Running Step 1 setup test...${NC}"
+        ensure_services
+        docker compose run --rm cli python test_step1_setup.py
+        ;;
+        
+    "shell")
+        echo -e "${GREEN}Opening interactive shell...${NC}"
+        ensure_services
+        docker compose run --rm cli /bin/bash
+        ;;
+        
+    "web")
+        echo -e "${GREEN}Starting web interface...${NC}"
+        docker compose --profile demo up -d
+        echo -e "${GREEN}Web interface available at:${NC}"
+        echo "  Frontend: http://localhost:3000"
+        echo "  Backend API: http://localhost:8000"
+        echo ""
+        echo "To stop: $0 stop"
+        ;;
+        
+    "stop")
+        echo -e "${YELLOW}Stopping all services...${NC}"
+        docker compose --profile demo down
+        ;;
+        
+    "clean")
+        echo -e "${YELLOW}Stopping and removing all containers...${NC}"
+        docker compose down -v
+        ;;
+        
+    "status")
+        echo -e "${GREEN}Service status:${NC}"
+        docker compose ps
+        ;;
+        
+    "logs")
+        if [ -z "$2" ]; then
+            docker compose logs -f
+        else
+            docker compose logs -f "$2"
+        fi
+        ;;
+        
+    *)
+        echo "AI Security Analysis Tool"
+        echo ""
+        echo "Usage: $0 [command] [options]"
+        echo ""
+        echo "Commands:"
+        echo "  demo              Load and explore pre-packaged demo analysis"
+        echo "  analyze           Run Step 1 STPA-Sec analysis"
+        echo "  test              Test system setup and connectivity"
+        echo "  shell             Open interactive shell in container"
+        echo "  web               Start full web interface"
+        echo "  stop              Stop all services"
+        echo "  clean             Stop and remove all containers/volumes"
+        echo "  status            Show service status"
+        echo "  logs [service]    Show logs (optionally for specific service)"
+        echo ""
+        echo "Examples:"
+        echo "  $0 demo"
+        echo "  $0 analyze --config configs/standard-analysis.yaml"
+        echo "  $0 test"
+        echo "  $0 web"
+        echo ""
+        ;;
+esac

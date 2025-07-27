@@ -12,7 +12,8 @@ import type {
   EntityMapping,
   ThreatMapping,
   ControlMapping,
-  RiskMapping
+  RiskMapping,
+  Risk
 } from '../types';
 
 interface PASTAData {
@@ -261,8 +262,16 @@ export class PASTAJSONAdapter implements AnalysisImportAdapter {
     return mappingResults;
   }
   
-  async extractRisks(analysis: StandardizedAnalysis): Promise<any[]> {
-    return analysis.risks;
+  async extractRisks(analysis: StandardizedAnalysis): Promise<Risk[]> {
+    // Convert the RiskMapping array to Risk array
+    return analysis.risks.map(risk => ({
+      id: risk.id,
+      name: risk.name,
+      score: risk.score,
+      description: risk.description,
+      category: risk.category,
+      ...risk.properties
+    }));
   }
   
   // Extract entities from PASTA data

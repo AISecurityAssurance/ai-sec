@@ -9,7 +9,7 @@ import type {
   ControlAction, 
   UCA, 
   CausalScenario 
-} from '../../../packages/types/src/analysis';
+} from '@security-platform/types';
 
 interface AnalysisStatus {
   status: 'pending' | 'in_progress' | 'completed' | 'failed';
@@ -42,10 +42,11 @@ interface SystemDescription {
     excluded: string[];
   };
   assumptions: string[];
-  missionStatement?: {
-    mission: string;
-    primaryGoals: string[];
-    successCriteria: string[];
+  missionStatement: {
+    purpose: string;
+    method: string;
+    goals: string[];
+    constraints: string[];
   };
   context?: string;
 }
@@ -120,9 +121,10 @@ export const useAnalysisStore = create<AnalysisState>()(
         },
         assumptions: [],
         missionStatement: {
-          mission: '',
-          primaryGoals: [],
-          successCriteria: []
+          purpose: '',
+          method: '',
+          goals: [],
+          constraints: []
         }
       },
       losses: [],
@@ -266,9 +268,10 @@ export const useAnalysisStore = create<AnalysisState>()(
               },
               assumptions: [],
               missionStatement: {
-                mission: '',
-                primaryGoals: [],
-                successCriteria: []
+                purpose: '',
+                method: '',
+                goals: [],
+                constraints: []
               }
             },
             losses: [],

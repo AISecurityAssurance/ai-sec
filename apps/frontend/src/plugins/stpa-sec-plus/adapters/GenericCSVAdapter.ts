@@ -877,6 +877,19 @@ export class GenericCSVAdapter implements AnalysisImportAdapter {
     return entities.find(e => e.name === name);
   }
   
+  // Implement the interface method for extracting risks
+  async extractRisks(analysis: StandardizedAnalysis): Promise<Risk[]> {
+    // Convert the RiskMapping array to Risk array
+    return analysis.risks.map(risk => ({
+      id: risk.id,
+      name: risk.name,
+      score: risk.score,
+      description: risk.description,
+      category: risk.category,
+      ...risk.properties
+    }));
+  }
+  
   // Entity matching helper
   private findBestEntityMatch(importedEntity: EntityMapping, systemEntities: any[]): any {
     let bestMatch = {

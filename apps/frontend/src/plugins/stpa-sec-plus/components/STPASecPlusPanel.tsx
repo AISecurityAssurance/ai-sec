@@ -11,7 +11,7 @@ import type {
   CrossFrameworkInsight,
   SynthesisResult 
 } from '../types';
-import type { STPASecPlusPlugin } from '../index';
+import { STPASecPlusPlugin } from '../index';
 import './STPASecPlusPanel.css';
 
 interface STPASecPlusPanelProps {
@@ -267,16 +267,16 @@ function OverviewTab({ synthesisResult }: { synthesisResult: SynthesisResult }) 
       <div className="coverage-map">
         <h4>Coverage Analysis</h4>
         <div className="coverage-grid">
-          {Object.entries(metrics.coverageMap).map(([domain, coverage]) => (
+          {metrics.coverageMap && Object.entries(metrics.coverageMap).map(([domain, coverage]) => (
             <div key={domain} className="coverage-item">
               <span className="domain">{domain}</span>
               <div className="coverage-bar">
                 <div 
                   className="coverage-fill"
-                  style={{ width: `${coverage * 100}%` }}
+                  style={{ width: `${(coverage as any) * 100}%` }}
                 />
               </div>
-              <span className="coverage-percent">{Math.round(coverage * 100)}%</span>
+              <span className="coverage-percent">{Math.round((coverage as any) * 100)}%</span>
             </div>
           ))}
         </div>

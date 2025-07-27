@@ -89,7 +89,7 @@ echo ""
 echo "🏥 Checking service health..."
 
 # Check backend (internal)
-if docker compose -f docker-compose.prod.yml exec backend curl -s http://localhost:8000/health > /dev/null 2>&1; then
+if docker compose -f docker-compose.prod.yml exec backend python -c "import requests; requests.get('http://localhost:8000/health').raise_for_status()" > /dev/null 2>&1; then
     echo "✅ Backend API is running"
 else
     echo "⚠️  Backend API is not responding yet. Check logs with: docker compose -f docker-compose.prod.yml logs backend"

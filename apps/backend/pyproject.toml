@@ -1,87 +1,134 @@
 [project]
-name = "security-analyst-backend"
-version = "0.1.0"
-description = "Backend for Security Analyst - AI-powered security analysis platform"
-authors = [{name = "Security Analyst Team", email = "team@securityanalyst.ai"}]
-readme = "README.md"
+name = "security-analysis-backend"
+version = "1.0.0"
+description = "Security Analysis Platform Backend with STPA-Sec+"
+authors = [
+    {name = "Security Analysis Team", email = "team@securityanalysis.local"},
+]
 requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
 
 dependencies = [
     # Core
-    "fastapi>=0.109.0",
-    "uvicorn[standard]>=0.27.0",
-    "pydantic>=2.5.3",
-    "pydantic-settings>=2.1.0",
-    "python-dotenv>=1.0.0",
-    "httpx>=0.26.0",
+    "fastapi==0.104.1",
+    "uvicorn[standard]==0.24.0",
+    "pydantic==2.5.0",
+    "pydantic-settings==2.1.0",
+    "python-dotenv==1.0.0",
+    "email-validator==2.1.0",
     
     # Database
-    "sqlalchemy>=2.0.25",
-    "alembic>=1.13.1",
-    "asyncpg>=0.29.0",
-    "redis>=5.0.1",
-    "neo4j>=5.16.0",
+    "sqlalchemy==2.0.23",
+    "alembic==1.12.1",
+    "asyncpg==0.29.0",
+    "psycopg2-binary==2.9.10",
+    "aiosqlite==0.19.0",
+    "redis==5.0.1",
     
-    # LLM Providers
-    "anthropic>=0.8.1",
-    "openai>=1.7.2",
-    "groq>=0.3.0",
-    "google-generativeai>=0.3.2",
+    # LLM & AI
+    "openai==1.6.1",
+    "anthropic==0.18.1",
+    "groq==0.3.0",
+    "google-generativeai==0.3.2",
+    "instructor==0.4.5",
+    "tiktoken==0.5.2",
+    "llama-index==0.9.20",
+    "langchain==0.0.350",
+    "tenacity==8.2.3",
     
-    # LLM Tools
-    "instructor>=0.4.5",
-    "tiktoken>=0.5.2",
-    "llama-index>=0.9.23",
-    "langchain>=0.1.0",
+    # Graph Database
+    "neo4j==5.15.0",
     
-    # Security
-    "python-jose[cryptography]>=3.3.0",
-    "passlib[bcrypt]>=1.7.4",
-    "python-multipart>=0.0.6",
+    # API & Security
+    "python-multipart==0.0.6",
+    "python-jose[cryptography]==3.3.0",
+    "passlib[bcrypt]==1.7.4",
+    "httpx==0.25.2",
+    "websockets==12.0",
     
     # Utilities
-    "tenacity>=8.2.3",
-    "python-dateutil>=2.8.2",
-    "pyyaml>=6.0.1",
+    "aiofiles==23.2.1",
+    "pandas==2.1.4",
+    "numpy==1.26.2",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.4.4",
-    "pytest-asyncio>=0.23.3",
-    "pytest-cov>=4.1.0",
-    "black>=23.12.1",
-    "isort>=5.13.2",
-    "mypy>=1.8.0",
-    "ruff>=0.1.11",
-    "pre-commit>=3.6.0",
+    "pytest==7.4.3",
+    "pytest-asyncio==0.21.1",
+    "black==23.12.0",
+    "isort==5.13.2",
+    "mypy==1.7.1",
+    "ruff==0.1.9",
+    "pre-commit==3.6.0",
 ]
 
-[tool.setuptools]
-packages = ["api", "core", "storage", "config"]
+[project.scripts]
+start = "uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+test = "pytest"
+format = "black . && isort ."
+lint = "ruff check . && mypy ."
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.black]
-line-length = 88
+line-length = 100
 target-version = ['py311']
 include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.mypy_cache
+  | \.venv
+  | build
+  | dist
+)/
+'''
 
 [tool.isort]
 profile = "black"
-line_length = 88
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+    "W191",  # indentation contains tabs
+]
 
 [tool.mypy]
 python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
-check_untyped_defs = true
-
-[tool.ruff]
-line-length = 88
-select = ["E", "F", "W", "I", "N", "UP", "B", "SIM"]
-ignore = ["E501"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-addopts = "-ra -q --strict-markers"
 testpaths = ["tests"]
-pythonpath = ["."]
+python_files = ["test_*.py", "*_test.py"]
+python_functions = ["test_*"]
+python_classes = ["Test*"]
+asyncio_mode = "auto"
+addopts = "-v --tb=short"
+
+[tool.uv]
+dev-dependencies = []

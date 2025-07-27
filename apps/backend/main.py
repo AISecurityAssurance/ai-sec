@@ -110,6 +110,10 @@ app.include_router(chat.router, prefix="/api/v1/chat", tags=["chat"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(settings_api.router, prefix="/api/v1/settings", tags=["settings"])
 
+# Include STPA-Sec specific routes
+from api.routes import stpa_sec
+app.include_router(stpa_sec.router, prefix="/api/v1", tags=["STPA-Sec"])
+
 # WebSocket endpoint
 app.websocket("/ws/{user_id}")(websocket_endpoint)
 

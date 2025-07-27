@@ -163,8 +163,8 @@ class Relationship(Base):
     source = relationship("Entity", foreign_keys=[source_id], back_populates="source_relationships")
     target = relationship("Entity", foreign_keys=[target_id], back_populates="target_relationships")
     control_loop = relationship("ControlLoop", back_populates="relationships")
-    analyses = relationship("Analysis", back_populates="relationship")
-    scenarios = relationship("Scenario", back_populates="relationship")
+    analyses = relationship("Analysis", back_populates="rel")
+    scenarios = relationship("Scenario", back_populates="rel")
 
 class AdversaryControlProblem(Base):
     __tablename__ = 'adversary_control_problems'
@@ -180,7 +180,7 @@ class AdversaryControlProblem(Base):
 # Step 3: Analyses
 
 class Analysis(Base):
-    __tablename__ = 'analyses'
+    __tablename__ = 'stpa_analyses'
     
     id = Column(String, primary_key=True)
     relationship_id = Column(String, ForeignKey('relationships.id', ondelete='CASCADE'), nullable=False)
@@ -205,7 +205,7 @@ class Analysis(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     
     # Relationships
-    relationship = relationship("Relationship", back_populates="analyses")
+    rel = relationship("Relationship", back_populates="analyses")
 
 # Step 4: Scenarios and Mitigations
 
@@ -229,7 +229,7 @@ class Scenario(Base):
     created_at = Column(DateTime, default=func.now())
     
     # Relationships
-    relationship = relationship("Relationship", back_populates="scenarios")
+    rel = relationship("Relationship", back_populates="scenarios")
     mitigations = relationship("ScenarioMitigation", back_populates="scenario")
     wargaming_sessions = relationship("WargamingSession", back_populates="scenario")
 

@@ -21,7 +21,7 @@ export default function UserApp() {
   const [showNewAnalysisDialog, setShowNewAnalysisDialog] = useState(false);
   
   // Get enabledAnalyses and analysis status from Zustand store
-  const { enabledAnalyses, setEnabledAnalyses, setCurrentAnalysisId, analysisStatus, updateAnalysisStatus } = useAnalysisStore();
+  const { enabledAnalyses, setEnabledAnalyses, setCurrentAnalysisId, analysisStatus, updateAnalysisStatus, isLoadingData, dataLoadError } = useAnalysisStore();
   
   // Update isAnalyzing based on analysisStatus
   useEffect(() => {
@@ -32,12 +32,15 @@ export default function UserApp() {
     }
   }, [analysisStatus.status]);
   
-  // Load demo data on mount if on demo version
+  // Load data from API on mount
   useEffect(() => {
-    const versionStore = useVersionStore.getState();
-    if (versionStore.activeVersionId === 'demo-v1') {
-      useAnalysisStore.getState().resetToDemoData();
-    }
+    const analysisStore = useAnalysisStore.getState();
+    
+    // Always load from database API - no fallback to mock data
+    analysisStore.loadDataFromApi().catch((error) => {
+      console.error('Failed to load data from API:', error);
+      // DO NOT fall back to mock data - let the error show
+    });
   }, []);
 
   const handleRunAnalysis = async () => {
@@ -158,6 +161,57 @@ export default function UserApp() {
       setIsAnalyzing(false);
     }
   };
+
+  // Show loading overlay while fetching data
+  if (isLoadingData) {
+    return (
+      <SimpleLayout>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          flexDirection: 'column',
+          gap: '20px'
+        }}>
+          <div style={{ fontSize: '24px', color: 'var(--primary)' }}>⚡</div>
+          <div style={{ color: 'var(--text-secondary)' }}>Loading analysis data...</div>
+        </div>
+      </SimpleLayout>
+    );
+  }
+
+  // Show error message if data load failed
+  if (dataLoadError) {
+    return (
+      <SimpleLayout>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          flexDirection: 'column',
+          gap: '20px',
+          padding: '40px'
+        }}>
+          <div style={{ fontSize: '48px', color: 'var(--error)' }}>⚠️</div>
+          <h2 style={{ color: 'var(--error)', margin: 0 }}>Database Connection Failed</h2>
+          <p style={{ color: 'var(--text-secondary)', textAlign: 'center', maxWidth: '600px' }}>
+            {dataLoadError}
+          </p>
+          <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
+            Please ensure the backend is running at http://localhost:8000
+          </p>
+          <button 
+            className="btn-primary" 
+            onClick={() => window.location.reload()}
+          >
+            Retry Connection
+          </button>
+        </div>
+      </SimpleLayout>
+    );
+  }
 
   return (
     <SimpleLayout>

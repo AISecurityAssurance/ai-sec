@@ -1,117 +1,116 @@
-.PHONY: help install install-dev setup-env setup-db run-dev run-prod test lint format clean docker-up docker-down migrate
+# Makefile for Security Analysis Platform Backend
+
+.PHONY: help build up down test db-test shell logs clean reset
 
 # Default target
-.DEFAULT_GOAL := help
-
-# Python interpreter
-PYTHON := python3.11
-
-# Help command
 help:
-	@echo "Security Analyst Backend - Development Commands"
-	@echo "==============================================="
-	@echo "install        - Install production dependencies"
-	@echo "install-dev    - Install development dependencies"
-	@echo "setup-env      - Copy .env.example to .env"
-	@echo "setup-db       - Initialize database with migrations"
-	@echo "run-dev        - Run development server"
-	@echo "run-prod       - Run production server"
-	@echo "test           - Run tests"
-	@echo "lint           - Run linting"
-	@echo "format         - Format code"
-	@echo "clean          - Clean cache files"
-	@echo "docker-up      - Start Docker services"
-	@echo "docker-down    - Stop Docker services"
-	@echo "migrate        - Run database migrations"
+	@echo "Security Analysis Platform Backend - Docker Commands"
+	@echo "=================================================="
+	@echo "make build      - Build backend Docker image"
+	@echo "make up         - Start all services"
+	@echo "make down       - Stop all services"
+	@echo "make test       - Run all tests"
+	@echo "make db-test    - Run database tests"
+	@echo "make test-stpa-sec - Run STPA-Sec integration test"
+	@echo "make shell      - Open shell in backend container"
+	@echo "make logs       - Show backend logs"
+	@echo "make clean      - Clean up containers and volumes"
+	@echo "make reset      - Full reset (clean + rebuild)"
+	@echo ""
+	@echo "Database Management:"
+	@echo "make db-migrate - Run database migrations"
+	@echo "make db-shell   - Open PostgreSQL shell"
+	@echo "make db-backup  - Backup database"
+	@echo ""
+	@echo "Development:"
+	@echo "make dev        - Start in development mode"
+	@echo "make format     - Format Python code"
+	@echo "make lint       - Run linting"
+	@echo "make run-script SCRIPT=file.py - Run a Python script"
 
-# Install production dependencies
-install:
-	@echo "Installing production dependencies..."
-	uv pip install -e .
+# Build the backend image
+build:
+	docker-compose -f docker-compose.dev.yml build backend
 
-# Install development dependencies
-install-dev:
-	@echo "Installing development dependencies..."
-	uv pip install -e ".[dev]"
+# Start all services
+up:
+	docker-compose -f docker-compose.yml up -d
+	docker-compose -f docker-compose.dev.yml up -d backend
+	@echo ""
+	@echo "Services started:"
+	@echo "  API:            http://localhost:8000"
+	@echo "  API Docs:       http://localhost:8000/docs"
+	@echo "  pgAdmin:        http://localhost:5050"
+	@echo "  Redis Commander: http://localhost:8081"
 
-# Setup environment
-setup-env:
-	@echo "Setting up environment..."
-	@if [ ! -f .env ]; then \
-		cp .env.example .env; \
-		echo "Created .env file. Please update with your API keys."; \
-	else \
-		echo ".env file already exists."; \
-	fi
+# Start in development mode with logs
+dev:
+	docker-compose -f docker-compose.yml up -d postgres redis
+	docker-compose -f docker-compose.dev.yml up backend
 
-# Setup database
-setup-db:
-	@echo "Setting up database..."
-	alembic init -t async alembic
-	alembic revision --autogenerate -m "Initial migration"
-	alembic upgrade head
+# Stop all services
+down:
+	docker-compose -f docker-compose.dev.yml down
+	docker-compose -f docker-compose.yml down
 
-# Run development server
-run-dev:
-	@echo "Starting development server..."
-	uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
-
-# Run production server
-run-prod:
-	@echo "Starting production server..."
-	uvicorn api.main:app --host 0.0.0.0 --port 8000 --workers 4
-
-# Run tests
+# Run all tests
 test:
-	@echo "Running tests..."
-	pytest -v --cov=. --cov-report=term-missing
+	docker-compose -f docker-compose.dev.yml run --rm backend pytest
 
-# Run linting
-lint:
-	@echo "Running linters..."
-	ruff check .
-	mypy .
+# Run database tests specifically
+db-test:
+	./run_db_tests.sh
+
+# Run STPA-Sec integration test
+test-stpa-sec:
+	docker-compose -f docker-compose.dev.yml run --rm backend python test_stpa_sec_integration.py
+
+# Run a specific Python script in container
+run-script:
+	@if [ -z "$(SCRIPT)" ]; then \
+		echo "Usage: make run-script SCRIPT=filename.py"; \
+		exit 1; \
+	fi
+	docker-compose -f docker-compose.dev.yml run --rm backend python $(SCRIPT)
+
+# Run database migrations
+db-migrate:
+	docker-compose -f docker-compose.dev.yml run --rm backend python test_database_setup.py
+
+# Open shell in backend container
+shell:
+	docker-compose -f docker-compose.dev.yml exec backend bash
+
+# Open PostgreSQL shell
+db-shell:
+	docker-compose -f docker-compose.yml exec postgres psql -U sa_user -d security_analyst
+
+# Backup database
+db-backup:
+	@mkdir -p backups
+	docker-compose -f docker-compose.yml exec postgres pg_dump -U sa_user security_analyst > backups/backup_$$(date +%Y%m%d_%H%M%S).sql
+	@echo "Database backed up to backups/backup_$$(date +%Y%m%d_%H%M%S).sql"
+
+# Show logs
+logs:
+	docker-compose -f docker-compose.dev.yml logs -f backend
+
+# Clean up
+clean:
+	docker-compose -f docker-compose.dev.yml down -v
+	docker-compose -f docker-compose.yml down -v
+	@echo "All containers and volumes removed"
+
+# Full reset
+reset: clean build db-migrate
+	@echo "Full reset completed"
 
 # Format code
 format:
-	@echo "Formatting code..."
-	black .
-	isort .
-	ruff check --fix .
+	docker-compose -f docker-compose.dev.yml run --rm backend black .
+	docker-compose -f docker-compose.dev.yml run --rm backend isort .
 
-# Clean cache files
-clean:
-	@echo "Cleaning cache files..."
-	find . -type d -name "__pycache__" -exec rm -rf {} +
-	find . -type f -name "*.pyc" -delete
-	find . -type f -name "*.pyo" -delete
-	find . -type f -name "*.egg-info" -delete
-	find . -type d -name ".pytest_cache" -exec rm -rf {} +
-	find . -type d -name ".mypy_cache" -exec rm -rf {} +
-	find . -type d -name ".ruff_cache" -exec rm -rf {} +
-
-# Docker commands
-docker-up:
-	@echo "Starting Docker services..."
-	docker-compose up -d
-
-# Stop Docker services
-docker-down:
-	@echo "Stopping Docker services..."
-	docker-compose down
-
-# Run migrations
-migrate:
-	@echo "Running migrations..."
-	alembic upgrade head
-
-# Create new migration
-migrate-new:
-	@echo "Creating new migration..."
-	@read -p "Enter migration message: " msg; \
-	alembic revision --autogenerate -m "$$msg"
-
-# Development setup (combines multiple commands)
-dev-setup: install-dev setup-env docker-up setup-db
-	@echo "Development environment setup complete!"
-	@echo "Run 'make run-dev' to start the server."
+# Lint code
+lint:
+	docker-compose -f docker-compose.dev.yml run --rm backend pylint src api
+	docker-compose -f docker-compose.dev.yml run --rm backend mypy .

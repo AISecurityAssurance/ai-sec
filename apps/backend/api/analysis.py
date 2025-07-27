@@ -112,11 +112,20 @@ async def run_analysis_task(
                     continue
                     
                 try:
-                    agent = agent_class()
+                    # Pass database session to STPA-Sec agent
+                    if framework == FrameworkType.STPA_SEC:
+                        agent = agent_class(db_session=db)
+                    else:
+                        agent = agent_class()
+                    
                     framework_sections = section_ids.get(framework.value) if section_ids else None
                     
                     # Run agent with WebSocket notifications
-                    result = await agent.analyze(context, framework_sections, notifier)
+                    # Enable database saving for STPA-Sec
+                    if framework == FrameworkType.STPA_SEC:
+                        result = await agent.analyze(context, framework_sections, notifier, save_to_db=True)
+                    else:
+                        result = await agent.analyze(context, framework_sections, notifier)
                     
                     # Store result in database
                     db_result = DBAnalysisResult(

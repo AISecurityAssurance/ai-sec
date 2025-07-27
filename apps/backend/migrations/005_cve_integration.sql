@@ -45,7 +45,7 @@ CREATE TABLE cve_database (
   apt_association VARCHAR[],  -- ['APT28', 'Lazarus', etc.]
   
   -- References and mappings
-  references JSONB,
+  cve_references JSONB,
   mitre_attack_techniques VARCHAR[],  -- ['T1055', 'T1059.001', etc.]
   cwe_ids VARCHAR[],  -- ['CWE-79', 'CWE-89', etc.]
   

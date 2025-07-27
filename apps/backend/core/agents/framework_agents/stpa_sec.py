@@ -7,12 +7,15 @@ import json
 import re
 import time
 from uuid import uuid4
+from sqlalchemy.orm import Session
 
 from core.agents.base import BaseAnalysisAgent
 from core.agents.types import SectionResult
 from core.models.schemas import FrameworkType, AgentContext, AgentResult
 from core.templates.mapper import TemplateMapper, create_threat_table
 from core.agents.websocket_integration import AgentWebSocketNotifier
+from storage.repositories.stpa_sec import STPASecRepository
+from core.database import get_db
 
 
 class StpaSecAgent(BaseAnalysisAgent):
@@ -26,17 +29,27 @@ class StpaSecAgent(BaseAnalysisAgent):
     4. Step 4: Identify causal scenarios
     """
     
-    def __init__(self):
+    def __init__(self, db_session: Optional[Session] = None):
         super().__init__(FrameworkType.STPA_SEC)
+        self.db_session = db_session
+        self.repository = None
         
     async def analyze(
         self, 
         context: AgentContext, 
         section_ids: Optional[List[str]] = None,
-        notifier: Optional['AgentWebSocketNotifier'] = None
+        notifier: Optional['AgentWebSocketNotifier'] = None,
+        save_to_db: bool = True
     ) -> AgentResult:
         """Run STPA-Sec analysis"""
         start_time = time.time()
+        
+        # Initialize database session if needed
+        if save_to_db and not self.db_session:
+            self.db_session = next(get_db())
+            self.repository = STPASecRepository(self.db_session)
+        elif save_to_db and self.db_session:
+            self.repository = STPASecRepository(self.db_session)
         
         # Notify analysis start
         if notifier:
@@ -64,6 +77,28 @@ class StpaSecAgent(BaseAnalysisAgent):
             success = all(s.status == "completed" for s in sections)
             error = next((s.error for s in sections if s.error), None)
             await notifier.notify_analysis_complete("STPA-Sec", success, error)
+        
+        # Save to database if enabled
+        if save_to_db and self.repository and success:
+            try:
+                # Convert sections list to dict for easier access
+                sections_dict = {s.id: s.model_dump() for s in sections}
+                result.sections = sections_dict
+                
+                # Save analysis to database
+                analysis_id = self.repository.save_analysis(context, result)
+                
+                # Add database ID to result metadata
+                result.metadata = result.metadata or {}
+                result.metadata['database_id'] = analysis_id
+                result.metadata['saved_to_database'] = True
+                
+                print(f"STPA-Sec analysis saved to database with ID: {analysis_id}")
+            except Exception as e:
+                print(f"Failed to save STPA-Sec analysis to database: {str(e)}")
+                result.metadata = result.metadata or {}
+                result.metadata['database_error'] = str(e)
+                result.metadata['saved_to_database'] = False
             
         return result
     

@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import os
 
-from api.routes import analysis, artifacts, chat, versions
+from api.routes import analysis, artifacts, chat, versions, stpa_sec
 from api.websocket import websocket_endpoint
 from api.dependencies import get_orchestrator
 from storage.database import init_db
@@ -61,6 +61,11 @@ app.include_router(
     versions.router,
     prefix="/api/versions",
     tags=["versions"]
+)
+app.include_router(
+    stpa_sec.router,
+    prefix="/api/stpa-sec",
+    tags=["STPA-Sec"]
 )
 
 # WebSocket endpoint

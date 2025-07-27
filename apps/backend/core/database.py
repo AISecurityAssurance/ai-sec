@@ -57,11 +57,15 @@ async def init_db():
         ChatMessage, Artifact, SystemComponent, Setting
     )
     
-    async with engine.begin() as conn:
-        # Create all tables
-        await conn.run_sync(Base.metadata.create_all)
-        
-    print("Database tables created successfully")
+    try:
+        async with engine.begin() as conn:
+            # Create all tables
+            await conn.run_sync(Base.metadata.create_all)
+            
+        print("Database tables created successfully")
+    except Exception as e:
+        print(f"Database initialization warning: {str(e)}")
+        # Continue anyway - tables might already exist
 
 
 async def close_db():

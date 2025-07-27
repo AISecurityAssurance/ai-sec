@@ -62,7 +62,7 @@ SELECT
   COUNT(DISTINCT sd.mission_criticality->>'primary_mission') as missions_protected,
   
   -- Risk reduction in mission terms
-  JSON_AGG(DISTINCT 
+  JSON_AGG(
     JSON_BUILD_OBJECT(
       'mission_element', mc.mission_element,
       'current_risk', mc.current_risk,
@@ -116,7 +116,7 @@ SELECT
 FROM adversaries a
 JOIN adversary_control_problems acp ON a.id = acp.adversary_id
 LEFT JOIN relationships r ON r.source_id = acp.entity_id OR r.target_id = acp.entity_id
-LEFT JOIN analyses an ON an.relationship_id = r.id
+LEFT JOIN stpa_analyses an ON an.relationship_id = r.id
 LEFT JOIN scenarios s ON s.relationship_id = r.id 
   AND a.id = ANY(s.threat_actor_refs)
 LEFT JOIN scenario_mitigations sm ON sm.scenario_id = s.id
@@ -137,10 +137,10 @@ FROM (
   SELECT DISTINCT 
     jsonb_array_elements_text(temporal_context->'timing_windows'->'critical') as time_window,
     'critical' as window_type
-  FROM analyses
+  FROM stpa_analyses
   WHERE temporal_context IS NOT NULL
 ) tc
-JOIN analyses a ON a.temporal_context->'timing_windows'->'critical' ? tc.time_window
+JOIN stpa_analyses a ON a.temporal_context->'timing_windows'->'critical' ? tc.time_window
 JOIN scenarios s ON s.uca_refs && ARRAY[a.id]
 GROUP BY tc.time_window, tc.window_type
 ORDER BY peak_risk DESC;
@@ -206,7 +206,7 @@ WITH risk_aggregation AS (
     
   FROM entities e
   LEFT JOIN relationships r ON e.id IN (r.source_id, r.target_id)
-  LEFT JOIN analyses a ON r.id = a.relationship_id
+  LEFT JOIN stpa_analyses a ON r.id = a.relationship_id
   LEFT JOIN ai_agent_layers aal ON e.id = aal.agent_id
   LEFT JOIN privacy_threats pt ON r.id = pt.relationship_id
   LEFT JOIN scenarios s ON r.id = s.relationship_id
@@ -391,7 +391,7 @@ SELECT
   END as audit_status,
   
   -- Evidence collection
-  JSON_AGG(DISTINCT 
+  JSON_AGG(
     JSON_BUILD_OBJECT(
       'control', im.control_type,
       'evidence', im.audit_evidence,
@@ -412,7 +412,7 @@ DECLARE
   invalid_count INT;
 BEGIN
   SELECT COUNT(*) INTO invalid_count
-  FROM analyses a
+  FROM stpa_analyses a
   WHERE 
     (a.uca_not_provided->>'exists' = 'true' AND 
      NOT (a.uca_not_provided->'hazard_refs' ?| array(SELECT id FROM hazards)))
@@ -447,7 +447,7 @@ BEGIN
       END
     )
   FROM relationships r
-  LEFT JOIN analyses a ON r.id = a.relationship_id
+  LEFT JOIN stpa_analyses a ON r.id = a.relationship_id
   WHERE a.id IS NULL 
      OR a.uca_not_provided IS NULL 
      OR a.stride_spoofing IS NULL

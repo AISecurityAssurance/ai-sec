@@ -3,7 +3,7 @@
 -- This migration creates the analysis tables for UCAs, STRIDE, scenarios, and mitigations
 
 -- Step 3: Unsafe Control Actions & STRIDE
-CREATE TABLE analyses (
+CREATE TABLE stpa_analyses (
   id VARCHAR PRIMARY KEY,
   relationship_id VARCHAR NOT NULL REFERENCES relationships(id) ON DELETE CASCADE,
   analysis_type VARCHAR CHECK (analysis_type IN ('stpa-sec', 'stride', 'pasta', 'maestro')) NOT NULL,
@@ -124,7 +124,7 @@ CREATE INDEX idx_analyses_type ON analyses(analysis_type);
 -- Indexes for JSONB queries
 CREATE INDEX idx_analyses_uca_severity ON analyses ((uca_not_provided->>'severity'), (uca_provided_causes_hazard->>'severity'));
 CREATE INDEX idx_analyses_stride_severity ON analyses ((stride_spoofing->>'severity'), (stride_tampering->>'severity'));
-CREATE INDEX idx_analyses_dread_score ON analyses ((dread_assessment->>'total_score')::INT);
+CREATE INDEX idx_analyses_dread_score ON analyses (CAST(dread_assessment->>'total_score' AS INT));
 
 -- Step 4: Causal Scenarios
 CREATE TABLE scenarios (
@@ -192,7 +192,7 @@ CREATE TABLE scenarios (
 -- Create indexes for scenarios
 CREATE INDEX idx_scenarios_relationship ON scenarios(relationship_id);
 CREATE INDEX idx_scenarios_risk ON scenarios(risk_score DESC);
-CREATE INDEX idx_scenarios_d4 ON scenarios((d4_assessment->>'overall_score')::INT DESC);
+CREATE INDEX idx_scenarios_d4 ON scenarios(CAST(d4_assessment->>'overall_score' AS INT) DESC);
 
 -- Mitigations
 CREATE TABLE mitigations (

@@ -1,15 +1,15 @@
 import { create } from 'zustand';
 import { persist, subscribeWithSelector } from 'zustand/middleware';
-import { 
-  losses as initialLosses,
-  hazards as initialHazards,
-  controllers as initialControllers,
-  controlActions as initialControlActions,
-  ucas as initialUcas,
-  causalScenarios as initialScenarios
-} from '../apps/user/mockData/stpaSecData';
-import { systemDescription as initialSystemDescription } from '../apps/user/mockData/systemData';
 import { useVersionStore } from './versionStore';
+import { stpaSecApiService } from '../services/stpaSecApiService';
+import type { 
+  Loss, 
+  Hazard, 
+  Controller, 
+  ControlAction, 
+  UCA, 
+  CausalScenario 
+} from '../types/analysis';
 
 interface AnalysisStatus {
   status: 'pending' | 'in_progress' | 'completed' | 'failed';
@@ -33,6 +33,13 @@ interface AnalysisResult {
   completedAt?: string;
 }
 
+interface SystemDescription {
+  name: string;
+  description: string;
+  boundaries: string;
+  assumptions: string[];
+}
+
 interface AnalysisState {
   // Project info
   projectId: string | null;
@@ -44,20 +51,22 @@ interface AnalysisState {
   analysisResults: Record<string, AnalysisResult>;
   
   // System data
-  systemDescription: typeof initialSystemDescription;
+  systemDescription: SystemDescription;
   
   // STPA-Sec data
-  losses: typeof initialLosses;
-  hazards: typeof initialHazards;
-  controllers: typeof initialControllers;
-  controlActions: typeof initialControlActions;
-  ucas: typeof initialUcas;
-  scenarios: typeof initialScenarios;
+  losses: Loss[];
+  hazards: Hazard[];
+  controllers: Controller[];
+  controlActions: ControlAction[];
+  ucas: UCA[];
+  scenarios: CausalScenario[];
   
   // UI state
   enabledAnalyses: Record<string, boolean>;
   demoMode: boolean;
   hasUnsavedChanges: boolean;
+  isLoadingData: boolean;
+  dataLoadError: string | null;
   
   // Actions
   setProjectId: (id: string | null) => void;
@@ -66,69 +75,68 @@ interface AnalysisState {
   updateAnalysisStatus: (status: AnalysisStatus) => void;
   updateAnalysisResult: (framework: string, result: AnalysisResult) => void;
   updateSectionResult: (framework: string, sectionId: string, section: Partial<AnalysisSection>) => void;
-  updateSystemDescription: (data: Partial<typeof initialSystemDescription>) => void;
-  updateLosses: (data: typeof initialLosses) => void;
-  updateHazards: (data: typeof initialHazards) => void;
-  updateControllers: (data: typeof initialControllers) => void;
-  updateControlActions: (data: typeof initialControlActions) => void;
-  updateUcas: (data: typeof initialUcas) => void;
-  updateScenarios: (data: typeof initialScenarios) => void;
+  updateSystemDescription: (data: Partial<SystemDescription>) => void;
+  updateLosses: (data: Loss[]) => void;
+  updateHazards: (data: Hazard[]) => void;
+  updateControllers: (data: Controller[]) => void;
+  updateControlActions: (data: ControlAction[]) => void;
+  updateUcas: (data: UCA[]) => void;
+  updateScenarios: (data: CausalScenario[]) => void;
   setEnabledAnalyses: (analyses: Record<string, boolean>) => void;
   setDemoMode: (enabled: boolean) => void;
   setHasUnsavedChanges: (hasChanges: boolean) => void;
   clearAnalysisResults: () => void;
   resetToDemoData: () => void;
   loadVersionData: (versionId: string) => void;
+  loadDataFromApi: () => Promise<void>;
 }
 
 export const useAnalysisStore = create<AnalysisState>()(
   subscribeWithSelector(
     persist(
     (set) => ({
-      // Initial state
+      // Initial state - empty until loaded from database
       projectId: null,
       projectVersion: '1.0.0',
       currentAnalysisId: null,
       analysisStatus: { status: 'pending', progress: 0 },
       analysisResults: {},
-      systemDescription: initialSystemDescription,
-      losses: initialLosses,
-      hazards: initialHazards,
-      controllers: initialControllers,
-      controlActions: initialControlActions,
-      ucas: initialUcas,
-      scenarios: initialScenarios,
-      enabledAnalyses: {
-        'stpa-sec': false,
-        'stride': false,
-        'pasta': false,
-        'maestro': false,
-        'dread': false,
-        'linddun': false,
-        'hazop': false,
-        'octave': false,
-        'cve': false
+      systemDescription: {
+        name: '',
+        description: '',
+        boundaries: '',
+        assumptions: []
       },
+      losses: [],
+      hazards: [],
+      controllers: [],
+      controlActions: [],
+      ucas: [],
+      scenarios: [],
+      enabledAnalyses: {},
       demoMode: false,
       hasUnsavedChanges: false,
+      isLoadingData: true,  // Start loading immediately
+      dataLoadError: null,
       
       // Actions
       setProjectId: (id) => set({ projectId: id }),
       setProjectVersion: (version) => set({ projectVersion: version }),
       setCurrentAnalysisId: (id) => set({ currentAnalysisId: id }),
       updateAnalysisStatus: (status) => set({ analysisStatus: status }),
+      
       updateAnalysisResult: (framework, result) => set((state) => ({
         analysisResults: {
           ...state.analysisResults,
           [framework]: result
-        },
-        hasUnsavedChanges: true
+        }
       })),
+      
       updateSectionResult: (framework, sectionId, section) => set((state) => {
-        const frameworkResult = state.analysisResults[framework];
-        if (!frameworkResult) return state;
+        const result = state.analysisResults[framework];
+        if (!result) return state;
         
-        const updatedSections = frameworkResult.sections.map(s => 
+        const updatedSections = result.sections.map(s => 
           s.id === sectionId ? { ...s, ...section } : s
         );
         
@@ -136,16 +144,18 @@ export const useAnalysisStore = create<AnalysisState>()(
           analysisResults: {
             ...state.analysisResults,
             [framework]: {
-              ...frameworkResult,
+              ...result,
               sections: updatedSections
             }
-          },
-          hasUnsavedChanges: true
+          }
         };
       }),
+      
       updateSystemDescription: (data) => set((state) => ({
-        systemDescription: { ...state.systemDescription, ...data }
+        systemDescription: { ...state.systemDescription, ...data },
+        hasUnsavedChanges: true
       })),
+      
       updateLosses: (data) => set({ losses: data }),
       updateHazards: (data) => set({ hazards: data }),
       updateControllers: (data) => set({ controllers: data }),
@@ -162,51 +172,84 @@ export const useAnalysisStore = create<AnalysisState>()(
         hasUnsavedChanges: false 
       }),
       
-      resetToDemoData: () => set({
-        systemDescription: initialSystemDescription,
-        losses: initialLosses,
-        hazards: initialHazards,
-        controllers: initialControllers,
-        controlActions: initialControlActions,
-        ucas: initialUcas,
-        scenarios: initialScenarios,
-        hasUnsavedChanges: false,
-        analysisResults: {},
-        analysisStatus: { status: 'pending', progress: 0 },
-        currentAnalysisId: null
-      }),
+      resetToDemoData: () => {
+        // This function should now load from database, not use mock data
+        const state = useAnalysisStore.getState();
+        state.loadDataFromApi();
+      },
+      
+      loadDataFromApi: async () => {
+        set({ isLoadingData: true, dataLoadError: null });
+        
+        try {
+          const data = await stpaSecApiService.loadAnalysisData();
+          
+          // Only use data from API, no fallback to mock data
+          set({
+            losses: data.losses || [],
+            hazards: data.hazards || [],
+            controllers: data.controllers || [],
+            controlActions: data.controlActions || [],
+            ucas: data.ucas || [],
+            scenarios: data.causalScenarios || [],
+            isLoadingData: false,
+            dataLoadError: null
+          });
+        } catch (error) {
+          console.error('Failed to load data from API:', error);
+          set({ 
+            isLoadingData: false, 
+            dataLoadError: 'Failed to connect to database. Please ensure the backend is running.' 
+          });
+          // DO NOT fall back to mock data - let the system show the error
+          // Clear any existing data to make it obvious something is wrong
+          set({
+            losses: [],
+            hazards: [],
+            controllers: [],
+            controlActions: [],
+            ucas: [],
+            scenarios: []
+          });
+        }
+      },
       
       loadVersionData: (versionId) => {
         const versionStore = useVersionStore.getState();
         const versionData = versionStore.getVersionData(versionId);
         
-        // If demo version or no version data, reset to demo data
-        if (versionId === 'demo-v1' || !versionData) {
-          // Call resetToDemoData directly
+        // For demo version, load from database
+        if (versionId === 'demo-v1') {
+          // Load from database API
+          const state = useAnalysisStore.getState();
+          state.loadDataFromApi();
+        } else if (versionData) {
+          // Load the versioned data (for non-demo versions)
+          // This would be data from previous analyses stored locally
           set({
-            systemDescription: initialSystemDescription,
-            losses: initialLosses,
-            hazards: initialHazards,
-            controllers: initialControllers,
-            controlActions: initialControlActions,
-            ucas: initialUcas,
-            scenarios: initialScenarios,
+            systemDescription: versionData.systemDescription || {},
+            losses: versionData.losses || [],
+            hazards: versionData.hazards || [],
+            controllers: versionData.controllers || [],
+            controlActions: versionData.controlActions || [],
+            ucas: versionData.ucas || [],
+            scenarios: versionData.scenarios || [],
+            hasUnsavedChanges: false
+          });
+        } else {
+          // No data available - clear everything
+          set({
+            systemDescription: {},
+            losses: [],
+            hazards: [],
+            controllers: [],
+            controlActions: [],
+            ucas: [],
+            scenarios: [],
             hasUnsavedChanges: false,
             analysisResults: {},
             analysisStatus: { status: 'pending', progress: 0 },
             currentAnalysisId: null
-          });
-        } else if (versionData) {
-          // Load the versioned data
-          set({
-            systemDescription: versionData.systemDescription || initialSystemDescription,
-            losses: versionData.losses || initialLosses,
-            hazards: versionData.hazards || initialHazards,
-            controllers: versionData.controllers || initialControllers,
-            controlActions: versionData.controlActions || initialControlActions,
-            ucas: versionData.ucas || initialUcas,
-            scenarios: versionData.scenarios || initialScenarios,
-            hasUnsavedChanges: false
           });
         }
       }
@@ -247,18 +290,10 @@ export const useAnalysisStore = create<AnalysisState>()(
 );
 
 // Subscribe to version changes
-useVersionStore.subscribe((state) => {
-  // Load data when active version changes
-  useAnalysisStore.getState().loadVersionData(state.activeVersionId);
-});
-
-// Initialize with correct data on app load
-if (typeof window !== 'undefined') {
-  const versionStore = useVersionStore.getState();
-  const analysisStore = useAnalysisStore.getState();
-  
-  // If we're on demo version, ensure we have clean demo data
-  if (versionStore.activeVersionId === 'demo-v1') {
-    analysisStore.resetToDemoData();
+useVersionStore.subscribe(
+  (state) => state.activeVersionId,
+  (activeVersionId) => {
+    const analysisStore = useAnalysisStore.getState();
+    analysisStore.loadVersionData(activeVersionId);
   }
-}
+);

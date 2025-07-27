@@ -840,8 +840,12 @@ def main():
     print("=" * 60)
     
     # Create database connection
-    DATABASE_URL = settings.database.postgres_url.replace('+asyncpg', '')
-    engine = create_engine(DATABASE_URL)
+    # Use environment variable if available, otherwise fall back to settings
+    import os
+    DATABASE_URL = os.getenv('DATABASE_URL', settings.database.postgres_url)
+    # Convert async URL to sync URL
+    SYNC_DATABASE_URL = DATABASE_URL.replace('+asyncpg', '')
+    engine = create_engine(SYNC_DATABASE_URL)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     
     session = SessionLocal()

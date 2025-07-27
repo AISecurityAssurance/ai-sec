@@ -446,7 +446,8 @@ class STPASecRepository:
     
     def get_system_definition(self) -> Optional[SystemDefinition]:
         """Get current system definition"""
-        return self.session.query(SystemDefinition).filter_by(id='system-001').first()
+        # For now, just get the first system definition
+        return self.session.query(SystemDefinition).first()
     
     def get_losses_for_stakeholder(self, stakeholder_id: str) -> List[Loss]:
         """Get all losses affecting a specific stakeholder"""

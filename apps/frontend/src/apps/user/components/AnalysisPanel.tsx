@@ -240,7 +240,7 @@ export default function AnalysisPanel({
   const updateSystemBoundaries = (type: 'included' | 'excluded', items: string[]) => {
     updateSystemDescription({
       boundaries: {
-        ...systemDescription.boundaries,
+        ...systemDescription.boundaries as any,
         [type]: items
       }
     });

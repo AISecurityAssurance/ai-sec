@@ -4,7 +4,7 @@
  * Transforms generic STRIDE threat modeling CSV exports into standardized format
  */
 
-import { 
+import type { 
   AnalysisImportAdapter, 
   StandardizedAnalysis, 
   ValidationResult,

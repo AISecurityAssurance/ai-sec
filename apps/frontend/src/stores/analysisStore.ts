@@ -9,7 +9,7 @@ import type {
   ControlAction, 
   UCA, 
   CausalScenario 
-} from '../types/analysis';
+} from '../../../packages/types/src/analysis';
 
 interface AnalysisStatus {
   status: 'pending' | 'in_progress' | 'completed' | 'failed';
@@ -36,8 +36,18 @@ interface AnalysisResult {
 interface SystemDescription {
   name: string;
   description: string;
-  boundaries: string;
+  fullDescription?: string;
+  boundaries: {
+    included: string[];
+    excluded: string[];
+  };
   assumptions: string[];
+  missionStatement?: {
+    mission: string;
+    primaryGoals: string[];
+    successCriteria: string[];
+  };
+  context?: string;
 }
 
 interface AnalysisState {
@@ -93,7 +103,7 @@ interface AnalysisState {
 
 export const useAnalysisStore = create<AnalysisState>()(
   subscribeWithSelector(
-    persist(
+    persist<AnalysisState>(
     (set) => ({
       // Initial state - empty until loaded from database
       projectId: null,
@@ -104,8 +114,16 @@ export const useAnalysisStore = create<AnalysisState>()(
       systemDescription: {
         name: '',
         description: '',
-        boundaries: '',
-        assumptions: []
+        boundaries: {
+          included: [],
+          excluded: []
+        },
+        assumptions: [],
+        missionStatement: {
+          mission: '',
+          primaryGoals: [],
+          successCriteria: []
+        }
       },
       losses: [],
       hazards: [],
@@ -239,7 +257,20 @@ export const useAnalysisStore = create<AnalysisState>()(
         } else {
           // No data available - clear everything
           set({
-            systemDescription: {},
+            systemDescription: {
+              name: '',
+              description: '',
+              boundaries: {
+                included: [],
+                excluded: []
+              },
+              assumptions: [],
+              missionStatement: {
+                mission: '',
+                primaryGoals: [],
+                successCriteria: []
+              }
+            },
             losses: [],
             hazards: [],
             controllers: [],

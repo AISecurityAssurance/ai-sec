@@ -15,7 +15,7 @@ import type {
   Relationship,
   Adversary,
   SystemDefinition
-} from '../types/analysis';
+} from '../../../packages/types/src/analysis';
 
 export interface ControlStructure {
   entities: Entity[];

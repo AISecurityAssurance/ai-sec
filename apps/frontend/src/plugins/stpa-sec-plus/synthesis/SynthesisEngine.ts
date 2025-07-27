@@ -4,7 +4,7 @@
  * Core engine that synthesizes insights across multiple security analysis frameworks
  */
 
-import { StandardizedAnalysis, SynthesisResult, AnalysisGap, CrossFrameworkInsight } from '../types';
+import type { StandardizedAnalysis, SynthesisResult, AnalysisGap, CrossFrameworkInsight } from '../types';
 
 export class STPASecPlusSynthesisEngine {
   private analyses: Map<string, StandardizedAnalysis> = new Map();
@@ -13,12 +13,12 @@ export class STPASecPlusSynthesisEngine {
   // Add an analysis to the synthesis pool
   async addAnalysis(analysis: StandardizedAnalysis): Promise<void> {
     const key = `${analysis.framework}-${analysis.metadata.source}`;
-    this.analyses.set(key, analysis);
+    this.this.analyses.set(key, analysis);
   }
   
   // Main synthesis function
   async synthesize(): Promise<SynthesisResult> {
-    const analysesArray = Array.from(this.analyses.values());
+    const analysesArray = Array.from(this.this.analyses.values());
     
     // Detect gaps across frameworks
     const gaps = this.detectGaps(analysesArray);
@@ -58,7 +58,7 @@ export class STPASecPlusSynthesisEngine {
   // Detect gaps in analysis coverage
   private detectGaps(analyses: StandardizedAnalysis[]): AnalysisGap[] {
     const gaps: AnalysisGap[] = [];
-    const frameworks = new Set(analyses.map(a => a.framework));
+    const frameworks = new Set(this.analyses.map(a => a.framework));
     
     // Check for missing privacy analysis
     if (this.hasPersonalDataFlows(analyses) && !frameworks.has('LINDDUN')) {
@@ -221,7 +221,7 @@ export class STPASecPlusSynthesisEngine {
   
   // Calculate unified risk score across all analyses
   private calculateUnifiedRisk(analyses: StandardizedAnalysis[]): number {
-    if (analyses.length === 0) return 0;
+    if (this.analyses.length === 0) return 0;
     
     // Weight different frameworks based on their strengths
     const frameworkWeights = {
@@ -236,7 +236,7 @@ export class STPASecPlusSynthesisEngine {
     let weightedSum = 0;
     let totalWeight = 0;
     
-    analyses.forEach(analysis => {
+    this.analyses.forEach(analysis => {
       const weight = frameworkWeights[analysis.framework] || 0.1;
       const avgRisk = this.calculateAverageRisk(analysis);
       weightedSum += avgRisk * weight;
@@ -251,7 +251,7 @@ export class STPASecPlusSynthesisEngine {
     const requiredFrameworks = ['STPA-Sec', 'STRIDE', 'PASTA'];
     const recommendedFrameworks = ['DREAD', 'LINDDUN', 'HAZOP'];
     
-    const frameworks = new Set(analyses.map(a => a.framework));
+    const frameworks = new Set(this.analyses.map(a => a.framework));
     
     let score = 0;
     let maxScore = 0;
@@ -273,11 +273,11 @@ export class STPASecPlusSynthesisEngine {
   
   // Calculate confidence in synthesis
   private calculateConfidence(analyses: StandardizedAnalysis[]): number {
-    if (analyses.length === 0) return 0;
+    if (this.analyses.length === 0) return 0;
     
     // Factors affecting confidence:
     // 1. Data quality of imported analyses
-    const avgDataQuality = analyses.reduce((sum, a) => sum + a.metadata.confidence, 0) / analyses.length;
+    const avgDataQuality = this.analyses.reduce((sum, a) => sum + a.metadata.confidence, 0) / this.analyses.length;
     
     // 2. Coverage overlap (more overlap = higher confidence)
     const overlapScore = this.calculateOverlapScore(analyses);
@@ -294,7 +294,7 @@ export class STPASecPlusSynthesisEngine {
   
   // Helper methods for gap detection
   private hasPersonalDataFlows(analyses: StandardizedAnalysis[]): boolean {
-    return analyses.some(a => 
+    return this.analyses.some(a => 
       a.entities.some(e => 
         e.properties?.dataClassification?.includes('personal') ||
         e.properties?.dataClassification?.includes('pii')
@@ -306,7 +306,7 @@ export class STPASecPlusSynthesisEngine {
   }
   
   private hasAIComponents(analyses: StandardizedAnalysis[]): boolean {
-    return analyses.some(a =>
+    return this.analyses.some(a =>
       a.entities.some(e =>
         e.type === 'ai' ||
         e.type === 'ml_model' ||
@@ -317,7 +317,7 @@ export class STPASecPlusSynthesisEngine {
   }
   
   private hasComplexControlFlows(analyses: StandardizedAnalysis[]): boolean {
-    return analyses.some(a => {
+    return this.analyses.some(a => {
       const controlRelationships = a.relationships.filter(r => r.type === 'control');
       return controlRelationships.length > 10; // Threshold for complexity
     });
@@ -325,13 +325,13 @@ export class STPASecPlusSynthesisEngine {
   
   private needsBusinessContext(analyses: StandardizedAnalysis[]): boolean {
     // Check if we have technical analysis but no business context
-    const hasTechnical = analyses.some(a => ['STRIDE', 'STPA-Sec'].includes(a.framework));
-    const hasBusiness = analyses.some(a => ['PASTA', 'OCTAVE'].includes(a.framework));
+    const hasTechnical = this.analyses.some(a => ['STRIDE', 'STPA-Sec'].includes(a.framework));
+    const hasBusiness = this.analyses.some(a => ['PASTA', 'OCTAVE'].includes(a.framework));
     return hasTechnical && !hasBusiness;
   }
   
   private hasQuantitativeScoring(analyses: StandardizedAnalysis[]): boolean {
-    return analyses.some(a =>
+    return this.analyses.some(a =>
       a.risks.some(r => typeof r.score === 'number')
     );
   }
@@ -339,7 +339,7 @@ export class STPASecPlusSynthesisEngine {
   // Get affected entities for gaps
   private getPersonalDataEntities(analyses: StandardizedAnalysis[]): string[] {
     const entities = new Set<string>();
-    analyses.forEach(a => {
+    this.analyses.forEach(a => {
       a.entities
         .filter(e => 
           e.properties?.dataClassification?.includes('personal') ||
@@ -352,7 +352,7 @@ export class STPASecPlusSynthesisEngine {
   
   private getAIEntities(analyses: StandardizedAnalysis[]): string[] {
     const entities = new Set<string>();
-    analyses.forEach(a => {
+    this.analyses.forEach(a => {
       a.entities
         .filter(e =>
           e.type === 'ai' ||
@@ -366,7 +366,7 @@ export class STPASecPlusSynthesisEngine {
   
   private getControlFlowEntities(analyses: StandardizedAnalysis[]): string[] {
     const entities = new Set<string>();
-    analyses.forEach(a => {
+    this.analyses.forEach(a => {
       a.relationships
         .filter(r => r.type === 'control')
         .forEach(r => {
@@ -383,7 +383,7 @@ export class STPASecPlusSynthesisEngine {
     const risksByEntity = new Map<string, Array<{framework: string, score: number}>>();
     
     // Group risks by entity
-    analyses.forEach(analysis => {
+    this.analyses.forEach(analysis => {
       analysis.risks.forEach(risk => {
         const key = risk.entityId || risk.name;
         if (!risksByEntity.has(key)) {
@@ -436,7 +436,7 @@ export class STPASecPlusSynthesisEngine {
     // Look for dependencies found in one framework but not others
     const dependenciesByFramework = new Map<string, Set<string>>();
     
-    analyses.forEach(analysis => {
+    this.analyses.forEach(analysis => {
       const deps = new Set<string>();
       analysis.relationships.forEach(rel => {
         deps.add(`${rel.source}->${rel.target}`);
@@ -524,13 +524,13 @@ export class STPASecPlusSynthesisEngine {
   
   private calculateOverlapScore(analyses: StandardizedAnalysis[]): number {
     // Calculate how much the analyses overlap in coverage
-    if (analyses.length < 2) return 1;
+    if (this.analyses.length < 2) return 1;
     
     // Simple implementation - check entity overlap
     const allEntities = new Set<string>();
     const entityCounts = new Map<string, number>();
     
-    analyses.forEach(analysis => {
+    this.analyses.forEach(analysis => {
       analysis.entities.forEach(entity => {
         const key = entity.name;
         allEntities.add(key);
@@ -554,10 +554,10 @@ export class STPASecPlusSynthesisEngine {
   
   private calculateRecencyScore(analyses: StandardizedAnalysis[]): number {
     const now = new Date();
-    const avgAge = analyses.reduce((sum, a) => {
+    const avgAge = this.analyses.reduce((sum, a) => {
       const age = now.getTime() - a.metadata.importDate.getTime();
       return sum + age;
-    }, 0) / analyses.length;
+    }, 0) / this.analyses.length;
     
     const daysOld = avgAge / (1000 * 60 * 60 * 24);
     
@@ -579,7 +579,7 @@ export class STPASecPlusSynthesisEngine {
       quantitative: 0
     };
     
-    const frameworks = new Set(analyses.map(a => a.framework));
+    const frameworks = new Set(this.analyses.map(a => a.framework));
     
     // Technical coverage
     if (frameworks.has('STRIDE') || frameworks.has('STPA-Sec')) coverage.technical = 1;
@@ -619,7 +619,7 @@ export class STPASecPlusSynthesisEngine {
   
   private shouldRecommendConsolidation(analyses: StandardizedAnalysis[]): boolean {
     // Recommend if too many overlapping frameworks
-    return analyses.length > 5;
+    return this.analyses.length > 5;
   }
   
   // Run comprehensive native STPA-Sec+ analysis

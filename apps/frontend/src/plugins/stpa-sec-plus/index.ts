@@ -5,7 +5,7 @@
  * allowing users to import existing analyses and generate unified insights.
  */
 
-import { AnalysisPlugin, AnalysisResult, AnalysisOptions } from '@prototype1/types';
+import { AnalysisPlugin, AnalysisResult, AnalysisOptions } from '../../../../packages/types/src';
 import { STPASecPlusSynthesisEngine } from './synthesis/SynthesisEngine';
 import { ImportAdapterRegistry } from './adapters/ImportAdapterRegistry';
 import { GapDetectionEngine } from './synthesis/GapDetectionEngine';

@@ -4,7 +4,7 @@
  * Flexible CSV adapter that can handle various security analysis CSV formats
  */
 
-import { 
+import type { 
   AnalysisImportAdapter, 
   StandardizedAnalysis, 
   ValidationResult,
@@ -186,9 +186,6 @@ export class GenericCSVAdapter implements AnalysisImportAdapter {
     return mappingResults;
   }
   
-  async extractRisks(analysis: StandardizedAnalysis): Promise<any[]> {
-    return analysis.risks;
-  }
   
   // Parse CSV string into array of objects
   private parseCSV(csvString: string): any[] {

@@ -4,7 +4,7 @@
  * Transforms Microsoft TMT (.tm7) files into standardized STPA-Sec+ format
  */
 
-import { 
+import type { 
   AnalysisImportAdapter, 
   StandardizedAnalysis, 
   ValidationResult,

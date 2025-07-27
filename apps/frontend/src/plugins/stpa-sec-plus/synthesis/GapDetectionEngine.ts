@@ -4,7 +4,7 @@
  * Identifies gaps in security analysis coverage across frameworks
  */
 
-import { StandardizedAnalysis, AnalysisGap } from '../types';
+import type { StandardizedAnalysis, AnalysisGap } from '../types';
 
 export class GapDetectionEngine {
   // Main gap detection function

@@ -5,13 +5,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { 
+import type { 
   StandardizedAnalysis, 
   AnalysisGap, 
   CrossFrameworkInsight,
   SynthesisResult 
 } from '../types';
-import { STPASecPlusPlugin } from '../index';
+import type { STPASecPlusPlugin } from '../index';
 import './STPASecPlusPanel.css';
 
 interface STPASecPlusPanelProps {

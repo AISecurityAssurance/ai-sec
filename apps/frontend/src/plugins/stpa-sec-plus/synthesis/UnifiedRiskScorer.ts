@@ -4,7 +4,7 @@
  * Calculates unified risk scores across multiple security analysis frameworks
  */
 
-import { SynthesisResult, StandardizedAnalysis, ExecutiveMetrics } from '../types';
+import type { SynthesisResult, StandardizedAnalysis, ExecutiveMetrics } from '../types';
 
 export class UnifiedRiskScorer {
   // Framework weights for different aspects

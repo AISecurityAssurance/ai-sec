@@ -4,7 +4,7 @@
  * Manages all import adapters for different security analysis tool formats
  */
 
-import { AnalysisImportAdapter } from '../types';
+import type { AnalysisImportAdapter } from '../types';
 import { MicrosoftTMTAdapter } from './MicrosoftTMTAdapter';
 import { STRIDECSVAdapter } from './STRIDECSVAdapter';
 import { PASTAJSONAdapter } from './PASTAJSONAdapter';

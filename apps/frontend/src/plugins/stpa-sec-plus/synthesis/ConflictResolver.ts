@@ -4,7 +4,7 @@
  * Resolves conflicts between different security analyses and frameworks
  */
 
-import { StandardizedAnalysis, Conflict, ConflictResolution } from '../types';
+import type { StandardizedAnalysis, Conflict, ConflictResolution } from '../types';
 
 export class ConflictResolver {
   // Main conflict resolution function

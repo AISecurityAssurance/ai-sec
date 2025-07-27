@@ -201,7 +201,11 @@ export default function StandaloneComponent() {
                   strideCategory: item.strideCategory || '',
                   d4Score: item.d4Score || { detectability: 0, difficulty: 0, damage: 0, deniability: 0 },
                   confidence: item.confidence || 0,
-                  mitigations: []
+                  mitigations: [],
+                  likelihood: item.likelihood,
+                  detectability: item.detectability,
+                  prerequisites: item.prerequisites || [],
+                  indicators: item.indicators || []
                 };
               });
               updateScenarios(transformedData);

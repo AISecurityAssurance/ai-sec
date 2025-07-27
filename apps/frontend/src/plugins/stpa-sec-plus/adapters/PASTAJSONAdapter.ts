@@ -209,7 +209,7 @@ export class PASTAJSONAdapter implements AnalysisImportAdapter {
     const relationships = this.extractRelationships(data);
     const threats = this.extractThreats(data);
     const controls = this.extractControls(data);
-    const risks = this.extractRisks(data);
+    const risks = this.extractRiskMappings(data);
     
     return {
       framework: 'PASTA',
@@ -462,7 +462,7 @@ export class PASTAJSONAdapter implements AnalysisImportAdapter {
   }
   
   // Extract risks from PASTA data
-  private extractRisks(data: PASTAData): RiskMapping[] {
+  private extractRiskMappings(data: PASTAData): RiskMapping[] {
     const risks: RiskMapping[] = [];
     
     data.riskAnalysis.risks.forEach(risk => {

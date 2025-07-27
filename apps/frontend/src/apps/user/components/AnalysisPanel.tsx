@@ -714,8 +714,12 @@ export default function AnalysisPanel({
               strideCategory: d.strideCategory || '',
               d4Score: d.d4Score || { detectability: 0, difficulty: 0, damage: 0, deniability: 0 },
               confidence: d.confidence || 0,
-              mitigations: []
-            } as CausalScenario;
+              mitigations: [],
+              likelihood: d.likelihood,
+              detectability: d.detectability,
+              prerequisites: d.prerequisites || [],
+              indicators: d.indicators || []
+            };
           });
           updateScenarios(updatedScenarios);
         } : undefined}

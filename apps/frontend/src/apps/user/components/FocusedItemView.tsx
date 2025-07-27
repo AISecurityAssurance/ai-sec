@@ -74,7 +74,7 @@ export default function FocusedItemView() {
   };
   
   const item = getItemData();
-  const [editedItem, setEditedItem] = useState<Loss | Hazard | Controller | ControlAction | UCA | CausalScenario | null | undefined>(item);
+  const [editedItem, setEditedItem] = useState(item);
   
   useEffect(() => {
     setEditedItem(item);
@@ -164,7 +164,7 @@ export default function FocusedItemView() {
         break;
       case 'scenario':
         if (isCausalScenario(editedItem)) {
-          updateScenarios(scenarios.map(s => s.id === itemId ? editedItem : s));
+          updateScenarios(scenarios.map(s => s.id === itemId ? editedItem as CausalScenario : s) as any);
         }
         break;
     }
@@ -412,6 +412,7 @@ export default function FocusedItemView() {
               {renderField('Name', editedItem.name, 'name')}
               {renderField('Type', editedItem.type, 'type')}
               {renderField('Responsibilities', editedItem.responsibilities.join(', '), 'responsibilities', undefined, true)}
+              {renderField('Process Model', editedItem.processModel.join(', '), 'processModel', undefined, true)}
             </>
           );
         }

@@ -219,7 +219,7 @@ export interface GapDetectionConfig {
 
 // Conflict types
 export interface Conflict {
-  type: 'risk_score_mismatch' | 'control_effectiveness_disagreement' | 'threat_existence_conflict';
+  type: 'risk_score_mismatch' | 'control_effectiveness_disagreement' | 'threat_existence_conflict' | 'entity_classification_conflict' | 'severity_rating_conflict';
   entity?: string;
   frameworks: string[];
   details: any;

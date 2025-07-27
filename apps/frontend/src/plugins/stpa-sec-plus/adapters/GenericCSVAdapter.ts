@@ -11,7 +11,8 @@ import type {
   EntityMapping,
   ThreatMapping,
   ControlMapping,
-  RiskMapping
+  RiskMapping,
+  Risk
 } from '../types';
 
 interface CSVMapping {
@@ -131,7 +132,7 @@ export class GenericCSVAdapter implements AnalysisImportAdapter {
     const entities = this.extractEntities(rows, columnTypes);
     const threats = this.extractThreats(rows, columnTypes);
     const controls = this.extractControls(rows, columnTypes);
-    const risks = this.extractRisks(rows, columnTypes);
+    const risks = this.extractRiskMappings(rows, columnTypes);
     
     // Try to infer relationships
     const relationships = this.inferRelationships(entities, threats, rows);
@@ -695,7 +696,7 @@ export class GenericCSVAdapter implements AnalysisImportAdapter {
   }
   
   // Extract risks
-  private extractRisks(rows: any[], columnTypes: any): RiskMapping[] {
+  private extractRiskMappings(rows: any[], columnTypes: any): RiskMapping[] {
     const risks: RiskMapping[] = [];
     const riskColumns = columnTypes.risks;
     

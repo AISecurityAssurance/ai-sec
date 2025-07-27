@@ -20,7 +20,7 @@ export interface Hazard {
 export interface Controller {
   id: string;
   name: string;
-  type: 'human' | 'software' | 'organizational';
+  type: 'human' | 'software' | 'hardware' | 'organizational';
   responsibilities: string[];
   processModel: string[];
 }
@@ -47,7 +47,13 @@ export interface CausalScenario {
   id: string;
   ucaId: string;
   description: string;
-  causalFactors: string[];
+  causalFactors: {
+    controller: string[];
+    feedback: string[];
+    communication: string[];
+    processModel: string[];
+    externalDisturbances: string[];
+  } | string[]; // Allow both for compatibility
   strideCategory: string;
   d4Score: {
     detectability: number;
@@ -57,6 +63,10 @@ export interface CausalScenario {
   };
   mitigations: string[];
   confidence: number;
+  likelihood?: string;
+  detectability?: string;
+  prerequisites?: string[];
+  indicators?: string[];
 }
 
 // Step 1: System Engineering Foundation

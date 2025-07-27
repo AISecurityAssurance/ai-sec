@@ -9,7 +9,7 @@ import type {
   ControlAction, 
   UCA, 
   CausalScenario 
-} from '@security-platform/types';
+} from '../types/stpaSecTypes';
 
 interface AnalysisStatus {
   status: 'pending' | 'in_progress' | 'completed' | 'failed';
@@ -289,45 +289,15 @@ export const useAnalysisStore = create<AnalysisState>()(
       }
     }),
     {
-      name: 'analysis-storage',
-      partialize: (state) => {
-        // Don't persist demo data to prevent modifications from carrying over
-        const versionStore = useVersionStore.getState();
-        if (versionStore.activeVersionId === 'demo-v1' || state.demoMode) {
-          // Only persist non-data settings for demo mode
-          return {
-            projectId: state.projectId,
-            projectVersion: state.projectVersion,
-            enabledAnalyses: state.enabledAnalyses,
-            demoMode: state.demoMode
-          };
-        }
-        
-        // For non-demo versions, persist everything
-        return {
-          projectId: state.projectId,
-          projectVersion: state.projectVersion,
-          systemDescription: state.systemDescription,
-          losses: state.losses,
-          hazards: state.hazards,
-          controllers: state.controllers,
-          controlActions: state.controlActions,
-          ucas: state.ucas,
-          scenarios: state.scenarios,
-          enabledAnalyses: state.enabledAnalyses,
-          demoMode: state.demoMode
-        };
-      }
+      name: 'analysis-storage'
     }
   )
   )
 );
 
 // Subscribe to version changes
-useVersionStore.subscribe(
-  (state) => state.activeVersionId,
-  (activeVersionId) => {
-    const analysisStore = useAnalysisStore.getState();
-    analysisStore.loadVersionData(activeVersionId);
-  }
-);
+useVersionStore.subscribe((state) => {
+  const activeVersionId = state.activeVersionId;
+  const analysisStore = useAnalysisStore.getState();
+  analysisStore.loadVersionData(activeVersionId);
+});

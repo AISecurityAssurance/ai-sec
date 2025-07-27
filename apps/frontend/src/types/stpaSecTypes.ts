@@ -126,6 +126,9 @@ export interface CausalScenario {
   prerequisites: string[];
   indicators: string[];
   confidence: number; // 0-100
+  
+  // Additional properties for compatibility with mockData
+  mitigations?: string[];
 }
 
 export interface Mitigation {

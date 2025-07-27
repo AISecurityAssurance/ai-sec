@@ -4,11 +4,11 @@
  * Calculates unified risk scores across multiple security analysis frameworks
  */
 
-import type { SynthesisResult, StandardizedAnalysis, ExecutiveMetrics } from '../types';
+import type { SynthesisResult, StandardizedAnalysis, ExecutiveMetrics, AnalysisFramework } from '../types';
 
 export class UnifiedRiskScorer {
   // Framework weights for different aspects
-  private frameworkWeights = {
+  private frameworkWeights: Record<string, { technical: number; systemic: number; business: number; coverage: number }> = {
     'STPA-Sec': { technical: 0.9, systemic: 1.0, business: 0.6, coverage: 0.9 },
     'STRIDE': { technical: 1.0, systemic: 0.7, business: 0.5, coverage: 0.8 },
     'PASTA': { technical: 0.7, systemic: 0.8, business: 1.0, coverage: 0.8 },
@@ -16,7 +16,10 @@ export class UnifiedRiskScorer {
     'DREAD': { technical: 0.8, systemic: 0.6, business: 0.7, coverage: 0.6 },
     'MAESTRO': { technical: 0.9, systemic: 0.8, business: 0.7, coverage: 0.8 },
     'LINDDUN': { technical: 0.7, systemic: 0.6, business: 0.8, coverage: 0.7 },
-    'HAZOP': { technical: 0.8, systemic: 0.9, business: 0.6, coverage: 0.7 }
+    'HAZOP': { technical: 0.8, systemic: 0.9, business: 0.6, coverage: 0.7 },
+    'NIST-CSF': { technical: 0.7, systemic: 0.8, business: 0.8, coverage: 0.9 },
+    'ISO27001': { technical: 0.7, systemic: 0.8, business: 0.8, coverage: 0.9 },
+    'CUSTOM': { technical: 0.5, systemic: 0.5, business: 0.5, coverage: 0.5 }
   };
   
   // Main unified risk calculation
@@ -185,7 +188,7 @@ export class UnifiedRiskScorer {
     // Calculate framework coverage for compliance
     const requiredFrameworks = this.getRequiredComplianceFrameworks(analyses);
     const presentFrameworks = new Set(analyses.map(a => a.framework));
-    const frameworkCoverage = requiredFrameworks.filter(f => presentFrameworks.has(f)).length / 
+    const frameworkCoverage = requiredFrameworks.filter(f => presentFrameworks.has(f as AnalysisFramework)).length / 
                              requiredFrameworks.length;
     
     // Combine factors

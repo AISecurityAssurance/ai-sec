@@ -10,16 +10,44 @@ import type {
   ControlAction,
   UCA,
   CausalScenario,
-  Mitigation,
-  Entity,
-  Relationship,
-  Adversary,
-  SystemDefinition
-} from '../../../packages/types/src/analysis';
+  Mitigation
+} from '../types/stpaSecTypes';
+
+// Local types for control structure
+export interface Entity {
+  id: string;
+  type: string;
+  name: string;
+  attributes?: Record<string, any>;
+}
+
+export interface Relationship {
+  id: string;
+  source: string;
+  target: string;
+  type: string;
+  label?: string;
+}
 
 export interface ControlStructure {
   entities: Entity[];
   relationships: Relationship[];
+}
+
+export interface SystemDefinition {
+  description: string;
+  boundaries?: string[];
+  assumptions?: string[];
+  constraints?: string[];
+}
+
+export interface Adversary {
+  id: string;
+  name: string;
+  sophistication: string;
+  capabilities: string[];
+  motivation: string;
+  resources?: string[];
 }
 
 export interface RiskSummary {
@@ -136,18 +164,18 @@ class StpaSecApiService {
           responsibilities: entity.responsibilities || []
         }));
       
-      // Transform relationships to match frontend ControlAction interface
-      const controlActions: ControlAction[] = data.relationships.map((rel: any, index: number) => ({
-        id: rel.id || `ca-${index}`,
-        from: rel.source,
-        to: rel.target,
-        description: rel.control_actions?.[0] || rel.type,
-        type: rel.type === 'feedback' ? 'feedback' : 'control'
+      // Transform relationships to match frontend Relationship interface
+      const relationships: Relationship[] = data.relationships.map((rel: any, index: number) => ({
+        id: rel.id || `rel-${index}`,
+        source: rel.source,
+        target: rel.target,
+        type: rel.type === 'feedback' ? 'feedback' : 'control',
+        label: rel.control_actions?.[0] || rel.type
       }));
       
       return {
         entities: controllers,
-        relationships: controlActions
+        relationships: relationships
       };
     } catch (error) {
       console.error('Error fetching control structure:', error);

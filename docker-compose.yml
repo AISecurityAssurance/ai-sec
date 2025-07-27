@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Core database services - always needed
   postgres:
@@ -123,4 +121,4 @@ volumes:
 
 networks:
   sa_network:
-    name: security_analyst_network
+    name: prototype1_sa_network

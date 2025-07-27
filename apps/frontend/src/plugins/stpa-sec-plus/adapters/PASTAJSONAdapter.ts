@@ -261,6 +261,9 @@ export class PASTAJSONAdapter implements AnalysisImportAdapter {
     return mappingResults;
   }
   
+  async extractRisks(analysis: StandardizedAnalysis): Promise<any[]> {
+    return analysis.risks;
+  }
   
   // Extract entities from PASTA data
   private extractEntities(data: PASTAData): EntityMapping[] {
@@ -453,6 +456,9 @@ export class PASTAJSONAdapter implements AnalysisImportAdapter {
   private extractRisks(data: PASTAData): RiskMapping[] {
     const risks: RiskMapping[] = [];
     
+    data.riskAnalysis.risks.forEach(risk => {
+      const scenario = data.attackScenarios.find(s => s.id === risk.scenarioId);
+      
       risks.push({
         id: risk.id,
         name: scenario?.name || `Risk ${risk.id}`,

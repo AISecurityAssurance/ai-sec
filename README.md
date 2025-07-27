@@ -2,6 +2,18 @@
 
 A comprehensive AI-powered security threat modeling and analysis platform supporting multiple frameworks including STPA-SEC, STRIDE, PASTA, DREAD, MAESTRO, LINDDUN, HAZOP, and OCTAVE.
 
+## 🆕 Step 1 Analysis CLI (New!)
+
+```bash
+# Quick demo - no API keys needed
+./ai-sec demo
+
+# Run analysis with your own system
+./ai-sec analyze --config configs/standard-analysis.yaml
+```
+
+See [QUICKSTART.md](QUICKSTART.md) for detailed instructions.
+
 ## 🚀 Quick Start (Docker)
 
 ### Prerequisites

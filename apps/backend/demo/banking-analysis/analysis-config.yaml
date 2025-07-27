@@ -1,0 +1,26 @@
+analysis:
+  id: "demo-banking-2024-01"
+  name: "Digital Banking Platform Security Analysis - Demo"
+  description: "Pre-analyzed demo showing STPA-Sec Step 1 results for a digital banking platform"
+  created_at: "2024-01-15T10:00:00Z"
+  version: "1.0"
+  read_only: true  # Indicates this should be copied before editing
+
+input:
+  system_description_file: "system-description.txt"
+  
+execution:
+  mode: "enhanced"
+  model_used: "gpt-4-turbo-preview"
+  cognitive_styles: ["intuitive", "technical"]
+  
+results:
+  format: "json"
+  path: "./results/"
+  
+metadata:
+  demo: true
+  description: |
+    This demo analysis showcases STPA-Sec Step 1 applied to a digital banking platform.
+    It includes comprehensive mission analysis, loss identification, hazard identification,
+    and stakeholder analysis including adversary profiling.

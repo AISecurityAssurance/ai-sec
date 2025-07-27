@@ -5,7 +5,8 @@ from typing import Dict, Any, List
 import re
 import json
 
-from .base_step1 import BaseStep1Agent
+from .base_step1 import BaseStep1Agent, CognitiveStyle
+from core.utils.llm_client import llm_manager
 
 
 class MissionAnalystAgent(BaseStep1Agent):
@@ -28,34 +29,22 @@ class MissionAnalystAgent(BaseStep1Agent):
         
         system_description = context.get('system_description', '')
         
-        # Extract components
-        purpose = await self._extract_purpose(system_description)
-        method = await self._extract_method(system_description)
-        goals = await self._extract_goals(system_description)
+        # Always use LLM for analysis
+        mission_data = await self._analyze_mission_with_llm(system_description)
         
-        # Build problem statement
-        problem_statement = {
-            "purpose_what": purpose,
-            "method_how": method,
-            "goals_why": goals,
-            "full_statement": f"A System to {purpose} by means of {method} in order to {goals}"
-        }
-        
-        # Extract mission context
-        mission_context = await self._extract_mission_context(system_description)
-        
-        # Extract operational constraints
-        operational_constraints = await self._extract_operational_constraints(system_description)
-        
-        # Extract environmental assumptions
-        environmental_assumptions = await self._extract_environmental_assumptions(system_description)
+        # Extract components from mission data
+        problem_statement = mission_data.get('problem_statement', {})
+        mission_context = mission_data.get('mission_context', {})
+        operational_constraints = mission_data.get('operational_constraints', [])
+        environmental_assumptions = mission_data.get('environmental_assumptions', {})
         
         results = {
             "problem_statement": problem_statement,
             "mission_context": mission_context,
             "operational_constraints": operational_constraints,
             "environmental_assumptions": environmental_assumptions,
-            "abstraction_validated": True
+            "abstraction_validated": True,
+            "cognitive_style": self.cognitive_style.value
         }
         
         # Validate abstraction level
@@ -70,254 +59,115 @@ class MissionAnalystAgent(BaseStep1Agent):
         
         return results
     
-    async def _extract_purpose(self, description: str) -> str:
-        """Extract the system's purpose (WHAT it does)"""
-        # Look for purpose indicators
-        purpose_patterns = [
-            r"purpose is to (.+?)(?:\.|,|by|through)",
-            r"designed to (.+?)(?:\.|,|by|through)",
-            r"system that (.+?)(?:\.|,|by|through)",
-            r"platform for (.+?)(?:\.|,|by|through)",
-            r"enables (.+?)(?:\.|,|by|through)"
-        ]
+    async def _analyze_mission_with_llm(self, description: str) -> Dict[str, Any]:
+        """Use LLM to analyze mission based on cognitive style"""
+        # Get cognitive style prompt modifier
+        style_modifier = self.get_cognitive_style_prompt_modifier()
         
-        for pattern in purpose_patterns:
-            match = re.search(pattern, description, re.IGNORECASE)
-            if match:
-                purpose = match.group(1).strip()
-                # Clean up and ensure mission-level language
-                purpose = self.extract_mission_language(purpose)
-                return purpose
+        # Build the prompt
+        prompt = f"""{style_modifier}
+
+You are a security analyst performing STPA-Sec Step 1 mission analysis.
+
+System Description:
+{description}
+
+Analyze the system's mission and provide:
+
+1. Problem Statement with:
+   - PURPOSE (WHAT the system does - mission level)
+   - METHOD (HOW it achieves purpose - abstract, not implementation)
+   - GOALS (WHY it matters - strategic objectives)
+   - Full statement: "A System to [PURPOSE] by means of [METHOD] in order to [GOALS]"
+
+2. Mission Context:
+   - Domain (e.g., financial_services, healthcare, infrastructure)
+   - Criticality (catastrophic, major, moderate, minor)
+   - Operational tempo (continuous, scheduled, on_demand)
+   - Key capabilities (abstract capabilities, not features)
+
+3. Operational Constraints:
+   - Regulatory frameworks and compliance requirements
+   - Business constraints (SLAs, transaction volumes)
+   - Organizational constraints (risk appetite, maturity)
+
+4. Environmental Assumptions:
+   - User behavior patterns
+   - Threat landscape
+   - Infrastructure dependencies
+   - Trust relationships
+
+Provide your response as a JSON object with the following structure:
+{{
+  "problem_statement": {{
+    "purpose_what": "purpose description",
+    "method_how": "method description",
+    "goals_why": "goals description",
+    "full_statement": "A System to..."
+  }},
+  "mission_context": {{
+    "domain": "domain_type",
+    "criticality": "catastrophic|major|moderate|minor",
+    "operational_tempo": {{
+      "pattern": "continuous|scheduled|on_demand",
+      "peak_periods": ["period1", "period2"],
+      "availability_requirement": "percentage or description"
+    }},
+    "key_capabilities": ["capability1", "capability2"]
+  }},
+  "operational_constraints": {{
+    "regulatory": {{
+      "frameworks": ["framework1", "framework2"],
+      "audit_frequency": "periodic|continuous",
+      "change_approval": "required|standard"
+    }},
+    "business": {{
+      "availability_requirement": "SLA percentage",
+      "transaction_volume": "volume description",
+      "legacy_integration": "required|optional|none"
+    }},
+    "organizational": {{
+      "risk_appetite": "low|moderate|high",
+      "security_maturity": "initial|developing|defined|managed|optimizing",
+      "change_capacity": "low|moderate|high"
+    }}
+  }},
+  "environmental_assumptions": {{
+    "user_behavior": ["assumption1", "assumption2"],
+    "threat_landscape": ["threat1", "threat2"],
+    "infrastructure": ["dependency1", "dependency2"],
+    "trust_relationships": ["relationship1", "relationship2"]
+  }}
+}}
+
+IMPORTANT: Maintain mission-level abstraction. Avoid implementation details, technical specifications, or prevention-focused language."""
         
-        # Fallback: extract from first sentence
-        first_sentence = description.split('.')[0]
-        purpose = self.extract_mission_language(first_sentence)
-        return purpose
-    
-    async def _extract_method(self, description: str) -> str:
-        """Extract the method (HOW it achieves purpose - abstract level)"""
-        method_patterns = [
-            r"by means of (.+?)(?:\.|,|in order to)",
-            r"through (.+?)(?:\.|,|to)",
-            r"via (.+?)(?:\.|,|to)",
-            r"using (.+?)(?:\.|,|to)"
-        ]
-        
-        for pattern in method_patterns:
-            match = re.search(pattern, description, re.IGNORECASE)
-            if match:
-                method = match.group(1).strip()
-                # Ensure abstract language
-                method = self.extract_mission_language(method)
-                return method
-        
-        # Fallback: infer from description
-        if "banking" in description.lower():
-            return "controlled access to financial services with transaction integrity assurance"
-        elif "medical" in description.lower():
-            return "controlled delivery of healthcare services with patient safety assurance"
-        else:
-            return "controlled system operations with integrity assurance"
-    
-    async def _extract_goals(self, description: str) -> str:
-        """Extract the goals (WHY it matters)"""
-        goal_patterns = [
-            r"in order to (.+?)(?:\.|$)",
-            r"to achieve (.+?)(?:\.|$)",
-            r"ensuring (.+?)(?:\.|$)",
-            r"while (.+?)(?:\.|$)"
-        ]
-        
-        goals = []
-        for pattern in goal_patterns:
-            matches = re.findall(pattern, description, re.IGNORECASE)
-            for match in matches:
-                goal = self.extract_mission_language(match.strip())
-                if not self.is_prevention_language(goal):
-                    goals.append(goal)
-        
-        if goals:
-            return " and ".join(goals[:3])  # Limit to 3 main goals
-        
-        # Fallback based on domain
-        if "banking" in description.lower():
-            return "enable customer financial management while ensuring regulatory compliance and maintaining market trust"
-        else:
-            return "achieve mission objectives while maintaining stakeholder trust"
-    
-    async def _extract_mission_context(self, description: str) -> Dict[str, Any]:
-        """Extract mission context information"""
-        context = {
-            "domain": self._identify_domain(description),
-            "criticality": self._assess_criticality(description),
-            "scale": self._extract_scale(description),
-            "operational_tempo": self._extract_tempo(description)
-        }
-        
-        return context
-    
-    def _identify_domain(self, description: str) -> str:
-        """Identify the operational domain"""
-        domains = {
-            "banking": ["bank", "financial", "payment", "transaction"],
-            "healthcare": ["medical", "health", "patient", "clinical"],
-            "transportation": ["vehicle", "traffic", "transport", "autonomous"],
-            "defense": ["military", "defense", "weapon", "classified"],
-            "energy": ["power", "grid", "nuclear", "utility"],
-            "manufacturing": ["factory", "production", "industrial", "scada"]
-        }
-        
-        desc_lower = description.lower()
-        for domain, keywords in domains.items():
-            if any(keyword in desc_lower for keyword in keywords):
-                return domain
-                
-        return "general_systems"
-    
-    def _assess_criticality(self, description: str) -> str:
-        """Assess mission criticality"""
-        critical_indicators = ["life", "safety", "financial", "national", "critical", "essential"]
-        desc_lower = description.lower()
-        
-        if any(indicator in desc_lower for indicator in critical_indicators):
-            return "mission_critical"
-        return "business_critical"
-    
-    def _extract_scale(self, description: str) -> Dict[str, str]:
-        """Extract operational scale"""
-        scale = {
-            "geographic": "unknown",
-            "users": "unknown",
-            "volume": "unknown"
-        }
-        
-        # Geographic scale
-        if any(word in description.lower() for word in ["global", "worldwide", "international"]):
-            scale["geographic"] = "global"
-        elif any(word in description.lower() for word in ["national", "country"]):
-            scale["geographic"] = "national"
-        elif any(word in description.lower() for word in ["regional", "state"]):
-            scale["geographic"] = "regional"
-        
-        # User scale
-        if "million" in description.lower():
-            scale["users"] = "millions"
-        elif "thousand" in description.lower():
-            scale["users"] = "thousands"
-        
-        # Volume
-        if any(word in description.lower() for word in ["high volume", "high frequency"]):
-            scale["volume"] = "high_frequency"
+        try:
+            # Call LLM
+            response = await llm_manager.generate(prompt, temperature=0.7, max_tokens=2000)
             
-        return scale
-    
-    def _extract_tempo(self, description: str) -> Dict[str, Any]:
-        """Extract operational tempo"""
-        tempo = {
-            "normal": "business_hours",
-            "peak_periods": [],
-            "critical_dates": []
-        }
-        
-        if "24/7" in description or "24x7" in description:
-            tempo["normal"] = "24x7"
-        elif "real-time" in description.lower():
-            tempo["normal"] = "real_time"
+            # Parse JSON response
+            content = response.content.strip()
+            # Extract JSON from markdown code blocks if present
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0].strip()
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0].strip()
             
-        return tempo
-    
-    async def _extract_operational_constraints(self, description: str) -> Dict[str, Any]:
-        """Extract operational constraints"""
-        constraints = {
-            "regulatory": self._extract_regulatory_constraints(description),
-            "business": self._extract_business_constraints(description),
-            "organizational": self._extract_organizational_constraints(description)
-        }
-        
-        return constraints
-    
-    def _extract_regulatory_constraints(self, description: str) -> Dict[str, Any]:
-        """Extract regulatory constraints"""
-        regulations = []
-        
-        # Common regulations
-        reg_patterns = {
-            "PCI-DSS": r"PCI[\s-]?DSS",
-            "HIPAA": r"HIPAA",
-            "GDPR": r"GDPR",
-            "SOX": r"SOX|Sarbanes",
-            "NERC-CIP": r"NERC[\s-]?CIP",
-            "FISMA": r"FISMA"
-        }
-        
-        for reg_name, pattern in reg_patterns.items():
-            if re.search(pattern, description, re.IGNORECASE):
-                regulations.append(reg_name)
-        
-        return {
-            "frameworks": regulations,
-            "audit_frequency": "periodic",
-            "change_approval": "required" if regulations else "standard"
-        }
-    
-    def _extract_business_constraints(self, description: str) -> Dict[str, Any]:
-        """Extract business constraints"""
-        constraints = {}
-        
-        # Availability
-        sla_match = re.search(r"(\d+\.?\d*)\s*%\s*(?:SLA|availability|uptime)", description, re.IGNORECASE)
-        if sla_match:
-            constraints["availability_requirement"] = f"{sla_match.group(1)}% SLA"
-        
-        # Transaction volume
-        volume_match = re.search(r"(\d+[MKB]?)\+?\s*(?:transactions?|requests?)/(?:day|hour|minute)", description, re.IGNORECASE)
-        if volume_match:
-            constraints["transaction_volume"] = volume_match.group(0)
-        
-        # Legacy requirements
-        if "legacy" in description.lower():
-            constraints["legacy_integration"] = "required"
+            mission_data = json.loads(content)
             
-        return constraints
-    
-    def _extract_organizational_constraints(self, description: str) -> Dict[str, Any]:
-        """Extract organizational constraints"""
-        return {
-            "risk_appetite": "low",  # Default for critical systems
-            "security_maturity": "developing",
-            "change_capacity": "moderate"
-        }
-    
-    async def _extract_environmental_assumptions(self, description: str) -> Dict[str, Any]:
-        """Extract environmental assumptions"""
-        assumptions = {
-            "user_behavior": [],
-            "threat_landscape": [],
-            "infrastructure": [],
-            "trust_relationships": []
-        }
-        
-        # User behavior assumptions
-        if "untrusted" in description.lower() or "internet" in description.lower():
-            assumptions["user_behavior"].append("untrusted_networks")
-        if "mobile" in description.lower():
-            assumptions["user_behavior"].append("mobile_device_usage")
-        
-        # Threat assumptions
-        if "nation" in description.lower() and "state" in description.lower():
-            assumptions["threat_landscape"].append("nation_state_actors")
-        if "insider" in description.lower():
-            assumptions["threat_landscape"].append("insider_threats")
-        if "sophisticated" in description.lower():
-            assumptions["threat_landscape"].append("sophisticated_adversaries")
-        
-        # Infrastructure assumptions
-        if "cloud" in description.lower():
-            assumptions["infrastructure"].append("cloud_deployment")
-        if "hybrid" in description.lower():
-            assumptions["infrastructure"].append("hybrid_infrastructure")
-        
-        return assumptions
+            # Validate structure
+            required_keys = ["problem_statement", "mission_context", "operational_constraints", "environmental_assumptions"]
+            for key in required_keys:
+                if key not in mission_data:
+                    raise ValueError(f"Missing required key: {key}")
+            
+            return mission_data
+            
+        except Exception as e:
+            await self.log_activity(f"LLM mission analysis failed: {e}", {"error": str(e)})
+            # Re-raise the exception - analysis should fail if LLM fails
+            raise
     
     def validate_abstraction_level(self, content: str) -> bool:
         """Validate mission-level abstraction"""

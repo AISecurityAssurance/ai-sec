@@ -6,7 +6,8 @@ import re
 import json
 from uuid import uuid4
 
-from .base_step1 import BaseStep1Agent
+from .base_step1 import BaseStep1Agent, CognitiveStyle
+from core.utils.llm_client import llm_manager
 
 
 class StakeholderAnalystAgent(BaseStep1Agent):
@@ -33,29 +34,12 @@ class StakeholderAnalystAgent(BaseStep1Agent):
         mission_context = prior_results.get('mission_analyst', {}).get('mission_context', {})
         losses = prior_results.get('loss_identification', {}).get('losses', [])
         
-        # Identify different stakeholder types
-        users = await self._identify_user_stakeholders(system_description, mission_context)
-        operators = await self._identify_operator_stakeholders(system_description, mission_context)
-        regulators = await self._identify_regulator_stakeholders(system_description, mission_context)
-        beneficiaries = await self._identify_beneficiary_stakeholders(system_description, mission_context)
+        # Always use LLM for analysis
+        stakeholder_data = await self._analyze_stakeholders_with_llm(system_description, mission_context, losses)
         
-        # Combine all non-adversary stakeholders
-        all_stakeholders = users + operators + regulators + beneficiaries
-        
-        # Analyze stakeholder perspectives
-        for stakeholder in all_stakeholders:
-            stakeholder['mission_perspective'] = await self._analyze_mission_perspective(
-                stakeholder, mission_context
-            )
-            stakeholder['loss_exposure'] = await self._analyze_loss_exposure(
-                stakeholder, losses
-            )
-            stakeholder['influence_interest'] = await self._analyze_influence_interest(
-                stakeholder, mission_context
-            )
-        
-        # Identify adversaries
-        adversaries = await self._identify_adversaries(system_description, mission_context)
+        # Extract stakeholders
+        all_stakeholders = stakeholder_data.get('stakeholders', [])
+        adversaries = stakeholder_data.get('adversaries', [])
         
         # Create stakeholder analysis
         stakeholder_matrix = await self._create_stakeholder_matrix(all_stakeholders)
@@ -774,6 +758,137 @@ class StakeholderAnalystAgent(BaseStep1Agent):
             s_type = stakeholder['stakeholder_type']
             types[s_type] = types.get(s_type, 0) + 1
         return types
+    
+    async def _analyze_stakeholders_hardcoded(self, description: str, mission_context: Dict[str, Any], 
+                                             losses: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Fallback hardcoded stakeholder analysis"""
+        # Identify different stakeholder types
+        users = await self._identify_user_stakeholders(description, mission_context)
+        operators = await self._identify_operator_stakeholders(description, mission_context)
+        regulators = await self._identify_regulator_stakeholders(description, mission_context)
+        beneficiaries = await self._identify_beneficiary_stakeholders(description, mission_context)
+        
+        # Combine all non-adversary stakeholders
+        all_stakeholders = users + operators + regulators + beneficiaries
+        
+        # Identify adversaries
+        adversaries = await self._identify_adversaries(description, mission_context)
+        
+        return {
+            "stakeholders": all_stakeholders,
+            "adversaries": adversaries
+        }
+    
+    async def _analyze_stakeholders_with_llm(self, description: str, mission_context: Dict[str, Any], 
+                                           losses: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Use LLM to analyze stakeholders based on cognitive style"""
+        # Get cognitive style prompt modifier
+        style_modifier = self.get_cognitive_style_prompt_modifier()
+        
+        # Format losses for prompt
+        losses_summary = "\n".join([f"- {loss['identifier']}: {loss['description']}" for loss in losses[:10]])
+        
+        # Build the prompt
+        prompt = f"""{style_modifier}
+
+You are a security analyst performing STPA-Sec Step 1 stakeholder analysis.
+
+System Description:
+{description}
+
+Mission Context:
+{json.dumps(mission_context, indent=2)}
+
+Identified Losses:
+{losses_summary}
+
+Analyze all stakeholders and adversaries for this system.
+
+For STAKEHOLDERS (legitimate users of the system), identify:
+1. Name and type (user, operator, regulator, beneficiary)
+2. Description of their relationship to the system
+3. Mission perspective (what they need from the system)
+4. Loss exposure (which losses affect them)
+5. Influence/interest analysis (influence_level, interest_level, engagement_strategy)
+6. Criticality (primary, essential, important, secondary)
+
+For ADVERSARIES (threat actors), identify:
+1. Adversary class (nation_state, organized_crime, insider, hacktivist, opportunist)
+2. Profile (sophistication, resources, persistence, primary_interest, geographic_scope)
+3. Mission targets (what they're interested in, value perception, historical interest)
+
+Provide your response as a JSON object with the following structure:
+{{
+  "stakeholders": [
+    {{
+      "name": "Stakeholder Name",
+      "stakeholder_type": "user|operator|regulator|beneficiary",
+      "description": "Their relationship to the system",
+      "criticality": "primary|essential|important|secondary",
+      "mission_perspective": {{
+        "primary_needs": ["need1", "need2"],
+        "value_derived": "What value they get from the system",
+        "success_criteria": "What constitutes success for them"
+      }},
+      "loss_exposure": [
+        {{
+          "loss_id": "L-X",
+          "impact": "catastrophic|major|moderate|minor",
+          "description": "How this loss affects them"
+        }}
+      ],
+      "influence_interest": {{
+        "influence_level": "very_high|high|medium|low",
+        "interest_level": "high|medium|low",
+        "engagement_strategy": "manage_closely|keep_satisfied|keep_informed|monitor"
+      }}
+    }}
+  ],
+  "adversaries": [
+    {{
+      "adversary_class": "adversary_type",
+      "profile": {{
+        "sophistication": "advanced|high|moderate|low",
+        "resources": "unlimited|significant|moderate|limited|minimal",
+        "persistence": "persistent|long_term|campaign_based|opportunistic|short_term",
+        "primary_interest": "strategic_advantage|financial_gain|ideological|personal_gain|easy_gains",
+        "geographic_scope": "global|international|regional|local"
+      }},
+      "mission_targets": {{
+        "interested_in": ["target1", "target2"],
+        "value_perception": "strategic_target|high_value_target|symbolic_target|target_of_opportunity|volume_target",
+        "historical_interest": "active_reconnaissance|known_targeting|periodic_campaigns|common_threat|constant_scanning"
+      }}
+    }}
+  ]
+}}
+
+IMPORTANT: Consider all types of stakeholders and realistic adversary profiles for this system type."""
+        
+        try:
+            # Call LLM
+            response = await llm_manager.generate(prompt, temperature=0.7, max_tokens=3000)
+            
+            # Parse JSON response
+            content = response.content.strip()
+            # Extract JSON from markdown code blocks if present
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0].strip()
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0].strip()
+            
+            stakeholder_data = json.loads(content)
+            
+            # Validate structure
+            if "stakeholders" not in stakeholder_data or "adversaries" not in stakeholder_data:
+                raise ValueError("Response must contain 'stakeholders' and 'adversaries' keys")
+            
+            return stakeholder_data
+            
+        except Exception as e:
+            await self.log_activity(f"LLM stakeholder analysis failed: {e}", {"error": str(e)})
+            # Re-raise the exception - analysis should fail if LLM fails
+            raise
     
     def validate_abstraction_level(self, content: str) -> bool:
         """Validate stakeholder content maintains mission-level abstraction"""

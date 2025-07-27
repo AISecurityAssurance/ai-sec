@@ -1,0 +1,234 @@
+{
+  "hazards": [
+    {
+      "identifier": "H-1",
+      "description": "System operates with compromised authentication mechanisms allowing unauthorized access",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "identity_verification",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "moderate", "likelihood": "rare"},
+          "degraded": {"impact": "high", "likelihood": "possible"},
+          "emergency": {"impact": "catastrophic", "likelihood": "likely"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "minimal", "detection": "easy"},
+          "moderate": {"impact": "moderate", "detection": "moderate"},
+          "severe": {"impact": "high", "detection": "hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "Continuous vulnerability requiring constant monitoring",
+        "duration": "continuous"
+      }
+    },
+    {
+      "identifier": "H-2",
+      "description": "System operates without effective encryption of sensitive financial data in transit or at rest",
+      "hazard_category": "confidentiality_breached",
+      "affected_system_property": "data_protection",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "high", "likelihood": "rare"},
+          "degraded": {"impact": "catastrophic", "likelihood": "possible"},
+          "emergency": {"impact": "catastrophic", "likelihood": "likely"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "moderate", "detection": "moderate"},
+          "moderate": {"impact": "high", "detection": "hard"},
+          "severe": {"impact": "catastrophic", "detection": "very_hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "Persistent exposure of sensitive data",
+        "duration": "continuous"
+      }
+    },
+    {
+      "identifier": "H-3",
+      "description": "System operates in degraded state with critical services unavailable or unresponsive",
+      "hazard_category": "availability_degraded",
+      "affected_system_property": "service_availability",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "moderate", "likelihood": "rare"},
+          "peak": {"impact": "high", "likelihood": "possible"},
+          "crisis": {"impact": "catastrophic", "likelihood": "likely"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "low", "detection": "easy"},
+          "moderate": {"impact": "moderate", "detection": "moderate"},
+          "severe": {"impact": "high", "detection": "hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "periodic",
+        "when_present": "During peak usage, maintenance windows, or system failures",
+        "duration": "intermittent"
+      }
+    },
+    {
+      "identifier": "H-4",
+      "description": "System operates without real-time fraud detection capabilities",
+      "hazard_category": "capability_lost",
+      "affected_system_property": "fraud_detection",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "moderate", "likelihood": "rare"},
+          "high_volume": {"impact": "high", "likelihood": "possible"},
+          "attack": {"impact": "catastrophic", "likelihood": "likely"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "low", "detection": "easy"},
+          "moderate": {"impact": "moderate", "detection": "hard"},
+          "severe": {"impact": "catastrophic", "detection": "very_hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "periodic",
+        "when_present": "During model updates, system maintenance, or targeted attacks",
+        "duration": "transient"
+      }
+    },
+    {
+      "identifier": "H-5",
+      "description": "System operates with incomplete or inaccurate audit logging preventing compliance verification",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "audit_integrity",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "low", "likelihood": "rare"},
+          "degraded": {"impact": "moderate", "likelihood": "possible"},
+          "emergency": {"impact": "high", "likelihood": "likely"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "minimal", "detection": "hard"},
+          "moderate": {"impact": "moderate", "detection": "very_hard"},
+          "severe": {"impact": "high", "detection": "extremely_hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "Continuous risk to compliance posture",
+        "duration": "continuous"
+      }
+    }
+  ],
+  "hazard_count": 5,
+  "hazard_categories": {
+    "integrity_compromised": 2,
+    "confidentiality_breached": 1,
+    "availability_degraded": 1,
+    "capability_lost": 1
+  },
+  "hazard_loss_mappings": [
+    {
+      "id": "map-1",
+      "hazard_id": "H-1",
+      "loss_id": "L-1",
+      "relationship_strength": "direct",
+      "rationale": "Compromised authentication directly enables unauthorized financial transactions",
+      "conditions": ["Valid credentials compromised", "Insufficient additional verification"]
+    },
+    {
+      "id": "map-2",
+      "hazard_id": "H-2",
+      "loss_id": "L-3",
+      "relationship_strength": "direct",
+      "rationale": "Lack of encryption directly exposes customer financial data",
+      "conditions": ["Data intercepted in transit", "Storage systems compromised"]
+    },
+    {
+      "id": "map-3",
+      "hazard_id": "H-3",
+      "loss_id": "L-4",
+      "relationship_strength": "direct",
+      "rationale": "Service unavailability directly prevents mission accomplishment",
+      "conditions": ["Critical services affected", "No failover available"]
+    },
+    {
+      "id": "map-4",
+      "hazard_id": "H-4",
+      "loss_id": "L-1",
+      "relationship_strength": "conditional",
+      "rationale": "Lack of fraud detection enables financial losses when attacks occur",
+      "conditions": ["Active fraud attempts", "Detection gap coincides with attack"]
+    },
+    {
+      "id": "map-5",
+      "hazard_id": "H-5",
+      "loss_id": "L-2",
+      "relationship_strength": "conditional",
+      "rationale": "Incomplete audit logs prevent compliance demonstration during audits",
+      "conditions": ["Regulatory audit occurs", "Critical logs missing"]
+    }
+  ],
+  "temporal_analysis": {
+    "always_present": [
+      {
+        "hazard_id": "H-1",
+        "description": "System operates with compromised authentication mechanisms allowing unauthorized access"
+      },
+      {
+        "hazard_id": "H-2",
+        "description": "System operates without effective encryption of sensitive financial data in transit or at rest"
+      },
+      {
+        "hazard_id": "H-5",
+        "description": "System operates with incomplete or inaccurate audit logging preventing compliance verification"
+      }
+    ],
+    "periodic": [
+      {
+        "hazard_id": "H-3",
+        "description": "System operates in degraded state with critical services unavailable or unresponsive",
+        "when": "During peak usage, maintenance windows, or system failures"
+      },
+      {
+        "hazard_id": "H-4",
+        "description": "System operates without real-time fraud detection capabilities",
+        "when": "During model updates, system maintenance, or targeted attacks"
+      }
+    ],
+    "conditional": [],
+    "coverage_gaps": [
+      {
+        "gap_type": "temporal",
+        "description": "Periodic hazards create vulnerability windows",
+        "affected_hazards": ["H-3", "H-4"]
+      }
+    ]
+  },
+  "environmental_analysis": {
+    "threat_escalation_pattern": "System shows progressive degradation with increasing threat levels",
+    "highest_risk_conditions": ["emergency operations with severe threats"],
+    "environmental_dependencies": ["network availability", "third-party service uptime", "threat intelligence feeds"]
+  },
+  "coverage_analysis": {
+    "covered_losses": ["L-1", "L-2", "L-3", "L-4"],
+    "uncovered_losses": ["L-5"],
+    "coverage_percentage": 80.0,
+    "loss_hazard_ratio": {
+      "L-1": 2,
+      "L-2": 1,
+      "L-3": 1,
+      "L-4": 1,
+      "L-5": 0
+    }
+  },
+  "cognitive_style": "enhanced",
+  "cognitive_synthesis": {
+    "styles_used": ["intuitive", "technical"],
+    "synthesis_method": "integrated_analysis",
+    "intuitive_insights": "Identified subtle temporal vulnerabilities and cascading effects",
+    "technical_insights": "Mapped specific technical failure modes to compliance gaps"
+  },
+  "analysis_metadata": {
+    "agent_type": "hazard_identification",
+    "analysis_id": "demo-banking-2024-01",
+    "timestamp": "2024-01-15T10:10:00Z",
+    "version": "1.0"
+  }
+}

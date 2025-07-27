@@ -6,7 +6,8 @@ import re
 import json
 from uuid import uuid4
 
-from .base_step1 import BaseStep1Agent
+from .base_step1 import BaseStep1Agent, CognitiveStyle
+from core.utils.llm_client import llm_manager
 
 
 class HazardIdentificationAgent(BaseStep1Agent):
@@ -33,23 +34,15 @@ class HazardIdentificationAgent(BaseStep1Agent):
         losses = prior_results.get('loss_identification', {}).get('losses', [])
         mission_context = prior_results.get('mission_analyst', {}).get('mission_context', {})
         
-        # Identify hazards by category
-        integrity_hazards = await self._identify_integrity_hazards(system_description, losses, mission_context)
-        confidentiality_hazards = await self._identify_confidentiality_hazards(system_description, losses, mission_context)
-        availability_hazards = await self._identify_availability_hazards(system_description, losses, mission_context)
-        capability_hazards = await self._identify_capability_hazards(system_description, losses, mission_context)
-        
-        # Combine all hazards
-        all_hazards = integrity_hazards + confidentiality_hazards + availability_hazards + capability_hazards
+        # Always use LLM for analysis
+        hazards = await self._identify_hazards_with_llm(system_description, losses, mission_context)
         
         # Assign identifiers
-        hazards = []
-        for i, hazard in enumerate(all_hazards):
+        for i, hazard in enumerate(hazards):
             hazard['identifier'] = f"H-{i+1}"
-            hazards.append(hazard)
         
-        # Create hazard-loss mappings
-        mappings = await self._create_hazard_loss_mappings(hazards, losses)
+        # Create hazard-loss mappings using LLM
+        mappings = await self._create_hazard_loss_mappings_with_llm(hazards, losses)
         
         # Analyze temporal exposure
         temporal_analysis = await self._analyze_temporal_exposure(hazards)
@@ -64,7 +57,8 @@ class HazardIdentificationAgent(BaseStep1Agent):
             "hazard_loss_mappings": mappings,
             "temporal_analysis": temporal_analysis,
             "environmental_analysis": environmental_analysis,
-            "coverage_analysis": await self._analyze_loss_coverage(hazards, losses, mappings)
+            "coverage_analysis": await self._analyze_loss_coverage(hazards, losses, mappings),
+            "cognitive_style": self.cognitive_style.value
         }
         
         await self.save_results(results)
@@ -75,286 +69,74 @@ class HazardIdentificationAgent(BaseStep1Agent):
         
         return results
     
-    async def _identify_integrity_hazards(self, description: str, losses: List[Dict[str, Any]], 
-                                         mission_context: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Identify integrity-related hazardous states"""
-        hazards = []
+    async def _create_hazard_loss_mappings_with_llm(self, hazards: List[Dict[str, Any]], 
+                                                   losses: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Use LLM to create mappings between hazards and losses"""
+        # Get cognitive style prompt modifier
+        style_modifier = self.get_cognitive_style_prompt_modifier()
         
-        # Common integrity concerns
-        integrity_patterns = [
-            ("authentication", "System operates with compromised identity verification integrity"),
-            ("authorization", "System operates without proper access control integrity"),
-            ("transaction", "System operates without transaction integrity assurance"),
-            ("data integrity", "System operates with compromised data integrity mechanisms")
-        ]
+        # Format hazards and losses for prompt
+        hazards_summary = "\n".join([f"- {h['identifier']}: {h['description']} (Category: {h['hazard_category']})" for h in hazards])
+        losses_summary = "\n".join([f"- {l['identifier']}: {l['description']} (Category: {l['loss_category']})" for l in losses])
         
-        for keyword, state_description in integrity_patterns:
-            if keyword in description.lower():
-                hazards.append({
-                    "description": state_description,
-                    "hazard_category": "integrity_compromised",
-                    "affected_system_property": self._extract_affected_property(state_description),
-                    "environmental_factors": {
-                        "operational_conditions": {
-                            "normal": {"impact": "moderate", "likelihood": "rare"},
-                            "degraded": {"impact": "high", "likelihood": "possible"},
-                            "emergency": {"impact": "catastrophic", "likelihood": "likely"}
-                        },
-                        "threat_conditions": {
-                            "baseline": {"system_resilience": "adequate"},
-                            "elevated": {"system_resilience": "stressed"},
-                            "severe": {"system_resilience": "compromised"}
-                        }
-                    },
-                    "temporal_nature": {
-                        "existence": "always",
-                        "mission_relevance": "Creates persistent vulnerability to mission compromise"
-                    }
-                })
+        # Build the prompt
+        prompt = f"""{style_modifier}
+
+You are analyzing relationships between hazards and losses in STPA-Sec Step 1.
+
+Hazards (System States):
+{hazards_summary}
+
+Losses (Unacceptable Outcomes):
+{losses_summary}
+
+Map each hazard to the losses it could lead to. Consider:
+1. Direct relationships where the hazard directly causes the loss
+2. Conditional relationships where additional factors are needed
+3. Indirect relationships where the hazard contributes to conditions enabling the loss
+
+For each meaningful mapping, provide:
+- The hazard and loss being mapped
+- Relationship strength (direct, conditional, indirect)
+- Rationale explaining the connection
+- Enabling conditions that must be present
+
+Provide your response as a JSON array of mapping objects:
+[
+  {{
+    "hazard_id": "H-X",
+    "loss_id": "L-Y",
+    "relationship_strength": "direct|conditional|indirect",
+    "rationale": "Explanation of how this hazard leads to this loss",
+    "conditions": ["condition1", "condition2"]
+  }}
+]
+
+Only include mappings that are meaningful for risk analysis. Avoid tenuous connections."""
         
-        return hazards
-    
-    async def _identify_confidentiality_hazards(self, description: str, losses: List[Dict[str, Any]], 
-                                               mission_context: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Identify confidentiality-related hazardous states"""
-        hazards = []
-        
-        confidentiality_keywords = ["privacy", "confidential", "sensitive", "encryption", "data protection"]
-        
-        if any(keyword in description.lower() for keyword in confidentiality_keywords):
-            hazards.append({
-                "description": "System operates with data protection mechanisms in compromised state",
-                "hazard_category": "confidentiality_breached",
-                "affected_system_property": "data_protection",
-                "environmental_factors": {
-                    "operational_conditions": {
-                        "normal": {"impact": "high", "likelihood": "very_rare"},
-                        "degraded": {"impact": "catastrophic", "likelihood": "possible"},
-                        "emergency": {"impact": "catastrophic", "likelihood": "likely"}
-                    },
-                    "threat_conditions": {
-                        "baseline": {"exposure_window": "limited"},
-                        "elevated": {"exposure_window": "extended"},
-                        "severe": {"exposure_window": "continuous"}
-                    }
-                },
-                "temporal_nature": {
-                    "existence": "always",
-                    "mission_relevance": "Exposes mission-critical information continuously"
-                }
-            })
-        
-        return hazards
-    
-    async def _identify_availability_hazards(self, description: str, losses: List[Dict[str, Any]], 
-                                           mission_context: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Identify availability-related hazardous states"""
-        hazards = []
-        
-        availability_keywords = ["availability", "service", "uptime", "24/7", "real-time"]
-        
-        if any(keyword in description.lower() for keyword in availability_keywords):
-            hazards.append({
-                "description": "System operates in degraded state preventing mission accomplishment",
-                "hazard_category": "availability_degraded",
-                "affected_system_property": "service_availability",
-                "environmental_factors": {
-                    "operational_conditions": {
-                        "normal": {"impact": "moderate", "likelihood": "rare"},
-                        "peak": {"impact": "high", "likelihood": "possible"},
-                        "crisis": {"impact": "catastrophic", "likelihood": "likely"}
-                    },
-                    "threat_conditions": {
-                        "baseline": {"attack_surface": "normal"},
-                        "elevated": {"attack_surface": "expanded"},
-                        "severe": {"attack_surface": "maximum"}
-                    }
-                },
-                "temporal_nature": {
-                    "existence": "always",
-                    "mission_relevance": "Directly prevents mission execution"
-                }
-            })
-        
-        return hazards
-    
-    async def _identify_capability_hazards(self, description: str, losses: List[Dict[str, Any]], 
-                                          mission_context: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Identify capability loss hazardous states"""
-        hazards = []
-        
-        # Look for specific capabilities mentioned
-        if "fraud" in description.lower() or "detection" in description.lower():
-            hazards.append({
-                "description": "System operates without effective anomaly detection capability",
-                "hazard_category": "capability_loss",
-                "affected_system_property": "operational_capability",
-                "environmental_factors": {
-                    "operational_conditions": {
-                        "normal": {"detection_gap": "minimal"},
-                        "high_volume": {"detection_gap": "moderate"},
-                        "attack": {"detection_gap": "severe"}
-                    },
-                    "threat_conditions": {
-                        "baseline": {"false_negative_rate": "acceptable"},
-                        "elevated": {"false_negative_rate": "concerning"},
-                        "severe": {"false_negative_rate": "critical"}
-                    }
-                },
-                "temporal_nature": {
-                    "existence": "periodic",
-                    "when_present": "During model updates, high-volume periods, or targeted attacks",
-                    "mission_relevance": "Creates windows of vulnerability to mission compromise"
-                }
-            })
-        
-        if "decision" in description.lower() or "automated" in description.lower():
-            hazards.append({
-                "description": "System operates with compromised decision-making integrity",
-                "hazard_category": "capability_loss",
-                "affected_system_property": "operational_capability",
-                "environmental_factors": {
-                    "operational_conditions": {
-                        "normal": {"decision_accuracy": "high"},
-                        "degraded": {"decision_accuracy": "questionable"},
-                        "compromised": {"decision_accuracy": "unreliable"}
-                    },
-                    "threat_conditions": {
-                        "baseline": {"manipulation_risk": "low"},
-                        "elevated": {"manipulation_risk": "moderate"},
-                        "severe": {"manipulation_risk": "high"}
-                    }
-                },
-                "temporal_nature": {
-                    "existence": "always",
-                    "mission_relevance": "Undermines mission decision quality"
-                }
-            })
-        
-        return hazards
-    
-    def _extract_affected_property(self, state_description: str) -> str:
-        """Extract the affected system property from state description"""
-        property_map = {
-            "identity verification": "transaction_integrity",
-            "access control": "transaction_integrity",
-            "transaction": "transaction_integrity",
-            "data integrity": "data_protection",
-            "data protection": "data_protection",
-            "service": "service_availability",
-            "detection": "operational_capability",
-            "decision": "operational_capability",
-            "authentication": "transaction_integrity",
-            "authorization": "transaction_integrity"
-        }
-        
-        desc_lower = state_description.lower()
-        for keyword, property_name in property_map.items():
-            if keyword in desc_lower:
-                return property_name
-                
-        return "mission_effectiveness"
-    
-    async def _create_hazard_loss_mappings(self, hazards: List[Dict[str, Any]], 
-                                          losses: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Create mappings between hazards and losses"""
-        mappings = []
-        
-        for hazard in hazards:
-            for loss in losses:
-                strength, rationale = self._assess_hazard_loss_relationship(hazard, loss)
-                
-                if strength:
-                    mappings.append({
-                        "id": str(uuid4()),
-                        "hazard_id": hazard['identifier'],
-                        "loss_id": loss['identifier'],
-                        "relationship_strength": strength,
-                        "rationale": rationale,
-                        "conditions": self._identify_enabling_conditions(hazard, loss)
-                    })
-        
-        return mappings
-    
-    def _assess_hazard_loss_relationship(self, hazard: Dict[str, Any], 
-                                       loss: Dict[str, Any]) -> Tuple[Optional[str], str]:
-        """Assess the relationship between a hazard and loss"""
-        hazard_category = hazard['hazard_category']
-        loss_category = loss['loss_category']
-        
-        # Direct relationships
-        direct_relationships = {
-            ('integrity_compromised', 'financial'): (
-                'direct',
-                'Compromised integrity directly enables financial losses'
-            ),
-            ('confidentiality_breached', 'privacy'): (
-                'direct',
-                'Confidentiality breach directly causes privacy loss'
-            ),
-            ('availability_degraded', 'mission'): (
-                'direct',
-                'Availability loss directly prevents mission accomplishment'
-            ),
-            ('capability_loss', 'financial'): (
-                'direct',
-                'Lost detection capability enables financial losses'
-            )
-        }
-        
-        # Conditional relationships
-        conditional_relationships = {
-            ('integrity_compromised', 'reputation'): (
-                'conditional',
-                'Integrity compromise may lead to reputation loss if discovered'
-            ),
-            ('confidentiality_breached', 'regulatory'): (
-                'conditional',
-                'Confidentiality breach triggers regulatory loss if data is regulated'
-            ),
-            ('availability_degraded', 'financial'): (
-                'conditional',
-                'Availability loss causes financial impact through SLA violations'
-            )
-        }
-        
-        # Check for matches
-        key = (hazard_category, loss_category)
-        if key in direct_relationships:
-            return direct_relationships[key]
-        elif key in conditional_relationships:
-            return conditional_relationships[key]
-        
-        # Check for any integrity hazard leading to regulatory loss
-        if hazard_category == 'integrity_compromised' and loss_category == 'regulatory':
-            return 'conditional', 'Integrity failures may violate regulatory requirements'
-        
-        # Check for any hazard leading to reputation loss
-        if loss_category == 'reputation':
-            return 'indirect', 'Any significant hazard realization can damage reputation'
-        
-        return None, ""
-    
-    def _identify_enabling_conditions(self, hazard: Dict[str, Any], 
-                                    loss: Dict[str, Any]) -> List[str]:
-        """Identify conditions that enable hazard to lead to loss"""
-        conditions = []
-        
-        # Environmental conditions
-        env_factors = hazard.get('environmental_factors', {})
-        if 'degraded' in env_factors.get('operational_conditions', {}):
-            conditions.append("System operating in degraded mode")
-        
-        # Temporal conditions
-        temporal = hazard.get('temporal_nature', {})
-        if temporal.get('existence') == 'periodic':
-            conditions.append(f"During: {temporal.get('when_present', 'specific time windows')}")
-        
-        # Threat conditions
-        if 'severe' in env_factors.get('threat_conditions', {}):
-            conditions.append("Under active adversarial pressure")
-        
-        return conditions
+        try:
+            # Call LLM
+            response = await llm_manager.generate(prompt, temperature=0.7, max_tokens=2500)
+            
+            # Parse JSON response
+            content = response.content.strip()
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0].strip()
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0].strip()
+            
+            mappings = json.loads(content)
+            
+            # Add UUIDs to each mapping
+            for mapping in mappings:
+                mapping['id'] = str(uuid4())
+            
+            return mappings
+            
+        except Exception as e:
+            await self.log_activity(f"LLM hazard-loss mapping failed: {e}", {"error": str(e)})
+            # Return empty list on failure
+            return []
     
     async def _analyze_temporal_exposure(self, hazards: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze temporal aspects of hazards"""
@@ -506,6 +288,94 @@ class HazardIdentificationAgent(BaseStep1Agent):
             category = hazard['hazard_category']
             categories[category] = categories.get(category, 0) + 1
         return categories
+    
+    
+    async def _identify_hazards_with_llm(self, description: str, losses: List[Dict[str, Any]], 
+                                        mission_context: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Use LLM to identify hazards based on cognitive style"""
+        # Get cognitive style prompt modifier
+        style_modifier = self.get_cognitive_style_prompt_modifier()
+        
+        # Format losses for prompt
+        losses_summary = "\n".join([f"- {loss['identifier']}: {loss['description']}" for loss in losses[:10]])
+        
+        # Build the prompt
+        prompt = f"""{style_modifier}
+
+You are a security analyst performing STPA-Sec Step 1 hazard identification.
+
+System Description:
+{description}
+
+Identified Losses:
+{losses_summary}
+
+Mission Context:
+{json.dumps(mission_context, indent=2)}
+
+Identify hazardous SYSTEM STATES (not actions or attacks) that could lead to the identified losses. 
+For each hazard:
+1. Describe the hazardous STATE using language like "System operates in/with/without..."
+2. Categorize as: integrity_compromised, confidentiality_breached, availability_degraded, or capability_lost
+3. Identify which system property is affected
+4. Assess environmental factors (operational conditions, threat conditions)
+5. Describe temporal nature (always present, periodic, conditional)
+
+Provide your response as a JSON array of hazard objects with the following structure:
+[
+  {{
+    "description": "System operates with/in/without... (state description)",
+    "hazard_category": "integrity_compromised|confidentiality_breached|availability_degraded|capability_lost",
+    "affected_system_property": "property name",
+    "environmental_factors": {{
+      "operational_conditions": {{
+        "normal": {{"impact": "low|moderate|high", "likelihood": "rare|possible|likely"}},
+        "degraded": {{"impact": "low|moderate|high", "likelihood": "rare|possible|likely"}},
+        "emergency": {{"impact": "low|moderate|high", "likelihood": "rare|possible|likely"}}
+      }},
+      "threat_conditions": {{
+        "benign": {{"impact": "minimal", "detection": "easy"}},
+        "moderate": {{"impact": "moderate", "detection": "moderate"}},
+        "severe": {{"impact": "high", "detection": "hard"}}
+      }}
+    }},
+    "temporal_nature": {{
+      "existence": "always|periodic|conditional",
+      "when_present": "description of when hazard exists",
+      "duration": "continuous|intermittent|transient"
+    }}
+  }}
+]
+
+IMPORTANT: 
+- Focus on system STATES, not actions or attack methods
+- Use state-based language (operates, exists in, maintains, etc.)
+- Each hazard should clearly relate to one or more identified losses"""
+        
+        try:
+            # Call LLM
+            response = await llm_manager.generate(prompt, temperature=0.7, max_tokens=2500)
+            
+            # Parse JSON response
+            content = response.content.strip()
+            # Extract JSON from markdown code blocks if present
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0].strip()
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0].strip()
+            
+            hazards = json.loads(content)
+            
+            # Validate structure
+            if not isinstance(hazards, list):
+                raise ValueError("Response must be a JSON array")
+            
+            return hazards
+            
+        except Exception as e:
+            await self.log_activity(f"LLM hazard identification failed: {e}", {"error": str(e)})
+            # Re-raise the exception - analysis should fail if LLM fails
+            raise
     
     def validate_abstraction_level(self, content: str) -> bool:
         """Validate hazard maintains system state abstraction"""

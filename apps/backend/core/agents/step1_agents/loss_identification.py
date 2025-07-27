@@ -6,7 +6,8 @@ import re
 import json
 from uuid import uuid4
 
-from .base_step1 import BaseStep1Agent
+from .base_step1 import BaseStep1Agent, CognitiveStyle
+from core.utils.llm_client import llm_manager
 
 
 class LossIdentificationAgent(BaseStep1Agent):
@@ -31,24 +32,15 @@ class LossIdentificationAgent(BaseStep1Agent):
         system_description = context.get('system_description', '')
         mission_results = await self.get_prior_results(['mission_analyst'])
         
-        # Extract different types of losses
-        financial_losses = await self._identify_financial_losses(system_description, mission_results)
-        regulatory_losses = await self._identify_regulatory_losses(system_description, mission_results)
-        privacy_losses = await self._identify_privacy_losses(system_description, mission_results)
-        reputation_losses = await self._identify_reputation_losses(system_description, mission_results)
-        mission_losses = await self._identify_mission_losses(system_description, mission_results)
-        
-        # Combine all losses
-        all_losses = financial_losses + regulatory_losses + privacy_losses + reputation_losses + mission_losses
+        # Always use LLM for analysis
+        losses = await self._identify_losses_with_llm(system_description, mission_results)
         
         # Assign identifiers
-        losses = []
-        for i, loss in enumerate(all_losses):
+        for i, loss in enumerate(losses):
             loss['identifier'] = f"L-{i+1}"
-            losses.append(loss)
         
-        # Identify loss dependencies
-        dependencies = await self._identify_loss_dependencies(losses)
+        # Identify loss dependencies using LLM
+        dependencies = await self._identify_loss_dependencies_with_llm(losses)
         
         # Create loss cascade analysis
         cascade_analysis = await self._analyze_loss_cascades(losses, dependencies)
@@ -59,7 +51,8 @@ class LossIdentificationAgent(BaseStep1Agent):
             "loss_categories": self._summarize_categories(losses),
             "dependencies": dependencies,
             "cascade_analysis": cascade_analysis,
-            "severity_distribution": self._analyze_severity_distribution(losses)
+            "severity_distribution": self._analyze_severity_distribution(losses),
+            "cognitive_style": self.cognitive_style.value
         }
         
         await self.save_results(results)
@@ -70,247 +63,75 @@ class LossIdentificationAgent(BaseStep1Agent):
         
         return results
     
-    async def _identify_financial_losses(self, description: str, mission_results: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Identify financial losses"""
-        losses = []
+    async def _identify_loss_dependencies_with_llm(self, losses: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Use LLM to identify dependencies between losses"""
+        # Get cognitive style prompt modifier
+        style_modifier = self.get_cognitive_style_prompt_modifier()
         
-        financial_indicators = [
-            "financial", "money", "funds", "transaction", "payment",
-            "revenue", "cost", "budget", "asset", "capital"
-        ]
+        # Format losses for prompt
+        losses_summary = "\n".join([f"- {loss['identifier']}: {loss['description']} (Category: {loss['loss_category']})" for loss in losses])
         
-        if any(indicator in description.lower() for indicator in financial_indicators):
-            # Unauthorized transactions
-            losses.append({
-                "description": "Loss of financial assets due to unauthorized transactions",
-                "loss_category": "financial",
-                "severity_classification": {
-                    "magnitude": "catastrophic",
-                    "scope": "organization_wide",
-                    "duration": "long_term",
-                    "reversibility": "difficult",
-                    "detection_difficulty": "moderate"
-                },
-                "mission_impact": {
-                    "primary_capability_loss": ["financial_integrity", "asset_protection"],
-                    "cascading_effects": ["customer_trust", "regulatory_compliance"],
-                    "stakeholder_harm": {
-                        "customers": {"type": "financial_loss", "severity": "catastrophic"},
-                        "organization": {"type": "revenue_loss", "severity": "major"}
-                    }
-                }
-            })
+        # Build the prompt
+        prompt = f"""{style_modifier}
+
+You are analyzing dependencies between identified losses in STPA-Sec Step 1.
+
+Identified Losses:
+{losses_summary}
+
+Analyze relationships between these losses to identify:
+1. Which losses trigger or enable other losses
+2. The strength and timing of these dependencies
+3. Cascading effects through the system
+
+For each dependency, provide:
+- Primary loss that triggers/enables the dependent loss
+- Type of dependency (triggers, enables, amplifies)
+- Strength (certain, likely, possible)
+- Time relationship (immediate, delayed, concurrent)
+- Rationale for the dependency
+
+Provide your response as a JSON array of dependency objects:
+[
+  {{
+    "primary_loss_id": "L-X",
+    "dependent_loss_id": "L-Y",
+    "dependency_type": "triggers|enables|amplifies",
+    "dependency_strength": "certain|likely|possible",
+    "time_relationship": {{
+      "sequence": "immediate|delayed|concurrent",
+      "typical_delay": "description of timing",
+      "persistence": "sustained|temporary|variable"
+    }},
+    "rationale": "Explanation of why this dependency exists"
+  }}
+]
+
+Focus on meaningful dependencies that affect risk analysis and mitigation strategies."""
+        
+        try:
+            # Call LLM
+            response = await llm_manager.generate(prompt, temperature=0.7, max_tokens=2000)
             
-            # Revenue loss
-            losses.append({
-                "description": "Loss of revenue due to service disruption",
-                "loss_category": "financial",
-                "severity_classification": {
-                    "magnitude": "major",
-                    "scope": "business_unit",
-                    "duration": "medium_term",
-                    "reversibility": "possible",
-                    "detection_difficulty": "easy"
-                },
-                "mission_impact": {
-                    "primary_capability_loss": ["revenue_generation", "business_continuity"],
-                    "cascading_effects": ["market_position", "investor_confidence"],
-                    "stakeholder_harm": {
-                        "organization": {"type": "revenue_loss", "severity": "major"},
-                        "shareholders": {"type": "value_loss", "severity": "moderate"}
-                    }
-                }
-            })
-        
-        return losses
-    
-    async def _identify_regulatory_losses(self, description: str, mission_results: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Identify regulatory compliance losses"""
-        losses = []
-        
-        # Check for regulatory frameworks
-        regulatory_indicators = [
-            "compliance", "regulation", "audit", "legal", "law",
-            "PCI", "GDPR", "HIPAA", "SOX", "NERC"
-        ]
-        
-        if any(indicator in description.upper() for indicator in regulatory_indicators):
-            losses.append({
-                "description": "Loss of regulatory compliance status",
-                "loss_category": "regulatory",
-                "severity_classification": {
-                    "magnitude": "catastrophic",
-                    "scope": "enterprise_wide",
-                    "duration": "long_term",
-                    "reversibility": "difficult",
-                    "detection_difficulty": "easy"
-                },
-                "mission_impact": {
-                    "primary_capability_loss": ["operational_authorization", "market_access"],
-                    "cascading_effects": ["business_operations", "reputation"],
-                    "stakeholder_harm": {
-                        "regulators": {"type": "compliance_failure", "severity": "catastrophic"},
-                        "organization": {"type": "operational_restriction", "severity": "catastrophic"}
-                    }
-                }
-            })
-        
-        return losses
-    
-    async def _identify_privacy_losses(self, description: str, mission_results: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Identify privacy-related losses"""
-        losses = []
-        
-        privacy_indicators = [
-            "privacy", "personal", "PII", "confidential", "sensitive",
-            "customer data", "user information", "private"
-        ]
-        
-        if any(indicator in description.lower() for indicator in privacy_indicators):
-            losses.append({
-                "description": "Loss of customer privacy through unauthorized data exposure",
-                "loss_category": "privacy",
-                "severity_classification": {
-                    "magnitude": "major",
-                    "scope": "customer_wide",
-                    "duration": "permanent",
-                    "reversibility": "impossible",
-                    "detection_difficulty": "hard"
-                },
-                "mission_impact": {
-                    "primary_capability_loss": ["privacy_protection", "data_confidentiality"],
-                    "cascading_effects": ["customer_trust", "legal_liability"],
-                    "stakeholder_harm": {
-                        "customers": {"type": "privacy_violation", "severity": "catastrophic"},
-                        "organization": {"type": "legal_exposure", "severity": "major"}
-                    }
-                }
-            })
-        
-        return losses
-    
-    async def _identify_reputation_losses(self, description: str, mission_results: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Identify reputation losses"""
-        losses = []
-        
-        # Reputation is often a secondary effect
-        if "customer" in description.lower() or "trust" in description.lower():
-            losses.append({
-                "description": "Loss of stakeholder trust and market confidence",
-                "loss_category": "reputation",
-                "severity_classification": {
-                    "magnitude": "major",
-                    "scope": "market_wide",
-                    "duration": "long_term",
-                    "reversibility": "very_difficult",
-                    "detection_difficulty": "moderate"
-                },
-                "mission_impact": {
-                    "primary_capability_loss": ["market_confidence", "stakeholder_trust"],
-                    "cascading_effects": ["customer_acquisition", "partner_relationships"],
-                    "stakeholder_harm": {
-                        "customers": {"type": "trust_loss", "severity": "major"},
-                        "partners": {"type": "confidence_loss", "severity": "moderate"},
-                        "investors": {"type": "value_perception", "severity": "major"}
-                    }
-                }
-            })
-        
-        return losses
-    
-    async def _identify_mission_losses(self, description: str, mission_results: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Identify mission-specific losses"""
-        losses = []
-        
-        # Extract mission context
-        mission_context = mission_results.get('mission_analyst', {}).get('mission_context', {})
-        domain = mission_context.get('domain', 'general')
-        
-        if domain == 'financial_services' or 'banking' in description.lower():
-            losses.append({
-                "description": "Loss of ability to provide financial services to customers",
-                "loss_category": "mission",
-                "severity_classification": {
-                    "magnitude": "catastrophic",
-                    "scope": "mission_wide",
-                    "duration": "variable",
-                    "reversibility": "possible",
-                    "detection_difficulty": "easy"
-                },
-                "mission_impact": {
-                    "primary_capability_loss": ["service_delivery", "mission_fulfillment"],
-                    "cascading_effects": ["customer_harm", "market_disruption"],
-                    "stakeholder_harm": {
-                        "customers": {"type": "service_denial", "severity": "catastrophic"},
-                        "organization": {"type": "mission_failure", "severity": "catastrophic"}
-                    }
-                }
-            })
-        
-        return losses
-    
-    async def _identify_loss_dependencies(self, losses: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Identify dependencies between losses"""
-        dependencies = []
-        
-        # Common dependency patterns
-        for i, primary_loss in enumerate(losses):
-            for j, dependent_loss in enumerate(losses):
-                if i == j:
-                    continue
-                    
-                # Financial losses often trigger reputation losses
-                if (primary_loss['loss_category'] == 'financial' and 
-                    dependent_loss['loss_category'] == 'reputation'):
-                    dependencies.append({
-                        "id": str(uuid4()),
-                        "primary_loss_id": primary_loss['identifier'],
-                        "dependent_loss_id": dependent_loss['identifier'],
-                        "dependency_type": "triggers",
-                        "dependency_strength": "likely",
-                        "time_relationship": {
-                            "sequence": "delayed",
-                            "typical_delay": "days_to_weeks",
-                            "persistence": "sustained"
-                        },
-                        "rationale": "Financial losses become public knowledge affecting reputation"
-                    })
-                
-                # Regulatory losses almost certainly trigger reputation losses
-                if (primary_loss['loss_category'] == 'regulatory' and 
-                    dependent_loss['loss_category'] == 'reputation'):
-                    dependencies.append({
-                        "id": str(uuid4()),
-                        "primary_loss_id": primary_loss['identifier'],
-                        "dependent_loss_id": dependent_loss['identifier'],
-                        "dependency_type": "triggers",
-                        "dependency_strength": "certain",
-                        "time_relationship": {
-                            "sequence": "immediate",
-                            "typical_delay": "hours_to_days",
-                            "persistence": "sustained"
-                        },
-                        "rationale": "Regulatory violations are publicly disclosed"
-                    })
-                
-                # Privacy losses enable financial losses
-                if (primary_loss['loss_category'] == 'privacy' and 
-                    dependent_loss['loss_category'] == 'financial'):
-                    dependencies.append({
-                        "id": str(uuid4()),
-                        "primary_loss_id": primary_loss['identifier'],
-                        "dependent_loss_id": dependent_loss['identifier'],
-                        "dependency_type": "enables",
-                        "dependency_strength": "possible",
-                        "time_relationship": {
-                            "sequence": "concurrent",
-                            "typical_delay": "immediate",
-                            "persistence": "variable"
-                        },
-                        "rationale": "Exposed data can be used for financial fraud"
-                    })
-        
-        return dependencies
+            # Parse JSON response
+            content = response.content.strip()
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0].strip()
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0].strip()
+            
+            dependencies = json.loads(content)
+            
+            # Add UUIDs to each dependency
+            for dep in dependencies:
+                dep['id'] = str(uuid4())
+            
+            return dependencies
+            
+        except Exception as e:
+            await self.log_activity(f"LLM dependency analysis failed: {e}", {"error": str(e)})
+            # Return empty list on failure - don't fall back to hardcoded
+            return []
     
     async def _analyze_loss_cascades(self, losses: List[Dict[str, Any]], 
                                     dependencies: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -392,6 +213,81 @@ class LossIdentificationAgent(BaseStep1Agent):
                 distribution[magnitude] += 1
                 
         return distribution
+    
+    
+    async def _identify_losses_with_llm(self, description: str, mission_results: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Use LLM to identify losses based on cognitive style"""
+        # Get cognitive style prompt modifier
+        style_modifier = self.get_cognitive_style_prompt_modifier()
+        
+        # Build the prompt
+        prompt = f"""{style_modifier}
+
+You are a security analyst performing STPA-Sec Step 1 loss identification.
+
+System Description:
+{description}
+
+Mission Context:
+{json.dumps(mission_results.get('mission_analyst', {}).get('mission_context', {}), indent=2)}
+
+Identify all potential losses (unacceptable outcomes) for this system. For each loss:
+1. Provide a clear description focusing on the outcome, not the mechanism
+2. Categorize as: financial, regulatory, privacy, reputation, or mission
+3. Assess severity with magnitude (catastrophic/major/moderate/minor), scope, duration, reversibility, and detection difficulty
+4. Identify mission impacts including capability loss, cascading effects, and stakeholder harm
+
+Provide your response as a JSON array of loss objects with the following structure:
+[
+  {{
+    "description": "Loss description",
+    "loss_category": "category",
+    "severity_classification": {{
+      "magnitude": "catastrophic|major|moderate|minor",
+      "scope": "enterprise_wide|organization_wide|business_unit|customer_wide|market_wide|mission_wide",
+      "duration": "permanent|long_term|medium_term|short_term|variable",
+      "reversibility": "impossible|very_difficult|difficult|possible|easy",
+      "detection_difficulty": "hard|moderate|easy"
+    }},
+    "mission_impact": {{
+      "primary_capability_loss": ["capability1", "capability2"],
+      "cascading_effects": ["effect1", "effect2"],
+      "stakeholder_harm": {{
+        "stakeholder_name": {{
+          "type": "harm_type",
+          "severity": "catastrophic|major|moderate|minor"
+        }}
+      }}
+    }}
+  }}
+]
+
+IMPORTANT: Focus on outcomes and consequences, not attack methods or vulnerabilities."""
+        
+        try:
+            # Call LLM
+            response = await llm_manager.generate(prompt, temperature=0.7, max_tokens=2000)
+            
+            # Parse JSON response
+            content = response.content.strip()
+            # Extract JSON from markdown code blocks if present
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0].strip()
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0].strip()
+            
+            losses = json.loads(content)
+            
+            # Validate structure
+            if not isinstance(losses, list):
+                raise ValueError("Response must be a JSON array")
+            
+            return losses
+            
+        except Exception as e:
+            await self.log_activity(f"LLM loss identification failed: {e}", {"error": str(e)})
+            # Re-raise the exception - analysis should fail if LLM fails
+            raise
     
     def validate_abstraction_level(self, content: str) -> bool:
         """Validate loss maintains mission-level abstraction"""

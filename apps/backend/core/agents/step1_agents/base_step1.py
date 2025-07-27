@@ -14,6 +14,17 @@ import asyncpg
 
 from core.agents.base import BaseAnalysisAgent
 from core.models.schemas import AgentContext, AgentResult
+from core.model_providers import get_model_client, ModelResponse
+from enum import Enum
+
+
+class CognitiveStyle(str, Enum):
+    """Cognitive styles for ASI-ARCH Dream Team approach"""
+    BALANCED = "balanced"  # Default single-agent mode
+    INTUITIVE = "intuitive"  # Fast, aesthetic, pattern recognition
+    TECHNICAL = "technical"  # Fast, technical, pragmatic execution
+    CREATIVE = "creative"  # Slow, aesthetic, novel connections
+    SYSTEMATIC = "systematic"  # Slow, technical, rigorous verification
 
 
 class BaseStep1Agent(ABC):
@@ -26,11 +37,13 @@ class BaseStep1Agent(ABC):
     - Mission impacts (not technical details)
     """
     
-    def __init__(self, analysis_id: str, db_connection: Optional[asyncpg.Connection] = None):
+    def __init__(self, analysis_id: str, db_connection: Optional[asyncpg.Connection] = None,
+                 cognitive_style: CognitiveStyle = CognitiveStyle.BALANCED):
         self.analysis_id = analysis_id
         self.db_connection = db_connection
         self.agent_id = str(uuid4())
         self.created_at = datetime.now()
+        self.cognitive_style = cognitive_style
         
     @abstractmethod
     async def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -175,3 +188,95 @@ class BaseStep1Agent(ABC):
                 json.dumps(results),
                 datetime.now()
             )
+    
+    async def call_llm(self, prompt: str, system_prompt: Optional[str] = None) -> str:
+        """
+        Call the configured LLM with cognitive style modifications
+        
+        Args:
+            prompt: User prompt
+            system_prompt: Optional system prompt
+            
+        Returns:
+            LLM response content
+        """
+        # Get cognitive style modifier
+        style_modifier = self.get_cognitive_style_prompt_modifier()
+        
+        # Build messages
+        messages = []
+        
+        if system_prompt:
+            # Prepend cognitive style to system prompt
+            full_system = f"{style_modifier}\n\n{system_prompt}" if style_modifier else system_prompt
+            messages.append({"role": "system", "content": full_system})
+        elif style_modifier:
+            # Add style modifier as system message if no system prompt
+            messages.append({"role": "system", "content": style_modifier})
+            
+        messages.append({"role": "user", "content": prompt})
+        
+        # Get model client and generate response
+        try:
+            client = get_model_client()
+            response = await client.generate(messages, temperature=0.7)
+            return response.content
+        except Exception as e:
+            raise RuntimeError(f"LLM call failed: {str(e)}") from e
+    
+    def get_cognitive_style_prompt_modifier(self) -> str:
+        """
+        Get prompt modifications based on cognitive style
+        
+        Returns:
+            String to prepend to prompts to influence cognitive style
+        """
+        modifiers = {
+            CognitiveStyle.BALANCED: "",  # No modification for default
+            
+            CognitiveStyle.INTUITIVE: """Think like an intuitive pattern recognizer:
+- Trust your instincts about what "feels" wrong or dangerous
+- Look for non-obvious patterns and emergent risks
+- Consider the aesthetic and human aspects of the system
+- Identify risks that might not be immediately measurable
+- Focus on the "big picture" and systemic issues
+
+""",
+            
+            CognitiveStyle.TECHNICAL: """Think like a pragmatic technical implementer:
+- Focus on concrete, measurable, and exploitable vulnerabilities
+- Consider practical attack vectors and failure modes
+- Emphasize technically feasible risks
+- Be specific about mechanisms and dependencies
+- Prioritize high-impact, high-likelihood scenarios
+
+""",
+            
+            CognitiveStyle.CREATIVE: """Think like a creative innovator:
+- Imagine novel and unexpected failure scenarios
+- Consider edge cases and unusual combinations
+- Think "outside the box" about potential risks
+- Explore unconventional attack vectors
+- Don't limit yourself to known patterns
+
+""",
+            
+            CognitiveStyle.SYSTEMATIC: """Think like a systematic validator:
+- Ensure comprehensive and complete coverage
+- Check for logical consistency and completeness
+- Validate that nothing important is missed
+- Be rigorous and methodical in your analysis
+- Ensure MECE (Mutually Exclusive, Collectively Exhaustive) categorization
+
+"""
+        }
+        
+        return modifiers.get(self.cognitive_style, "")
+    
+    def should_emphasize_novelty(self) -> bool:
+        """Whether this cognitive style should emphasize novel findings"""
+        return self.cognitive_style in [CognitiveStyle.INTUITIVE, CognitiveStyle.CREATIVE]
+    
+    def should_emphasize_rigor(self) -> bool:
+        """Whether this cognitive style should emphasize rigorous validation"""
+        return self.cognitive_style in [CognitiveStyle.TECHNICAL, CognitiveStyle.SYSTEMATIC]

@@ -330,3 +330,8 @@ async def export_analysis(
         "message": "Export functionality not yet implemented",
         "requested_format": format
     }
+
+
+# Include Step 1 specific routes
+from api.stpa_sec_step1 import router as step1_router
+router.include_router(step1_router, prefix="/step1", tags=["STPA-Sec Step 1"])

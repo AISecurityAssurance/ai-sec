@@ -50,7 +50,10 @@ class Step1CLI:
         self._setup_api_keys(config)
         
         # Create analysis database
-        db_name = await self._create_analysis_database(config)
+        db_name, timestamp = await self._create_analysis_database(config)
+        
+        # Store timestamp for consistent file naming
+        self._timestamp = timestamp
         
         # Read system description
         system_description = self._read_system_description(config)
@@ -205,9 +208,13 @@ class Step1CLI:
         from core.utils.llm_client import llm_manager
         llm_manager.reinitialize()
     
-    async def _create_analysis_database(self, config: dict) -> str:
-        """Create new PostgreSQL database for analysis"""
-        # Generate database name
+    async def _create_analysis_database(self, config: dict) -> tuple[str, str]:
+        """Create new PostgreSQL database for analysis
+        
+        Returns:
+            Tuple of (db_name, timestamp)
+        """
+        # Generate timestamp and database name
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         db_name = f"stpa_analysis_{timestamp}"
         
@@ -240,7 +247,7 @@ class Step1CLI:
         finally:
             await sys_conn.close()
         
-        return db_name
+        return db_name, timestamp
     
     def _read_system_description(self, config: dict) -> str:
         """Read system description from configured source"""
@@ -268,16 +275,25 @@ class Step1CLI:
         # Get project root (two levels up from backend)
         project_root = Path(__file__).parent.parent.parent
         
+        # Get timestamp from database name or use stored timestamp
+        if hasattr(self, '_timestamp'):
+            timestamp = self._timestamp
+        else:
+            # Extract timestamp from db_name if not available
+            timestamp = db_name.replace('stpa_analysis_', '')
+        
         # Use configured output_dir or default to root-level analysis directory
         if 'output_dir' in config['analysis']:
-            output_dir = Path(config['analysis']['output_dir'])
+            base_dir = Path(config['analysis']['output_dir'])
             # If it's a relative path, make it relative to project root
-            if not output_dir.is_absolute():
-                output_dir = project_root / output_dir
+            if not base_dir.is_absolute():
+                base_dir = project_root / base_dir
         else:
             # Default to analysis directory at root level
-            output_dir = project_root / 'analysis' / db_name
+            base_dir = project_root / 'analysis'
         
+        # Create timestamped subdirectory
+        output_dir = base_dir / timestamp
         output_dir.mkdir(parents=True, exist_ok=True)
         
         # Save configuration (without secrets)
@@ -297,6 +313,9 @@ class Step1CLI:
         # Store output info for display
         self._output_dir = output_dir
         self._saved_files = [config_file, results_file]
+        
+        # Export database to the same directory
+        await self._export_database(db_name, output_dir)
     
     def _display_results_summary(self, results: dict, execution_mode: str):
         """Display detailed analysis results like the demo"""
@@ -310,7 +329,10 @@ class Step1CLI:
         hazard_results = analysis_results.get('hazard_identification', {})
         constraint_results = analysis_results.get('security_constraints', {})
         boundary_results = analysis_results.get('system_boundaries', {})
+        # Try both possible keys for stakeholder results
         stakeholder_results = analysis_results.get('stakeholder_analyst', {})
+        if not stakeholder_results:
+            stakeholder_results = analysis_results.get('stakeholder_analysis', {})
         
         # Mission Statement
         if mission_results:
@@ -460,8 +482,9 @@ class Step1CLI:
             table.add_row("System Boundaries", str(boundary_count))
         
         if stakeholder_results:
-            stakeholder_count = len(stakeholder_results.get('stakeholders', []))
-            adversary_count = len(stakeholder_results.get('adversaries', []))
+            # Try both possible count fields
+            stakeholder_count = stakeholder_results.get('stakeholder_count', len(stakeholder_results.get('stakeholders', [])))
+            adversary_count = stakeholder_results.get('adversary_count', len(stakeholder_results.get('adversaries', [])))
             table.add_row("Stakeholders Identified", str(stakeholder_count))
             table.add_row("Adversaries Profiled", str(adversary_count))
         
@@ -562,6 +585,37 @@ class Step1CLI:
             for file_path in self._saved_files:
                 relative_path = file_path.relative_to(Path.cwd()) if file_path.is_relative_to(Path.cwd()) else file_path
                 self.console.print(f"  • {relative_path}")
+    
+    async def _export_database(self, db_name: str, output_dir: Path):
+        """Export PostgreSQL database to file"""
+        db_host = os.getenv('DB_HOST', 'postgres')
+        db_file = output_dir / f"{db_name}.sql"
+        
+        # Use pg_dump to export the database
+        dump_cmd = [
+            'pg_dump',
+            '-h', db_host,
+            '-U', 'sa_user',
+            '-d', db_name,
+            '-f', str(db_file),
+            '--no-password',
+            '--verbose'
+        ]
+        
+        # Set PGPASSWORD environment variable
+        env = os.environ.copy()
+        env['PGPASSWORD'] = 'sa_password'
+        
+        try:
+            import subprocess
+            result = subprocess.run(dump_cmd, env=env, capture_output=True, text=True)
+            if result.returncode == 0:
+                self.console.print(f"Exported database to: {db_file}")
+                self._saved_files.append(db_file)
+            else:
+                self.console.print(f"[yellow]Warning: Could not export database: {result.stderr}[/yellow]")
+        except Exception as e:
+            self.console.print(f"[yellow]Warning: Database export failed: {e}[/yellow]")
 
 
 async def main():

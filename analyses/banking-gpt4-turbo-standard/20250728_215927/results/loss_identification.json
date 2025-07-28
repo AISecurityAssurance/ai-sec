@@ -1,0 +1,320 @@
+{
+  "losses": [
+    {
+      "description": "Unauthorized access to customer financial data leading to data theft",
+      "loss_category": "privacy",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "customer_wide",
+        "duration": "long_term",
+        "reversibility": "difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Account Management",
+          "Security Services"
+        ],
+        "cascading_effects": [
+          "loss of trust",
+          "reduced platform usage"
+        ],
+        "stakeholder_harm": {
+          "Retail customers": {
+            "type": "identity theft, financial loss",
+            "severity": "major"
+          },
+          "Business customers": {
+            "type": "compromised business financial integrity",
+            "severity": "major"
+          },
+          "Regulators": {
+            "type": "compliance violation",
+            "severity": "moderate"
+          }
+        }
+      },
+      "identifier": "L-1"
+    },
+    {
+      "description": "Disruption of payment processing capabilities due to system failure",
+      "loss_category": "mission",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "mission_wide",
+        "duration": "medium_term",
+        "reversibility": "possible",
+        "detection_difficulty": "easy"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Payment Processing"
+        ],
+        "cascading_effects": [
+          "delayed financial transactions",
+          "market disruption"
+        ],
+        "stakeholder_harm": {
+          "Retail customers": {
+            "type": "inability to perform transactions",
+            "severity": "major"
+          },
+          "Business customers": {
+            "type": "disrupted business operations",
+            "severity": "major"
+          },
+          "Shareholders": {
+            "type": "financial loss",
+            "severity": "moderate"
+          }
+        }
+      },
+      "identifier": "L-2"
+    },
+    {
+      "description": "Financial loss due to fraudulent transactions exploiting system vulnerabilities",
+      "loss_category": "financial",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "customer_wide",
+        "duration": "short_term",
+        "reversibility": "possible",
+        "detection_difficulty": "hard"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Payment Processing",
+          "Security Services"
+        ],
+        "cascading_effects": [
+          "increased operational costs",
+          "compensation expenses"
+        ],
+        "stakeholder_harm": {
+          "Retail customers": {
+            "type": "financial loss",
+            "severity": "major"
+          },
+          "Business customers": {
+            "type": "financial loss",
+            "severity": "major"
+          },
+          "Bank employees": {
+            "type": "increased workload",
+            "severity": "moderate"
+          }
+        }
+      },
+      "identifier": "L-3"
+    },
+    {
+      "description": "Regulatory fines and sanctions due to non-compliance with GDPR, SOX, or PCI-DSS",
+      "loss_category": "regulatory",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "enterprise_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Security Services"
+        ],
+        "cascading_effects": [
+          "financial losses",
+          "reputational damage"
+        ],
+        "stakeholder_harm": {
+          "Shareholders": {
+            "type": "financial loss",
+            "severity": "major"
+          },
+          "Regulators": {
+            "type": "loss of confidence in platform's compliance",
+            "severity": "moderate"
+          }
+        }
+      },
+      "identifier": "L-4"
+    },
+    {
+      "description": "Loss of reputation due to publicized security breaches or system failures",
+      "loss_category": "reputation",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "market_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "easy"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Security Services",
+          "Payment Processing"
+        ],
+        "cascading_effects": [
+          "customer attrition",
+          "decreased market share"
+        ],
+        "stakeholder_harm": {
+          "Retail customers": {
+            "type": "loss of service reliability",
+            "severity": "moderate"
+          },
+          "Business customers": {
+            "type": "loss of service reliability",
+            "severity": "moderate"
+          },
+          "Shareholders": {
+            "type": "financial loss",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-5"
+    }
+  ],
+  "loss_count": 5,
+  "loss_categories": {
+    "privacy": 1,
+    "mission": 1,
+    "financial": 1,
+    "regulatory": 1,
+    "reputation": 1
+  },
+  "dependencies": [
+    {
+      "primary_loss_id": "L-1",
+      "dependent_loss_id": "L-4",
+      "dependency_type": "enables",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "weeks to months",
+        "persistence": "temporary"
+      },
+      "rationale": "Unauthorized access to customer financial data may lead to non-compliance incidents with GDPR, SOX, or PCI-DSS, which in turn could result in regulatory fines and sanctions.",
+      "id": "5c717992-bd10-4617-be4a-0519c07fbeae"
+    },
+    {
+      "primary_loss_id": "L-1",
+      "dependent_loss_id": "L-5",
+      "dependency_type": "triggers",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "days to weeks",
+        "persistence": "sustained"
+      },
+      "rationale": "Publicized incidents of unauthorized access to customer financial data directly harm the organization's reputation.",
+      "id": "e348ade7-389f-4097-a377-480d2572ecfd"
+    },
+    {
+      "primary_loss_id": "L-2",
+      "dependent_loss_id": "L-3",
+      "dependency_type": "enables",
+      "dependency_strength": "possible",
+      "time_relationship": {
+        "sequence": "concurrent",
+        "typical_delay": "N/A",
+        "persistence": "variable"
+      },
+      "rationale": "Disruption of payment processing capabilities may create opportunities for fraudulent transactions, especially if the disruption leads to lowered scrutiny or bypass of normal verification processes.",
+      "id": "45d398e7-8321-46f6-9ff7-09b141ec6626"
+    },
+    {
+      "primary_loss_id": "L-2",
+      "dependent_loss_id": "L-5",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "hours to days",
+        "persistence": "temporary"
+      },
+      "rationale": "System failures disrupting payment capabilities can quickly lead to negative publicity and harm the organization's reputation.",
+      "id": "f0830a31-2330-48ad-a27a-e841b2747eb9"
+    },
+    {
+      "primary_loss_id": "L-3",
+      "dependent_loss_id": "L-4",
+      "dependency_type": "enables",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "weeks to months",
+        "persistence": "temporary"
+      },
+      "rationale": "Financial losses from fraudulent transactions can indicate non-compliance with financial regulations or security standards, potentially leading to regulatory fines and sanctions.",
+      "id": "0c49de09-f0b0-44c9-849e-51dc43b092f8"
+    },
+    {
+      "primary_loss_id": "L-3",
+      "dependent_loss_id": "L-5",
+      "dependency_type": "amplifies",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "days to weeks",
+        "persistence": "sustained"
+      },
+      "rationale": "Fraudulent transactions exploiting system vulnerabilities can severely damage an organization's reputation, particularly if they are widely publicized.",
+      "id": "f46d8d01-0f94-4784-95f7-c847aaeb55d4"
+    },
+    {
+      "primary_loss_id": "L-4",
+      "dependent_loss_id": "L-5",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "immediately after fines are publicized",
+        "persistence": "temporary to sustained"
+      },
+      "rationale": "Regulatory fines and sanctions for non-compliance are often publicized, leading to a direct loss of reputation as stakeholders lose trust in the organization's ability to protect its data and operate within legal frameworks.",
+      "id": "6fc9047e-b8de-4e01-93d3-76cdcfda917b"
+    }
+  ],
+  "cascade_analysis": {
+    "primary_losses": [
+      "L-1",
+      "L-2"
+    ],
+    "cascade_chains": [
+      {
+        "chain": [
+          "L-1",
+          "L-4",
+          "L-5"
+        ],
+        "trigger": "L-1",
+        "terminal_losses": [
+          "L-5"
+        ],
+        "chain_length": 3
+      },
+      {
+        "chain": [
+          "L-2",
+          "L-3",
+          "L-4",
+          "L-5"
+        ],
+        "trigger": "L-2",
+        "terminal_losses": [
+          "L-5"
+        ],
+        "chain_length": 4
+      }
+    ],
+    "max_cascade_depth": 4
+  },
+  "severity_distribution": {
+    "catastrophic": 0,
+    "major": 5,
+    "moderate": 0,
+    "minor": 0
+  },
+  "cognitive_style": "balanced"
+}

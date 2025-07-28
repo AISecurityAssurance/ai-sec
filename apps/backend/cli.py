@@ -260,6 +260,7 @@ class Step1CLI:
                 provider=ModelProvider.OPENAI,
                 auth_method='api-key',
                 api_key=os.getenv('AZURE_OPENAI_API_KEY'),
+                api_endpoint=os.getenv('AZURE_OPENAI_API_BASE'),
                 model=os.getenv('AZURE_OPENAI_API_MODEL', 'gpt-4-turbo'),
                 is_enabled=True
             )
@@ -715,6 +716,15 @@ class Step1CLI:
         
         try:
             import subprocess
+            
+            # Check if pg_dump exists
+            check_cmd = ['which', 'pg_dump']
+            check_result = subprocess.run(check_cmd, capture_output=True, text=True)
+            if check_result.returncode != 0:
+                self.console.print("[yellow]Warning: pg_dump not found. Database export skipped.[/yellow]")
+                self.console.print("[yellow]To enable database export, rebuild the Docker image with postgresql-client.[/yellow]")
+                return
+            
             result = subprocess.run(dump_cmd, env=env, capture_output=True, text=True)
             if result.returncode == 0:
                 self.console.print(f"Exported database to: {db_file}")

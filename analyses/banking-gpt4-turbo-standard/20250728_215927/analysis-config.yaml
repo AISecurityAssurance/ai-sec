@@ -1,0 +1,18 @@
+analysis:
+  description: STPA-Sec Step 1 analysis using standard single-agent approach with
+    GPT-4 Turbo
+  name: Digital Banking Platform Security Analysis - GPT-4 Turbo Standard
+  output_dir: ./analyses/banking-gpt4-turbo-standard/
+execution:
+  mode: standard
+input:
+  path: demo/banking-analysis/system-description.txt
+  type: file
+model:
+  api_key_env: OPENAI_API_KEY
+  name: gpt-4-turbo-preview
+  provider: openai
+output:
+  exports:
+  - format: json
+  - format: markdown

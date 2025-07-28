@@ -1,0 +1,31 @@
+# Ollama Mistral standard Step 1 analysis configuration
+#
+# Prerequisites:
+# 1. Install Ollama: https://ollama.ai
+# 2. Start Ollama server: ollama serve
+# 3. Pull the model: ollama pull mistral:instruct
+#
+# No API key needed for local models
+
+analysis:
+  name: "Digital Banking Platform Security Analysis - Ollama Mistral Standard"
+  description: "STPA-Sec Step 1 analysis using standard single-agent approach with local Mistral model"
+  output_dir: "./analyses/banking-ollama-mistral-standard/"
+
+model:
+  provider: "ollama"
+  name: "mistral:instruct"  # Use instruction-tuned version for better results
+  api_endpoint: "http://localhost:11434"  # Default Ollama endpoint
+  # No api_key_env needed for Ollama
+
+execution:
+  mode: "standard"  # Single agent per task
+
+input:
+  type: "file"
+  path: "demo/banking-analysis/system-description.txt"
+
+output:
+  exports:
+    - format: "json"
+    - format: "markdown"

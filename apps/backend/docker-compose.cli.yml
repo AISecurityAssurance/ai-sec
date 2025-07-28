@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  cli:
+    build:
+      context: .
+      dockerfile: Dockerfile.cli
+    container_name: sa_cli
+    environment:
+      # Database settings - using host for existing PostgreSQL
+      POSTGRES_HOST: host.docker.internal
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: security_analyst
+      POSTGRES_USER: sa_user
+      POSTGRES_PASSWORD: sa_password
+      
+      # Model provider settings
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      
+      # Application settings
+      ENVIRONMENT: development
+      DEBUG: "true"
+      
+    volumes:
+      - .:/app
+      - ./analyses:/app/analyses  # For output
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    network_mode: "host"  # Use host network to access local PostgreSQL
+    command: /bin/bash
+
+networks:
+  default:
+    external: true
+    name: prototype1_sa_network

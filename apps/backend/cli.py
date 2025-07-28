@@ -334,7 +334,7 @@ class Step1CLI:
         with open(config_file, 'w') as f:
             yaml.dump(config_copy, f)
         
-        # Save results as JSON
+        # Save combined results as JSON
         results_file = output_dir / 'analysis-results.json'
         with open(results_file, 'w') as f:
             json.dump(results, f, indent=2, default=str)
@@ -342,6 +342,10 @@ class Step1CLI:
         # Store output info for display
         self._output_dir = output_dir
         self._saved_files = [config_file, results_file]
+        
+        # Save individual agent results
+        individual_files = self._save_individual_results(results, output_dir)
+        self._saved_files.extend(individual_files)
         
         # Generate markdown report
         report_file = await self._generate_markdown_report(config, results, output_dir)
@@ -537,6 +541,12 @@ class Step1CLI:
                 title="ASI-ARCH Dream Team Analysis"
             )
             self.console.print(panel)
+        
+        # Analysis Metrics
+        self._display_analysis_metrics(analysis_results)
+        
+        # Critical Findings
+        self._display_critical_findings(analysis_results)
     
     
     def _display_completeness_check(self, completeness: dict):
@@ -799,6 +809,173 @@ class Step1CLI:
         except Exception as e:
             self.console.print(f"[yellow]Warning: Could not generate markdown report: {e}[/yellow]")
             return None
+    
+    def _display_analysis_metrics(self, analysis_results: dict):
+        """Display analysis metrics"""
+        self.console.print("\n[bold]Analysis Metrics:[/bold]")
+        
+        # Calculate total findings
+        total_findings = 0
+        loss_results = analysis_results.get('loss_identification', {})
+        hazard_results = analysis_results.get('hazard_identification', {})
+        constraint_results = analysis_results.get('security_constraints', {})
+        boundary_results = analysis_results.get('system_boundaries', {})
+        stakeholder_results = analysis_results.get('stakeholder_analyst', {})
+        if not stakeholder_results:
+            stakeholder_results = analysis_results.get('stakeholder_analysis', {})
+        
+        if loss_results:
+            total_findings += loss_results.get('loss_count', 0)
+            total_findings += len(loss_results.get('dependencies', []))
+        if hazard_results:
+            total_findings += hazard_results.get('hazard_count', 0)
+            total_findings += len(hazard_results.get('hazard_loss_mappings', []))
+        if constraint_results:
+            total_findings += constraint_results.get('constraint_count', 0)
+            total_findings += len(constraint_results.get('constraint_hazard_mappings', []))
+        if boundary_results:
+            total_findings += len(boundary_results.get('system_boundaries', []))
+        if stakeholder_results:
+            total_findings += len(stakeholder_results.get('stakeholders', []))
+            total_findings += len(stakeholder_results.get('adversaries', []))
+        
+        self.console.print(f"  • Total findings: {total_findings}")
+        self.console.print(f"  • Loss dependencies: {len(loss_results.get('dependencies', []))}")
+        self.console.print(f"  • Hazard-loss mappings: {len(hazard_results.get('hazard_loss_mappings', []))}")
+        self.console.print(f"  • Security constraints: {constraint_results.get('constraint_count', 0)}")
+        self.console.print(f"  • Constraint-hazard mappings: {len(constraint_results.get('constraint_hazard_mappings', []))}")
+        self.console.print(f"  • System boundaries: {len(boundary_results.get('system_boundaries', []))}")
+    
+    def _display_critical_findings(self, analysis_results: dict):
+        """Display critical findings"""
+        findings = self._generate_critical_findings(analysis_results)
+        if findings:
+            self.console.print("\n[bold]Critical Findings:[/bold]")
+            for i, finding in enumerate(findings, 1):
+                self.console.print(f"\n{i}. {finding}")
+    
+    def _generate_critical_findings(self, results: dict) -> list:
+        """Generate critical findings based on analysis patterns"""
+        findings = []
+        
+        # Extract results sections
+        loss_results = results.get('loss_identification', {})
+        hazard_results = results.get('hazard_identification', {})
+        constraint_results = results.get('security_constraints', {})
+        stakeholder_results = results.get('stakeholder_analyst', {})
+        if not stakeholder_results:
+            stakeholder_results = results.get('stakeholder_analysis', {})
+        
+        # Helper to get full descriptions
+        hazards = {h['identifier']: h for h in hazard_results.get('hazards', [])}
+        losses = {l['identifier']: l for l in loss_results.get('losses', [])}
+        constraints = {c['identifier']: c for c in constraint_results.get('security_constraints', [])}
+        
+        # Direct Mappings to Catastrophic Losses
+        if hazard_results and loss_results:
+            mappings = hazard_results.get('hazard_loss_mappings', [])
+            for mapping in mappings:
+                if mapping['relationship_strength'] == 'direct':
+                    loss = losses.get(mapping['loss_id'])
+                    hazard = hazards.get(mapping['hazard_id'])
+                    if loss and hazard and loss.get('severity_classification', {}).get('magnitude') == 'catastrophic':
+                        findings.append(
+                            f"[Direct Mapping - Catastrophic Loss] {mapping['hazard_id']} maps directly to {mapping['loss_id']}\n"
+                            f"  Hazard: {hazard['description']}\n"
+                            f"  Loss: {loss['description']}"
+                        )
+        
+        # Mandatory Constraints Addressing Multiple Hazards
+        if constraint_results:
+            mappings = constraint_results.get('constraint_hazard_mappings', [])
+            constraint_hazard_count = {}
+            for mapping in mappings:
+                c_id = mapping['constraint_id']
+                constraint_hazard_count[c_id] = constraint_hazard_count.get(c_id, 0) + 1
+            
+            for c_id, count in constraint_hazard_count.items():
+                if count > 1:
+                    constraint = constraints.get(c_id)
+                    if constraint and constraint.get('enforcement_level') == 'mandatory':
+                        findings.append(
+                            f"[Mandatory Constraint] {c_id} addresses {count} hazard(s)\n"
+                            f"  Constraint: {constraint['constraint_statement']}\n"
+                            f"  Addresses: {', '.join([m['hazard_id'] for m in mappings if m['constraint_id'] == c_id])}"
+                        )
+        
+        # Dependency Chains
+        if loss_results:
+            dependencies = loss_results.get('dependencies', [])
+            # Look for chains
+            for dep1 in dependencies:
+                for dep2 in dependencies:
+                    if dep1['dependent_loss_id'] == dep2['primary_loss_id']:
+                        findings.append(
+                            f"[Dependency Chain] {dep1['primary_loss_id']} → {dep1['dependent_loss_id']} → {dep2['dependent_loss_id']}\n"
+                            f"  Chain type: {dep1['dependency_type']} → {dep2['dependency_type']}\n"
+                            f"  Time relationship: {dep1['time_relationship']['sequence']} → {dep2['time_relationship']['sequence']}"
+                        )
+        
+        # Multiple Hazards to Single Loss
+        if hazard_results and loss_results:
+            loss_hazard_count = {}
+            for mapping in hazard_results.get('hazard_loss_mappings', []):
+                l_id = mapping['loss_id']
+                if l_id not in loss_hazard_count:
+                    loss_hazard_count[l_id] = []
+                loss_hazard_count[l_id].append(mapping['hazard_id'])
+            
+            for l_id, h_ids in loss_hazard_count.items():
+                if len(h_ids) >= 3:
+                    loss = losses.get(l_id)
+                    if loss:
+                        hazard_categories = set()
+                        for h_id in h_ids[:3]:  # First 3 hazards
+                            hazard = hazards.get(h_id)
+                            if hazard:
+                                hazard_categories.add(hazard.get('hazard_category', 'unknown'))
+                        
+                        findings.append(
+                            f"[Multiple Hazards → Single Loss] {len(h_ids)} hazards target {l_id}\n"
+                            f"  Loss: {loss['description']}\n"
+                            f"  Hazards: {', '.join(h_ids[:3])} (categories: {', '.join(hazard_categories)})"
+                        )
+        
+        return findings[:10]  # Limit to top 10 findings
+    
+    def _save_individual_results(self, results: dict, output_dir: Path) -> list:
+        """Save individual JSON files for each agent result"""
+        saved_files = []
+        
+        # Create results subdirectory
+        results_dir = output_dir / 'results'
+        results_dir.mkdir(exist_ok=True)
+        
+        # Get the analysis results
+        analysis_results = results.get('results', {})
+        
+        # Save each agent's results individually
+        agent_files = {
+            'mission_analyst': 'mission_analyst.json',
+            'loss_identification': 'loss_identification.json',
+            'hazard_identification': 'hazard_identification.json',
+            'stakeholder_analyst': 'stakeholder_analyst.json',
+            'stakeholder_analysis': 'stakeholder_analyst.json',  # Handle both possible keys
+            'security_constraints': 'security_constraints.json',
+            'system_boundaries': 'system_boundaries.json',
+            'validation': 'validation.json'
+        }
+        
+        for agent_key, filename in agent_files.items():
+            if agent_key in analysis_results:
+                file_path = results_dir / filename
+                # Skip if we already saved this file (e.g., stakeholder_analyst vs stakeholder_analysis)
+                if file_path not in saved_files:
+                    with open(file_path, 'w') as f:
+                        json.dump(analysis_results[agent_key], f, indent=2, default=str)
+                    saved_files.append(file_path)
+        
+        return saved_files
 
 
 async def main():

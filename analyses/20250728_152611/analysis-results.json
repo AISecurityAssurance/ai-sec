@@ -1,0 +1,2802 @@
+{
+  "analysis_id": "702691c9-9a91-4839-97f5-dfbb7f304894",
+  "analysis_name": "Loaded Analysis",
+  "timestamp": "2025-07-28T15:26:11.774787",
+  "duration": 0,
+  "status": "validated",
+  "results": {
+    "mission_analysis": {
+      "problem_statement": {
+        "purpose_what": "provide secure, reliable, and convenient financial services that empower customers to manage their money, make payments, and access credit",
+        "method_how": "secure digital channels with multi-factor authentication, real-time transaction processing, and automated risk assessment",
+        "goals_why": "enable financial inclusion, maintain regulatory compliance, and build lasting customer relationships while protecting assets and data",
+        "full_statement": "A System to provide secure, reliable, and convenient financial services that empower customers to manage their money, make payments, and access credit by means of secure digital channels with multi-factor authentication, real-time transaction processing, and automated risk assessment in order to enable financial inclusion, maintain regulatory compliance, and build lasting customer relationships while protecting assets and data"
+      },
+      "mission_context": {
+        "domain": "financial_services",
+        "criticality": "catastrophic",
+        "operational_tempo": {
+          "pattern": "continuous",
+          "peak_periods": [
+            "business_hours",
+            "end_of_month",
+            "holiday_shopping"
+          ],
+          "availability_requirement": "99.99% uptime SLA"
+        },
+        "key_capabilities": [
+          "secure_transaction_processing",
+          "real_time_fraud_detection",
+          "multi_channel_access",
+          "regulatory_reporting",
+          "customer_identity_verification"
+        ]
+      },
+      "operational_constraints": {
+        "regulatory": {
+          "frameworks": [
+            "PCI-DSS",
+            "SOX",
+            "GDPR",
+            "AML/BSA"
+          ],
+          "audit_frequency": "periodic",
+          "change_approval": "required"
+        },
+        "business": {
+          "availability_requirement": "99.99% SLA",
+          "transaction_volume": "10M+ transactions/day",
+          "legacy_integration": "required"
+        },
+        "organizational": {
+          "risk_appetite": "low",
+          "security_maturity": "managed",
+          "change_capacity": "moderate"
+        }
+      },
+      "environmental_assumptions": {
+        "user_behavior": [
+          "untrusted_networks",
+          "mobile_device_usage",
+          "varied_technical_sophistication"
+        ],
+        "threat_landscape": [
+          "organized_crime_groups",
+          "insider_threats",
+          "nation_state_actors",
+          "opportunistic_attackers"
+        ],
+        "infrastructure": [
+          "cloud_deployment",
+          "multi_region_redundancy",
+          "third_party_integrations"
+        ],
+        "trust_relationships": [
+          "payment_processor_networks",
+          "credit_bureau_services",
+          "regulatory_bodies"
+        ]
+      },
+      "abstraction_validated": true,
+      "cognitive_style": "enhanced",
+      "analysis_metadata": {
+        "agent_type": "mission_analyst",
+        "analysis_id": "demo-banking-2024-01",
+        "timestamp": "2024-01-15T10:00:00Z",
+        "version": "1.0"
+      }
+    },
+    "loss_identification": {
+      "losses": [
+        {
+          "identifier": "L-1",
+          "description": "Loss of customer financial assets through unauthorized transactions or account compromise",
+          "loss_category": "financial",
+          "severity_classification": {
+            "magnitude": "catastrophic",
+            "scope": "customer_wide",
+            "duration": "permanent",
+            "reversibility": "difficult",
+            "detection_difficulty": "moderate"
+          },
+          "mission_impact": {
+            "primary_capability_loss": [
+              "asset_protection",
+              "transaction_integrity"
+            ],
+            "cascading_effects": [
+              "customer_trust_erosion",
+              "regulatory_scrutiny",
+              "legal_liability"
+            ],
+            "stakeholder_harm": {
+              "customers": {
+                "type": "financial_loss",
+                "severity": "catastrophic"
+              },
+              "organization": {
+                "type": "liability_exposure",
+                "severity": "major"
+              }
+            }
+          }
+        },
+        {
+          "identifier": "L-2",
+          "description": "Loss of regulatory compliance resulting in operational restrictions or license revocation",
+          "loss_category": "regulatory",
+          "severity_classification": {
+            "magnitude": "catastrophic",
+            "scope": "enterprise_wide",
+            "duration": "long_term",
+            "reversibility": "very_difficult",
+            "detection_difficulty": "easy"
+          },
+          "mission_impact": {
+            "primary_capability_loss": [
+              "operational_authorization",
+              "market_access"
+            ],
+            "cascading_effects": [
+              "business_disruption",
+              "market_exit",
+              "reputation_damage"
+            ],
+            "stakeholder_harm": {
+              "regulators": {
+                "type": "compliance_failure",
+                "severity": "catastrophic"
+              },
+              "organization": {
+                "type": "business_continuity",
+                "severity": "catastrophic"
+              },
+              "customers": {
+                "type": "service_disruption",
+                "severity": "major"
+              }
+            }
+          }
+        },
+        {
+          "identifier": "L-3",
+          "description": "Loss of customer privacy through unauthorized disclosure of personal financial information",
+          "loss_category": "privacy",
+          "severity_classification": {
+            "magnitude": "major",
+            "scope": "customer_wide",
+            "duration": "permanent",
+            "reversibility": "impossible",
+            "detection_difficulty": "hard"
+          },
+          "mission_impact": {
+            "primary_capability_loss": [
+              "data_confidentiality",
+              "privacy_protection"
+            ],
+            "cascading_effects": [
+              "identity_theft_risk",
+              "customer_harm",
+              "regulatory_penalties"
+            ],
+            "stakeholder_harm": {
+              "customers": {
+                "type": "privacy_violation",
+                "severity": "catastrophic"
+              },
+              "organization": {
+                "type": "legal_liability",
+                "severity": "major"
+              }
+            }
+          }
+        },
+        {
+          "identifier": "L-4",
+          "description": "Loss of ability to provide banking services due to system unavailability or degradation",
+          "loss_category": "mission",
+          "severity_classification": {
+            "magnitude": "major",
+            "scope": "mission_wide",
+            "duration": "variable",
+            "reversibility": "possible",
+            "detection_difficulty": "easy"
+          },
+          "mission_impact": {
+            "primary_capability_loss": [
+              "service_delivery",
+              "customer_access"
+            ],
+            "cascading_effects": [
+              "customer_inconvenience",
+              "revenue_loss",
+              "competitive_disadvantage"
+            ],
+            "stakeholder_harm": {
+              "customers": {
+                "type": "service_denial",
+                "severity": "major"
+              },
+              "organization": {
+                "type": "revenue_impact",
+                "severity": "major"
+              },
+              "business_customers": {
+                "type": "operational_disruption",
+                "severity": "major"
+              }
+            }
+          }
+        },
+        {
+          "identifier": "L-5",
+          "description": "Loss of market confidence and stakeholder trust due to security incidents or service failures",
+          "loss_category": "reputation",
+          "severity_classification": {
+            "magnitude": "major",
+            "scope": "market_wide",
+            "duration": "long_term",
+            "reversibility": "very_difficult",
+            "detection_difficulty": "moderate"
+          },
+          "mission_impact": {
+            "primary_capability_loss": [
+              "market_position",
+              "stakeholder_trust"
+            ],
+            "cascading_effects": [
+              "customer_attrition",
+              "partnership_loss",
+              "stock_devaluation"
+            ],
+            "stakeholder_harm": {
+              "customers": {
+                "type": "trust_erosion",
+                "severity": "major"
+              },
+              "investors": {
+                "type": "value_loss",
+                "severity": "major"
+              },
+              "partners": {
+                "type": "relationship_damage",
+                "severity": "moderate"
+              }
+            }
+          }
+        }
+      ],
+      "loss_count": 5,
+      "loss_categories": {
+        "financial": 1,
+        "regulatory": 1,
+        "privacy": 1,
+        "mission": 1,
+        "reputation": 1
+      },
+      "dependencies": [
+        {
+          "id": "dep-1",
+          "primary_loss_id": "L-1",
+          "dependent_loss_id": "L-5",
+          "dependency_type": "triggers",
+          "dependency_strength": "likely",
+          "time_relationship": {
+            "sequence": "delayed",
+            "typical_delay": "days to weeks",
+            "persistence": "sustained"
+          },
+          "rationale": "Financial losses affecting customers become public knowledge, eroding trust and market confidence"
+        },
+        {
+          "id": "dep-2",
+          "primary_loss_id": "L-2",
+          "dependent_loss_id": "L-4",
+          "dependency_type": "triggers",
+          "dependency_strength": "certain",
+          "time_relationship": {
+            "sequence": "immediate",
+            "typical_delay": "immediate",
+            "persistence": "sustained"
+          },
+          "rationale": "Regulatory restrictions directly prevent the organization from providing services"
+        },
+        {
+          "id": "dep-3",
+          "primary_loss_id": "L-3",
+          "dependent_loss_id": "L-2",
+          "dependency_type": "triggers",
+          "dependency_strength": "likely",
+          "time_relationship": {
+            "sequence": "delayed",
+            "typical_delay": "weeks to months",
+            "persistence": "temporary"
+          },
+          "rationale": "Privacy breaches trigger regulatory investigations and potential compliance violations"
+        }
+      ],
+      "cascade_analysis": {
+        "primary_losses": [
+          "L-1",
+          "L-3"
+        ],
+        "cascade_chains": [
+          {
+            "chain": [
+              "L-1",
+              "L-5"
+            ],
+            "trigger": "L-1",
+            "terminal_losses": [
+              "L-5"
+            ],
+            "chain_length": 2
+          },
+          {
+            "chain": [
+              "L-3",
+              "L-2",
+              "L-4"
+            ],
+            "trigger": "L-3",
+            "terminal_losses": [
+              "L-4"
+            ],
+            "chain_length": 3
+          }
+        ],
+        "max_cascade_depth": 3
+      },
+      "severity_distribution": {
+        "catastrophic": 2,
+        "major": 3,
+        "moderate": 0,
+        "minor": 0
+      },
+      "cognitive_style": "enhanced",
+      "cognitive_synthesis": {
+        "styles_used": [
+          "intuitive",
+          "technical"
+        ],
+        "synthesis_method": "complementary_perspectives",
+        "intuitive_insights": "Identified trust and reputation as critical vulnerability points",
+        "technical_insights": "Mapped specific regulatory compliance cascades"
+      },
+      "analysis_metadata": {
+        "agent_type": "loss_identification",
+        "analysis_id": "demo-banking-2024-01",
+        "timestamp": "2024-01-15T10:05:00Z",
+        "version": "1.0"
+      }
+    },
+    "hazard_identification": {
+      "hazards": [
+        {
+          "identifier": "H-1",
+          "description": "System operates with compromised authentication mechanisms allowing unauthorized access",
+          "hazard_category": "integrity_compromised",
+          "affected_system_property": "identity_verification",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "rare"
+              },
+              "degraded": {
+                "impact": "high",
+                "likelihood": "possible"
+              },
+              "emergency": {
+                "impact": "catastrophic",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "always",
+            "when_present": "Continuous vulnerability requiring constant monitoring",
+            "duration": "continuous"
+          }
+        },
+        {
+          "identifier": "H-2",
+          "description": "System operates without effective encryption of sensitive financial data in transit or at rest",
+          "hazard_category": "confidentiality_breached",
+          "affected_system_property": "data_protection",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "high",
+                "likelihood": "rare"
+              },
+              "degraded": {
+                "impact": "catastrophic",
+                "likelihood": "possible"
+              },
+              "emergency": {
+                "impact": "catastrophic",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "moderate": {
+                "impact": "high",
+                "detection": "hard"
+              },
+              "severe": {
+                "impact": "catastrophic",
+                "detection": "very_hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "always",
+            "when_present": "Persistent exposure of sensitive data",
+            "duration": "continuous"
+          }
+        },
+        {
+          "identifier": "H-3",
+          "description": "System operates in degraded state with critical services unavailable or unresponsive",
+          "hazard_category": "availability_degraded",
+          "affected_system_property": "service_availability",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "rare"
+              },
+              "peak": {
+                "impact": "high",
+                "likelihood": "possible"
+              },
+              "crisis": {
+                "impact": "catastrophic",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "low",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "periodic",
+            "when_present": "During peak usage, maintenance windows, or system failures",
+            "duration": "intermittent"
+          }
+        },
+        {
+          "identifier": "H-4",
+          "description": "System operates without real-time fraud detection capabilities",
+          "hazard_category": "capability_lost",
+          "affected_system_property": "fraud_detection",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "rare"
+              },
+              "high_volume": {
+                "impact": "high",
+                "likelihood": "possible"
+              },
+              "attack": {
+                "impact": "catastrophic",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "low",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "hard"
+              },
+              "severe": {
+                "impact": "catastrophic",
+                "detection": "very_hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "periodic",
+            "when_present": "During model updates, system maintenance, or targeted attacks",
+            "duration": "transient"
+          }
+        },
+        {
+          "identifier": "H-5",
+          "description": "System operates with incomplete or inaccurate audit logging preventing compliance verification",
+          "hazard_category": "integrity_compromised",
+          "affected_system_property": "audit_integrity",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "low",
+                "likelihood": "rare"
+              },
+              "degraded": {
+                "impact": "moderate",
+                "likelihood": "possible"
+              },
+              "emergency": {
+                "impact": "high",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "hard"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "very_hard"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "extremely_hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "always",
+            "when_present": "Continuous risk to compliance posture",
+            "duration": "continuous"
+          }
+        },
+        {
+          "identifier": "H-6",
+          "description": "System operates with inadequate incident communication protocols",
+          "hazard_category": "capability_lost",
+          "affected_system_property": "incident_response",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "low",
+                "likelihood": "rare"
+              },
+              "incident": {
+                "impact": "high",
+                "likelihood": "likely"
+              },
+              "crisis": {
+                "impact": "catastrophic",
+                "likelihood": "certain"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "periodic",
+            "when_present": "During security incidents or service disruptions",
+            "duration": "transient"
+          }
+        },
+        {
+          "identifier": "H-7",
+          "description": "System operates without monitoring of public sentiment/social media",
+          "hazard_category": "awareness_compromised",
+          "affected_system_property": "reputation_monitoring",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "low",
+                "likelihood": "possible"
+              },
+              "incident": {
+                "impact": "moderate",
+                "likelihood": "likely"
+              },
+              "viral_event": {
+                "impact": "high",
+                "likelihood": "certain"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "hard"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "very_hard"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "extremely_hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "always",
+            "when_present": "Continuous blind spot for reputation threats",
+            "duration": "continuous"
+          }
+        },
+        {
+          "identifier": "H-8",
+          "description": "System operates with inconsistent service quality during peak periods",
+          "hazard_category": "performance_degraded",
+          "affected_system_property": "service_consistency",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "minimal",
+                "likelihood": "rare"
+              },
+              "peak": {
+                "impact": "moderate",
+                "likelihood": "likely"
+              },
+              "extreme_peak": {
+                "impact": "high",
+                "likelihood": "certain"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "low",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "periodic",
+            "when_present": "During month-end, holidays, or marketing campaigns",
+            "duration": "intermittent"
+          }
+        },
+        {
+          "identifier": "H-9",
+          "description": "System operates with incorrect financial calculation algorithms",
+          "hazard_category": "integrity_compromised",
+          "affected_system_property": "calculation_accuracy",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "rare"
+              },
+              "high_volume": {
+                "impact": "high",
+                "likelihood": "possible"
+              },
+              "regulatory_change": {
+                "impact": "catastrophic",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "moderate": {
+                "impact": "high",
+                "detection": "hard"
+              },
+              "severe": {
+                "impact": "catastrophic",
+                "detection": "very_hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "conditional",
+            "when_present": "After updates, configuration changes, or regulatory adjustments",
+            "duration": "persistent_until_fixed"
+          }
+        },
+        {
+          "identifier": "H-10",
+          "description": "System operates with improper transaction routing logic",
+          "hazard_category": "integrity_compromised",
+          "affected_system_property": "transaction_routing",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "rare"
+              },
+              "network_changes": {
+                "impact": "high",
+                "likelihood": "possible"
+              },
+              "failover": {
+                "impact": "catastrophic",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "low",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "conditional",
+            "when_present": "During network topology changes or payment processor updates",
+            "duration": "transient"
+          }
+        },
+        {
+          "identifier": "H-11",
+          "description": "System operates with flawed credit assessment models",
+          "hazard_category": "decision_compromised",
+          "affected_system_property": "risk_assessment",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "possible"
+              },
+              "economic_shift": {
+                "impact": "high",
+                "likelihood": "likely"
+              },
+              "regulatory_change": {
+                "impact": "high",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "low",
+                "detection": "hard"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "very_hard"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "extremely_hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "always",
+            "when_present": "Continuous risk of incorrect credit decisions",
+            "duration": "continuous"
+          }
+        },
+        {
+          "identifier": "H-12",
+          "description": "System operates with compromised session management allowing account takeover",
+          "hazard_category": "integrity_compromised",
+          "affected_system_property": "session_security",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "rare"
+              },
+              "degraded": {
+                "impact": "high",
+                "likelihood": "possible"
+              },
+              "emergency": {
+                "impact": "catastrophic",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "moderate"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "hard"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "very_hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "always",
+            "when_present": "Continuous vulnerability to session hijacking and fixation attacks",
+            "duration": "continuous"
+          }
+        },
+        {
+          "identifier": "H-13",
+          "description": "System operates without adequate segregation of duties enabling insider fraud",
+          "hazard_category": "integrity_compromised",
+          "affected_system_property": "access_control",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "possible"
+              },
+              "reduced_staff": {
+                "impact": "high",
+                "likelihood": "likely"
+              },
+              "emergency": {
+                "impact": "catastrophic",
+                "likelihood": "certain"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "low",
+                "detection": "hard"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "very_hard"
+              },
+              "severe": {
+                "impact": "catastrophic",
+                "detection": "extremely_hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "always",
+            "when_present": "Persistent risk of insider threats and fraudulent activities",
+            "duration": "continuous"
+          }
+        },
+        {
+          "identifier": "H-14",
+          "description": "System operates with vulnerable API endpoints exposing critical functions",
+          "hazard_category": "confidentiality_breached",
+          "affected_system_property": "api_security",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "high",
+                "likelihood": "possible"
+              },
+              "high_traffic": {
+                "impact": "catastrophic",
+                "likelihood": "likely"
+              },
+              "under_attack": {
+                "impact": "catastrophic",
+                "likelihood": "certain"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "moderate": {
+                "impact": "high",
+                "detection": "hard"
+              },
+              "severe": {
+                "impact": "catastrophic",
+                "detection": "very_hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "always",
+            "when_present": "Continuous exposure of critical functions through insecure APIs",
+            "duration": "continuous"
+          }
+        },
+        {
+          "identifier": "H-15",
+          "description": "System operates without proper data retention/deletion controls violating privacy regulations",
+          "hazard_category": "compliance_violated",
+          "affected_system_property": "data_lifecycle",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "likely"
+              },
+              "audit_period": {
+                "impact": "high",
+                "likelihood": "certain"
+              },
+              "regulatory_review": {
+                "impact": "catastrophic",
+                "likelihood": "certain"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "low",
+                "detection": "moderate"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "hard"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "very_hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "always",
+            "when_present": "Continuous non-compliance with data protection regulations",
+            "duration": "continuous"
+          }
+        }
+      ],
+      "hazard_count": 15,
+      "hazard_categories": {
+        "integrity_compromised": 6,
+        "confidentiality_breached": 2,
+        "availability_degraded": 1,
+        "capability_lost": 2,
+        "awareness_compromised": 1,
+        "performance_degraded": 1,
+        "decision_compromised": 1,
+        "compliance_violated": 1
+      },
+      "hazard_loss_mappings": [
+        {
+          "id": "map-1",
+          "hazard_id": "H-1",
+          "loss_id": "L-1",
+          "relationship_strength": "direct",
+          "rationale": "Compromised authentication directly enables unauthorized financial transactions",
+          "conditions": [
+            "Valid credentials compromised",
+            "Insufficient additional verification"
+          ]
+        },
+        {
+          "id": "map-2",
+          "hazard_id": "H-2",
+          "loss_id": "L-3",
+          "relationship_strength": "direct",
+          "rationale": "Lack of encryption directly exposes customer financial data",
+          "conditions": [
+            "Data intercepted in transit",
+            "Storage systems compromised"
+          ]
+        },
+        {
+          "id": "map-3",
+          "hazard_id": "H-3",
+          "loss_id": "L-4",
+          "relationship_strength": "direct",
+          "rationale": "Service unavailability directly prevents mission accomplishment",
+          "conditions": [
+            "Critical services affected",
+            "No failover available"
+          ]
+        },
+        {
+          "id": "map-4",
+          "hazard_id": "H-4",
+          "loss_id": "L-1",
+          "relationship_strength": "conditional",
+          "rationale": "Lack of fraud detection enables financial losses when attacks occur",
+          "conditions": [
+            "Active fraud attempts",
+            "Detection gap coincides with attack"
+          ]
+        },
+        {
+          "id": "map-5",
+          "hazard_id": "H-5",
+          "loss_id": "L-2",
+          "relationship_strength": "conditional",
+          "rationale": "Incomplete audit logs prevent compliance demonstration during audits",
+          "conditions": [
+            "Regulatory audit occurs",
+            "Critical logs missing"
+          ]
+        },
+        {
+          "id": "map-6",
+          "hazard_id": "H-6",
+          "loss_id": "L-5",
+          "relationship_strength": "direct",
+          "rationale": "Poor incident communication directly damages market confidence",
+          "conditions": [
+            "Security incident occurs",
+            "Communication delayed or inadequate"
+          ]
+        },
+        {
+          "id": "map-7",
+          "hazard_id": "H-7",
+          "loss_id": "L-5",
+          "relationship_strength": "direct",
+          "rationale": "Lack of sentiment monitoring prevents reputation damage detection",
+          "conditions": [
+            "Negative sentiment spreads",
+            "No early warning system"
+          ]
+        },
+        {
+          "id": "map-8",
+          "hazard_id": "H-8",
+          "loss_id": "L-5",
+          "relationship_strength": "conditional",
+          "rationale": "Service inconsistency erodes customer trust over time",
+          "conditions": [
+            "Repeated service degradation",
+            "Customer experience impact"
+          ]
+        },
+        {
+          "id": "map-9",
+          "hazard_id": "H-9",
+          "loss_id": "L-1",
+          "relationship_strength": "direct",
+          "rationale": "Incorrect calculations directly cause financial losses",
+          "conditions": [
+            "Calculation errors occur",
+            "Errors favor adverse outcomes"
+          ]
+        },
+        {
+          "id": "map-10",
+          "hazard_id": "H-9",
+          "loss_id": "L-2",
+          "relationship_strength": "conditional",
+          "rationale": "Calculation errors may violate regulatory requirements",
+          "conditions": [
+            "Errors affect regulated calculations",
+            "Discovered during audit"
+          ]
+        },
+        {
+          "id": "map-11",
+          "hazard_id": "H-10",
+          "loss_id": "L-1",
+          "relationship_strength": "conditional",
+          "rationale": "Misrouted transactions may result in financial losses",
+          "conditions": [
+            "Transactions sent to wrong destination",
+            "Recovery fails"
+          ]
+        },
+        {
+          "id": "map-12",
+          "hazard_id": "H-11",
+          "loss_id": "L-1",
+          "relationship_strength": "direct",
+          "rationale": "Flawed credit models lead to bad debt and losses",
+          "conditions": [
+            "Models underestimate risk",
+            "Defaults exceed predictions"
+          ]
+        },
+        {
+          "id": "map-13",
+          "hazard_id": "H-12",
+          "loss_id": "L-1",
+          "relationship_strength": "direct",
+          "rationale": "Compromised sessions enable unauthorized financial transactions",
+          "conditions": [
+            "Session tokens stolen or fixated",
+            "Insufficient session validation"
+          ]
+        },
+        {
+          "id": "map-14",
+          "hazard_id": "H-12",
+          "loss_id": "L-3",
+          "relationship_strength": "conditional",
+          "rationale": "Session hijacking may expose customer data during active sessions",
+          "conditions": [
+            "Session taken over",
+            "Sensitive data accessed in session"
+          ]
+        },
+        {
+          "id": "map-15",
+          "hazard_id": "H-13",
+          "loss_id": "L-1",
+          "relationship_strength": "direct",
+          "rationale": "Lack of segregation enables insider fraud and financial losses",
+          "conditions": [
+            "Single person controls entire process",
+            "Fraudulent intent present"
+          ]
+        },
+        {
+          "id": "map-16",
+          "hazard_id": "H-13",
+          "loss_id": "L-2",
+          "relationship_strength": "conditional",
+          "rationale": "Insufficient segregation violates regulatory requirements",
+          "conditions": [
+            "Regulatory audit occurs",
+            "Controls found inadequate"
+          ]
+        },
+        {
+          "id": "map-17",
+          "hazard_id": "H-14",
+          "loss_id": "L-3",
+          "relationship_strength": "direct",
+          "rationale": "Vulnerable APIs directly expose sensitive customer data",
+          "conditions": [
+            "API exploited",
+            "Authentication/authorization bypassed"
+          ]
+        },
+        {
+          "id": "map-18",
+          "hazard_id": "H-14",
+          "loss_id": "L-1",
+          "relationship_strength": "conditional",
+          "rationale": "API vulnerabilities may enable unauthorized transactions",
+          "conditions": [
+            "Critical functions exposed",
+            "Exploitation successful"
+          ]
+        },
+        {
+          "id": "map-19",
+          "hazard_id": "H-15",
+          "loss_id": "L-2",
+          "relationship_strength": "direct",
+          "rationale": "Improper data retention directly violates privacy regulations",
+          "conditions": [
+            "Data retained beyond legal limits",
+            "Deletion requests ignored"
+          ]
+        },
+        {
+          "id": "map-20",
+          "hazard_id": "H-15",
+          "loss_id": "L-5",
+          "relationship_strength": "conditional",
+          "rationale": "Privacy violations damage reputation when exposed publicly",
+          "conditions": [
+            "Violations discovered",
+            "Public disclosure occurs"
+          ]
+        }
+      ],
+      "temporal_analysis": {
+        "always_present": [
+          {
+            "hazard_id": "H-1",
+            "description": "System operates with compromised authentication mechanisms allowing unauthorized access"
+          },
+          {
+            "hazard_id": "H-2",
+            "description": "System operates without effective encryption of sensitive financial data in transit or at rest"
+          },
+          {
+            "hazard_id": "H-5",
+            "description": "System operates with incomplete or inaccurate audit logging preventing compliance verification"
+          },
+          {
+            "hazard_id": "H-7",
+            "description": "System operates without monitoring of public sentiment/social media"
+          },
+          {
+            "hazard_id": "H-11",
+            "description": "System operates with flawed credit assessment models"
+          },
+          {
+            "hazard_id": "H-12",
+            "description": "System operates with compromised session management allowing account takeover"
+          },
+          {
+            "hazard_id": "H-13",
+            "description": "System operates without adequate segregation of duties enabling insider fraud"
+          },
+          {
+            "hazard_id": "H-14",
+            "description": "System operates with vulnerable API endpoints exposing critical functions"
+          },
+          {
+            "hazard_id": "H-15",
+            "description": "System operates without proper data retention/deletion controls violating privacy regulations"
+          }
+        ],
+        "periodic": [
+          {
+            "hazard_id": "H-3",
+            "description": "System operates in degraded state with critical services unavailable or unresponsive",
+            "when": "During peak usage, maintenance windows, or system failures"
+          },
+          {
+            "hazard_id": "H-4",
+            "description": "System operates without real-time fraud detection capabilities",
+            "when": "During model updates, system maintenance, or targeted attacks"
+          },
+          {
+            "hazard_id": "H-6",
+            "description": "System operates with inadequate incident communication protocols",
+            "when": "During security incidents or service disruptions"
+          },
+          {
+            "hazard_id": "H-8",
+            "description": "System operates with inconsistent service quality during peak periods",
+            "when": "During month-end, holidays, or marketing campaigns"
+          }
+        ],
+        "conditional": [
+          {
+            "hazard_id": "H-9",
+            "description": "System operates with incorrect financial calculation algorithms",
+            "when": "After updates, configuration changes, or regulatory adjustments"
+          },
+          {
+            "hazard_id": "H-10",
+            "description": "System operates with improper transaction routing logic",
+            "when": "During network topology changes or payment processor updates"
+          }
+        ],
+        "coverage_gaps": [
+          {
+            "gap_type": "temporal",
+            "description": "Periodic hazards create vulnerability windows",
+            "affected_hazards": [
+              "H-3",
+              "H-4",
+              "H-6",
+              "H-8"
+            ]
+          },
+          {
+            "gap_type": "conditional",
+            "description": "Conditional hazards create unpredictable risk exposure",
+            "affected_hazards": [
+              "H-9",
+              "H-10"
+            ]
+          }
+        ]
+      },
+      "environmental_analysis": {
+        "threat_escalation_pattern": "System shows progressive degradation with increasing threat levels",
+        "highest_risk_conditions": [
+          "emergency operations with severe threats"
+        ],
+        "environmental_dependencies": [
+          "network availability",
+          "third-party service uptime",
+          "threat intelligence feeds"
+        ]
+      },
+      "coverage_analysis": {
+        "covered_losses": [
+          "L-1",
+          "L-2",
+          "L-3",
+          "L-4",
+          "L-5"
+        ],
+        "uncovered_losses": [],
+        "coverage_percentage": 100.0,
+        "loss_hazard_ratio": {
+          "L-1": 8,
+          "L-2": 4,
+          "L-3": 3,
+          "L-4": 1,
+          "L-5": 4
+        }
+      },
+      "cognitive_style": "enhanced",
+      "cognitive_synthesis": {
+        "styles_used": [
+          "intuitive",
+          "technical"
+        ],
+        "synthesis_method": "integrated_analysis",
+        "intuitive_insights": "Identified subtle temporal vulnerabilities and cascading effects",
+        "technical_insights": "Mapped specific technical failure modes to compliance gaps"
+      },
+      "analysis_metadata": {
+        "agent_type": "hazard_identification",
+        "analysis_id": "demo-banking-2024-01",
+        "timestamp": "2024-01-15T10:10:00Z",
+        "version": "1.0"
+      }
+    },
+    "stakeholder_analysis": {
+      "stakeholders": [
+        {
+          "name": "Retail Banking Customers",
+          "stakeholder_type": "user",
+          "description": "Individual customers using personal banking services",
+          "criticality": "primary",
+          "mission_perspective": {
+            "primary_needs": [
+              "secure_access",
+              "24/7_availability",
+              "financial_privacy"
+            ],
+            "value_derived": "Convenient and secure management of personal finances",
+            "success_criteria": "Ability to conduct banking activities safely at any time"
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-1",
+              "impact": "catastrophic",
+              "description": "Direct financial harm through unauthorized transactions"
+            },
+            {
+              "loss_id": "L-3",
+              "impact": "catastrophic",
+              "description": "Personal information exposure leading to identity theft"
+            },
+            {
+              "loss_id": "L-4",
+              "impact": "major",
+              "description": "Inability to access funds when needed"
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "high",
+            "interest_level": "high",
+            "engagement_strategy": "manage_closely"
+          }
+        },
+        {
+          "name": "Business Banking Customers",
+          "stakeholder_type": "user",
+          "description": "Corporate customers managing business accounts and transactions",
+          "criticality": "primary",
+          "mission_perspective": {
+            "primary_needs": [
+              "transaction_processing",
+              "cash_management",
+              "integration_capabilities"
+            ],
+            "value_derived": "Efficient financial operations supporting business activities",
+            "success_criteria": "Reliable high-volume transaction processing with minimal friction"
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-1",
+              "impact": "catastrophic",
+              "description": "Business operations disrupted by financial losses"
+            },
+            {
+              "loss_id": "L-4",
+              "impact": "catastrophic",
+              "description": "Business continuity threatened by service unavailability"
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "high",
+            "interest_level": "high",
+            "engagement_strategy": "manage_closely"
+          }
+        },
+        {
+          "name": "Bank Operations Staff",
+          "stakeholder_type": "operator",
+          "description": "Personnel responsible for system operation and maintenance",
+          "criticality": "essential",
+          "mission_perspective": {
+            "primary_needs": [
+              "system_stability",
+              "operational_visibility",
+              "incident_response_tools"
+            ],
+            "value_derived": "Ability to maintain service quality and respond to issues",
+            "success_criteria": "System operates within defined parameters with manageable workload"
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-2",
+              "impact": "major",
+              "description": "Operational restrictions impacting job performance"
+            },
+            {
+              "loss_id": "L-5",
+              "impact": "moderate",
+              "description": "Reputational impact affecting workplace morale"
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "medium",
+            "interest_level": "high",
+            "engagement_strategy": "keep_informed"
+          }
+        },
+        {
+          "name": "Financial Regulators",
+          "stakeholder_type": "regulator",
+          "description": "Government agencies overseeing banking compliance",
+          "criticality": "required",
+          "mission_perspective": {
+            "primary_needs": [
+              "compliance_verification",
+              "audit_access",
+              "incident_reporting"
+            ],
+            "value_derived": "Assurance of regulatory compliance and consumer protection",
+            "success_criteria": "Full compliance with all regulatory requirements"
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-2",
+              "impact": "catastrophic",
+              "description": "Regulatory failure requiring enforcement action"
+            },
+            {
+              "loss_id": "L-3",
+              "impact": "major",
+              "description": "Privacy violations requiring regulatory response"
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "very_high",
+            "interest_level": "high",
+            "engagement_strategy": "manage_closely"
+          }
+        },
+        {
+          "name": "Shareholders",
+          "stakeholder_type": "beneficiary",
+          "description": "Investors with financial stake in the organization",
+          "criticality": "important",
+          "mission_perspective": {
+            "primary_needs": [
+              "financial_performance",
+              "risk_management",
+              "competitive_position"
+            ],
+            "value_derived": "Return on investment and long-term value growth",
+            "success_criteria": "Sustainable profitability with managed risk exposure"
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-5",
+              "impact": "major",
+              "description": "Market value erosion due to reputation damage"
+            },
+            {
+              "loss_id": "L-2",
+              "impact": "major",
+              "description": "Financial impact of regulatory penalties"
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "high",
+            "interest_level": "medium",
+            "engagement_strategy": "keep_satisfied"
+          }
+        },
+        {
+          "name": "Technology Partners",
+          "stakeholder_type": "vendor",
+          "description": "Payment processors, cloud providers, and infrastructure partners",
+          "criticality": "essential",
+          "mission_perspective": {
+            "primary_needs": [
+              "stable_integration",
+              "clear_requirements",
+              "predictable_volumes"
+            ],
+            "value_derived": "Revenue from service provision and strategic partnership",
+            "success_criteria": "Reliable service delivery meeting SLAs"
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-4",
+              "impact": "major",
+              "description": "Partner failures cascade to service unavailability"
+            },
+            {
+              "loss_id": "L-2",
+              "impact": "moderate",
+              "description": "Partner compliance issues affect bank operations"
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "medium",
+            "interest_level": "medium",
+            "engagement_strategy": "keep_informed"
+          }
+        },
+        {
+          "name": "Third-party Integrators",
+          "stakeholder_type": "vendor",
+          "description": "Fintech apps, data aggregators, and API consumers",
+          "criticality": "important",
+          "mission_perspective": {
+            "primary_needs": [
+              "api_access",
+              "data_availability",
+              "stable_interfaces"
+            ],
+            "value_derived": "Ability to provide value-added services to mutual customers",
+            "success_criteria": "Reliable API access and data consistency"
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-3",
+              "impact": "major",
+              "description": "Integration vulnerabilities expose customer data"
+            },
+            {
+              "loss_id": "L-5",
+              "impact": "moderate",
+              "description": "Third-party incidents reflect on bank reputation"
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "low",
+            "interest_level": "high",
+            "engagement_strategy": "keep_informed"
+          }
+        }
+      ],
+      "stakeholder_count": 7,
+      "stakeholder_types": {
+        "user": 2,
+        "operator": 1,
+        "regulator": 1,
+        "beneficiary": 1,
+        "vendor": 2
+      },
+      "adversaries": [
+        {
+          "adversary_class": "organized_crime",
+          "profile": {
+            "sophistication": "high",
+            "resources": "significant",
+            "persistence": "long_term",
+            "primary_interest": "financial_gain",
+            "geographic_scope": "global"
+          },
+          "mission_targets": {
+            "interested_in": [
+              "customer_accounts",
+              "payment_systems",
+              "identity_data"
+            ],
+            "value_perception": "high_value_target",
+            "historical_interest": "known_targeting"
+          }
+        },
+        {
+          "adversary_class": "nation_state",
+          "profile": {
+            "sophistication": "advanced",
+            "resources": "unlimited",
+            "persistence": "persistent",
+            "primary_interest": "strategic_advantage",
+            "geographic_scope": "global"
+          },
+          "mission_targets": {
+            "interested_in": [
+              "financial_infrastructure",
+              "economic_intelligence",
+              "strategic_disruption"
+            ],
+            "value_perception": "strategic_target",
+            "historical_interest": "active_reconnaissance"
+          }
+        },
+        {
+          "adversary_class": "insider",
+          "profile": {
+            "sophistication": "moderate",
+            "resources": "limited",
+            "persistence": "opportunistic",
+            "primary_interest": "personal_gain",
+            "geographic_scope": "local"
+          },
+          "mission_targets": {
+            "interested_in": [
+              "privileged_access",
+              "customer_data",
+              "financial_controls"
+            ],
+            "value_perception": "target_of_opportunity",
+            "historical_interest": "common_threat"
+          }
+        },
+        {
+          "adversary_class": "hacktivist",
+          "profile": {
+            "sophistication": "moderate",
+            "resources": "crowd_sourced",
+            "persistence": "campaign_based",
+            "primary_interest": "ideological",
+            "geographic_scope": "international"
+          },
+          "mission_targets": {
+            "interested_in": [
+              "public_embarrassment",
+              "service_disruption",
+              "data_exposure"
+            ],
+            "value_perception": "symbolic_target",
+            "historical_interest": "periodic_campaigns"
+          }
+        }
+      ],
+      "adversary_count": 4,
+      "stakeholder_matrix": {
+        "high_influence_high_interest": [
+          {
+            "name": "Retail Banking Customers",
+            "type": "user",
+            "strategy": "manage_closely"
+          },
+          {
+            "name": "Business Banking Customers",
+            "type": "user",
+            "strategy": "manage_closely"
+          },
+          {
+            "name": "Financial Regulators",
+            "type": "regulator",
+            "strategy": "manage_closely"
+          }
+        ],
+        "high_influence_low_interest": [
+          {
+            "name": "Shareholders",
+            "type": "beneficiary",
+            "strategy": "keep_satisfied"
+          }
+        ],
+        "low_influence_high_interest": [
+          {
+            "name": "Bank Operations Staff",
+            "type": "operator",
+            "strategy": "keep_informed"
+          },
+          {
+            "name": "Third-party Integrators",
+            "type": "vendor",
+            "strategy": "keep_informed"
+          }
+        ],
+        "low_influence_low_interest": [],
+        "medium_influence_medium_interest": [
+          {
+            "name": "Technology Partners",
+            "type": "vendor",
+            "strategy": "keep_informed"
+          }
+        ]
+      },
+      "adversary_analysis": {
+        "threat_landscape": {
+          "sophistication_range": "Low to Advanced (full spectrum)",
+          "resource_availability": "Unlimited resources available (nation-state)",
+          "persistence_patterns": [
+            "Advanced Persistent Threats (APT) expected",
+            "Long-term campaigns likely",
+            "Opportunistic attacks constant"
+          ]
+        },
+        "mission_attractiveness": {
+          "overall_rating": "high",
+          "factors": [
+            "Multiple adversaries see high value",
+            "Historical evidence of targeting"
+          ],
+          "most_interested_adversaries": [
+            "organized_crime",
+            "nation_state"
+          ]
+        },
+        "combined_threat_level": "severe"
+      },
+      "mission_success_criteria": {
+        "success_states": {
+          "user_success": {
+            "description": "Users can reliably achieve their financial goals through the system",
+            "violated_by_losses": [
+              "L-1",
+              "L-3",
+              "L-4"
+            ],
+            "evidence_of_success": "High usage rates, positive feedback, successful transactions"
+          },
+          "operational_success": {
+            "description": "System operates efficiently within defined parameters",
+            "violated_by_losses": [
+              "L-4"
+            ],
+            "evidence_of_success": "Stable operations, manageable workload, effective controls"
+          },
+          "regulatory_success": {
+            "description": "System maintains continuous compliance with all regulations",
+            "violated_by_losses": [
+              "L-2",
+              "L-3"
+            ],
+            "evidence_of_success": "Clean audits, no violations, proactive compliance"
+          },
+          "security_success": {
+            "description": "System successfully resists adversary attempts",
+            "violated_by_losses": [
+              "L-1",
+              "L-2",
+              "L-3",
+              "L-4",
+              "L-5"
+            ],
+            "evidence_of_success": "No successful compromises, threats detected and mitigated"
+          }
+        },
+        "success_indicators": {
+          "behavioral_indicators": [
+            "Users actively choose to use the system",
+            "Stakeholders express confidence in the system",
+            "No abnormal user behavior patterns"
+          ],
+          "performance_indicators": [
+            "System meets 99.99% availability target",
+            "Transaction error rates below 0.01%",
+            "Fraud losses below industry benchmarks"
+          ],
+          "external_indicators": [
+            "Positive regulatory assessments",
+            "Strong customer satisfaction scores",
+            "Market share growth or stability"
+          ]
+        }
+      },
+      "critical_relationships": [
+        {
+          "relationship": "User-Operator",
+          "nature": "Service delivery and support",
+          "criticality": "essential",
+          "failure_impact": "Users cannot achieve goals, operators cannot fulfill duties"
+        },
+        {
+          "relationship": "Operator-Regulator",
+          "nature": "Compliance and oversight",
+          "criticality": "required",
+          "failure_impact": "Regulatory violations and enforcement actions"
+        },
+        {
+          "relationship": "Adversary-User",
+          "nature": "Threat and target",
+          "criticality": "hostile",
+          "failure_impact": "Direct harm to users through system compromise"
+        },
+        {
+          "relationship": "Bank-Technology Partner",
+          "nature": "Service dependency",
+          "criticality": "essential",
+          "failure_impact": "Service degradation or complete unavailability"
+        },
+        {
+          "relationship": "Third-party-User",
+          "nature": "Extended service ecosystem",
+          "criticality": "important",
+          "failure_impact": "Data exposure or degraded user experience"
+        }
+      ],
+      "cognitive_style": "enhanced",
+      "cognitive_synthesis": {
+        "styles_used": [
+          "intuitive",
+          "technical"
+        ],
+        "synthesis_method": "stakeholder_perspective_integration",
+        "intuitive_insights": "Identified critical trust relationships and cultural factors",
+        "technical_insights": "Mapped specific compliance requirements and threat profiles"
+      },
+      "analysis_metadata": {
+        "agent_type": "stakeholder_analyst",
+        "analysis_id": "demo-banking-2024-01",
+        "timestamp": "2024-01-15T10:15:00Z",
+        "version": "1.0"
+      }
+    },
+    "security_constraints": {
+      "security_constraints": [
+        {
+          "identifier": "SC-1",
+          "constraint_statement": "The system shall verify user identity through multi-factor authentication before granting access to financial functions",
+          "rationale": "Prevents unauthorized access that could lead to financial losses",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-1",
+              "L-3"
+            ],
+            "capability_degradation": "Complete loss of access control"
+          }
+        },
+        {
+          "identifier": "SC-2",
+          "constraint_statement": "The system shall maintain confidentiality of all financial data during transmission and storage",
+          "rationale": "Prevents exposure of sensitive customer information",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-3",
+              "L-2"
+            ],
+            "capability_degradation": "Loss of data protection capability"
+          }
+        },
+        {
+          "identifier": "SC-3",
+          "constraint_statement": "The system shall maintain availability of critical banking services during declared operational hours",
+          "rationale": "Ensures customers can access their funds and conduct essential transactions",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-4",
+              "L-5"
+            ],
+            "capability_degradation": "Service delivery failure"
+          }
+        },
+        {
+          "identifier": "SC-4",
+          "constraint_statement": "The system shall detect and respond to anomalous transaction patterns in real-time",
+          "rationale": "Enables early detection and prevention of fraudulent activities",
+          "constraint_type": "detective",
+          "enforcement_level": "mandatory",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-1"
+            ],
+            "capability_degradation": "Loss of fraud detection"
+          }
+        },
+        {
+          "identifier": "SC-5",
+          "constraint_statement": "The system shall maintain complete and accurate audit logs of all security-relevant events",
+          "rationale": "Enables compliance verification and incident investigation",
+          "constraint_type": "detective",
+          "enforcement_level": "mandatory",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-2"
+            ],
+            "capability_degradation": "Loss of compliance demonstration"
+          }
+        },
+        {
+          "identifier": "SC-6",
+          "constraint_statement": "The system shall provide timely and accurate incident communication to affected stakeholders",
+          "rationale": "Maintains stakeholder trust and enables appropriate response",
+          "constraint_type": "corrective",
+          "enforcement_level": "mandatory",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-5"
+            ],
+            "capability_degradation": "Loss of stakeholder confidence"
+          }
+        },
+        {
+          "identifier": "SC-7",
+          "constraint_statement": "The system shall monitor and respond to reputation threats in public channels",
+          "rationale": "Enables early detection and response to reputation damage",
+          "constraint_type": "detective",
+          "enforcement_level": "recommended",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-5"
+            ],
+            "capability_degradation": "Delayed reputation damage detection"
+          }
+        },
+        {
+          "identifier": "SC-8",
+          "constraint_statement": "The system shall maintain consistent service quality across all operational conditions",
+          "rationale": "Preserves customer trust and operational reliability",
+          "constraint_type": "preventive",
+          "enforcement_level": "recommended",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-4",
+              "L-5"
+            ],
+            "capability_degradation": "Degraded user experience"
+          }
+        },
+        {
+          "identifier": "SC-9",
+          "constraint_statement": "The system shall ensure accuracy of all financial calculations and transactions",
+          "rationale": "Prevents financial losses and regulatory violations",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-1",
+              "L-2"
+            ],
+            "capability_degradation": "Loss of computational integrity"
+          }
+        },
+        {
+          "identifier": "SC-10",
+          "constraint_statement": "The system shall correctly route all transactions to intended destinations",
+          "rationale": "Ensures transaction integrity and prevents misrouting",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-1"
+            ],
+            "capability_degradation": "Transaction processing failure"
+          }
+        },
+        {
+          "identifier": "SC-11",
+          "constraint_statement": "The system shall maintain accurate risk assessment for credit decisions",
+          "rationale": "Prevents excessive financial exposure and bad debt",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-1"
+            ],
+            "capability_degradation": "Loss of risk management"
+          }
+        },
+        {
+          "identifier": "SC-12",
+          "constraint_statement": "The system shall enforce secure session management for all user interactions",
+          "rationale": "Prevents session hijacking and unauthorized account access",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-1",
+              "L-3"
+            ],
+            "capability_degradation": "Loss of session security"
+          }
+        },
+        {
+          "identifier": "SC-13",
+          "constraint_statement": "The system shall enforce segregation of duties for critical financial operations",
+          "rationale": "Prevents insider fraud and unauthorized activities",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-1",
+              "L-2"
+            ],
+            "capability_degradation": "Loss of internal controls"
+          }
+        },
+        {
+          "identifier": "SC-14",
+          "constraint_statement": "The system shall protect all API endpoints from unauthorized access and abuse",
+          "rationale": "Prevents exposure of critical functions to attackers",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-1",
+              "L-3",
+              "L-4"
+            ],
+            "capability_degradation": "Loss of API security"
+          }
+        },
+        {
+          "identifier": "SC-15",
+          "constraint_statement": "The system shall enforce data retention and deletion policies in compliance with privacy regulations",
+          "rationale": "Ensures regulatory compliance and minimizes privacy exposure",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-2",
+              "L-3"
+            ],
+            "capability_degradation": "Loss of privacy compliance"
+          }
+        }
+      ],
+      "constraint_hazard_mappings": [
+        {
+          "constraint_id": "SC-1",
+          "hazard_id": "H-1",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-2",
+          "hazard_id": "H-2",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-3",
+          "hazard_id": "H-3",
+          "relationship_type": "reduces"
+        },
+        {
+          "constraint_id": "SC-4",
+          "hazard_id": "H-4",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-5",
+          "hazard_id": "H-5",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-6",
+          "hazard_id": "H-6",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-7",
+          "hazard_id": "H-7",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-8",
+          "hazard_id": "H-8",
+          "relationship_type": "reduces"
+        },
+        {
+          "constraint_id": "SC-9",
+          "hazard_id": "H-9",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-10",
+          "hazard_id": "H-10",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-11",
+          "hazard_id": "H-11",
+          "relationship_type": "reduces"
+        },
+        {
+          "constraint_id": "SC-12",
+          "hazard_id": "H-12",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-13",
+          "hazard_id": "H-13",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-14",
+          "hazard_id": "H-14",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-15",
+          "hazard_id": "H-15",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-1",
+          "hazard_id": "H-12",
+          "relationship_type": "reduces"
+        },
+        {
+          "constraint_id": "SC-5",
+          "hazard_id": "H-13",
+          "relationship_type": "detects"
+        },
+        {
+          "constraint_id": "SC-9",
+          "hazard_id": "H-11",
+          "relationship_type": "reduces"
+        }
+      ],
+      "constraint_count": 15,
+      "constraint_types": {
+        "preventive": 11,
+        "detective": 3,
+        "corrective": 1,
+        "compensating": 0
+      },
+      "cognitive_style": "enhanced",
+      "analysis_metadata": {
+        "agent_type": "security_constraints",
+        "analysis_id": "demo-banking-2024-01",
+        "timestamp": "2024-01-15T10:25:00Z",
+        "version": "1.0"
+      }
+    },
+    "system_boundaries": {
+      "system_boundaries": [
+        {
+          "boundary_name": "Banking Platform System Scope",
+          "boundary_type": "system_scope",
+          "description": "Defines what components and functions are within the digital banking platform's analysis scope",
+          "definition_criteria": {
+            "ownership": "Directly owned and operated by the bank",
+            "control": "Bank has direct configuration and operational control",
+            "responsibility": "Bank is accountable for security and compliance"
+          },
+          "elements": [
+            {
+              "element_name": "Core Banking Application",
+              "element_type": "component",
+              "position": "inside",
+              "assumptions": {
+                "availability": "99.99% uptime target",
+                "security": "Hardened and monitored"
+              }
+            },
+            {
+              "element_name": "Authentication Service",
+              "element_type": "component",
+              "position": "inside",
+              "assumptions": {
+                "capability": "Supports MFA",
+                "integration": "Native to platform"
+              }
+            },
+            {
+              "element_name": "Transaction Processing Engine",
+              "element_type": "component",
+              "position": "inside",
+              "assumptions": {
+                "throughput": "10K TPS capacity",
+                "consistency": "ACID compliant"
+              }
+            },
+            {
+              "element_name": "Customer Database",
+              "element_type": "component",
+              "position": "inside",
+              "assumptions": {
+                "encryption": "At-rest encryption",
+                "backup": "Real-time replication"
+              }
+            },
+            {
+              "element_name": "API Gateway",
+              "element_type": "interface",
+              "position": "interface",
+              "assumptions": {
+                "security": "Rate limiting and authentication",
+                "monitoring": "Full request logging"
+              }
+            },
+            {
+              "element_name": "Customer Mobile Devices",
+              "element_type": "component",
+              "position": "outside",
+              "assumptions": {
+                "security": "Uncontrolled",
+                "connectivity": "Variable"
+              }
+            },
+            {
+              "element_name": "Payment Networks (SWIFT, ACH)",
+              "element_type": "component",
+              "position": "outside",
+              "assumptions": {
+                "availability": "SLA-based",
+                "security": "Industry standard"
+              }
+            },
+            {
+              "element_name": "Cloud Infrastructure",
+              "element_type": "component",
+              "position": "outside",
+              "assumptions": {
+                "compliance": "SOC2 certified",
+                "availability": "Region redundancy"
+              }
+            }
+          ]
+        },
+        {
+          "boundary_name": "Trust Boundaries",
+          "boundary_type": "trust",
+          "description": "Identifies where trust levels change and additional verification is required",
+          "definition_criteria": {
+            "authentication": "Where identity verification occurs",
+            "authorization": "Where access control decisions are made",
+            "data_validation": "Where input validation is critical"
+          },
+          "elements": [
+            {
+              "element_name": "Customer-Platform Interface",
+              "element_type": "interface",
+              "position": "interface",
+              "assumptions": {
+                "trust": "Zero trust model",
+                "verification": "Every request authenticated"
+              }
+            },
+            {
+              "element_name": "Platform-Payment Network Interface",
+              "element_type": "interface",
+              "position": "interface",
+              "assumptions": {
+                "trust": "Mutual authentication",
+                "protocol": "Industry standard security"
+              }
+            },
+            {
+              "element_name": "Internal Admin Access",
+              "element_type": "interface",
+              "position": "interface",
+              "assumptions": {
+                "trust": "Privileged access management",
+                "monitoring": "Full audit trail"
+              }
+            },
+            {
+              "element_name": "Third-party API Access",
+              "element_type": "interface",
+              "position": "interface",
+              "assumptions": {
+                "trust": "OAuth 2.0",
+                "scope": "Limited permissions"
+              }
+            }
+          ]
+        },
+        {
+          "boundary_name": "Regulatory Compliance Boundary",
+          "boundary_type": "responsibility",
+          "description": "Defines where regulatory compliance responsibilities begin and end",
+          "definition_criteria": {
+            "data_residency": "Where data must be stored",
+            "audit_requirements": "What must be logged and retained",
+            "reporting_obligations": "What must be reported to regulators"
+          },
+          "elements": [
+            {
+              "element_name": "Customer Financial Data",
+              "element_type": "data",
+              "position": "inside",
+              "assumptions": {
+                "retention": "7 years",
+                "privacy": "PII protection required"
+              }
+            },
+            {
+              "element_name": "Transaction Records",
+              "element_type": "data",
+              "position": "inside",
+              "assumptions": {
+                "immutability": "Tamper-proof storage",
+                "availability": "Regulatory access required"
+              }
+            },
+            {
+              "element_name": "Regulatory Reporting Interface",
+              "element_type": "interface",
+              "position": "interface",
+              "assumptions": {
+                "format": "Regulator-specified",
+                "timing": "Daily/monthly requirements"
+              }
+            },
+            {
+              "element_name": "Third-party Processor Data",
+              "element_type": "data",
+              "position": "crossing",
+              "assumptions": {
+                "responsibility": "Shared under agreement",
+                "visibility": "Limited"
+              }
+            }
+          ]
+        },
+        {
+          "boundary_name": "Data Governance Boundary",
+          "boundary_type": "data_governance",
+          "description": "Defines where data ownership and protection requirements change",
+          "definition_criteria": {
+            "ownership": "Who owns the data",
+            "classification": "Sensitivity levels",
+            "protection": "Required security controls"
+          },
+          "elements": [
+            {
+              "element_name": "Customer Personal Data",
+              "element_type": "data",
+              "position": "inside",
+              "assumptions": {
+                "ownership": "Customer owned, bank custodian",
+                "classification": "Highly sensitive"
+              }
+            },
+            {
+              "element_name": "Transaction Metadata",
+              "element_type": "data",
+              "position": "inside",
+              "assumptions": {
+                "ownership": "Bank owned",
+                "classification": "Sensitive"
+              }
+            },
+            {
+              "element_name": "Aggregated Analytics",
+              "element_type": "data",
+              "position": "inside",
+              "assumptions": {
+                "ownership": "Bank owned",
+                "classification": "Internal"
+              }
+            },
+            {
+              "element_name": "Public Marketing Data",
+              "element_type": "data",
+              "position": "crossing",
+              "assumptions": {
+                "ownership": "Bank owned",
+                "classification": "Public"
+              }
+            }
+          ]
+        }
+      ],
+      "boundary_relationships": [
+        {
+          "parent_boundary": "Banking Platform System Scope",
+          "child_boundary": "Trust Boundaries",
+          "relationship_type": "contains"
+        },
+        {
+          "parent_boundary": "Regulatory Compliance Boundary",
+          "child_boundary": "Data Governance Boundary",
+          "relationship_type": "overlaps"
+        }
+      ],
+      "boundary_summary": {
+        "total_boundaries": 4,
+        "boundary_types": {
+          "system_scope": 1,
+          "trust": 1,
+          "responsibility": 1,
+          "data_governance": 1
+        },
+        "critical_interfaces": 8,
+        "external_dependencies": 4
+      },
+      "cognitive_style": "enhanced",
+      "analysis_metadata": {
+        "agent_type": "system_boundaries",
+        "analysis_id": "demo-banking-2024-01",
+        "timestamp": "2024-01-15T10:30:00Z",
+        "version": "1.0"
+      }
+    },
+    "validation": {
+      "overall_status": "validated",
+      "validation_results": {
+        "mission_clarity": {
+          "status": "complete",
+          "findings": [
+            "Problem statement articulates purpose, method, and goals",
+            "Mission context provides domain understanding",
+            "Operational constraints defined across regulatory, business, and organizational dimensions"
+          ],
+          "stats": {
+            "constraint_categories": 3,
+            "mission_components": 3
+          }
+        },
+        "loss_completeness": {
+          "status": "complete",
+          "findings": [
+            "Losses cover 5 major categories: financial, regulatory, privacy, mission, reputation",
+            "Severity classifications with appropriate categorization",
+            "15 dependency relationships mapped showing cascade effects"
+          ],
+          "stats": {
+            "loss_categories": 5,
+            "total_losses": 12,
+            "dependencies_mapped": 15
+          }
+        },
+        "hazard_coverage": {
+          "status": "complete",
+          "findings": [
+            "Hazards map to 80% of identified losses",
+            "Technical failure modes documented",
+            "Environmental factors included"
+          ],
+          "stats": {
+            "hazards_identified": 18,
+            "loss_coverage_percentage": 80,
+            "unmapped_losses": [
+              "L-5"
+            ]
+          }
+        },
+        "stakeholder_coverage": {
+          "status": "complete",
+          "findings": [
+            "All primary stakeholder categories represented",
+            "Adversary profiles with threat modeling",
+            "Influence/interest matrix completed"
+          ],
+          "stats": {
+            "stakeholder_count": 8,
+            "adversary_profiles": 4,
+            "stakeholder_categories": 5
+          }
+        },
+        "consistency_check": {
+          "status": "complete",
+          "findings": [
+            "Loss categories align with mission objectives",
+            "Hazard-loss mappings are logically consistent",
+            "Stakeholder interests correlate with identified losses"
+          ],
+          "stats": {
+            "alignment_checks_passed": 3,
+            "terminology_inconsistencies": 1
+          }
+        }
+      },
+      "analysis_metrics": {
+        "total_findings": 53,
+        "losses_identified": 5,
+        "hazards_identified": 11,
+        "stakeholders_identified": 7,
+        "adversaries_profiled": 4,
+        "dependencies_mapped": 15,
+        "hazard_loss_mappings": 12
+      },
+      "cross_analysis_insights": {
+        "critical_convergence_points": [
+          {
+            "type": "authentication_vulnerability",
+            "affected_elements": [
+              "H-1",
+              "L-1",
+              "organized_crime"
+            ],
+            "criticality": "very_high",
+            "insight": "Authentication compromise represents highest risk intersection"
+          },
+          {
+            "type": "regulatory_cascade",
+            "affected_elements": [
+              "L-3",
+              "L-2",
+              "L-4",
+              "Financial Regulators"
+            ],
+            "criticality": "high",
+            "insight": "Privacy breach can trigger regulatory action leading to service shutdown"
+          }
+        ],
+        "systemic_vulnerabilities": [
+          "Heavy reliance on authentication as single control point",
+          "Regulatory compliance creates brittleness in system adaptability",
+          "Reputation damage has no direct mitigation strategy"
+        ]
+      },
+      "analysis_summary": {
+        "scope": "Digital banking platform security analysis",
+        "coverage": {
+          "losses": "12 losses across 5 categories",
+          "hazards": "11 hazards with 100% loss coverage",
+          "stakeholders": "8 stakeholders and 4 adversary profiles"
+        },
+        "critical_findings": [
+          "H-1 (compromised authentication) maps directly to L-1 (financial losses) with organized crime targeting",
+          "Loss dependency chain identified: L-3 (privacy breach) \u2192 L-2 (regulatory compliance) \u2192 L-4 (service shutdown)",
+          "H-6, H-7, H-8 all map to L-5 (reputation loss) covering incident communication, sentiment monitoring, and service quality"
+        ],
+        "analysis_completeness": "All Step 1 components completed with validation"
+      },
+      "step2_bridge": {
+        "control_needs": [
+          {
+            "need": "Multi-factor authentication with fallback mechanisms",
+            "addresses": [
+              "H-1",
+              "L-1"
+            ],
+            "priority": "critical"
+          },
+          {
+            "need": "Real-time fraud detection with behavioral analytics",
+            "addresses": [
+              "H-4",
+              "L-1"
+            ],
+            "priority": "critical"
+          },
+          {
+            "need": "End-to-end encryption for data at rest and in transit",
+            "addresses": [
+              "H-2",
+              "L-3"
+            ],
+            "priority": "critical"
+          },
+          {
+            "need": "Comprehensive audit logging with tamper protection",
+            "addresses": [
+              "H-5",
+              "L-2"
+            ],
+            "priority": "high"
+          },
+          {
+            "need": "Service redundancy and graceful degradation",
+            "addresses": [
+              "H-3",
+              "L-4"
+            ],
+            "priority": "high"
+          }
+        ],
+        "implied_boundaries": {
+          "system_boundaries": [
+            "Customer authentication services",
+            "Transaction processing core",
+            "Data storage and encryption layer",
+            "Regulatory reporting interface",
+            "External payment networks"
+          ],
+          "trust_boundaries": [
+            "Customer device to banking platform",
+            "Banking platform to payment processors",
+            "Banking platform to regulatory systems",
+            "Internal operations to production systems"
+          ]
+        },
+        "architectural_hints": {
+          "patterns": [
+            "Zero-trust architecture for all connections",
+            "Defense in depth for critical transactions",
+            "Segregation of regulatory reporting systems"
+          ],
+          "critical_points": [
+            "Authentication gateway requires special hardening",
+            "Transaction approval needs multiple validation layers",
+            "Audit system must be isolated from operational systems"
+          ]
+        },
+        "transition_guidance": [
+          "Begin Step 2 with authentication control structure",
+          "Map regulatory compliance controls early",
+          "Consider adversary capabilities when defining control actions",
+          "Ensure control structure addresses all identified hazards"
+        ]
+      },
+      "cognitive_style": "enhanced",
+      "cognitive_synthesis": {
+        "styles_used": [
+          "intuitive",
+          "technical"
+        ],
+        "synthesis_method": "cross_validation",
+        "intuitive_insights": "Identified emergent risks from stakeholder-hazard interactions",
+        "technical_insights": "Validated coverage metrics and dependency chains"
+      },
+      "analysis_metadata": {
+        "agent_type": "validation",
+        "analysis_id": "demo-banking-2024-01",
+        "timestamp": "2024-01-15T10:20:00Z",
+        "version": "1.0"
+      }
+    }
+  },
+  "completeness_check": {
+    "is_complete": false,
+    "missing_artifacts": [
+      "mission_analysis",
+      "loss_identification",
+      "hazard_identification",
+      "stakeholder_analysis",
+      "security_constraints",
+      "system_boundaries",
+      "validation"
+    ],
+    "validation_issues": [],
+    "artifact_status": {
+      "mission_analysis": {
+        "present": false,
+        "complete": false,
+        "issues": [
+          "mission_analysis not found in results"
+        ]
+      },
+      "loss_identification": {
+        "present": false,
+        "complete": false,
+        "issues": [
+          "loss_identification not found in results"
+        ]
+      },
+      "hazard_identification": {
+        "present": false,
+        "complete": false,
+        "issues": [
+          "hazard_identification not found in results"
+        ]
+      },
+      "stakeholder_analysis": {
+        "present": false,
+        "complete": false,
+        "issues": [
+          "stakeholder_analysis not found in results"
+        ]
+      },
+      "security_constraints": {
+        "present": false,
+        "complete": false,
+        "issues": [
+          "security_constraints not found in results"
+        ]
+      },
+      "system_boundaries": {
+        "present": false,
+        "complete": false,
+        "issues": [
+          "system_boundaries not found in results"
+        ]
+      },
+      "validation": {
+        "present": false,
+        "complete": false,
+        "issues": [
+          "validation not found in results"
+        ]
+      }
+    },
+    "summary": "7 missing artifacts"
+  },
+  "executive_summary": "Analysis loaded from existing results.",
+  "step2_bridge": {
+    "control_needs": [
+      {
+        "need": "Multi-factor authentication with fallback mechanisms",
+        "addresses": [
+          "H-1",
+          "L-1"
+        ],
+        "priority": "critical"
+      },
+      {
+        "need": "Real-time fraud detection with behavioral analytics",
+        "addresses": [
+          "H-4",
+          "L-1"
+        ],
+        "priority": "critical"
+      },
+      {
+        "need": "End-to-end encryption for data at rest and in transit",
+        "addresses": [
+          "H-2",
+          "L-3"
+        ],
+        "priority": "critical"
+      },
+      {
+        "need": "Comprehensive audit logging with tamper protection",
+        "addresses": [
+          "H-5",
+          "L-2"
+        ],
+        "priority": "high"
+      },
+      {
+        "need": "Service redundancy and graceful degradation",
+        "addresses": [
+          "H-3",
+          "L-4"
+        ],
+        "priority": "high"
+      }
+    ],
+    "implied_boundaries": {
+      "system_boundaries": [
+        "Customer authentication services",
+        "Transaction processing core",
+        "Data storage and encryption layer",
+        "Regulatory reporting interface",
+        "External payment networks"
+      ],
+      "trust_boundaries": [
+        "Customer device to banking platform",
+        "Banking platform to payment processors",
+        "Banking platform to regulatory systems",
+        "Internal operations to production systems"
+      ]
+    },
+    "architectural_hints": {
+      "patterns": [
+        "Zero-trust architecture for all connections",
+        "Defense in depth for critical transactions",
+        "Segregation of regulatory reporting systems"
+      ],
+      "critical_points": [
+        "Authentication gateway requires special hardening",
+        "Transaction approval needs multiple validation layers",
+        "Audit system must be isolated from operational systems"
+      ]
+    },
+    "transition_guidance": [
+      "Begin Step 2 with authentication control structure",
+      "Map regulatory compliance controls early",
+      "Consider adversary capabilities when defining control actions",
+      "Ensure control structure addresses all identified hazards"
+    ]
+  },
+  "execution_log": [
+    {
+      "timestamp": "2025-07-28T15:26:11.774795",
+      "message": "Analysis loaded from /app/demo/banking-analysis",
+      "type": "info"
+    }
+  ],
+  "loaded_from": "/app/demo/banking-analysis"
+}

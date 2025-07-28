@@ -1,0 +1,11 @@
+analysis:
+  name: 'Demo: banking-analysis'
+  output_dir: /analyses
+execution:
+  mode: enhanced
+input:
+  path: /app/demo/banking-analysis
+  type: demo
+model:
+  name: pre-packaged
+  provider: demo

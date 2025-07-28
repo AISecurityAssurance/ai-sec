@@ -12,15 +12,11 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv for faster package management
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-
 # Copy dependency files
 COPY pyproject.toml requirements.txt ./
 
-# Install Python dependencies
-# Use full path to uv since PATH isn't updated until next RUN
-RUN /root/.cargo/bin/uv pip install --system -r requirements.txt
+# Install Python dependencies using pip
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
@@ -28,9 +24,6 @@ COPY . .
 # Create non-root user
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
-
-# Update PATH for runtime
-ENV PATH="/root/.cargo/bin:$PATH"
 
 # Expose port
 EXPOSE 8000

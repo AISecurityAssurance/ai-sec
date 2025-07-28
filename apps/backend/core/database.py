@@ -16,14 +16,14 @@ if database_url.startswith("sqlite"):
     # SQLite doesn't support some pool options
     engine = create_async_engine(
         database_url,
-        echo=settings.debug,
+        echo=False,  # Always disable echo, use logging instead
         connect_args={"check_same_thread": False}
     )
 else:
     # PostgreSQL and other databases
     engine = create_async_engine(
         database_url,
-        echo=settings.debug,
+        echo=False,  # Always disable echo, use logging instead
         pool_pre_ping=True,
         pool_size=5,
         max_overflow=10

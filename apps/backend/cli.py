@@ -18,12 +18,15 @@ from pathlib import Path
 from typing import Optional
 
 # Configure logging BEFORE importing anything that uses SQLAlchemy
-if not os.getenv('DEBUG'):
-    # Suppress SQLAlchemy and httpx logging
-    logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
-    logging.getLogger('httpx').setLevel(logging.WARNING)
-    # Also suppress the default format
-    logging.basicConfig(level=logging.WARNING, format='%(message)s')
+# Set up basic config first
+logging.basicConfig(level=logging.WARNING, format='%(message)s')
+
+# Suppress noisy loggers
+for logger_name in ['sqlalchemy.engine', 'sqlalchemy.engine.Engine', 'httpx', 'asyncio']:
+    logging.getLogger(logger_name).setLevel(logging.ERROR)
+
+# Override environment to ensure SQLAlchemy doesn't echo
+os.environ['PYTHONUNBUFFERED'] = '1'
 
 import asyncpg
 from rich.console import Console
@@ -689,24 +692,6 @@ class Step1CLI:
                 relative_path = file_path.relative_to(Path.cwd()) if file_path.is_relative_to(Path.cwd()) else file_path
                 self.console.print(f"  • {relative_path}")
     
-    def _get_model_info(self, config: dict) -> dict:
-        """Get model information from configuration and settings"""
-        model_config = config.get('model', {})
-        provider = model_config.get('provider', 'unknown')
-        model_name = model_config.get('name', 'unknown')
-        
-        # Try to get actual model info from settings
-        if provider in settings.model_providers:
-            provider_config = settings.model_providers[provider]
-            if hasattr(provider_config, 'model'):
-                model_name = provider_config.model
-        
-        return {
-            "provider": provider,
-            "model": model_name,
-            "execution_mode": config.get('execution', {}).get('mode', 'standard'),
-            "timestamp": datetime.now().isoformat()
-        }
     
     async def _export_database(self, db_name: str, output_dir: Path):
         """Export PostgreSQL database to file"""

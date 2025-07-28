@@ -71,3 +71,36 @@ async def init_db():
 async def close_db():
     """Close database connections"""
     await engine.dispose()
+
+
+async def create_database_pool(database_url: str):
+    """Create a database connection pool"""
+    # For asyncpg, we just return the connection string
+    # The actual pool is managed by asyncpg.create_pool
+    return database_url
+
+
+async def run_migrations(database_url: str):
+    """Run database migrations"""
+    import asyncpg
+    from pathlib import Path
+    
+    # Connect to the database
+    conn = await asyncpg.connect(database_url)
+    
+    try:
+        # Get migrations directory
+        migrations_dir = Path(__file__).parent.parent / "migrations"
+        
+        # Run migrations in order
+        if migrations_dir.exists():
+            migration_files = sorted(migrations_dir.glob("*.sql"))
+            for migration_file in migration_files:
+                print(f"Running migration: {migration_file.name}")
+                with open(migration_file, 'r') as f:
+                    sql = f.read()
+                    await conn.execute(sql)
+        
+        print("All migrations completed successfully")
+    finally:
+        await conn.close()

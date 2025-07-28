@@ -27,7 +27,7 @@ services:
     container_name: sa_backend
     profiles: ["web", "full", "demo"]
     environment:
-      DATABASE_URL: postgresql://sa_user:sa_password@postgres:5432/security_analyst
+      DATABASE_URL: postgresql+asyncpg://sa_user:sa_password@postgres:5432/security_analyst
       REDIS_URL: redis://redis:6379
       PYTHONPATH: /app
     ports:
@@ -67,8 +67,14 @@ services:
     container_name: sa_cli
     profiles: ["cli"]
     environment:
-      DATABASE_URL: postgresql://sa_user:sa_password@postgres:5432/security_analyst
+      DATABASE_URL: postgresql+asyncpg://sa_user:sa_password@postgres:5432/security_analyst
       PYTHONPATH: /app
+      SECRET_KEY: "dev-secret-key-change-in-production"
+      ENVIRONMENT: development
+      DEBUG: "true"
+      # Model provider settings - pass through from host
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     volumes:
       - ./apps/backend:/app
       - ./analyses:/analyses  # For saving analysis results

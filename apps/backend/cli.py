@@ -65,14 +65,16 @@ class Step1CLI:
             
             try:
                 # Connect to database
-                db_url = f"postgresql://sa_user:sa_password@localhost:5432/{db_name}"
+                db_host = os.getenv('DB_HOST', 'postgres')
+                db_url = f"postgresql://sa_user:sa_password@{db_host}:5432/{db_name}"
                 db_conn = await asyncpg.connect(db_url)
                 
                 # Create coordinator with execution mode
                 execution_mode = config.get('execution', {}).get('mode', 'standard')
                 coordinator = Step1Coordinator(
                     db_connection=db_conn,
-                    execution_mode=execution_mode
+                    execution_mode=execution_mode,
+                    db_name=db_name
                 )
                 
                 # Run analysis
@@ -90,6 +92,9 @@ class Step1CLI:
                 # Display completeness check
                 if 'completeness_check' in results:
                     self._display_completeness_check(results['completeness_check'])
+                
+                # Display file output locations
+                self._display_output_files()
                 
             finally:
                 await db_conn.close()
@@ -120,13 +125,15 @@ class Step1CLI:
             
             try:
                 # Connect to database
-                db_url = f"postgresql://sa_user:sa_password@localhost:5432/{db_name}"
+                db_host = os.getenv('DB_HOST', 'postgres')
+                db_url = f"postgresql://sa_user:sa_password@{db_host}:5432/{db_name}"
                 db_conn = await asyncpg.connect(db_url)
                 
                 # Create coordinator
                 coordinator = Step1Coordinator(
                     db_connection=db_conn,
-                    execution_mode="enhanced"  # Demo uses enhanced mode
+                    execution_mode="enhanced",  # Demo uses enhanced mode
+                    db_name=db_name
                 )
                 
                 # Load existing analysis
@@ -193,6 +200,10 @@ class Step1CLI:
                     is_enabled=True
                 )
                 settings.active_provider = ModelProvider.OLLAMA
+        
+        # Reinitialize llm_manager after setting up API keys
+        from core.utils.llm_client import llm_manager
+        llm_manager.reinitialize()
     
     async def _create_analysis_database(self, config: dict) -> str:
         """Create new PostgreSQL database for analysis"""
@@ -201,8 +212,10 @@ class Step1CLI:
         db_name = f"stpa_analysis_{timestamp}"
         
         # Create database
+        # Use environment variable or default to Docker service name
+        db_host = os.getenv('DB_HOST', 'postgres')
         sys_conn = await asyncpg.connect(
-            "postgresql://sa_user:sa_password@localhost:5432/postgres"
+            f"postgresql://sa_user:sa_password@{db_host}:5432/postgres"
         )
         
         try:
@@ -212,7 +225,7 @@ class Step1CLI:
             # Run migrations
             await sys_conn.close()
             db_conn = await asyncpg.connect(
-                f"postgresql://sa_user:sa_password@localhost:5432/{db_name}"
+                f"postgresql://sa_user:sa_password@{db_host}:5432/{db_name}"
             )
             
             # Run migrations (simplified for demo)
@@ -252,7 +265,19 @@ class Step1CLI:
     
     async def _save_results(self, config: dict, results: dict, db_name: str):
         """Save results in configured formats"""
-        output_dir = Path(config['analysis'].get('output_dir', f'./analyses/{db_name}'))
+        # Get project root (two levels up from backend)
+        project_root = Path(__file__).parent.parent.parent
+        
+        # Use configured output_dir or default to root-level analysis directory
+        if 'output_dir' in config['analysis']:
+            output_dir = Path(config['analysis']['output_dir'])
+            # If it's a relative path, make it relative to project root
+            if not output_dir.is_absolute():
+                output_dir = project_root / output_dir
+        else:
+            # Default to analysis directory at root level
+            output_dir = project_root / 'analysis' / db_name
+        
         output_dir.mkdir(parents=True, exist_ok=True)
         
         # Save configuration (without secrets)
@@ -260,32 +285,185 @@ class Step1CLI:
         if 'model' in config_copy and 'api_key' in config_copy['model']:
             del config_copy['model']['api_key']
         
-        with open(output_dir / 'analysis-config.yaml', 'w') as f:
+        config_file = output_dir / 'analysis-config.yaml'
+        with open(config_file, 'w') as f:
             yaml.dump(config_copy, f)
         
         # Save results as JSON
-        with open(output_dir / 'analysis-results.json', 'w') as f:
+        results_file = output_dir / 'analysis-results.json'
+        with open(results_file, 'w') as f:
             json.dump(results, f, indent=2, default=str)
         
-        self.console.print(f"Results saved to: {output_dir}")
+        # Store output info for display
+        self._output_dir = output_dir
+        self._saved_files = [config_file, results_file]
     
     def _display_results_summary(self, results: dict, execution_mode: str):
-        """Display summary of analysis results"""
+        """Display detailed analysis results like the demo"""
         
-        # Create summary table
-        table = Table(title=f"Step 1 Analysis Summary ({execution_mode} mode)")
-        table.add_column("Component", style="cyan")
+        self.console.print(f"\n[bold green]Step 1 STPA-Sec Analysis Results ({execution_mode} mode)[/bold green]\n")
+        
+        # Extract results sections
+        analysis_results = results.get('results', {})
+        mission_results = analysis_results.get('mission_analyst', {})
+        loss_results = analysis_results.get('loss_identification', {})
+        hazard_results = analysis_results.get('hazard_identification', {})
+        constraint_results = analysis_results.get('security_constraints', {})
+        boundary_results = analysis_results.get('system_boundaries', {})
+        stakeholder_results = analysis_results.get('stakeholder_analyst', {})
+        
+        # Mission Statement
+        if mission_results:
+            ps = mission_results.get('problem_statement', {})
+            if ps:
+                self.console.print(Panel(
+                    f"[bold]Purpose:[/bold] {ps.get('purpose_what', 'N/A')}\n\n"
+                    f"[bold]Method:[/bold] {ps.get('method_how', 'N/A')}\n\n"
+                    f"[bold]Goals:[/bold] {ps.get('goals_why', 'N/A')}",
+                    title="Mission Statement",
+                    border_style="blue"
+                ))
+        
+        # Losses
+        if loss_results:
+            self.console.print("\n[bold]Losses:[/bold]")
+            self.console.print(f"Total: {loss_results.get('loss_count', 0)} losses")
+            
+            # Show loss categories breakdown
+            if 'loss_categories' in loss_results:
+                categories = loss_results['loss_categories']
+                self.console.print("\n[bold]Losses by Category:[/bold]")
+                for category, count in categories.items():
+                    self.console.print(f"  • {category.capitalize()}: {count}")
+            
+            self.console.print("\nAll Losses:")
+            for loss in loss_results.get('losses', []):
+                self.console.print(f"  • {loss['identifier']}: {loss['description']}")
+                self.console.print(f"    Category: {loss['loss_category']}, Severity: {loss['severity_classification']['magnitude']}")
+            
+            # Show loss dependencies
+            if 'dependencies' in loss_results:
+                self.console.print("\n[bold]Loss Dependencies:[/bold]")
+                for dep in loss_results.get('dependencies', []):
+                    self.console.print(f"  • {dep['primary_loss_id']} → {dep['dependent_loss_id']} ({dep['dependency_type']})")
+                    self.console.print(f"    Strength: {dep['dependency_strength']}, Timing: {dep['time_relationship']['sequence']}")
+                    if 'rationale' in dep:
+                        self.console.print(f"    Rationale: {dep['rationale']}")
+        
+        # Hazards
+        if hazard_results:
+            self.console.print("\n[bold]Hazards:[/bold]")
+            self.console.print(f"Total: {hazard_results.get('hazard_count', 0)} hazards")
+            
+            # Show hazard categories breakdown
+            if 'hazard_categories' in hazard_results:
+                categories = hazard_results['hazard_categories']
+                self.console.print("\n[bold]Hazards by Category:[/bold]")
+                for category, count in categories.items():
+                    self.console.print(f"  • {category.replace('_', ' ').title()}: {count}")
+            
+            self.console.print("\nAll Hazards:")
+            for hazard in hazard_results.get('hazards', []):
+                self.console.print(f"  • {hazard['identifier']}: {hazard['description']}")
+                self.console.print(f"    Category: {hazard['hazard_category']}")
+            
+            # Show hazard-loss mappings
+            if 'hazard_loss_mappings' in hazard_results:
+                self.console.print("\n[bold]Hazard-Loss Mappings:[/bold]")
+                for mapping in hazard_results.get('hazard_loss_mappings', []):
+                    self.console.print(f"  • {mapping['hazard_id']} → {mapping['loss_id']} ({mapping['relationship_strength']})")
+                    if 'rationale' in mapping:
+                        self.console.print(f"    Rationale: {mapping['rationale']}")
+        
+        # Security Constraints
+        if constraint_results:
+            self.console.print("\n[bold]Security Constraints:[/bold]")
+            self.console.print(f"Total: {constraint_results.get('constraint_count', 0)} constraints")
+            
+            # Show constraint types
+            self.console.print("\n[bold]Security Constraints by Type:[/bold]")
+            if 'constraint_types' in constraint_results:
+                types = constraint_results['constraint_types']
+                self.console.print(f"  • Preventive: {types.get('preventive', 0)}")
+                self.console.print(f"  • Detective: {types.get('detective', 0)}")
+                self.console.print(f"  • Corrective: {types.get('corrective', 0)}")
+                self.console.print(f"  • Compensating: {types.get('compensating', 0)}")
+            
+            # Show all constraints
+            self.console.print("\nAll Security Constraints:")
+            for constraint in constraint_results.get('security_constraints', []):
+                self.console.print(f"  • {constraint['identifier']}: {constraint['constraint_statement']}")
+                self.console.print(f"    Type: {constraint['constraint_type']}, Level: {constraint['enforcement_level']}")
+            
+            # Show constraint-hazard mappings
+            if 'constraint_hazard_mappings' in constraint_results:
+                self.console.print("\n[bold]Constraint-Hazard Mappings:[/bold]")
+                for mapping in constraint_results.get('constraint_hazard_mappings', []):
+                    self.console.print(f"  • {mapping['constraint_id']} → {mapping['hazard_id']} ({mapping['relationship_type']})")
+        
+        # System Boundaries
+        if boundary_results:
+            self.console.print("\n[bold]System Boundaries:[/bold]")
+            self.console.print(f"Total: {len(boundary_results.get('system_boundaries', []))} boundaries")
+            
+            self.console.print("\nAll System Boundaries:")
+            for boundary in boundary_results.get('system_boundaries', []):
+                self.console.print(f"  • {boundary['boundary_name']} ({boundary['boundary_type']})")
+                self.console.print(f"    {boundary['description']}")
+                if 'elements' in boundary:
+                    inside = [e for e in boundary['elements'] if e['position'] == 'inside']
+                    outside = [e for e in boundary['elements'] if e['position'] == 'outside']
+                    interface = [e for e in boundary['elements'] if e['position'] == 'interface']
+                    self.console.print(f"    Elements: {len(inside)} inside, {len(outside)} outside, {len(interface)} at interface")
+        
+        # Stakeholders
+        if stakeholder_results:
+            self.console.print("\n[bold]Stakeholders:[/bold]")
+            for sh in stakeholder_results.get('stakeholders', []):
+                self.console.print(f"  • {sh['name']} ({sh['stakeholder_type']})")
+                self.console.print(f"    Criticality: {sh.get('criticality', 'N/A')}")
+                needs = sh.get('mission_perspective', {}).get('primary_needs', [])
+                if needs:
+                    self.console.print(f"    Primary needs: {', '.join(needs)}")
+            
+            # Adversaries
+            self.console.print("\n[bold]Adversaries:[/bold]")
+            for adv in stakeholder_results.get('adversaries', []):
+                profile = adv['profile']
+                self.console.print(f"  • {adv['adversary_class'].replace('_', ' ').title()}")
+                self.console.print(f"    Sophistication: {profile['sophistication']}, Resources: {profile['resources']}")
+                self.console.print(f"    Primary interest: {profile['primary_interest']}")
+                targets = adv.get('mission_targets', {}).get('interested_in', [])
+                if targets:
+                    self.console.print(f"    Targets: {', '.join(targets)}")
+        
+        # Create summary table at the end
+        table = Table(title="Analysis Summary", show_header=True)
+        table.add_column("Component", style="cyan", width=25)
         table.add_column("Count", justify="right", style="green")
-        table.add_column("Status", style="yellow")
         
-        # Extract counts
-        loss_results = results['results'].get('loss_identification', {})
-        hazard_results = results['results'].get('hazard_identification', {})
-        stakeholder_results = results['results'].get('stakeholder_analysis', {})
+        # Add counts to table
+        if loss_results:
+            loss_count = loss_results.get('loss_count', 0)
+            table.add_row("Losses Identified", str(loss_count))
         
-        table.add_row("Losses", str(loss_results.get('loss_count', 0)), "✓")
-        table.add_row("Hazards", str(len(hazard_results.get('hazards', []))), "✓")
-        table.add_row("Stakeholders", str(len(stakeholder_results.get('stakeholders', []))), "✓")
+        if hazard_results:
+            hazard_count = hazard_results.get('hazard_count', 0)
+            table.add_row("Hazards Identified", str(hazard_count))
+        
+        if constraint_results:
+            constraint_count = constraint_results.get('constraint_count', 0)
+            table.add_row("Security Constraints", str(constraint_count))
+        
+        if boundary_results:
+            boundary_count = len(boundary_results.get('system_boundaries', []))
+            table.add_row("System Boundaries", str(boundary_count))
+        
+        if stakeholder_results:
+            stakeholder_count = len(stakeholder_results.get('stakeholders', []))
+            adversary_count = len(stakeholder_results.get('adversaries', []))
+            table.add_row("Stakeholders Identified", str(stakeholder_count))
+            table.add_row("Adversaries Profiled", str(adversary_count))
         
         self.console.print("\n")
         self.console.print(table)
@@ -375,6 +553,15 @@ class Step1CLI:
                     self.console.print(f"  • {issue}")
                 if len(completeness['validation_issues']) > 5:
                     self.console.print(f"  • ...and {len(completeness['validation_issues'])-5} more issues")
+    
+    def _display_output_files(self):
+        """Display information about saved output files"""
+        if hasattr(self, '_output_dir') and hasattr(self, '_saved_files'):
+            self.console.print("\n[bold]Analysis Output:[/bold]")
+            self.console.print(f"Results saved to: {self._output_dir}")
+            for file_path in self._saved_files:
+                relative_path = file_path.relative_to(Path.cwd()) if file_path.is_relative_to(Path.cwd()) else file_path
+                self.console.print(f"  • {relative_path}")
 
 
 async def main():

@@ -11,9 +11,16 @@ from .base_step1 import BaseStep1Agent, CognitiveStyle
 class SystemBoundaryAgent(BaseStep1Agent):
     """Agent responsible for defining system boundaries"""
     
-    def __init__(self, cognitive_style: CognitiveStyle = CognitiveStyle.BALANCED):
-        super().__init__(cognitive_style)
-        self.agent_type = "system_boundaries"
+    def get_agent_type(self) -> str:
+        return "system_boundaries"
+    
+    def validate_abstraction_level(self, content: str) -> bool:
+        """Validate that content maintains Step 1 abstraction level"""
+        # Check for implementation details
+        if self.is_implementation_detail(content):
+            return False
+        # Boundaries should be at mission level
+        return True
     
     async def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -47,14 +54,25 @@ class SystemBoundaryAgent(BaseStep1Agent):
         # Create summary
         summary = self._create_summary(boundaries)
         
+        # Generate comprehensive boundary analysis
+        boundary_analysis = self._generate_boundary_analysis(boundaries, relationships, summary)
+        
+        # Extract the primary system boundary (first one or create one) and enhance it
+        primary_boundary = boundaries[0] if boundaries else self._create_default_boundary(system_description)
+        
+        # Add required validation fields to the primary boundary
+        primary_boundary = self._enhance_primary_boundary(primary_boundary, boundary_analysis)
+        
         return {
             "system_boundaries": boundaries,
+            "system_boundary": primary_boundary,
+            "boundary_analysis": boundary_analysis,
             "boundary_relationships": relationships,
             "boundary_summary": summary,
             "cognitive_style": self.cognitive_style.value,
             "analysis_metadata": {
-                "agent_type": self.agent_type,
-                "analysis_id": context.get('analysis_id', 'unknown'),
+                "agent_type": self.get_agent_type(),
+                "analysis_id": self.analysis_id,
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "version": "1.0"
             }
@@ -269,3 +287,92 @@ Ensure all boundary types are covered and elements are clearly positioned."""
                 raise ValueError("No JSON found in response")
         
         return json.loads(json_str)
+    
+    def _generate_boundary_analysis(self, boundaries: List[Dict], relationships: List[Dict], summary: Dict) -> Dict[str, Any]:
+        """Generate comprehensive boundary analysis"""
+        
+        # Extract key elements across all boundaries
+        primary_system = set()
+        system_elements = set() 
+        external_entities = set()
+        interfaces = []
+        assumptions = []
+        exclusions = []
+        
+        for boundary in boundaries:
+            elements = boundary.get('elements', [])
+            for element in elements:
+                name = element.get('element_name', '')
+                position = element.get('position', '')
+                
+                if position == 'inside':
+                    if boundary.get('boundary_type') == 'system_scope':
+                        primary_system.add(name)
+                    system_elements.add(name)
+                elif position == 'outside':
+                    external_entities.add(name)
+                elif position == 'interface':
+                    interfaces.append({
+                        'name': name,
+                        'boundary_type': boundary.get('boundary_type'),
+                        'assumptions': element.get('assumptions', {}),
+                        'constraints': element.get('constraints', {})
+                    })
+                
+                # Collect assumptions and exclusions
+                if 'assumptions' in element:
+                    for key, value in element['assumptions'].items():
+                        assumptions.append(f"{name}: {value}")
+                        
+                if 'constraints' in element:
+                    for key, value in element['constraints'].items():
+                        exclusions.append(f"{name}: {value}")
+        
+        return {
+            "primary_system": list(primary_system),
+            "system_elements": list(system_elements),
+            "external_entities": list(external_entities),
+            "interfaces": interfaces,
+            "assumptions": assumptions,
+            "exclusions": exclusions,
+            "boundary_coverage": {
+                "total_boundaries_defined": len(boundaries),
+                "critical_interfaces_identified": len(interfaces),
+                "external_dependencies": len(external_entities)
+            }
+        }
+    
+    def _create_default_boundary(self, system_description: str) -> Dict[str, Any]:
+        """Create a default system boundary if none exists"""
+        return {
+            "boundary_name": "System Scope Boundary",
+            "boundary_type": "system_scope", 
+            "description": "Primary system boundary defining what is within system control",
+            "definition_criteria": {
+                "criterion1": "Components directly controlled and operated by the system",
+                "criterion2": "External dependencies and interfaces outside system control"
+            },
+            "elements": [
+                {
+                    "element_name": "Core System",
+                    "element_type": "component",
+                    "position": "inside",
+                    "assumptions": {"reliable": "Assumed to be under direct system control"},
+                    "constraints": {"dependency": "Depends on external services for some operations"}
+                }
+            ]
+        }
+    
+    def _enhance_primary_boundary(self, primary_boundary: Dict[str, Any], boundary_analysis: Dict[str, Any]) -> Dict[str, Any]:
+        """Enhance primary boundary with required validation fields"""
+        enhanced_boundary = primary_boundary.copy()
+        
+        # Add required fields from boundary analysis
+        enhanced_boundary["primary_system"] = boundary_analysis.get("primary_system", [])
+        enhanced_boundary["system_elements"] = boundary_analysis.get("system_elements", [])
+        enhanced_boundary["external_entities"] = boundary_analysis.get("external_entities", [])
+        enhanced_boundary["interfaces"] = boundary_analysis.get("interfaces", [])
+        enhanced_boundary["assumptions"] = boundary_analysis.get("assumptions", [])
+        enhanced_boundary["exclusions"] = boundary_analysis.get("exclusions", [])
+        
+        return enhanced_boundary

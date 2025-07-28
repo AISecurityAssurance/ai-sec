@@ -482,7 +482,7 @@ SELECT
   COUNT(DISTINCT CASE WHEN a.stride_spoofing->>'severity' = 'critical' THEN a.id END) as critical_stride
 FROM entities e
 JOIN relationships r ON e.id IN (r.source_id, r.target_id)
-JOIN analyses a ON r.id = a.relationship_id
+JOIN stpa_analyses a ON r.id = a.relationship_id
 WHERE e.exposure = 'external'
 GROUP BY e.id, e.name, e.trust_level, e.exposure
 ORDER BY critical_ucas DESC, critical_stride DESC;

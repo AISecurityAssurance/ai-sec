@@ -11,9 +11,17 @@ from .base_step1 import BaseStep1Agent, CognitiveStyle
 class SecurityConstraintAgent(BaseStep1Agent):
     """Agent responsible for deriving security constraints from hazards"""
     
-    def __init__(self, cognitive_style: CognitiveStyle = CognitiveStyle.BALANCED):
-        super().__init__(cognitive_style)
-        self.agent_type = "security_constraints"
+    def get_agent_type(self) -> str:
+        return "security_constraints"
+    
+    def validate_abstraction_level(self, content: str) -> bool:
+        """Validate that content maintains Step 1 abstraction level"""
+        # Check for implementation details
+        if self.is_implementation_detail(content):
+            return False
+        # Check for prevention language (which is okay for constraints)
+        # Constraints naturally contain "shall" and "must" language
+        return True
     
     async def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -47,15 +55,19 @@ class SecurityConstraintAgent(BaseStep1Agent):
         # Create summary statistics
         summary = self._create_summary(constraints, mappings)
         
+        # Generate constraint coverage analysis
+        coverage = self._generate_constraint_coverage(constraints, hazards, losses)
+        
         return {
             "security_constraints": constraints,
+            "constraint_coverage": coverage,
             "constraint_hazard_mappings": mappings,
             "constraint_count": len(constraints),
             "constraint_types": summary["types"],
             "cognitive_style": self.cognitive_style.value,
             "analysis_metadata": {
-                "agent_type": self.agent_type,
-                "analysis_id": context.get('analysis_id', 'unknown'),
+                "agent_type": self.get_agent_type(),
+                "analysis_id": self.analysis_id,
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "version": "1.0"
             }
@@ -97,7 +109,8 @@ INSTRUCTIONS:
 2. Constraints must be at mission level (WHAT not HOW)
 3. Use "The system shall..." format
 4. Each constraint must be verifiable and enforceable
-5. Consider:
+5. IMPORTANT: Include the "addresses_hazards" field with hazard IDs for each constraint
+6. Consider:
    - Preventive constraints (eliminate hazards)
    - Detective constraints (identify when hazards occur)
    - Corrective constraints (respond to hazards)
@@ -108,12 +121,15 @@ Generate constraints in this JSON format:
   "constraints": [
     {{
       "identifier": "SC-1",
+      "name": "Strong Authentication Constraint",
       "constraint_statement": "The system shall...",
       "rationale": "Why this constraint is needed",
       "constraint_type": "preventive|detective|corrective|compensating",
       "enforcement_level": "mandatory|recommended|optional",
+      "enforcement_mechanism": "Technical controls, policies, procedures used to enforce this constraint",
       "addresses_hazards": ["H-1", "H-2"],
       "prevents_losses": ["L-1"],
+      "related_losses": ["L-1", "L-2"],
       "mission_impact_if_violated": {{
         "losses_enabled": ["L-1", "L-2"],
         "capability_degradation": "Description of impact"
@@ -121,6 +137,9 @@ Generate constraints in this JSON format:
     }}
   ]
 }}
+
+CRITICAL: The "addresses_hazards" field MUST contain the hazard IDs (e.g., ["H-1", "H-2"]) that each constraint addresses.
+Example: If constraint SC-1 addresses hazard H-1, include "addresses_hazards": ["H-1"] in that constraint.
 
 Ensure complete coverage - every hazard should have at least one constraint addressing it."""
         
@@ -147,7 +166,8 @@ Ensure complete coverage - every hazard should have at least one constraint addr
     
     def _validate_constraint(self, constraint: Dict[str, Any]) -> bool:
         """Validate a single constraint has required fields"""
-        required_fields = ['identifier', 'constraint_statement', 'constraint_type']
+        required_fields = ['identifier', 'name', 'constraint_statement', 'constraint_type', 
+                          'related_losses', 'enforcement_mechanism']
         
         for field in required_fields:
             if field not in constraint:
@@ -234,3 +254,40 @@ Ensure complete coverage - every hazard should have at least one constraint addr
                 raise ValueError("No JSON found in response")
         
         return json.loads(json_str)
+    
+    def _generate_constraint_coverage(self, constraints: List[Dict], hazards: List[Dict], losses: List[Dict]) -> Dict[str, Any]:
+        """Generate constraint coverage analysis"""
+        
+        # Count constraints by type
+        type_distribution = {
+            'preventive': 0,
+            'detective': 0,
+            'corrective': 0,
+            'compensating': 0
+        }
+        
+        hazards_with_constraints = set()
+        total_constraints = len(constraints)
+        
+        for constraint in constraints:
+            # Count constraint types
+            c_type = constraint.get('constraint_type', 'preventive')
+            if c_type in type_distribution:
+                type_distribution[c_type] += 1
+            
+            # Track which hazards have constraints
+            for hazard_id in constraint.get('addresses_hazards', []):
+                hazards_with_constraints.add(hazard_id)
+        
+        # Calculate coverage metrics
+        total_hazards = len(hazards)
+        hazards_covered = len(hazards_with_constraints)
+        coverage_balance = hazards_covered / total_hazards if total_hazards > 0 else 0.0
+        
+        return {
+            "total_hazards": total_hazards,
+            "hazards_with_constraints": hazards_covered,
+            "total_constraints": total_constraints,
+            "coverage_balance": coverage_balance,
+            "type_distribution": type_distribution
+        }

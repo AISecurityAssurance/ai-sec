@@ -119,12 +119,12 @@ CREATE TABLE stpa_analyses (
 );
 
 -- Create indexes for analyses
-CREATE INDEX idx_analyses_relationship ON analyses(relationship_id);
-CREATE INDEX idx_analyses_type ON analyses(analysis_type);
+CREATE INDEX idx_analyses_relationship ON stpa_analyses(relationship_id);
+CREATE INDEX idx_analyses_type ON stpa_analyses(analysis_type);
 -- Indexes for JSONB queries
-CREATE INDEX idx_analyses_uca_severity ON analyses ((uca_not_provided->>'severity'), (uca_provided_causes_hazard->>'severity'));
-CREATE INDEX idx_analyses_stride_severity ON analyses ((stride_spoofing->>'severity'), (stride_tampering->>'severity'));
-CREATE INDEX idx_analyses_dread_score ON analyses (CAST(dread_assessment->>'total_score' AS INT));
+CREATE INDEX idx_analyses_uca_severity ON stpa_analyses ((uca_not_provided->>'severity'), (uca_provided_causes_hazard->>'severity'));
+CREATE INDEX idx_analyses_stride_severity ON stpa_analyses ((stride_spoofing->>'severity'), (stride_tampering->>'severity'));
+CREATE INDEX idx_analyses_dread_score ON stpa_analyses (CAST(dread_assessment->>'total_score' AS INT));
 
 -- Step 4: Causal Scenarios
 CREATE TABLE scenarios (
@@ -338,7 +338,7 @@ CREATE TABLE hazop_deviations (
 -- Link HAZOP deviations to UCAs
 CREATE TABLE hazop_uca_mapping (
   hazop_id VARCHAR REFERENCES hazop_deviations(id),
-  analysis_id VARCHAR REFERENCES analyses(id),
+  analysis_id VARCHAR REFERENCES stpa_analyses(id),
   correlation_strength VARCHAR CHECK (correlation_strength IN ('weak', 'moderate', 'strong')),
   notes TEXT,
   PRIMARY KEY (hazop_id, analysis_id)

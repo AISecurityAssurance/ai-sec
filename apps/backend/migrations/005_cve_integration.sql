@@ -123,9 +123,7 @@ CREATE TABLE entity_vulnerabilities (
   ) STORED,
   
   -- Base risk calculation (before context)
-  base_risk_score FLOAT GENERATED ALWAYS AS (
-    (SELECT cvss_v3_score FROM cve_database WHERE cve_id = entity_vulnerabilities.cve_id)
-  ) STORED,
+  base_risk_score FLOAT,
   
   -- Mission context
   mission_critical_path BOOLEAN DEFAULT FALSE,
@@ -231,11 +229,41 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Add computed column for contextual risk score
+-- Add column for contextual risk score (will be populated by trigger)
 ALTER TABLE entity_vulnerabilities 
-ADD COLUMN contextual_risk_score FLOAT GENERATED ALWAYS AS (
-  calculate_contextual_risk_score(id)
-) STORED;
+ADD COLUMN contextual_risk_score FLOAT;
+
+-- Create trigger to populate base_risk_score
+CREATE OR REPLACE FUNCTION update_base_risk_score()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.base_risk_score := (
+    SELECT cvss_v3_score 
+    FROM cve_database 
+    WHERE cve_id = NEW.cve_id
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_base_risk_score
+BEFORE INSERT OR UPDATE ON entity_vulnerabilities
+FOR EACH ROW
+EXECUTE FUNCTION update_base_risk_score();
+
+-- Create trigger to populate contextual_risk_score
+CREATE OR REPLACE FUNCTION update_contextual_risk_score()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.contextual_risk_score := calculate_contextual_risk_score(NEW.id);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_contextual_risk_score
+AFTER INSERT OR UPDATE ON entity_vulnerabilities
+FOR EACH ROW
+EXECUTE FUNCTION update_contextual_risk_score();
 
 -- CVE to Scenario mapping
 CREATE TABLE cve_scenario_mappings (
@@ -271,7 +299,7 @@ WITH critical_paths AS (
   JOIN relationships r ON e.id IN (r.source_id, r.target_id)
   JOIN control_loops cl ON r.control_loop_id = cl.id
   WHERE cl.controlled_process IN (
-    SELECT unnest(mission_dependencies) 
+    SELECT jsonb_array_elements_text(mission_statement->'mission_dependencies') 
     FROM system_definition 
     WHERE id = 'system-001'
   )

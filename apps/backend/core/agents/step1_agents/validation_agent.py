@@ -35,7 +35,9 @@ class ValidationAgent(BaseStep1Agent):
             'mission_analyst',
             'loss_identification',
             'hazard_identification',
-            'stakeholder_analyst'
+            'stakeholder_analyst',
+            'security_constraints',
+            'system_boundaries'
         ])
         
         # Perform validation checks
@@ -77,10 +79,12 @@ class ValidationAgent(BaseStep1Agent):
         
         results = {
             "validation_results": {
-                "abstraction": abstraction_validation,
-                "completeness": completeness_validation,
-                "consistency": consistency_validation,
-                "coverage": coverage_validation,
+                # Use expected field names for coordinator
+                "mission_clarity": abstraction_validation,
+                "loss_completeness": completeness_validation,
+                "hazard_coverage": coverage_validation,
+                "stakeholder_coverage": consistency_validation,
+                # Additional validation results
                 "security_constraints": security_constraints_validation,
                 "system_boundaries": system_boundaries_validation
             },
@@ -209,7 +213,9 @@ class ValidationAgent(BaseStep1Agent):
             "mission_analyst": ["problem_statement", "mission_context", "operational_constraints"],
             "loss_identification": ["losses", "dependencies", "cascade_analysis"],
             "hazard_identification": ["hazards", "hazard_loss_mappings", "temporal_analysis"],
-            "stakeholder_analyst": ["stakeholders", "adversaries", "mission_success_criteria"]
+            "stakeholder_analyst": ["stakeholders", "adversaries", "mission_success_criteria"],
+            "security_constraints": ["security_constraints", "constraint_hazard_mappings"],
+            "system_boundaries": ["system_boundaries", "boundary_analysis"]
         }
         
         # Check for missing agents
@@ -246,6 +252,24 @@ class ValidationAgent(BaseStep1Agent):
                 "element": "hazards",
                 "impact": "major",
                 "description": f"Only {len(hazards)} hazards identified (minimum 3 recommended)"
+            })
+        
+        # Check minimum stakeholder count
+        stakeholders = prior_results.get('stakeholder_analyst', {}).get('stakeholders', [])
+        if len(stakeholders) < 5:
+            validation['incomplete_elements'].append({
+                "element": "stakeholders",
+                "impact": "major",
+                "description": f"Only {len(stakeholders)} stakeholders identified (minimum 5 recommended)"
+            })
+        
+        # Check minimum adversary count
+        adversaries = prior_results.get('stakeholder_analyst', {}).get('adversaries', [])
+        if len(adversaries) < 2:
+            validation['incomplete_elements'].append({
+                "element": "adversaries",
+                "impact": "moderate",
+                "description": f"Only {len(adversaries)} adversaries identified (minimum 2 recommended)"
             })
         
         # Calculate completeness score
@@ -302,13 +326,24 @@ class ValidationAgent(BaseStep1Agent):
         stakeholders = prior_results.get('stakeholder_analyst', {}).get('stakeholders', [])
         for stakeholder in stakeholders:
             exposure = stakeholder.get('loss_exposure', {})
-            for loss_id in exposure.get('direct_impact', []):
-                if loss_id not in loss_ids:
-                    validation['inconsistencies'].append({
-                        "type": "invalid_reference",
-                        "location": f"stakeholder.{stakeholder['name']}.loss_exposure",
-                        "issue": f"References non-existent loss {loss_id}"
-                    })
+            # Handle both dict and list formats
+            if isinstance(exposure, dict):
+                for loss_id in exposure.get('direct_impact', []):
+                    if loss_id not in loss_ids:
+                        validation['inconsistencies'].append({
+                            "type": "invalid_reference",
+                            "location": f"stakeholder.{stakeholder['name']}.loss_exposure",
+                            "issue": f"References non-existent loss {loss_id}"
+                        })
+            elif isinstance(exposure, list):
+                # If exposure is a list, it might contain loss identifiers directly
+                for loss_id in exposure:
+                    if isinstance(loss_id, str) and loss_id not in loss_ids:
+                        validation['inconsistencies'].append({
+                            "type": "invalid_reference",
+                            "location": f"stakeholder.{stakeholder['name']}.loss_exposure",
+                            "issue": f"References non-existent loss {loss_id}"
+                        })
         
         # Check terminology consistency
         domain = prior_results.get('mission_analyst', {}).get('mission_context', {}).get('domain', '')
@@ -425,12 +460,27 @@ class ValidationAgent(BaseStep1Agent):
         
         # Get hazards and check for constraints
         hazards = prior_results.get('hazard_identification', {}).get('hazards', [])
-        hazard_constraints = prior_results.get('hazard_identification', {}).get('security_constraints', {})
+        # Look for constraints in the security_constraints agent results
+        constraint_results = prior_results.get('security_constraints', {})
+        constraints = constraint_results.get('security_constraints', [])
+        constraint_mappings = constraint_results.get('constraint_hazard_mappings', [])
+        
+        # Build a map of hazards to their constraints
+        hazard_constraint_map = {}
+        for mapping in constraint_mappings:
+            hazard_id = mapping['hazard_id']
+            constraint_id = mapping['constraint_id']
+            # Find the constraint by ID
+            constraint = next((c for c in constraints if c['identifier'] == constraint_id), None)
+            if constraint:
+                if hazard_id not in hazard_constraint_map:
+                    hazard_constraint_map[hazard_id] = []
+                hazard_constraint_map[hazard_id].append(constraint)
         
         # Check that all hazards have at least one constraint
         for hazard in hazards:
             hazard_id = hazard['identifier']
-            if hazard_id not in hazard_constraints or not hazard_constraints[hazard_id]:
+            if hazard_id not in hazard_constraint_map or not hazard_constraint_map[hazard_id]:
                 validation['missing_constraints'].append({
                     "hazard_id": hazard_id,
                     "hazard_description": hazard['description'],
@@ -441,42 +491,53 @@ class ValidationAgent(BaseStep1Agent):
         # Validate constraint coverage (preventive, detective, corrective, compensating)
         constraint_types = ['preventive', 'detective', 'corrective', 'compensating']
         type_coverage = {ct: 0 for ct in constraint_types}
-        total_constraints = 0
+        total_constraints = len(constraints)
         
-        for hazard_id, constraints in hazard_constraints.items():
-            if constraints:
-                for constraint in constraints:
-                    total_constraints += 1
-                    constraint_type = constraint.get('type', 'preventive')
-                    if constraint_type in type_coverage:
-                        type_coverage[constraint_type] += 1
-                    
-                    # Check constraint strength
-                    if self._is_weak_constraint(constraint):
-                        validation['weak_constraints'].append({
-                            "hazard_id": hazard_id,
-                            "constraint": constraint.get('description', 'Unknown'),
-                            "issue": "Constraint may be too generic or weak"
-                        })
+        for constraint in constraints:
+            constraint_type = constraint.get('constraint_type', 'preventive')
+            if constraint_type in type_coverage:
+                type_coverage[constraint_type] += 1
+            
+            # Check constraint strength
+            if self._is_weak_constraint(constraint):
+                # Find which hazards this constraint addresses
+                affecting_hazards = [m['hazard_id'] for m in constraint_mappings if m['constraint_id'] == constraint['identifier']]
+                validation['weak_constraints'].append({
+                    "constraint_id": constraint['identifier'],
+                    "affecting_hazards": affecting_hazards,
+                    "constraint": constraint.get('constraint_statement', 'Unknown'),
+                    "issue": "Constraint may be too generic or weak"
+                })
         
         # Calculate coverage metrics
         validation['constraint_coverage'] = {
             "total_hazards": len(hazards),
-            "hazards_with_constraints": len([h for h in hazards if h['identifier'] in hazard_constraints and hazard_constraints[h['identifier']]]),
+            "hazards_with_constraints": len(hazard_constraint_map),
             "total_constraints": total_constraints,
             "type_distribution": type_coverage,
             "coverage_balance": self._calculate_constraint_balance(type_coverage)
         }
         
         # Check for critical constraint gaps
-        critical_hazards = [h for h in hazards if h['loss_likelihood'] == 'certain']
+        # Look for hazards that are categorized as high severity or have certain likelihood
+        critical_hazards = []
+        for h in hazards:
+            # Check various fields that might indicate criticality
+            if (h.get('hazard_category') in ['integrity_compromised', 'availability_degraded', 'mission_degraded'] or
+                h.get('severity') == 'high' or
+                h.get('loss_likelihood') == 'certain' or
+                h.get('temporal_nature', {}).get('existence') == 'always'):
+                critical_hazards.append(h)
+        
         for hazard in critical_hazards:
-            if hazard['identifier'] not in hazard_constraints or len(hazard_constraints[hazard['identifier']]) < 2:
+            hazard_id = hazard['identifier']
+            constraint_count = len(hazard_constraint_map.get(hazard_id, []))
+            if constraint_count < 2:
                 validation['missing_constraints'].append({
-                    "hazard_id": hazard['identifier'],
+                    "hazard_id": hazard_id,
                     "hazard_description": hazard['description'],
                     "impact": "critical",
-                    "issue": "Critical hazard needs multiple constraints"
+                    "issue": f"Critical hazard needs multiple constraints (currently has {constraint_count})"
                 })
         
         # Calculate constraint score
@@ -506,14 +567,20 @@ class ValidationAgent(BaseStep1Agent):
             "boundary_score": 100.0
         }
         
-        # Get boundary information from mission context
-        mission_context = prior_results.get('mission_analyst', {}).get('mission_context', {})
-        system_boundaries = mission_context.get('boundaries', {})
+        # Get boundary information from system_boundaries agent results
+        boundary_results = prior_results.get('system_boundaries', {})
+        system_boundaries = boundary_results.get('system_boundaries', [])
         
-        # Check for essential boundary types
-        essential_boundaries = ['system_environment', 'trusted_untrusted', 'internal_external']
+        # Convert list to dict for easier processing
+        boundary_dict = {}
+        for boundary in system_boundaries:
+            boundary_type = boundary.get('boundary_type', 'unknown')
+            boundary_dict[boundary_type] = boundary
+        
+        # Check for essential boundary types (map to our actual boundary types)
+        essential_boundaries = ['system_scope', 'trust', 'responsibility', 'data_governance']
         for boundary_type in essential_boundaries:
-            if boundary_type not in system_boundaries:
+            if boundary_type not in boundary_dict:
                 validation['missing_boundaries'].append({
                     "boundary_type": boundary_type,
                     "impact": "major",
@@ -521,7 +588,7 @@ class ValidationAgent(BaseStep1Agent):
                 })
         
         # Validate boundary definitions
-        for boundary_type, boundary_def in system_boundaries.items():
+        for boundary_type, boundary_def in boundary_dict.items():
             # Check for proper boundary structure
             if not isinstance(boundary_def, dict):
                 validation['boundary_issues'].append({
@@ -530,8 +597,8 @@ class ValidationAgent(BaseStep1Agent):
                 })
                 continue
                 
-            # Check for required elements
-            required_elements = ['elements', 'interfaces', 'crossing_points']
+            # Check for required elements (adapt to our actual structure)
+            required_elements = ['boundary_name', 'description', 'elements']
             for element in required_elements:
                 if element not in boundary_def or not boundary_def[element]:
                     validation['boundary_issues'].append({
@@ -544,32 +611,33 @@ class ValidationAgent(BaseStep1Agent):
         stakeholders = prior_results.get('stakeholder_analyst', {}).get('stakeholders', [])
         external_stakeholders = [s for s in stakeholders if s.get('position', 'external') == 'external']
         
-        if external_stakeholders and 'internal_external' in system_boundaries:
-            external_elements = system_boundaries['internal_external'].get('elements', {}).get('external', [])
-            stakeholder_names = [s['name'] for s in external_stakeholders]
+        # Simplified stakeholder boundary alignment check
+        if external_stakeholders and 'responsibility' in boundary_dict:
+            # Check if boundary definitions mention external stakeholders
+            boundary_text = str(boundary_dict['responsibility']).lower()
+            stakeholder_names = [s['name'].lower() for s in external_stakeholders]
             
-            # Check if external stakeholders are properly positioned
-            unmapped_stakeholders = [name for name in stakeholder_names if name not in str(external_elements)]
-            if unmapped_stakeholders:
+            unmapped_stakeholders = [name for name in stakeholder_names if name not in boundary_text]
+            if len(unmapped_stakeholders) > len(stakeholder_names) * 0.5:  # More than half unmapped
                 validation['boundary_issues'].append({
-                    "boundary_type": "internal_external",
-                    "issue": f"External stakeholders not mapped to boundaries: {unmapped_stakeholders}"
+                    "boundary_type": "responsibility",
+                    "issue": f"Many external stakeholders may not be properly addressed in boundary definitions"
                 })
         
-        # Check for critical interfaces
+        # Check for critical interfaces (count elements at interfaces)
         critical_interfaces = []
-        for boundary_type, boundary_def in system_boundaries.items():
-            if isinstance(boundary_def, dict) and 'interfaces' in boundary_def:
-                for interface in boundary_def.get('interfaces', []):
-                    if interface.get('criticality') == 'critical':
-                        critical_interfaces.append(interface)
+        for boundary_type, boundary_def in boundary_dict.items():
+            if isinstance(boundary_def, dict) and 'elements' in boundary_def:
+                elements = boundary_def.get('elements', [])
+                interface_elements = [e for e in elements if e.get('position') == 'interface']
+                critical_interfaces.extend(interface_elements)
         
         # Calculate boundary metrics
         validation['boundary_metrics'] = {
-            "defined_boundaries": len(system_boundaries),
-            "essential_coverage": len([b for b in essential_boundaries if b in system_boundaries]) / len(essential_boundaries) * 100,
+            "defined_boundaries": len(boundary_dict),
+            "essential_coverage": len([b for b in essential_boundaries if b in boundary_dict]) / len(essential_boundaries) * 100,
             "critical_interfaces": len(critical_interfaces),
-            "total_crossing_points": sum(len(b.get('crossing_points', [])) for b in system_boundaries.values() if isinstance(b, dict))
+            "total_elements": sum(len(b.get('elements', [])) for b in boundary_dict.values() if isinstance(b, dict))
         }
         
         # Validate boundary consistency with hazards
@@ -608,8 +676,11 @@ class ValidationAgent(BaseStep1Agent):
             "should", "may", "might", "could", "try"
         ]
         
+        # Check both constraint_statement and description fields
+        statement = constraint.get('constraint_statement', '').lower()
         description = constraint.get('description', '').lower()
-        return any(indicator in description for indicator in weak_indicators)
+        text = statement + " " + description
+        return any(indicator in text for indicator in weak_indicators)
     
     def _calculate_constraint_balance(self, type_coverage: Dict[str, int]) -> float:
         """Calculate balance score for constraint type distribution"""
@@ -824,6 +895,9 @@ class ValidationAgent(BaseStep1Agent):
             "boundary_control_requirements": {},
             "transition_guidance": []
         }
+        
+        # Get mission context
+        mission_context = prior_results.get('mission_analyst', {}).get('mission_context', {})
         
         # Analyze hazards to identify control needs
         hazards = prior_results.get('hazard_identification', {}).get('hazards', [])

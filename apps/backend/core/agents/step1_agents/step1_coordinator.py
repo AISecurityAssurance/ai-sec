@@ -14,8 +14,8 @@ from .mission_analyst import MissionAnalystAgent
 from .loss_identification import LossIdentificationAgent
 from .hazard_identification import HazardIdentificationAgent
 from .stakeholder_analyst import StakeholderAnalystAgent
-from .security_constraint import SecurityConstraintAgent
-from .system_boundary import SystemBoundaryAgent
+from .security_constraint_agent import SecurityConstraintAgent
+from .system_boundary_agent import SystemBoundaryAgent
 from .validation_agent import ValidationAgent
 from .base_step1 import CognitiveStyle
 
@@ -41,9 +41,11 @@ class Step1Coordinator:
     
     def __init__(self, analysis_id: Optional[str] = None, 
                  db_connection: Optional[asyncpg.Connection] = None,
-                 execution_mode: str = "standard"):
+                 execution_mode: str = "standard",
+                 db_name: Optional[str] = None):
         self.analysis_id = analysis_id or str(uuid4())
         self.db_connection = db_connection
+        self.db_name = db_name  # Store database name for parallel connections
         self.execution_log = []
         self.execution_mode = execution_mode
         
@@ -199,7 +201,15 @@ class Step1Coordinator:
         """Run hazard analysis"""
         # Create separate connection for parallel execution
         import os
-        DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://sa_user:sa_password@postgres:5432/security_analyst')
+        db_host = os.getenv('DB_HOST', 'postgres')
+        # Use the same database as the main connection
+        if self.db_name:
+            DATABASE_URL = f"postgresql://sa_user:sa_password@{db_host}:5432/{self.db_name}"
+        else:
+            DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://sa_user:sa_password@postgres:5432/security_analyst')
+            # Remove SQLAlchemy-specific prefix if present
+            if DATABASE_URL.startswith('postgresql+asyncpg://'):
+                DATABASE_URL = DATABASE_URL.replace('postgresql+asyncpg://', 'postgresql://')
         hazard_conn = await asyncpg.connect(DATABASE_URL)
         
         try:
@@ -217,7 +227,15 @@ class Step1Coordinator:
         """Run stakeholder analysis"""
         # Create separate connection for parallel execution
         import os
-        DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://sa_user:sa_password@postgres:5432/security_analyst')
+        db_host = os.getenv('DB_HOST', 'postgres')
+        # Use the same database as the main connection
+        if self.db_name:
+            DATABASE_URL = f"postgresql://sa_user:sa_password@{db_host}:5432/{self.db_name}"
+        else:
+            DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://sa_user:sa_password@postgres:5432/security_analyst')
+            # Remove SQLAlchemy-specific prefix if present
+            if DATABASE_URL.startswith('postgresql+asyncpg://'):
+                DATABASE_URL = DATABASE_URL.replace('postgresql+asyncpg://', 'postgresql://')
         stakeholder_conn = await asyncpg.connect(DATABASE_URL)
         
         try:
@@ -609,44 +627,57 @@ class Step1Coordinator:
         """Save security constraint results to database"""
         # Save security constraints
         for constraint in results['security_constraints']:
+            constraint_id = str(uuid4())
             await self.db_connection.execute("""
-                INSERT INTO step1_security_constraints
-                (id, analysis_id, identifier, name, constraint_type, 
-                 related_losses, related_hazards, enforcement_mechanism,
-                 temporal_aspects, criticality)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                INSERT INTO security_constraints
+                (id, analysis_id, identifier, constraint_statement, constraint_type, 
+                 rationale, enforcement_level)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+            """,
+                constraint_id,
+                self.analysis_id,
+                constraint['identifier'],
+                constraint.get('constraint_statement', constraint.get('description', '')),
+                constraint.get('constraint_type', 'preventive'),
+                constraint.get('rationale', ''),
+                constraint.get('enforcement_level', 'mandatory')
+            )
+            
+        # Save constraint-hazard mappings
+        for mapping in results.get('constraint_hazard_mappings', []):
+            await self.db_connection.execute("""
+                INSERT INTO constraint_hazard_mappings
+                (id, constraint_id, hazard_id, mapping_type, rationale)
+                VALUES ($1, 
+                    (SELECT id FROM security_constraints WHERE analysis_id = $2 AND identifier = $3),
+                    (SELECT id FROM step1_hazards WHERE analysis_id = $2 AND identifier = $4),
+                    $5, $6)
             """,
                 str(uuid4()),
                 self.analysis_id,
-                constraint['identifier'],
-                constraint['name'],
-                constraint['constraint_type'],
-                json.dumps(constraint['related_losses']),
-                json.dumps(constraint['related_hazards']),
-                json.dumps(constraint['enforcement_mechanism']),
-                json.dumps(constraint['temporal_aspects']),
-                constraint['criticality']
+                mapping['constraint_identifier'],
+                mapping['hazard_identifier'],
+                mapping.get('mapping_type', 'prevents'),
+                mapping.get('rationale', '')
             )
     
     async def _save_system_boundary_results(self, results: Dict[str, Any]):
         """Save system boundary results to database"""
-        # Save system boundary definition
-        boundary = results['system_boundary']
-        await self.db_connection.execute("""
-            INSERT INTO step1_system_boundaries
-            (id, analysis_id, primary_system, system_elements,
-             external_entities, interfaces, assumptions, exclusions)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        """,
-            str(uuid4()),
-            self.analysis_id,
-            json.dumps(boundary['primary_system']),
-            json.dumps(boundary['system_elements']),
-            json.dumps(boundary['external_entities']),
-            json.dumps(boundary['interfaces']),
-            json.dumps(boundary['assumptions']),
-            json.dumps(boundary['exclusions'])
-        )
+        # Save system boundaries
+        for boundary in results.get('system_boundaries', []):
+            boundary_id = str(uuid4())
+            await self.db_connection.execute("""
+                INSERT INTO system_boundaries
+                (id, analysis_id, boundary_name, boundary_type, description, definition_criteria)
+                VALUES ($1, $2, $3, $4, $5, $6)
+            """,
+                boundary_id,
+                self.analysis_id,
+                boundary.get('boundary_name', boundary.get('name', 'System Boundary')),
+                boundary.get('boundary_type', 'system_scope'),
+                boundary.get('description', ''),
+                json.dumps(boundary.get('definition_criteria', {}))
+            )
     
     async def _save_stakeholder_results(self, results: Dict[str, Any]):
         """Save stakeholder analysis results to database"""

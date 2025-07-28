@@ -101,6 +101,7 @@ CREATE TABLE loss_dependencies (
   )),
   
   time_relationship JSONB DEFAULT '{}',
+  rationale TEXT,
   
   created_at TIMESTAMP DEFAULT NOW(),
   UNIQUE(primary_loss_id, dependent_loss_id),

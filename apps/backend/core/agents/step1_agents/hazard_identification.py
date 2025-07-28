@@ -316,8 +316,8 @@ Mission Context:
 Identify hazardous SYSTEM STATES (not actions or attacks) that could lead to the identified losses. 
 For each hazard:
 1. Describe the hazardous STATE using language like "System operates in/with/without..."
-2. Categorize as: integrity_compromised, confidentiality_breached, availability_degraded, or capability_lost
-3. Identify which system property is affected
+2. Categorize as: integrity_compromised, confidentiality_breached, availability_degraded, capability_loss, non_compliance, or mission_degraded
+3. Identify which system property is affected (MUST be one of: transaction_integrity, data_protection, service_availability, regulatory_compliance, operational_capability, mission_effectiveness)
 4. Assess environmental factors (operational conditions, threat conditions)
 5. Describe temporal nature (always present, periodic, conditional)
 
@@ -325,7 +325,7 @@ Provide your response as a JSON array of hazard objects with the following struc
 [
   {{
     "description": "System operates with/in/without... (state description)",
-    "hazard_category": "integrity_compromised|confidentiality_breached|availability_degraded|capability_lost",
+    "hazard_category": "integrity_compromised|confidentiality_breached|availability_degraded|capability_loss|non_compliance|mission_degraded",
     "affected_system_property": "property name",
     "environmental_factors": {{
       "operational_conditions": {{

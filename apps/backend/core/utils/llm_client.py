@@ -446,6 +446,12 @@ class LLMManager:
             except Exception as e:
                 print(f"Failed to initialize {provider.value} client from DB: {e}")
     
+    def reinitialize(self):
+        """Force reinitialization of clients"""
+        self.clients = {}
+        self._db_checked = False
+        self._initialize_clients_from_env()
+    
     def _initialize_clients_from_env(self):
         """Initialize clients from environment variables"""
         for provider_id, config in settings.model_providers.items():

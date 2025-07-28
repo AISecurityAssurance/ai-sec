@@ -5,6 +5,7 @@ from typing import Dict, Any, Optional, List
 from abc import ABC, abstractmethod
 import asyncio
 import json
+import logging
 from datetime import datetime
 from uuid import uuid4
 
@@ -44,6 +45,7 @@ class BaseStep1Agent(ABC):
         self.agent_id = str(uuid4())
         self.created_at = datetime.now()
         self.cognitive_style = cognitive_style
+        self.logger = logging.getLogger(f"{self.__class__.__name__}-{self.agent_id[:8]}")
         
     @abstractmethod
     async def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -81,7 +83,7 @@ class BaseStep1Agent(ABC):
         if self.db_connection:
             await self.db_connection.execute("""
                 INSERT INTO agent_activity_log 
-                (id, agent_type, analysis_id, activity, details, timestamp)
+                (id, agent_type, analysis_id, activity, details, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6)
             """,
                 str(uuid4()),

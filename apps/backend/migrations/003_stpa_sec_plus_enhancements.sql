@@ -274,7 +274,7 @@ CREATE TABLE automated_threat_feeds (
 -- Link threats to affected analyses
 CREATE TABLE threat_analysis_mappings (
   threat_id VARCHAR REFERENCES threat_landscape_intelligence(id),
-  analysis_id VARCHAR REFERENCES analyses(id),
+  analysis_id VARCHAR REFERENCES stpa_analyses(id),
   relevance_score FLOAT CHECK (relevance_score >= 0 AND relevance_score <= 1),
   mapping_rationale TEXT,
   requires_reanalysis BOOLEAN DEFAULT FALSE,
@@ -362,7 +362,7 @@ BEGIN
     'STRIDE analysis exists without HAZOP deviation analysis' as description,
     'medium' as severity
   FROM relationships r
-  JOIN analyses a ON r.id = a.relationship_id
+  JOIN stpa_analyses a ON r.id = a.relationship_id
   WHERE a.stride_spoofing IS NOT NULL
     AND NOT EXISTS (SELECT 1 FROM hazop_deviations h WHERE h.relationship_id = r.id)
   

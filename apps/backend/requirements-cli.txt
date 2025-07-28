@@ -1,5 +1,6 @@
 # Requirements for CLI and Step 1 analysis
 asyncpg>=0.29.0
+psycopg2-binary>=2.9.0
 httpx>=0.25.0
 pyyaml>=6.0
 rich>=13.7.0

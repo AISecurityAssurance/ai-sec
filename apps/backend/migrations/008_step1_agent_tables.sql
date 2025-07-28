@@ -8,12 +8,12 @@ CREATE TABLE IF NOT EXISTS agent_activity_log (
     analysis_id VARCHAR REFERENCES step1_analyses(id) ON DELETE CASCADE,
     activity VARCHAR NOT NULL,
     details JSONB,
-    timestamp TIMESTAMP DEFAULT NOW(),
-    
-    -- Indexes
-    INDEX idx_agent_activity_analysis (analysis_id),
-    INDEX idx_agent_activity_timestamp (timestamp)
+    created_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Indexes for agent activity log
+CREATE INDEX IF NOT EXISTS idx_agent_activity_analysis ON agent_activity_log(analysis_id);
+CREATE INDEX IF NOT EXISTS idx_agent_activity_timestamp ON agent_activity_log(created_at);
 
 -- Agent results storage
 CREATE TABLE IF NOT EXISTS agent_results (
@@ -24,12 +24,12 @@ CREATE TABLE IF NOT EXISTS agent_results (
     created_at TIMESTAMP DEFAULT NOW(),
     
     -- Ensure one result per agent per analysis
-    UNIQUE (analysis_id, agent_type),
-    
-    -- Indexes
-    INDEX idx_agent_results_analysis (analysis_id),
-    INDEX idx_agent_results_agent_type (agent_type)
+    UNIQUE (analysis_id, agent_type)
 );
+
+-- Indexes for agent results
+CREATE INDEX IF NOT EXISTS idx_agent_results_analysis ON agent_results(analysis_id);
+CREATE INDEX IF NOT EXISTS idx_agent_results_agent_type ON agent_results(agent_type);
 
 -- Add metadata column to step1_analyses if not exists
 DO $$ 
@@ -78,9 +78,9 @@ SELECT
     a.id as analysis_id,
     a.name as analysis_name,
     COUNT(DISTINCT al.agent_type) as agents_executed,
-    MIN(al.timestamp) as start_time,
-    MAX(al.timestamp) as end_time,
-    EXTRACT(EPOCH FROM (MAX(al.timestamp) - MIN(al.timestamp))) as duration_seconds,
+    MIN(al.created_at) as start_time,
+    MAX(al.created_at) as end_time,
+    EXTRACT(EPOCH FROM (MAX(al.created_at) - MIN(al.created_at))) as duration_seconds,
     jsonb_agg(DISTINCT al.agent_type ORDER BY al.agent_type) as agent_types,
     COUNT(CASE WHEN al.activity LIKE '%error%' THEN 1 END) as error_count
 FROM step1_analyses a
@@ -106,7 +106,7 @@ CREATE OR REPLACE FUNCTION get_agent_timeline(p_analysis_id VARCHAR)
 RETURNS TABLE (
     agent_type VARCHAR,
     activity VARCHAR,
-    timestamp TIMESTAMP,
+    created_at TIMESTAMP,
     duration_to_next INTERVAL
 ) AS $$
 BEGIN
@@ -115,11 +115,11 @@ BEGIN
         SELECT 
             al.agent_type,
             al.activity,
-            al.timestamp,
-            LEAD(al.timestamp) OVER (ORDER BY al.timestamp) - al.timestamp as duration_to_next
+            al.created_at,
+            LEAD(al.created_at) OVER (ORDER BY al.created_at) - al.created_at as duration_to_next
         FROM agent_activity_log al
         WHERE al.analysis_id = p_analysis_id
-        ORDER BY al.timestamp
+        ORDER BY al.created_at
     )
     SELECT * FROM timeline;
 END;

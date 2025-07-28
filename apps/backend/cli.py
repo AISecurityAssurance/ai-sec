@@ -14,6 +14,7 @@ import yaml
 import json
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 import asyncpg
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -115,8 +116,30 @@ class Step1CLI:
             self.console.print(f"[red]Demo '{demo_name}' not found at {demo_path}[/red]")
             sys.exit(1)
         
+        # Create demo config
+        demo_config = {
+            'analysis': {
+                'name': f'Demo: {demo_name}',
+                'output_dir': '/analyses'  # Use mounted analyses directory
+            },
+            'model': {
+                'provider': 'demo',
+                'name': 'pre-packaged'
+            },
+            'input': {
+                'type': 'demo',
+                'path': str(demo_path)
+            },
+            'execution': {
+                'mode': 'enhanced'
+            }
+        }
+        
         # Create analysis database
-        db_name = await self._create_analysis_database({'analysis': {'name': f'Demo: {demo_name}'}})
+        db_name, timestamp = await self._create_analysis_database(demo_config)
+        
+        # Store timestamp for consistent file naming
+        self._timestamp = timestamp
         
         # Display loading message
         with Progress(
@@ -142,17 +165,23 @@ class Step1CLI:
                 # Load existing analysis
                 results = await coordinator.load_existing_analysis(str(demo_path))
                 
+                # Save results just like regular analysis
+                await self._save_results(demo_config, results, db_name)
+                
                 # Display summary
                 self._display_results_summary(results, "enhanced")
                 
-                # Show demo info
-                self._display_demo_info(demo_name, results)
+                # Display completeness check
+                if 'completeness_check' in results:
+                    self._display_completeness_check(results['completeness_check'])
+                
+                # Display file output locations
+                self._display_output_files()
                 
             finally:
                 await db_conn.close()
         
-        self.console.print(f"\n✅ Demo loaded! Database: {db_name}")
-        self.console.print(f"\n💡 You can now edit this analysis through the web interface or API.")
+        self.console.print(f"\n✅ Analysis complete! Database: {db_name}")
         return db_name
     
     def _load_config(self, config_path: str) -> dict:
@@ -314,6 +343,11 @@ class Step1CLI:
         self._output_dir = output_dir
         self._saved_files = [config_file, results_file]
         
+        # Generate markdown report
+        report_file = await self._generate_markdown_report(config, results, output_dir)
+        if report_file:
+            self._saved_files.append(report_file)
+        
         # Export database to the same directory
         await self._export_database(db_name, output_dir)
     
@@ -418,10 +452,13 @@ class Step1CLI:
                 self.console.print(f"    Type: {constraint['constraint_type']}, Level: {constraint['enforcement_level']}")
             
             # Show constraint-hazard mappings
-            if 'constraint_hazard_mappings' in constraint_results:
-                self.console.print("\n[bold]Constraint-Hazard Mappings:[/bold]")
-                for mapping in constraint_results.get('constraint_hazard_mappings', []):
+            self.console.print("\n[bold]Constraint-Hazard Mappings:[/bold]")
+            mappings = constraint_results.get('constraint_hazard_mappings', [])
+            if mappings:
+                for mapping in mappings:
                     self.console.print(f"  • {mapping['constraint_id']} → {mapping['hazard_id']} ({mapping['relationship_type']})")
+            else:
+                self.console.print("  No findings")
         
         # System Boundaries
         if boundary_results:
@@ -501,41 +538,6 @@ class Step1CLI:
             )
             self.console.print(panel)
     
-    def _display_demo_info(self, demo_name: str, results: dict):
-        """Display information about the loaded demo"""
-        
-        # Create info panel
-        info_text = [
-            f"Demo: {demo_name}",
-            f"Analysis ID: {results['analysis_id']}",
-            f"Status: {results['status']}",
-            "",
-            "Key Findings:",
-        ]
-        
-        # Add loss categories
-        loss_results = results['results'].get('loss_identification', {})
-        if 'loss_categories' in loss_results:
-            info_text.append(f"  • Loss Categories: {', '.join(loss_results['loss_categories'].keys())}")
-        
-        # Add hazard count
-        hazard_results = results['results'].get('hazard_identification', {})
-        if 'hazard_count' in hazard_results:
-            info_text.append(f"  • Hazards Identified: {hazard_results['hazard_count']}")
-        
-        # Add adversary types
-        stakeholder_results = results['results'].get('stakeholder_analysis', {})
-        if 'adversaries' in stakeholder_results:
-            adversary_types = [a['adversary_class'] for a in stakeholder_results['adversaries']]
-            info_text.append(f"  • Adversary Types: {', '.join(adversary_types)}")
-        
-        panel = Panel(
-            "\n".join(info_text),
-            title="Demo Analysis Loaded",
-            border_style="green"
-        )
-        self.console.print("\n")
-        self.console.print(panel)
     
     def _display_completeness_check(self, completeness: dict):
         """Display completeness check results"""
@@ -616,6 +618,187 @@ class Step1CLI:
                 self.console.print(f"[yellow]Warning: Could not export database: {result.stderr}[/yellow]")
         except Exception as e:
             self.console.print(f"[yellow]Warning: Database export failed: {e}[/yellow]")
+    
+    async def _generate_markdown_report(self, config: dict, results: dict, output_dir: Path) -> Optional[Path]:
+        """Generate markdown report from analysis results"""
+        try:
+            report_file = output_dir / 'analysis-report.md'
+            
+            with open(report_file, 'w') as f:
+                # Header
+                f.write(f"# Step 1 STPA-Sec Analysis Report\n\n")
+                f.write(f"**Analysis Name:** {config['analysis']['name']}\n")
+                f.write(f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write(f"**Execution Mode:** {config.get('execution', {}).get('mode', 'standard')}\n\n")
+                
+                # Extract results sections
+                analysis_results = results.get('results', {})
+                mission_results = analysis_results.get('mission_analyst', {})
+                loss_results = analysis_results.get('loss_identification', {})
+                hazard_results = analysis_results.get('hazard_identification', {})
+                constraint_results = analysis_results.get('security_constraints', {})
+                boundary_results = analysis_results.get('system_boundaries', {})
+                stakeholder_results = analysis_results.get('stakeholder_analyst', {})
+                if not stakeholder_results:
+                    stakeholder_results = analysis_results.get('stakeholder_analysis', {})
+                
+                # Mission Statement
+                if mission_results:
+                    ps = mission_results.get('problem_statement', {})
+                    if ps:
+                        f.write("## Mission Statement\n\n")
+                        f.write(f"**Purpose:** {ps.get('purpose_what', 'N/A')}\n\n")
+                        f.write(f"**Method:** {ps.get('method_how', 'N/A')}\n\n")
+                        f.write(f"**Goals:** {ps.get('goals_why', 'N/A')}\n\n")
+                
+                # Losses
+                if loss_results:
+                    f.write("## Losses\n\n")
+                    f.write(f"**Total:** {loss_results.get('loss_count', 0)} losses\n\n")
+                    
+                    if 'loss_categories' in loss_results:
+                        f.write("### Losses by Category\n\n")
+                        for category, count in loss_results['loss_categories'].items():
+                            f.write(f"- **{category.capitalize()}:** {count}\n")
+                        f.write("\n")
+                    
+                    f.write("### All Losses\n\n")
+                    for loss in loss_results.get('losses', []):
+                        f.write(f"- **{loss['identifier']}:** {loss['description']}\n")
+                        f.write(f"  - Category: {loss['loss_category']}\n")
+                        f.write(f"  - Severity: {loss['severity_classification']['magnitude']}\n")
+                    f.write("\n")
+                
+                # Hazards
+                if hazard_results:
+                    f.write("## Hazards\n\n")
+                    f.write(f"**Total:** {hazard_results.get('hazard_count', 0)} hazards\n\n")
+                    
+                    if 'hazard_categories' in hazard_results:
+                        f.write("### Hazards by Category\n\n")
+                        for category, count in hazard_results['hazard_categories'].items():
+                            f.write(f"- **{category.replace('_', ' ').title()}:** {count}\n")
+                        f.write("\n")
+                    
+                    f.write("### All Hazards\n\n")
+                    for hazard in hazard_results.get('hazards', []):
+                        f.write(f"- **{hazard['identifier']}:** {hazard['description']}\n")
+                        f.write(f"  - Category: {hazard['hazard_category']}\n")
+                    f.write("\n")
+                
+                # Security Constraints
+                if constraint_results:
+                    f.write("## Security Constraints\n\n")
+                    f.write(f"**Total:** {constraint_results.get('constraint_count', 0)} constraints\n\n")
+                    
+                    if 'constraint_types' in constraint_results:
+                        f.write("### Security Constraints by Type\n\n")
+                        types = constraint_results['constraint_types']
+                        f.write(f"- **Preventive:** {types.get('preventive', 0)}\n")
+                        f.write(f"- **Detective:** {types.get('detective', 0)}\n")
+                        f.write(f"- **Corrective:** {types.get('corrective', 0)}\n")
+                        f.write(f"- **Compensating:** {types.get('compensating', 0)}\n\n")
+                    
+                    f.write("### All Security Constraints\n\n")
+                    for constraint in constraint_results.get('security_constraints', []):
+                        f.write(f"- **{constraint['identifier']}:** {constraint['constraint_statement']}\n")
+                        f.write(f"  - Type: {constraint['constraint_type']}\n")
+                        f.write(f"  - Level: {constraint['enforcement_level']}\n")
+                    f.write("\n")
+                    
+                    f.write("### Constraint-Hazard Mappings\n\n")
+                    mappings = constraint_results.get('constraint_hazard_mappings', [])
+                    if mappings:
+                        for mapping in mappings:
+                            f.write(f"- {mapping['constraint_id']} → {mapping['hazard_id']} ({mapping['relationship_type']})\n")
+                    else:
+                        f.write("No findings\n")
+                    f.write("\n")
+                
+                # System Boundaries
+                if boundary_results:
+                    f.write("## System Boundaries\n\n")
+                    f.write(f"**Total:** {len(boundary_results.get('system_boundaries', []))} boundaries\n\n")
+                    
+                    f.write("### All System Boundaries\n\n")
+                    for boundary in boundary_results.get('system_boundaries', []):
+                        f.write(f"- **{boundary['boundary_name']}** ({boundary['boundary_type']})\n")
+                        f.write(f"  - {boundary['description']}\n")
+                        if 'elements' in boundary:
+                            inside = [e for e in boundary['elements'] if e['position'] == 'inside']
+                            outside = [e for e in boundary['elements'] if e['position'] == 'outside']
+                            interface = [e for e in boundary['elements'] if e['position'] == 'interface']
+                            f.write(f"  - Elements: {len(inside)} inside, {len(outside)} outside, {len(interface)} at interface\n")
+                    f.write("\n")
+                
+                # Stakeholders
+                if stakeholder_results:
+                    f.write("## Stakeholders\n\n")
+                    for sh in stakeholder_results.get('stakeholders', []):
+                        f.write(f"- **{sh['name']}** ({sh['stakeholder_type']})\n")
+                        f.write(f"  - Criticality: {sh.get('criticality', 'N/A')}\n")
+                        needs = sh.get('mission_perspective', {}).get('primary_needs', [])
+                        if needs:
+                            f.write(f"  - Primary needs: {', '.join(needs)}\n")
+                    f.write("\n")
+                    
+                    f.write("## Adversaries\n\n")
+                    for adv in stakeholder_results.get('adversaries', []):
+                        profile = adv['profile']
+                        f.write(f"- **{adv['adversary_class'].replace('_', ' ').title()}**\n")
+                        f.write(f"  - Sophistication: {profile['sophistication']}\n")
+                        f.write(f"  - Resources: {profile['resources']}\n")
+                        f.write(f"  - Primary interest: {profile['primary_interest']}\n")
+                        targets = adv.get('mission_targets', {}).get('interested_in', [])
+                        if targets:
+                            f.write(f"  - Targets: {', '.join(targets)}\n")
+                    f.write("\n")
+                
+                # Analysis Summary
+                f.write("## Analysis Summary\n\n")
+                f.write("| Component | Count |\n")
+                f.write("|-----------|-------|\n")
+                
+                if loss_results:
+                    f.write(f"| Losses Identified | {loss_results.get('loss_count', 0)} |\n")
+                if hazard_results:
+                    f.write(f"| Hazards Identified | {hazard_results.get('hazard_count', 0)} |\n")
+                if constraint_results:
+                    f.write(f"| Security Constraints | {constraint_results.get('constraint_count', 0)} |\n")
+                if boundary_results:
+                    f.write(f"| System Boundaries | {len(boundary_results.get('system_boundaries', []))} |\n")
+                if stakeholder_results:
+                    stakeholder_count = stakeholder_results.get('stakeholder_count', len(stakeholder_results.get('stakeholders', [])))
+                    adversary_count = stakeholder_results.get('adversary_count', len(stakeholder_results.get('adversaries', [])))
+                    f.write(f"| Stakeholders Identified | {stakeholder_count} |\n")
+                    f.write(f"| Adversaries Profiled | {adversary_count} |\n")
+                f.write("\n")
+                
+                # Completeness Check
+                if 'completeness_check' in results:
+                    completeness = results['completeness_check']
+                    f.write("## Analysis Completeness Check\n\n")
+                    f.write("| Artifact | Status | Issues |\n")
+                    f.write("|----------|--------|--------|\n")
+                    
+                    for artifact_name, status in completeness.get('artifact_status', {}).items():
+                        status_text = "Complete ✓" if status['complete'] else "Incomplete ✗"
+                        issues = "; ".join(status['issues'][:2]) if status['issues'] else "None"
+                        if len(status['issues']) > 2:
+                            issues += f" (+{len(status['issues'])-2} more)"
+                        f.write(f"| {artifact_name.replace('_', ' ').title()} | {status_text} | {issues} |\n")
+                    f.write("\n")
+                    
+                    if completeness['is_complete']:
+                        f.write("✓ **All Step 1 artifacts successfully generated!**\n")
+                    else:
+                        f.write(f"✗ **Analysis incomplete:** {completeness['summary']}\n")
+                
+            return report_file
+            
+        except Exception as e:
+            self.console.print(f"[yellow]Warning: Could not generate markdown report: {e}[/yellow]")
+            return None
 
 
 async def main():

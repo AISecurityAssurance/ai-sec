@@ -1059,13 +1059,13 @@ class Step1Coordinator:
                 results['stakeholder_analysis'] = json.load(f)
         
         # Load security constraint results
-        security_constraint_path = results_dir / "security_constraint.json"
+        security_constraint_path = results_dir / "security_constraints.json"
         if security_constraint_path.exists():
             with open(security_constraint_path, 'r') as f:
                 results['security_constraints'] = json.load(f)
         
         # Load system boundary results
-        system_boundary_path = results_dir / "system_boundary.json"
+        system_boundary_path = results_dir / "system_boundaries.json"
         if system_boundary_path.exists():
             with open(system_boundary_path, 'r') as f:
                 results['system_boundaries'] = json.load(f)
@@ -1110,6 +1110,9 @@ class Step1Coordinator:
         if missing:
             raise ValueError(f"Missing required analysis results: {missing}")
         
+        # Check completeness
+        completeness = self._check_analysis_completeness(results)
+        
         # Build final results structure
         final_results = {
             "analysis_id": self.analysis_id,
@@ -1118,6 +1121,7 @@ class Step1Coordinator:
             "duration": 0,  # No duration for loaded analysis
             "status": results['validation'].get('overall_status', 'completed'),
             "results": results,
+            "completeness_check": completeness,
             "executive_summary": results['validation'].get('executive_summary', 'Analysis loaded from existing results.'),
             "step2_bridge": results['validation'].get('step2_bridge', {}),
             "execution_log": [

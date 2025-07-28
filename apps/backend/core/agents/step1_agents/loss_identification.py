@@ -233,7 +233,7 @@ Mission Context:
 
 Identify all potential losses (unacceptable outcomes) for this system. For each loss:
 1. Provide a clear description focusing on the outcome, not the mechanism
-2. Categorize as: financial, regulatory, privacy, reputation, or mission
+2. Categorize using ONLY these categories: life, injury, financial, environmental, mission, reputation, privacy, regulatory
 3. Assess severity with magnitude (catastrophic/major/moderate/minor), scope, duration, reversibility, and detection difficulty
 4. Identify mission impacts including capability loss, cascading effects, and stakeholder harm
 
@@ -262,7 +262,10 @@ Provide your response as a JSON array of loss objects with the following structu
   }}
 ]
 
-IMPORTANT: Focus on outcomes and consequences, not attack methods or vulnerabilities."""
+IMPORTANT: 
+1. Focus on outcomes and consequences, not attack methods or vulnerabilities.
+2. Use ONLY these loss categories: life, injury, financial, environmental, mission, reputation, privacy, regulatory
+3. Do NOT use "security" as a loss category - map security concerns to one of the allowed categories (e.g., financial for theft, privacy for data breaches)."""
         
         try:
             # Call LLM

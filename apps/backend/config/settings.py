@@ -143,8 +143,20 @@ class Settings(BaseSettings):
                 is_enabled=True
             )
         
-        # OpenAI
-        if openai_key := os.getenv("OPENAI_API_KEY"):
+        # Azure OpenAI first (takes precedence)
+        if (azure_key := os.getenv("AZURE_OPENAI_API_KEY")) and (azure_base := os.getenv("AZURE_OPENAI_API_BASE")):
+            self.model_providers["openai"] = ModelConfig(
+                provider=ModelProvider.OPENAI,
+                auth_method=AuthMethod.API_KEY,
+                api_key=azure_key,
+                api_endpoint=azure_base,
+                model=os.getenv("AZURE_OPENAI_API_MODEL", "gpt-4-turbo"),
+                temperature=float(os.getenv("OPENAI_TEMPERATURE", "0.7")),
+                max_tokens=int(os.getenv("OPENAI_MAX_TOKENS", "4096")),
+                is_enabled=True
+            )
+        # Standard OpenAI
+        elif openai_key := os.getenv("OPENAI_API_KEY"):
             self.model_providers["openai"] = ModelConfig(
                 provider=ModelProvider.OPENAI,
                 auth_method=AuthMethod.API_KEY,

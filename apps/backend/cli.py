@@ -206,7 +206,18 @@ class Step1CLI:
         model_config = config.get('model', {})
         api_key_env = model_config.get('api_key_env')
         
-        if api_key_env:
+        # Check for Azure OpenAI first
+        if os.getenv('AZURE_OPENAI_API_KEY') and os.getenv('AZURE_OPENAI_API_BASE'):
+            self.console.print("[green]Using Azure OpenAI[/green]")
+            settings.model_providers['openai'] = ModelConfig(
+                provider=ModelProvider.OPENAI,
+                auth_method='api-key',
+                api_key=os.getenv('AZURE_OPENAI_API_KEY'),
+                model=os.getenv('AZURE_OPENAI_API_MODEL', 'gpt-4-turbo'),
+                is_enabled=True
+            )
+            settings.active_provider = ModelProvider.OPENAI
+        elif api_key_env:
             if api_key_env not in os.environ:
                 self.console.print(f"[red]Environment variable {api_key_env} not set[/red]")
                 self.console.print(f"Please set it with: export {api_key_env}='your-api-key'")

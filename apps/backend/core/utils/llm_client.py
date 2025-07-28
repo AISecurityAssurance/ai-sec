@@ -2,6 +2,7 @@ from typing import Dict, List, Optional, Any, AsyncGenerator
 from abc import ABC, abstractmethod
 import asyncio
 import time
+import os
 from contextlib import asynccontextmanager
 
 # LLM Provider imports
@@ -151,13 +152,24 @@ class AnthropicClient(BaseLLMClient):
 
 
 class OpenAIClient(BaseLLMClient):
-    """OpenAI (GPT) client"""
+    """OpenAI (GPT) client - supports both OpenAI and Azure OpenAI"""
     
     def __init__(self, config: ModelConfig):
         super().__init__(config)
         if not openai:
             raise ImportError("openai package not installed")
-        self.client = openai.AsyncOpenAI(api_key=config.api_key)
+        
+        # Check if this is Azure OpenAI (config has api_endpoint)
+        if config.api_endpoint:
+            # Use Azure OpenAI
+            self.client = openai.AsyncAzureOpenAI(
+                api_key=config.api_key,
+                azure_endpoint=config.api_endpoint,
+                api_version="2024-02-01"  # Latest stable API version
+            )
+        else:
+            # Use standard OpenAI
+            self.client = openai.AsyncOpenAI(api_key=config.api_key)
     
     async def generate(self, prompt: str, **kwargs) -> LLMResponse:
         start_time = time.time()

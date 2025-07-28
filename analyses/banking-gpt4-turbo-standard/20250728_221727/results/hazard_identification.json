@@ -1,0 +1,395 @@
+{
+  "hazards": [
+    {
+      "description": "System operates without sufficient load balancing during peak periods",
+      "hazard_category": "availability_degraded",
+      "affected_system_property": "service_availability",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "low",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "possible"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "periodic",
+        "when_present": "end-of-month and holiday seasons",
+        "duration": "intermittent"
+      },
+      "identifier": "H-1"
+    },
+    {
+      "description": "System operates with outdated encryption algorithms for data in transit and at rest",
+      "hazard_category": "confidentiality_breached",
+      "affected_system_property": "data_protection",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "rare"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "high",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "across all operational tempos",
+        "duration": "continuous"
+      },
+      "identifier": "H-2"
+    },
+    {
+      "description": "System operates with insufficient fraud detection capabilities during high-volume transaction periods",
+      "hazard_category": "capability_loss",
+      "affected_system_property": "transaction_integrity",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "possible"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "periodic",
+        "when_present": "peak transaction periods like end-of-month and holiday seasons",
+        "duration": "intermittent"
+      },
+      "identifier": "H-3"
+    },
+    {
+      "description": "System operates without complying with the latest GDPR updates for data privacy",
+      "hazard_category": "non_compliance",
+      "affected_system_property": "regulatory_compliance",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "high",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "during operation in European markets",
+        "duration": "continuous"
+      },
+      "identifier": "H-4"
+    },
+    {
+      "description": "System operates with inadequate multi-factor authentication mechanisms, leading to potential unauthorized access",
+      "hazard_category": "mission_degraded",
+      "affected_system_property": "operational_capability",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "possible"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "across all customer interactions requiring authentication",
+        "duration": "continuous"
+      },
+      "identifier": "H-5"
+    }
+  ],
+  "hazard_count": 5,
+  "hazard_categories": {
+    "availability_degraded": 1,
+    "confidentiality_breached": 1,
+    "capability_loss": 1,
+    "non_compliance": 1,
+    "mission_degraded": 1
+  },
+  "hazard_loss_mappings": [
+    {
+      "hazard_id": "H-1",
+      "loss_id": "L-3",
+      "relationship_strength": "direct",
+      "rationale": "Lack of sufficient load balancing during peak periods can directly cause system unavailability, impacting mission-critical operations.",
+      "conditions": [],
+      "id": "24bbbbc6-8749-422e-ace0-93d48bd738ab"
+    },
+    {
+      "hazard_id": "H-2",
+      "loss_id": "L-1",
+      "relationship_strength": "direct",
+      "rationale": "Using outdated encryption algorithms compromises the confidentiality of data in transit and at rest, directly leading to unauthorized access to customer financial data.",
+      "conditions": [],
+      "id": "e1761c51-1edd-4801-850d-ddcb352d1b84"
+    },
+    {
+      "hazard_id": "H-3",
+      "loss_id": "L-2",
+      "relationship_strength": "direct",
+      "rationale": "Insufficient fraud detection capabilities can directly result in financial loss due to an increase in successful fraudulent transactions during high-volume periods.",
+      "conditions": [],
+      "id": "c9f1b6a5-47a6-4cee-86eb-26346c6c8f37"
+    },
+    {
+      "hazard_id": "H-4",
+      "loss_id": "L-4",
+      "relationship_strength": "direct",
+      "rationale": "Operating without complying with the latest GDPR updates directly leads to a violation of GDPR compliance, due to inadequate data privacy practices for European customer data.",
+      "conditions": [],
+      "id": "2f5fd058-01ce-4a6c-b1e1-126f985b4d7f"
+    },
+    {
+      "hazard_id": "H-5",
+      "loss_id": "L-1",
+      "relationship_strength": "conditional",
+      "rationale": "Inadequate multi-factor authentication mechanisms increase the risk of unauthorized access, but the direct loss of customer financial data requires an attacker to exploit this weakness.",
+      "conditions": [
+        "An attacker attempts to gain unauthorized access"
+      ],
+      "id": "918f2abb-a129-4ebe-afa1-c5eb27207741"
+    },
+    {
+      "hazard_id": "H-5",
+      "loss_id": "L-5",
+      "relationship_strength": "indirect",
+      "rationale": "Weaknesses in multi-factor authentication can contribute to conditions enabling a data breach, which can lead to reputational damage once publicized.",
+      "conditions": [
+        "A data breach occurs",
+        "The breach becomes public knowledge"
+      ],
+      "id": "4e4e144d-20f3-4095-a5b7-77de42c90c1e"
+    },
+    {
+      "hazard_id": "H-2",
+      "loss_id": "L-5",
+      "relationship_strength": "indirect",
+      "rationale": "Using outdated encryption algorithms can indirectly contribute to a data breach if exploited, which could result in reputational damage once the breach is publicized.",
+      "conditions": [
+        "The encryption weaknesses are exploited",
+        "The breach becomes public knowledge"
+      ],
+      "id": "cb55315e-49dc-4ede-8501-13c1b536adb3"
+    }
+  ],
+  "temporal_analysis": {
+    "always_present": [
+      {
+        "hazard_id": "H-2",
+        "description": "System operates with outdated encryption algorithms for data in transit and at rest"
+      },
+      {
+        "hazard_id": "H-4",
+        "description": "System operates without complying with the latest GDPR updates for data privacy"
+      },
+      {
+        "hazard_id": "H-5",
+        "description": "System operates with inadequate multi-factor authentication mechanisms, leading to potential unauthorized access"
+      }
+    ],
+    "periodic": [
+      {
+        "hazard_id": "H-1",
+        "description": "System operates without sufficient load balancing during peak periods",
+        "when": "end-of-month and holiday seasons"
+      },
+      {
+        "hazard_id": "H-3",
+        "description": "System operates with insufficient fraud detection capabilities during high-volume transaction periods",
+        "when": "peak transaction periods like end-of-month and holiday seasons"
+      }
+    ],
+    "conditional": [],
+    "coverage_gaps": [
+      {
+        "gap_type": "temporal",
+        "description": "Periodic hazards create vulnerability windows",
+        "affected_hazards": [
+          "H-1",
+          "H-3"
+        ]
+      }
+    ]
+  },
+  "environmental_analysis": {
+    "operational_sensitivity": {
+      "H-1": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-2": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-3": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-4": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      },
+      "H-5": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      }
+    },
+    "threat_sensitivity": {
+      "H-1": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-2": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-3": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-4": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-5": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      }
+    },
+    "combined_risk_scenarios": [
+      {
+        "scenario": "Multiple high-impact hazards under stress",
+        "hazards": [
+          "H-1",
+          "H-2",
+          "H-3",
+          "H-4",
+          "H-5"
+        ],
+        "risk_level": "extreme"
+      }
+    ]
+  },
+  "coverage_analysis": {
+    "covered_losses": [
+      "L-5",
+      "L-3",
+      "L-1",
+      "L-4",
+      "L-2"
+    ],
+    "uncovered_losses": [],
+    "coverage_percentage": 100.0,
+    "loss_hazard_ratio": {
+      "L-1": 2,
+      "L-2": 1,
+      "L-3": 1,
+      "L-4": 1,
+      "L-5": 2
+    }
+  },
+  "cognitive_style": "balanced"
+}

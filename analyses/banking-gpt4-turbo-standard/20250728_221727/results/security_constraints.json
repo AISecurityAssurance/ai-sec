@@ -1,0 +1,180 @@
+{
+  "security_constraints": [
+    {
+      "identifier": "SC-1",
+      "name": "Load Balancing Enhancement Constraint",
+      "constraint_statement": "The system shall implement dynamic load balancing mechanisms to ensure availability during peak periods.",
+      "rationale": "To prevent system unavailability and performance degradation during high-traffic periods, ensuring reliability and user satisfaction.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Implementation of scalable, dynamic load balancing technologies and practices.",
+      "addresses_hazards": [
+        "H-1"
+      ],
+      "prevents_losses": [
+        "L-3"
+      ],
+      "related_losses": [
+        "L-3"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-3"
+        ],
+        "capability_degradation": "Reduced system availability and degraded user experience during peak demand."
+      }
+    },
+    {
+      "identifier": "SC-2",
+      "name": "Encryption Standards Compliance Constraint",
+      "constraint_statement": "The system shall use only encryption algorithms that meet or exceed current industry standards for data in transit and at rest.",
+      "rationale": "To protect customer financial data from unauthorized access or theft, thereby ensuring confidentiality and trust.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Regular audits of encryption practices and updates to adhere to the latest secure encryption standards.",
+      "addresses_hazards": [
+        "H-2"
+      ],
+      "prevents_losses": [
+        "L-1"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-5"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1"
+        ],
+        "capability_degradation": "Increased risk of data breaches and unauthorized access to sensitive information."
+      }
+    },
+    {
+      "identifier": "SC-3",
+      "name": "Advanced Fraud Detection Constraint",
+      "constraint_statement": "The system shall incorporate advanced fraud detection and analysis tools capable of operating effectively during high-volume transaction periods.",
+      "rationale": "To minimize financial loss due to fraudulent transactions by detecting and responding to fraud indicators in real time.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Deployment of state-of-the-art fraud detection software and continuous monitoring and analysis of transaction patterns.",
+      "addresses_hazards": [
+        "H-3"
+      ],
+      "prevents_losses": [
+        "L-2"
+      ],
+      "related_losses": [
+        "L-2"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-2"
+        ],
+        "capability_degradation": "Higher incidence of fraudulent transactions and financial losses."
+      }
+    },
+    {
+      "identifier": "SC-4",
+      "name": "GDPR Compliance Constraint",
+      "constraint_statement": "The system shall ensure all personal data processing activities comply with the latest GDPR requirements.",
+      "rationale": "To protect the privacy of European customers and avoid legal penalties associated with non-compliance.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Continuous legal review and system audits to ensure GDPR compliance in data handling and processing activities.",
+      "addresses_hazards": [
+        "H-4"
+      ],
+      "prevents_losses": [
+        "L-4"
+      ],
+      "related_losses": [
+        "L-4"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-4"
+        ],
+        "capability_degradation": "Legal and financial repercussions from GDPR non-compliance, including fines and loss of customer trust."
+      }
+    },
+    {
+      "identifier": "SC-5",
+      "name": "Multi-Factor Authentication Enhancement Constraint",
+      "constraint_statement": "The system shall implement and require robust multi-factor authentication for all user logins and sensitive transactions.",
+      "rationale": "To significantly reduce the risk of unauthorized access by enhancing the security of the authentication process.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical implementation of a multi-factor authentication system that requires at least two forms of verification.",
+      "addresses_hazards": [
+        "H-5"
+      ],
+      "prevents_losses": [
+        "L-1"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-5"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-5"
+        ],
+        "capability_degradation": "Increased likelihood of unauthorized account access and the potential for financial theft or data breaches."
+      }
+    }
+  ],
+  "constraint_coverage": {
+    "total_hazards": 5,
+    "hazards_with_constraints": 5,
+    "total_constraints": 5,
+    "coverage_balance": 1.0,
+    "type_distribution": {
+      "preventive": 5,
+      "detective": 0,
+      "corrective": 0,
+      "compensating": 0
+    }
+  },
+  "constraint_hazard_mappings": [
+    {
+      "constraint_id": "SC-1",
+      "hazard_id": "H-1",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-2",
+      "hazard_id": "H-2",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-3",
+      "hazard_id": "H-3",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-4",
+      "hazard_id": "H-4",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-5",
+      "hazard_id": "H-5",
+      "relationship_type": "eliminates"
+    }
+  ],
+  "constraint_count": 5,
+  "constraint_types": {
+    "preventive": 5,
+    "detective": 0,
+    "corrective": 0,
+    "compensating": 0
+  },
+  "cognitive_style": "balanced",
+  "analysis_metadata": {
+    "agent_type": "security_constraints",
+    "analysis_id": "2036a94e-2cb0-44b7-89b6-1fea27846284",
+    "timestamp": "2025-07-28T22:19:58.196277Z",
+    "version": "1.0"
+  }
+}

@@ -14,13 +14,13 @@ RUN apt-get update && apt-get install -y \
 
 # Install uv for faster package management
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.cargo/bin:$PATH"
 
 # Copy dependency files
 COPY pyproject.toml requirements.txt ./
 
 # Install Python dependencies
-RUN uv pip install --system -r requirements.txt
+# Use full path to uv since PATH isn't updated until next RUN
+RUN /root/.cargo/bin/uv pip install --system -r requirements.txt
 
 # Copy application code
 COPY . .
@@ -28,6 +28,9 @@ COPY . .
 # Create non-root user
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
+
+# Update PATH for runtime
+ENV PATH="/root/.cargo/bin:$PATH"
 
 # Expose port
 EXPOSE 8000

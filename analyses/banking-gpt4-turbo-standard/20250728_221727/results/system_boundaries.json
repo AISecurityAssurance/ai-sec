@@ -1,0 +1,327 @@
+{
+  "system_boundaries": [
+    {
+      "boundary_name": "Banking Platform System Scope",
+      "boundary_type": "system_scope",
+      "description": "Defines components and functions within the control of the digital banking platform and those it depends on externally.",
+      "definition_criteria": {
+        "criterion1": "Controlled by the digital banking platform",
+        "criterion2": "Depended upon but not controlled by the digital banking platform"
+      },
+      "elements": [
+        {
+          "element_name": "Customer-facing applications",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "key": "Assumes stable internet connectivity for operation"
+          },
+          "constraints": {
+            "key": "Reliant on mobile app store policies for distribution"
+          }
+        },
+        {
+          "element_name": "Payment processor networks",
+          "element_type": "actor",
+          "position": "outside",
+          "assumptions": {
+            "key": "Assumes compliance with PCI-DSS requirements"
+          },
+          "constraints": {
+            "key": "Dependent on external uptime and security"
+          }
+        },
+        {
+          "element_name": "API Gateways",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "key": "Securely manages traffic between customer applications and backend services"
+          },
+          "constraints": {}
+        }
+      ]
+    },
+    {
+      "boundary_name": "Banking Platform Trust Boundaries",
+      "boundary_type": "trust",
+      "description": "Identifies where trust levels change within the digital banking platform ecosystem.",
+      "definition_criteria": {
+        "criterion1": "Change in trust level",
+        "criterion2": "Need for authentication/authorization"
+      },
+      "elements": [
+        {
+          "element_name": "API Gateways to Microservices",
+          "element_type": "interface",
+          "position": "crossing",
+          "assumptions": {
+            "key": "API gateways validate requests before forwarding"
+          },
+          "constraints": {
+            "key": "Must support robust authentication mechanisms"
+          }
+        },
+        {
+          "element_name": "Customer login",
+          "element_type": "process",
+          "position": "inside",
+          "assumptions": {
+            "key": "Customers use multi-factor authentication"
+          },
+          "constraints": {
+            "key": "Subject to regulatory requirements for SCA"
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Banking Platform Responsibility Boundaries",
+      "boundary_type": "responsibility",
+      "description": "Defines legal and contractual responsibilities of the digital banking platform and its partners.",
+      "definition_criteria": {
+        "criterion1": "Legally or contractually obligated by the digital banking platform",
+        "criterion2": "Obligations of external partners"
+      },
+      "elements": [
+        {
+          "element_name": "Data encryption",
+          "element_type": "process",
+          "position": "inside",
+          "assumptions": {
+            "key": "Platform is responsible for protecting data in transit and at rest"
+          },
+          "constraints": {}
+        },
+        {
+          "element_name": "KYC compliance",
+          "element_type": "process",
+          "position": "interface",
+          "assumptions": {
+            "key": "Performed in partnership with third-party service providers"
+          },
+          "constraints": {
+            "key": "Platform must ensure third-party services comply with regulatory standards"
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Banking Platform Data Governance Boundaries",
+      "boundary_type": "data_governance",
+      "description": "Outlines how data management responsibilities change across the system.",
+      "definition_criteria": {
+        "criterion1": "Change in data ownership",
+        "criterion2": "Change in data protection requirements"
+      },
+      "elements": [
+        {
+          "element_name": "Customer financial data",
+          "element_type": "data",
+          "position": "inside",
+          "assumptions": {
+            "key": "Platform owns and is responsible for customer data privacy and protection"
+          },
+          "constraints": {
+            "key": "Subject to GDPR, SOX, and other regulatory requirements"
+          }
+        },
+        {
+          "element_name": "Transaction data shared with payment processors",
+          "element_type": "data",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Assumes payment processors comply with PCI-DSS for data protection"
+          },
+          "constraints": {
+            "key": "Platform must ensure processors' compliance through contractual agreements"
+          }
+        }
+      ]
+    }
+  ],
+  "system_boundary": {
+    "boundary_name": "Banking Platform System Scope",
+    "boundary_type": "system_scope",
+    "description": "Defines components and functions within the control of the digital banking platform and those it depends on externally.",
+    "definition_criteria": {
+      "criterion1": "Controlled by the digital banking platform",
+      "criterion2": "Depended upon but not controlled by the digital banking platform"
+    },
+    "elements": [
+      {
+        "element_name": "Customer-facing applications",
+        "element_type": "component",
+        "position": "inside",
+        "assumptions": {
+          "key": "Assumes stable internet connectivity for operation"
+        },
+        "constraints": {
+          "key": "Reliant on mobile app store policies for distribution"
+        }
+      },
+      {
+        "element_name": "Payment processor networks",
+        "element_type": "actor",
+        "position": "outside",
+        "assumptions": {
+          "key": "Assumes compliance with PCI-DSS requirements"
+        },
+        "constraints": {
+          "key": "Dependent on external uptime and security"
+        }
+      },
+      {
+        "element_name": "API Gateways",
+        "element_type": "interface",
+        "position": "interface",
+        "assumptions": {
+          "key": "Securely manages traffic between customer applications and backend services"
+        },
+        "constraints": {}
+      }
+    ],
+    "primary_system": [
+      "Customer-facing applications"
+    ],
+    "system_elements": [
+      "Data encryption",
+      "Customer financial data",
+      "Customer login",
+      "Customer-facing applications"
+    ],
+    "external_entities": [
+      "Payment processor networks"
+    ],
+    "interfaces": [
+      {
+        "name": "API Gateways",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "Securely manages traffic between customer applications and backend services"
+        },
+        "constraints": {}
+      },
+      {
+        "name": "KYC compliance",
+        "boundary_type": "responsibility",
+        "assumptions": {
+          "key": "Performed in partnership with third-party service providers"
+        },
+        "constraints": {
+          "key": "Platform must ensure third-party services comply with regulatory standards"
+        }
+      }
+    ],
+    "assumptions": [
+      "Customer-facing applications: Assumes stable internet connectivity for operation",
+      "Payment processor networks: Assumes compliance with PCI-DSS requirements",
+      "API Gateways: Securely manages traffic between customer applications and backend services",
+      "API Gateways to Microservices: API gateways validate requests before forwarding",
+      "Customer login: Customers use multi-factor authentication",
+      "Data encryption: Platform is responsible for protecting data in transit and at rest",
+      "KYC compliance: Performed in partnership with third-party service providers",
+      "Customer financial data: Platform owns and is responsible for customer data privacy and protection",
+      "Transaction data shared with payment processors: Assumes payment processors comply with PCI-DSS for data protection"
+    ],
+    "exclusions": [
+      "Customer-facing applications: Reliant on mobile app store policies for distribution",
+      "Payment processor networks: Dependent on external uptime and security",
+      "API Gateways to Microservices: Must support robust authentication mechanisms",
+      "Customer login: Subject to regulatory requirements for SCA",
+      "KYC compliance: Platform must ensure third-party services comply with regulatory standards",
+      "Customer financial data: Subject to GDPR, SOX, and other regulatory requirements",
+      "Transaction data shared with payment processors: Platform must ensure processors' compliance through contractual agreements"
+    ]
+  },
+  "boundary_analysis": {
+    "primary_system": [
+      "Customer-facing applications"
+    ],
+    "system_elements": [
+      "Data encryption",
+      "Customer financial data",
+      "Customer login",
+      "Customer-facing applications"
+    ],
+    "external_entities": [
+      "Payment processor networks"
+    ],
+    "interfaces": [
+      {
+        "name": "API Gateways",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "Securely manages traffic between customer applications and backend services"
+        },
+        "constraints": {}
+      },
+      {
+        "name": "KYC compliance",
+        "boundary_type": "responsibility",
+        "assumptions": {
+          "key": "Performed in partnership with third-party service providers"
+        },
+        "constraints": {
+          "key": "Platform must ensure third-party services comply with regulatory standards"
+        }
+      }
+    ],
+    "assumptions": [
+      "Customer-facing applications: Assumes stable internet connectivity for operation",
+      "Payment processor networks: Assumes compliance with PCI-DSS requirements",
+      "API Gateways: Securely manages traffic between customer applications and backend services",
+      "API Gateways to Microservices: API gateways validate requests before forwarding",
+      "Customer login: Customers use multi-factor authentication",
+      "Data encryption: Platform is responsible for protecting data in transit and at rest",
+      "KYC compliance: Performed in partnership with third-party service providers",
+      "Customer financial data: Platform owns and is responsible for customer data privacy and protection",
+      "Transaction data shared with payment processors: Assumes payment processors comply with PCI-DSS for data protection"
+    ],
+    "exclusions": [
+      "Customer-facing applications: Reliant on mobile app store policies for distribution",
+      "Payment processor networks: Dependent on external uptime and security",
+      "API Gateways to Microservices: Must support robust authentication mechanisms",
+      "Customer login: Subject to regulatory requirements for SCA",
+      "KYC compliance: Platform must ensure third-party services comply with regulatory standards",
+      "Customer financial data: Subject to GDPR, SOX, and other regulatory requirements",
+      "Transaction data shared with payment processors: Platform must ensure processors' compliance through contractual agreements"
+    ],
+    "boundary_coverage": {
+      "total_boundaries_defined": 4,
+      "critical_interfaces_identified": 2,
+      "external_dependencies": 1
+    }
+  },
+  "boundary_relationships": [
+    {
+      "parent_boundary": "Banking Platform System Scope",
+      "child_boundary": "Banking Platform Trust Boundaries",
+      "relationship_type": "contains"
+    },
+    {
+      "parent_boundary": "Banking Platform Responsibility Boundaries",
+      "child_boundary": "Banking Platform Data Governance Boundaries",
+      "relationship_type": "overlaps"
+    }
+  ],
+  "boundary_summary": {
+    "total_boundaries": 4,
+    "boundary_types": {
+      "system_scope": 1,
+      "trust": 1,
+      "responsibility": 1,
+      "data_governance": 1
+    },
+    "total_elements": 9,
+    "critical_interfaces": 2,
+    "external_dependencies": 1
+  },
+  "cognitive_style": "balanced",
+  "analysis_metadata": {
+    "agent_type": "system_boundaries",
+    "analysis_id": "2036a94e-2cb0-44b7-89b6-1fea27846284",
+    "timestamp": "2025-07-28T22:20:31.691198Z",
+    "version": "1.0"
+  }
+}

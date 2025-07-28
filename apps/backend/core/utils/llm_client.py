@@ -409,14 +409,18 @@ class LLMManager:
         if self.clients and self._db_checked:
             return
         
-        # Get database session
-        try:
-            async for db in get_db():
-                await self._initialize_clients_from_db(db)
-                break
-        except Exception as e:
-            # If DB is not available, fall back to env vars
-            self._initialize_clients_from_env()
+        # Try environment variables first (for CLI mode)
+        self._initialize_clients_from_env()
+        
+        # If no clients from env, try database
+        if not self.clients:
+            try:
+                async for db in get_db():
+                    await self._initialize_clients_from_db(db)
+                    break
+            except Exception as e:
+                # Database not available, that's OK for CLI mode
+                pass
         
         self._db_checked = True
         

@@ -805,7 +805,7 @@ Identified Losses:
 Analyze all stakeholders and adversaries for this system.
 
 For STAKEHOLDERS (legitimate users of the system), identify:
-1. Name and type (user, operator, regulator, beneficiary)
+1. Name and type (MUST be one of: user, operator, owner, regulator, partner, society, supplier)
 2. Description of their relationship to the system
 3. Mission perspective (what they need from the system)
 4. Loss exposure (which losses affect them)
@@ -822,7 +822,7 @@ Provide your response as a JSON object with the following structure:
   "stakeholders": [
     {{
       "name": "Stakeholder Name",
-      "stakeholder_type": "user|operator|regulator|beneficiary",
+      "stakeholder_type": "user|operator|owner|regulator|partner|society|supplier",
       "description": "Their relationship to the system",
       "criticality": "primary|essential|important|secondary",
       "mission_perspective": {{
@@ -863,7 +863,10 @@ Provide your response as a JSON object with the following structure:
   ]
 }}
 
-IMPORTANT: Consider all types of stakeholders and realistic adversary profiles for this system type."""
+IMPORTANT: 
+1. Consider all types of stakeholders and realistic adversary profiles for this system type.
+2. Use ONLY these stakeholder types: user, operator, owner, regulator, partner, society, supplier
+3. Do NOT use "beneficiary" or "vendor" as stakeholder types - map them to allowed types (e.g., shareholders → owner, vendors → supplier)."""
         
         try:
             # Call LLM

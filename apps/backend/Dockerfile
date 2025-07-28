@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     g++ \
     git \
     curl \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv for faster package management

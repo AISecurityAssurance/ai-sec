@@ -12,15 +12,17 @@ import os
 import sys
 import yaml
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 import asyncpg
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 from rich.table import Table
 from rich.panel import Panel
 from rich import print as rprint
+from rich.status import Status
 
 # Add backend to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -37,6 +39,31 @@ class Step1CLI:
     
     def __init__(self):
         self.console = console
+        self.status = None
+        self._setup_logging()
+    
+    def _setup_logging(self):
+        """Set up logging to redirect SQLAlchemy messages to a file"""
+        # Create logs directory if it doesn't exist
+        log_dir = Path("logs")
+        log_dir.mkdir(exist_ok=True)
+        
+        # Store log filename for later
+        self.log_filename = f"analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+        
+        # Configure logging to file for SQLAlchemy
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler(log_dir / self.log_filename),
+                logging.StreamHandler(sys.stdout) if os.getenv('DEBUG') else logging.NullHandler()
+            ]
+        )
+        
+        # Suppress SQLAlchemy console output unless DEBUG is set
+        if not os.getenv('DEBUG'):
+            logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
         
     async def analyze(self, config_path: str):
         """Run Step 1 analysis based on configuration file"""
@@ -59,13 +86,17 @@ class Step1CLI:
         # Read system description
         system_description = self._read_system_description(config)
         
+        # Create progress callback for coordinator
+        self.current_phase = "Initializing..."
+        
         # Run analysis with progress tracking
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
+            TimeElapsedColumn(),
             console=self.console
         ) as progress:
-            task = progress.add_task("Running Step 1 Analysis...", total=None)
+            task = progress.add_task(f"Running Step 1 Analysis - {self.current_phase}", total=None)
             
             try:
                 # Connect to database
@@ -394,6 +425,15 @@ class Step1CLI:
         
         # Export database to the same directory
         await self._export_database(db_name, output_dir)
+        
+        # Copy log file to artifacts
+        if hasattr(self, 'log_filename'):
+            log_source = Path("logs") / self.log_filename
+            if log_source.exists():
+                log_dest = output_dir / "analysis.log"
+                import shutil
+                shutil.copy2(log_source, log_dest)
+                self._saved_files.append(log_dest)
     
     def _display_results_summary(self, results: dict, execution_mode: str):
         """Display detailed analysis results like the demo"""

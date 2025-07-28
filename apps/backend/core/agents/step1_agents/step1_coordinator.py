@@ -671,8 +671,8 @@ class Step1Coordinator:
             """,
                 str(uuid4()),
                 self.analysis_id,
-                mapping['constraint_identifier'],
-                mapping['hazard_identifier'],
+                mapping.get('constraint_identifier', mapping.get('constraint_id')),
+                mapping.get('hazard_identifier', mapping.get('hazard_id')),
                 mapping.get('mapping_type', 'prevents'),
                 mapping.get('rationale', '')
             )
@@ -825,9 +825,10 @@ class Step1Coordinator:
         }
         self.execution_log.append(log_entry)
         
-        # Also print for visibility
+        # Also print for visibility with timestamp
+        timestamp = datetime.now().strftime('%H:%M:%S')
         prefix = "ERROR:" if error else "INFO:"
-        print(f"{prefix} {message}")
+        print(f"\n{prefix} {message} [{timestamp}]")
     
     def _check_analysis_completeness(self, results: Dict[str, Any]) -> Dict[str, Any]:
         """

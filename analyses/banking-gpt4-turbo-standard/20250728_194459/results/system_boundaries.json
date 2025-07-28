@@ -1,0 +1,313 @@
+{
+  "system_boundaries": [
+    {
+      "boundary_name": "Banking Platform System Scope",
+      "boundary_type": "system_scope",
+      "description": "Defines the components and functions within the Digital Banking Platform that the organization controls and those it depends on but does not control.",
+      "definition_criteria": {
+        "criterion1": "Components and functions directly involved in delivering the Digital Banking Platform's services.",
+        "criterion2": "External services and infrastructure the system relies on but does not control."
+      },
+      "elements": [
+        {
+          "element_name": "Customer-facing applications",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "assumption1": "The organization has full control over development, deployment, and maintenance."
+          },
+          "constraints": {}
+        },
+        {
+          "element_name": "API gateways",
+          "element_type": "interface",
+          "position": "inside",
+          "assumptions": {
+            "assumption1": "API gateways are managed internally but must interact with external services."
+          },
+          "constraints": {}
+        },
+        {
+          "element_name": "Payment processor networks",
+          "element_type": "actor",
+          "position": "outside",
+          "assumptions": {
+            "assumption1": "Dependent on external networks for payment processing, without direct control over their security measures."
+          },
+          "constraints": {}
+        },
+        {
+          "element_name": "Internet connectivity",
+          "element_type": "component",
+          "position": "outside",
+          "assumptions": {
+            "assumption1": "Essential for system access by customers but provided by external ISPs."
+          },
+          "constraints": {}
+        }
+      ]
+    },
+    {
+      "boundary_name": "Banking Platform Trust Boundaries",
+      "boundary_type": "trust",
+      "description": "Identifies where trust levels change within the Digital Banking Platform and where authentication, authorization, and data validation are critical.",
+      "definition_criteria": {
+        "criterion1": "Points at which users must be authenticated and authorized to access services.",
+        "criterion2": "Locations where data enters the system from less trusted environments and needs validation."
+      },
+      "elements": [
+        {
+          "element_name": "API gateways",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "assumption1": "API gateways serve as the primary entry points for data and therefore must enforce authentication and validate inputs."
+          },
+          "constraints": {}
+        },
+        {
+          "element_name": "Third-party integrations",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "assumption1": "Integrations require secure authentication mechanisms and validation of incoming data to maintain trust."
+          },
+          "constraints": {}
+        }
+      ]
+    },
+    {
+      "boundary_name": "Banking Platform Responsibility Boundaries",
+      "boundary_type": "responsibility",
+      "description": "Defines the legal and contractual responsibilities of the organization operating the Digital Banking Platform and those of its partners and customers.",
+      "definition_criteria": {
+        "criterion1": "Areas under the organization's direct legal and contractual control.",
+        "criterion2": "Areas under the control of partners or governed by shared agreements."
+      },
+      "elements": [
+        {
+          "element_name": "Customer data protection",
+          "element_type": "process",
+          "position": "inside",
+          "assumptions": {
+            "assumption1": "The organization is solely responsible for protecting customer data under GDPR, PCI-DSS, and other regulations."
+          },
+          "constraints": {}
+        },
+        {
+          "element_name": "Payment processing",
+          "element_type": "process",
+          "position": "crossing",
+          "assumptions": {
+            "assumption1": "While the organization handles payment requests, the actual processing is a shared responsibility with external payment networks."
+          },
+          "constraints": {}
+        }
+      ]
+    },
+    {
+      "boundary_name": "Banking Platform Data Governance Boundaries",
+      "boundary_type": "data_governance",
+      "description": "Outlines where data ownership and protection requirements change within the Digital Banking Platform ecosystem.",
+      "definition_criteria": {
+        "criterion1": "Transitions of data ownership between the organization, its customers, and third parties.",
+        "criterion2": "Changes in data protection requirements as data moves within and outside the system."
+      },
+      "elements": [
+        {
+          "element_name": "Customer personal data",
+          "element_type": "data",
+          "position": "inside",
+          "assumptions": {
+            "assumption1": "The organization owns and is responsible for customer data while it is within the system."
+          },
+          "constraints": {}
+        },
+        {
+          "element_name": "Transaction data shared with payment processors",
+          "element_type": "data",
+          "position": "crossing",
+          "assumptions": {
+            "assumption1": "Data governance responsibilities are shared with external processors once transaction data is sent for processing."
+          },
+          "constraints": {}
+        }
+      ]
+    }
+  ],
+  "system_boundary": {
+    "boundary_name": "Banking Platform System Scope",
+    "boundary_type": "system_scope",
+    "description": "Defines the components and functions within the Digital Banking Platform that the organization controls and those it depends on but does not control.",
+    "definition_criteria": {
+      "criterion1": "Components and functions directly involved in delivering the Digital Banking Platform's services.",
+      "criterion2": "External services and infrastructure the system relies on but does not control."
+    },
+    "elements": [
+      {
+        "element_name": "Customer-facing applications",
+        "element_type": "component",
+        "position": "inside",
+        "assumptions": {
+          "assumption1": "The organization has full control over development, deployment, and maintenance."
+        },
+        "constraints": {}
+      },
+      {
+        "element_name": "API gateways",
+        "element_type": "interface",
+        "position": "inside",
+        "assumptions": {
+          "assumption1": "API gateways are managed internally but must interact with external services."
+        },
+        "constraints": {}
+      },
+      {
+        "element_name": "Payment processor networks",
+        "element_type": "actor",
+        "position": "outside",
+        "assumptions": {
+          "assumption1": "Dependent on external networks for payment processing, without direct control over their security measures."
+        },
+        "constraints": {}
+      },
+      {
+        "element_name": "Internet connectivity",
+        "element_type": "component",
+        "position": "outside",
+        "assumptions": {
+          "assumption1": "Essential for system access by customers but provided by external ISPs."
+        },
+        "constraints": {}
+      }
+    ],
+    "primary_system": [
+      "API gateways",
+      "Customer-facing applications"
+    ],
+    "system_elements": [
+      "API gateways",
+      "Customer personal data",
+      "Customer data protection",
+      "Customer-facing applications"
+    ],
+    "external_entities": [
+      "Internet connectivity",
+      "Payment processor networks"
+    ],
+    "interfaces": [
+      {
+        "name": "API gateways",
+        "boundary_type": "trust",
+        "assumptions": {
+          "assumption1": "API gateways serve as the primary entry points for data and therefore must enforce authentication and validate inputs."
+        },
+        "constraints": {}
+      },
+      {
+        "name": "Third-party integrations",
+        "boundary_type": "trust",
+        "assumptions": {
+          "assumption1": "Integrations require secure authentication mechanisms and validation of incoming data to maintain trust."
+        },
+        "constraints": {}
+      }
+    ],
+    "assumptions": [
+      "Customer-facing applications: The organization has full control over development, deployment, and maintenance.",
+      "API gateways: API gateways are managed internally but must interact with external services.",
+      "Payment processor networks: Dependent on external networks for payment processing, without direct control over their security measures.",
+      "Internet connectivity: Essential for system access by customers but provided by external ISPs.",
+      "API gateways: API gateways serve as the primary entry points for data and therefore must enforce authentication and validate inputs.",
+      "Third-party integrations: Integrations require secure authentication mechanisms and validation of incoming data to maintain trust.",
+      "Customer data protection: The organization is solely responsible for protecting customer data under GDPR, PCI-DSS, and other regulations.",
+      "Payment processing: While the organization handles payment requests, the actual processing is a shared responsibility with external payment networks.",
+      "Customer personal data: The organization owns and is responsible for customer data while it is within the system.",
+      "Transaction data shared with payment processors: Data governance responsibilities are shared with external processors once transaction data is sent for processing."
+    ],
+    "exclusions": []
+  },
+  "boundary_analysis": {
+    "primary_system": [
+      "API gateways",
+      "Customer-facing applications"
+    ],
+    "system_elements": [
+      "API gateways",
+      "Customer personal data",
+      "Customer data protection",
+      "Customer-facing applications"
+    ],
+    "external_entities": [
+      "Internet connectivity",
+      "Payment processor networks"
+    ],
+    "interfaces": [
+      {
+        "name": "API gateways",
+        "boundary_type": "trust",
+        "assumptions": {
+          "assumption1": "API gateways serve as the primary entry points for data and therefore must enforce authentication and validate inputs."
+        },
+        "constraints": {}
+      },
+      {
+        "name": "Third-party integrations",
+        "boundary_type": "trust",
+        "assumptions": {
+          "assumption1": "Integrations require secure authentication mechanisms and validation of incoming data to maintain trust."
+        },
+        "constraints": {}
+      }
+    ],
+    "assumptions": [
+      "Customer-facing applications: The organization has full control over development, deployment, and maintenance.",
+      "API gateways: API gateways are managed internally but must interact with external services.",
+      "Payment processor networks: Dependent on external networks for payment processing, without direct control over their security measures.",
+      "Internet connectivity: Essential for system access by customers but provided by external ISPs.",
+      "API gateways: API gateways serve as the primary entry points for data and therefore must enforce authentication and validate inputs.",
+      "Third-party integrations: Integrations require secure authentication mechanisms and validation of incoming data to maintain trust.",
+      "Customer data protection: The organization is solely responsible for protecting customer data under GDPR, PCI-DSS, and other regulations.",
+      "Payment processing: While the organization handles payment requests, the actual processing is a shared responsibility with external payment networks.",
+      "Customer personal data: The organization owns and is responsible for customer data while it is within the system.",
+      "Transaction data shared with payment processors: Data governance responsibilities are shared with external processors once transaction data is sent for processing."
+    ],
+    "exclusions": [],
+    "boundary_coverage": {
+      "total_boundaries_defined": 4,
+      "critical_interfaces_identified": 2,
+      "external_dependencies": 2
+    }
+  },
+  "boundary_relationships": [
+    {
+      "parent_boundary": "Banking Platform System Scope",
+      "child_boundary": "Banking Platform Trust Boundaries",
+      "relationship_type": "contains"
+    },
+    {
+      "parent_boundary": "Banking Platform Responsibility Boundaries",
+      "child_boundary": "Banking Platform Data Governance Boundaries",
+      "relationship_type": "overlaps"
+    }
+  ],
+  "boundary_summary": {
+    "total_boundaries": 4,
+    "boundary_types": {
+      "system_scope": 1,
+      "trust": 1,
+      "responsibility": 1,
+      "data_governance": 1
+    },
+    "total_elements": 10,
+    "critical_interfaces": 2,
+    "external_dependencies": 2
+  },
+  "cognitive_style": "balanced",
+  "analysis_metadata": {
+    "agent_type": "system_boundaries",
+    "analysis_id": "ce850a5f-193a-465c-8cfd-92ef4523b875",
+    "timestamp": "2025-07-28T19:48:10.739346Z",
+    "version": "1.0"
+  }
+}

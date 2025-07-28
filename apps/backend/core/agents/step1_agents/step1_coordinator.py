@@ -115,12 +115,22 @@ class Step1Coordinator:
             # Phase 3: Parallel execution of Hazard and Stakeholder analysis
             self._log_execution("Starting Phase 3: Hazard and Stakeholder Analysis (parallel)")
             
+            # Update context with losses for hazard and stakeholder analysis
+            context['losses'] = loss_results.get('losses', [])
+            context['mission_context'] = mission_results
+            
             hazard_task = asyncio.create_task(self._run_hazard_analysis(context))
             stakeholder_task = asyncio.create_task(self._run_stakeholder_analysis(context))
             
             hazard_results, stakeholder_results = await asyncio.gather(
                 hazard_task, stakeholder_task
             )
+            
+            # Update context with hazards and losses for subsequent agents
+            context['hazards'] = hazard_results.get('hazards', [])
+            context['losses'] = loss_results.get('losses', [])
+            context['stakeholders'] = stakeholder_results.get('stakeholders', [])
+            context['adversaries'] = stakeholder_results.get('adversaries', [])
             
             # Phase 4: Security Constraint Definition
             self._log_execution("Starting Phase 4: Security Constraint Definition")
@@ -131,6 +141,9 @@ class Step1Coordinator:
             if self.db_connection:
                 await self._save_security_constraint_results(security_constraint_results)
             
+            # Update context with security constraints for system boundary agent
+            context['security_constraints'] = security_constraint_results.get('security_constraints', [])
+            
             # Phase 5: System Boundary Definition
             self._log_execution("Starting Phase 5: System Boundary Definition")
             system_boundary_results = await self._run_agent_with_cognitive_styles(
@@ -139,6 +152,9 @@ class Step1Coordinator:
             
             if self.db_connection:
                 await self._save_system_boundary_results(system_boundary_results)
+            
+            # Update context with all results for validation
+            context['system_boundaries'] = system_boundary_results.get('system_boundaries', [])
             
             # Phase 6: Validation
             self._log_execution("Starting Phase 6: Validation and Quality Assessment")

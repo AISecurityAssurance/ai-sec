@@ -87,6 +87,11 @@ class Step1CLI:
                     analysis_name=config['analysis']['name']
                 )
                 
+                # Add model information to results
+                model_info = self._get_model_info()
+                model_info['execution_mode'] = execution_mode
+                results['model_info'] = model_info
+                
                 # Save results
                 await self._save_results(config, results, db_name)
                 
@@ -164,6 +169,11 @@ class Step1CLI:
                 
                 # Load existing analysis
                 results = await coordinator.load_existing_analysis(str(demo_path))
+                
+                # Add model information to results
+                model_info = self._get_model_info()
+                model_info['execution_mode'] = "enhanced"  # Demo mode uses enhanced
+                results['model_info'] = model_info
                 
                 # Save results just like regular analysis
                 await self._save_results(demo_config, results, db_name)
@@ -289,6 +299,25 @@ class Step1CLI:
         
         return db_name, timestamp
     
+    def _get_model_info(self) -> dict:
+        """Get current model configuration info"""
+        model_info = {
+            "provider": settings.active_provider.value if settings.active_provider else "unknown",
+            "model": "unknown",
+            "temperature": 0.7,
+            "max_tokens": 4096
+        }
+        
+        # Get the active model config
+        if settings.active_provider and settings.active_provider in [ModelProvider(p) for p, c in settings.model_providers.items()]:
+            provider_config = settings.model_providers.get(settings.active_provider.value)
+            if provider_config:
+                model_info["model"] = provider_config.model or "default"
+                model_info["temperature"] = provider_config.temperature
+                model_info["max_tokens"] = provider_config.max_tokens
+        
+        return model_info
+    
     def _read_system_description(self, config: dict) -> str:
         """Read system description from configured source"""
         input_config = config.get('input', {})
@@ -368,6 +397,14 @@ class Step1CLI:
     
     def _display_results_summary(self, results: dict, execution_mode: str):
         """Display detailed analysis results like the demo"""
+        
+        # Display model information
+        model_info = results.get('model_info', {})
+        if model_info:
+            self.console.print(f"\n[bold cyan]Model Information:[/bold cyan]")
+            self.console.print(f"  • Provider: {model_info.get('provider', 'unknown')}")
+            self.console.print(f"  • Model: {model_info.get('model', 'unknown')}")
+            self.console.print(f"  • Execution Mode: {model_info.get('execution_mode', execution_mode)}")
         
         self.console.print(f"\n[bold green]Step 1 STPA-Sec Analysis Results ({execution_mode} mode)[/bold green]\n")
         
@@ -609,6 +646,25 @@ class Step1CLI:
                 relative_path = file_path.relative_to(Path.cwd()) if file_path.is_relative_to(Path.cwd()) else file_path
                 self.console.print(f"  • {relative_path}")
     
+    def _get_model_info(self, config: dict) -> dict:
+        """Get model information from configuration and settings"""
+        model_config = config.get('model', {})
+        provider = model_config.get('provider', 'unknown')
+        model_name = model_config.get('name', 'unknown')
+        
+        # Try to get actual model info from settings
+        if provider in settings.model_providers:
+            provider_config = settings.model_providers[provider]
+            if hasattr(provider_config, 'model'):
+                model_name = provider_config.model
+        
+        return {
+            "provider": provider,
+            "model": model_name,
+            "execution_mode": config.get('execution', {}).get('mode', 'standard'),
+            "timestamp": datetime.now().isoformat()
+        }
+    
     async def _export_database(self, db_name: str, output_dir: Path):
         """Export PostgreSQL database to file"""
         db_host = os.getenv('DB_HOST', 'postgres')
@@ -650,7 +706,17 @@ class Step1CLI:
                 f.write(f"# Step 1 STPA-Sec Analysis Report\n\n")
                 f.write(f"**Analysis Name:** {config['analysis']['name']}\n")
                 f.write(f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                f.write(f"**Execution Mode:** {config.get('execution', {}).get('mode', 'standard')}\n\n")
+                f.write(f"**Execution Mode:** {config.get('execution', {}).get('mode', 'standard')}\n")
+                
+                # Model Information
+                model_info = results.get('model_info', {})
+                if model_info:
+                    f.write(f"\n## Model Information\n\n")
+                    f.write(f"- **Provider:** {model_info.get('provider', 'unknown')}\n")
+                    f.write(f"- **Model:** {model_info.get('model', 'unknown')}\n")
+                    f.write(f"- **Execution Mode:** {model_info.get('execution_mode', 'standard')}\n")
+                
+                f.write("\n")
                 
                 # Extract results sections
                 analysis_results = results.get('results', {})

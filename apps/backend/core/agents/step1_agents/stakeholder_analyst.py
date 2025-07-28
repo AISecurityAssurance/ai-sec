@@ -804,6 +804,14 @@ Identified Losses:
 
 Analyze all stakeholders and adversaries for this system.
 
+IMPORTANT: You must identify AT LEAST 5 different stakeholders. Consider:
+- Different types of users (retail, business, internal)
+- Various operators (administrators, support staff, security team)
+- Different owners/investors (shareholders, board members)
+- Multiple regulators (financial, privacy, industry-specific)
+- Partners and suppliers (technology vendors, service providers)
+- Societal stakeholders (local community, general public)
+
 For STAKEHOLDERS (legitimate users of the system), identify:
 1. Name and type (MUST be one of: user, operator, owner, regulator, partner, society, supplier)
 2. Description of their relationship to the system
@@ -865,8 +873,16 @@ Provide your response as a JSON object with the following structure:
 
 IMPORTANT: 
 1. Consider all types of stakeholders and realistic adversary profiles for this system type.
-2. Use ONLY these stakeholder types: user, operator, owner, regulator, partner, society, supplier
-3. Do NOT use "beneficiary" or "vendor" as stakeholder types - map them to allowed types (e.g., shareholders → owner, vendors → supplier)."""
+2. Identify AT LEAST 5 different stakeholders from various categories to ensure comprehensive coverage.
+3. Use ONLY these stakeholder types: user, operator, owner, regulator, partner, society, supplier
+4. Do NOT use "beneficiary" or "vendor" as stakeholder types - map them to allowed types (e.g., shareholders → owner, vendors → supplier).
+5. Consider:
+   - Different user groups (e.g., retail customers, business customers, internal users)
+   - Various operators (e.g., system administrators, support staff, security team)
+   - Different owners/investors (e.g., shareholders, board members)
+   - Multiple regulators if applicable (e.g., financial regulators, data protection authorities)
+   - Partners and suppliers who depend on or support the system
+   - Societal stakeholders affected by the system's operation"""
         
         try:
             # Call LLM

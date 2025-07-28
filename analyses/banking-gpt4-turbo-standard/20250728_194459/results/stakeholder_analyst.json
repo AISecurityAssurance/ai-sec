@@ -1,0 +1,201 @@
+{
+  "stakeholders": [
+    {
+      "name": "Retail Customers",
+      "stakeholder_type": "user",
+      "description": "Individuals using the platform for personal financial management",
+      "criticality": "primary",
+      "mission_perspective": {
+        "primary_needs": [
+          "Account Management and Visibility",
+          "Secure Payment Processing"
+        ],
+        "value_derived": "Secure, convenient, and comprehensive management of personal finances",
+        "success_criteria": "Reliable access to financial services with robust security and privacy"
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-1",
+          "impact": "catastrophic",
+          "description": "Personal financial data breach could lead to financial loss and identity theft"
+        },
+        {
+          "loss_id": "L-3",
+          "impact": "major",
+          "description": "Fraudulent transactions could directly affect their financial assets"
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "medium",
+        "interest_level": "high",
+        "engagement_strategy": "keep_satisfied"
+      }
+    },
+    {
+      "name": "Regulators",
+      "stakeholder_type": "regulator",
+      "description": "Authorities ensuring the platform's compliance with financial regulations",
+      "criticality": "essential",
+      "mission_perspective": {
+        "primary_needs": [
+          "Compliance with Financial Regulations"
+        ],
+        "value_derived": "Ensuring the integrity and security of the financial market",
+        "success_criteria": "Full compliance by the platform with all regulatory requirements"
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-4",
+          "impact": "major",
+          "description": "Regulatory fines and sanctions could be imposed due to non-compliance"
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "high",
+        "interest_level": "high",
+        "engagement_strategy": "manage_closely"
+      }
+    }
+  ],
+  "stakeholder_count": 2,
+  "stakeholder_types": {
+    "user": 1,
+    "regulator": 1
+  },
+  "adversaries": [
+    {
+      "adversary_class": "organized_crime",
+      "profile": {
+        "sophistication": "high",
+        "resources": "significant",
+        "persistence": "long_term",
+        "primary_interest": "financial_gain",
+        "geographic_scope": "global"
+      },
+      "mission_targets": {
+        "interested_in": [
+          "customer data",
+          "financial transactions"
+        ],
+        "value_perception": "high_value_target",
+        "historical_interest": "known_targeting"
+      }
+    },
+    {
+      "adversary_class": "insider",
+      "profile": {
+        "sophistication": "moderate",
+        "resources": "limited",
+        "persistence": "opportunistic",
+        "primary_interest": "personal_gain",
+        "geographic_scope": "local"
+      },
+      "mission_targets": {
+        "interested_in": [
+          "sensitive internal documents",
+          "customer data"
+        ],
+        "value_perception": "strategic_target",
+        "historical_interest": "periodic_campaigns"
+      }
+    }
+  ],
+  "adversary_count": 2,
+  "stakeholder_matrix": {
+    "high_influence_high_interest": [
+      {
+        "name": "Regulators",
+        "type": "regulator",
+        "strategy": "manage_closely"
+      }
+    ],
+    "high_influence_low_interest": [],
+    "low_influence_high_interest": [
+      {
+        "name": "Retail Customers",
+        "type": "user",
+        "strategy": "keep_satisfied"
+      }
+    ],
+    "low_influence_low_interest": []
+  },
+  "adversary_analysis": {
+    "threat_landscape": {
+      "sophistication_range": "Low to High",
+      "resource_availability": "Well-funded adversaries present",
+      "persistence_patterns": [
+        "Long-term campaigns likely",
+        "Opportunistic attacks constant"
+      ]
+    },
+    "mission_attractiveness": {
+      "overall_rating": "high",
+      "factors": [
+        "Multiple adversaries see high value",
+        "Historical evidence of targeting"
+      ],
+      "most_interested_adversaries": [
+        "organized_crime",
+        "insider"
+      ]
+    },
+    "combined_threat_level": "elevated"
+  },
+  "mission_success_criteria": {
+    "success_states": {
+      "user_success": {
+        "description": "Users can reliably achieve their goals through the system",
+        "violated_by_losses": [
+          "L-1",
+          "L-2",
+          "L-3"
+        ],
+        "evidence_of_success": "High usage rates, positive feedback, goal achievement metrics"
+      },
+      "regulatory_success": {
+        "description": "System maintains continuous compliance with all regulations",
+        "violated_by_losses": [
+          "L-1",
+          "L-4"
+        ],
+        "evidence_of_success": "Clean audits, no violations, proactive compliance"
+      },
+      "security_success": {
+        "description": "System successfully resists adversary attempts",
+        "violated_by_losses": [
+          "L-1",
+          "L-2",
+          "L-3",
+          "L-4",
+          "L-5"
+        ],
+        "evidence_of_success": "No successful compromises, threats detected and mitigated"
+      }
+    },
+    "success_indicators": {
+      "behavioral_indicators": [
+        "Users actively choose to use the system",
+        "Stakeholders express confidence in the system",
+        "No abnormal user behavior patterns"
+      ],
+      "performance_indicators": [
+        "System meets defined performance targets",
+        "Error rates within acceptable thresholds",
+        "Recovery objectives consistently met"
+      ],
+      "external_indicators": [
+        "Positive stakeholder assessments",
+        "Regulatory approval maintained",
+        "Market position stable or improving"
+      ]
+    }
+  },
+  "critical_relationships": [
+    {
+      "relationship": "Adversary-User",
+      "nature": "Threat and target",
+      "criticality": "hostile",
+      "failure_impact": "Direct harm to users through system compromise"
+    }
+  ]
+}

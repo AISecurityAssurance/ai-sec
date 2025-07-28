@@ -1,0 +1,132 @@
+{
+  "security_constraints": [
+    {
+      "identifier": "SC-1",
+      "name": "Encryption for Data Protection",
+      "constraint_statement": "The system shall implement end-to-end encryption for all data in transit and at rest.",
+      "rationale": "To protect customer data and financial transactions from unauthorized access or interception.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as TLS for data in transit and AES for data at rest.",
+      "addresses_hazards": [
+        "H-1"
+      ],
+      "prevents_losses": [
+        "L-1"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-2"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1"
+        ],
+        "capability_degradation": "Compromise of customer data integrity and confidentiality leading to loss of trust and regulatory non-compliance."
+      }
+    },
+    {
+      "identifier": "SC-2",
+      "name": "Multi-Factor Authentication",
+      "constraint_statement": "The system shall require multi-factor authentication for all customer and administrative logins.",
+      "rationale": "To ensure that access to accounts and sensitive functions is granted only to authorized users.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls including something the user knows (password), something the user has (SMS code or authenticator app), and something the user is (biometric verification).",
+      "addresses_hazards": [
+        "H-2",
+        "H-3"
+      ],
+      "prevents_losses": [
+        "L-2"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-2"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-2"
+        ],
+        "capability_degradation": "Unauthorized access to user accounts and potential financial loss for customers and the bank."
+      }
+    },
+    {
+      "identifier": "SC-3",
+      "name": "Regular Security Audits",
+      "constraint_statement": "The system shall undergo regular security audits to identify and remediate vulnerabilities.",
+      "rationale": "To proactively discover and fix security weaknesses before they can be exploited.",
+      "constraint_type": "detective",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Procedures including third-party security assessments and internal audits, following industry best practices and compliance requirements.",
+      "addresses_hazards": [
+        "H-4"
+      ],
+      "prevents_losses": [
+        "L-3"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-3"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-3"
+        ],
+        "capability_degradation": "Undetected vulnerabilities may lead to system compromise, data breaches, and financial losses."
+      }
+    },
+    {
+      "identifier": "SC-4",
+      "name": "Incident Response Plan",
+      "constraint_statement": "The system shall have a formal incident response plan that is regularly tested and updated.",
+      "rationale": "To ensure timely and effective response to security incidents, minimizing impact.",
+      "constraint_type": "corrective",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Procedures and policies detailing response steps, roles, and communication strategies, along with regular drills and updates based on lessons learned and evolving threats.",
+      "addresses_hazards": [
+        "H-5"
+      ],
+      "prevents_losses": [
+        "L-4"
+      ],
+      "related_losses": [
+        "L-2",
+        "L-4"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-4"
+        ],
+        "capability_degradation": "Ineffective incident handling could exacerbate breaches, leading to greater financial loss and reputational damage."
+      }
+    }
+  ],
+  "constraint_coverage": {
+    "total_hazards": 0,
+    "hazards_with_constraints": 5,
+    "total_constraints": 4,
+    "coverage_balance": 0.0,
+    "type_distribution": {
+      "preventive": 2,
+      "detective": 1,
+      "corrective": 1,
+      "compensating": 0
+    }
+  },
+  "constraint_hazard_mappings": [],
+  "constraint_count": 4,
+  "constraint_types": {
+    "preventive": 2,
+    "detective": 1,
+    "corrective": 1,
+    "compensating": 0
+  },
+  "cognitive_style": "balanced",
+  "analysis_metadata": {
+    "agent_type": "security_constraints",
+    "analysis_id": "ce850a5f-193a-465c-8cfd-92ef4523b875",
+    "timestamp": "2025-07-28T19:47:29.734296Z",
+    "version": "1.0"
+  }
+}

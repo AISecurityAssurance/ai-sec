@@ -138,10 +138,16 @@ Generate constraints in this JSON format:
   ]
 }}
 
-CRITICAL: The "addresses_hazards" field MUST contain the hazard IDs (e.g., ["H-1", "H-2"]) that each constraint addresses.
-Example: If constraint SC-1 addresses hazard H-1, include "addresses_hazards": ["H-1"] in that constraint.
+CRITICAL REQUIREMENTS:
+1. EVERY constraint MUST have the "addresses_hazards" field filled with at least one hazard ID
+2. The "addresses_hazards" field is MANDATORY and cannot be empty
+3. Use the exact hazard IDs from the list above (e.g., ["H-1", "H-2"])
+4. Every hazard should have at least one constraint addressing it
 
-Ensure complete coverage - every hazard should have at least one constraint addressing it."""
+Example: If a constraint addresses hazards H-1 and H-3, you MUST include:
+"addresses_hazards": ["H-1", "H-3"]
+
+DO NOT generate constraints without the "addresses_hazards" field - they will be rejected."""
         
         return prompt
     

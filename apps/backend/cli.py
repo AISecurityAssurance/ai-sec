@@ -16,6 +16,15 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+
+# Configure logging BEFORE importing anything that uses SQLAlchemy
+if not os.getenv('DEBUG'):
+    # Suppress SQLAlchemy and httpx logging
+    logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
+    logging.getLogger('httpx').setLevel(logging.WARNING)
+    # Also suppress the default format
+    logging.basicConfig(level=logging.WARNING, format='%(message)s')
+
 import asyncpg
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
@@ -43,7 +52,7 @@ class Step1CLI:
         self._setup_logging()
     
     def _setup_logging(self):
-        """Set up logging to redirect SQLAlchemy messages to a file"""
+        """Set up logging to save all logs to a file"""
         # Create logs directory if it doesn't exist
         log_dir = Path("logs")
         log_dir.mkdir(exist_ok=True)
@@ -51,19 +60,13 @@ class Step1CLI:
         # Store log filename for later
         self.log_filename = f"analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
         
-        # Configure logging to file for SQLAlchemy
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(log_dir / self.log_filename),
-                logging.StreamHandler(sys.stdout) if os.getenv('DEBUG') else logging.NullHandler()
-            ]
-        )
+        # Add file handler to root logger to capture all logs
+        file_handler = logging.FileHandler(log_dir / self.log_filename)
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
         
-        # Suppress SQLAlchemy console output unless DEBUG is set
-        if not os.getenv('DEBUG'):
-            logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
+        # Add to root logger
+        logging.getLogger().addHandler(file_handler)
         
     async def analyze(self, config_path: str):
         """Run Step 1 analysis based on configuration file"""

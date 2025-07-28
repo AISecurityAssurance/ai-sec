@@ -663,7 +663,7 @@ class Step1Coordinator:
         for mapping in results.get('constraint_hazard_mappings', []):
             await self.db_connection.execute("""
                 INSERT INTO constraint_hazard_mappings
-                (id, constraint_id, hazard_id, mapping_type, rationale)
+                (id, constraint_id, hazard_id, relationship_type, effectiveness_rationale)
                 VALUES ($1, 
                     (SELECT id FROM security_constraints WHERE analysis_id = $2 AND identifier = $3),
                     (SELECT id FROM step1_hazards WHERE analysis_id = $2 AND identifier = $4),
@@ -673,7 +673,7 @@ class Step1Coordinator:
                 self.analysis_id,
                 mapping.get('constraint_identifier', mapping.get('constraint_id')),
                 mapping.get('hazard_identifier', mapping.get('hazard_id')),
-                mapping.get('mapping_type', 'prevents'),
+                mapping.get('relationship_type', mapping.get('mapping_type', 'prevents')),
                 mapping.get('rationale', '')
             )
     

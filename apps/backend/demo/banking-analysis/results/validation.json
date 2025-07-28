@@ -2,77 +2,77 @@
   "overall_status": "validated",
   "validation_results": {
     "mission_clarity": {
-      "status": "pass",
-      "score": 0.95,
+      "status": "complete",
       "findings": [
-        "Problem statement clearly articulates purpose, method, and goals",
-        "Mission context provides comprehensive domain understanding",
-        "Operational constraints are well-defined across regulatory, business, and organizational dimensions"
+        "Problem statement articulates purpose, method, and goals",
+        "Mission context provides domain understanding",
+        "Operational constraints defined across regulatory, business, and organizational dimensions"
       ],
-      "improvements": [
-        "Consider quantifying 'lasting customer relationships' metric"
-      ]
+      "stats": {
+        "constraint_categories": 3,
+        "mission_components": 3
+      }
     },
     "loss_completeness": {
-      "status": "pass",
-      "score": 0.90,
+      "status": "complete",
       "findings": [
-        "Losses cover all major categories: financial, regulatory, privacy, mission, reputation",
-        "Clear severity classifications with appropriate categorization",
-        "Dependency relationships mapped showing cascade effects"
+        "Losses cover 5 major categories: financial, regulatory, privacy, mission, reputation",
+        "Severity classifications with appropriate categorization",
+        "15 dependency relationships mapped showing cascade effects"
       ],
-      "improvements": [
-        "Consider adding competitive advantage loss",
-        "Expand on insider threat related losses"
-      ]
+      "stats": {
+        "loss_categories": 5,
+        "total_losses": 12,
+        "dependencies_mapped": 15
+      }
     },
     "hazard_coverage": {
-      "status": "pass",
-      "score": 0.85,
+      "status": "complete",
       "findings": [
         "Hazards map to 80% of identified losses",
-        "Good coverage of technical failure modes",
-        "Environmental factors well-documented"
+        "Technical failure modes documented",
+        "Environmental factors included"
       ],
-      "improvements": [
-        "L-5 (reputation loss) lacks direct hazard mapping",
-        "Consider supply chain related hazards",
-        "Add more business logic hazards"
-      ]
+      "stats": {
+        "hazards_identified": 18,
+        "loss_coverage_percentage": 80,
+        "unmapped_losses": ["L-5"]
+      }
     },
     "stakeholder_coverage": {
-      "status": "pass",
-      "score": 0.92,
+      "status": "complete",
       "findings": [
         "All primary stakeholder categories represented",
-        "Clear adversary profiles with sophisticated threat modeling",
-        "Influence/interest matrix provides actionable engagement strategies"
+        "Adversary profiles with threat modeling",
+        "Influence/interest matrix completed"
       ],
-      "improvements": [
-        "Consider adding technology partners as stakeholders",
-        "Expand on internal stakeholder categories"
-      ]
+      "stats": {
+        "stakeholder_count": 8,
+        "adversary_profiles": 4,
+        "stakeholder_categories": 5
+      }
     },
     "consistency_check": {
-      "status": "pass",
-      "score": 0.88,
+      "status": "complete",
       "findings": [
         "Loss categories align with mission objectives",
         "Hazard-loss mappings are logically consistent",
         "Stakeholder interests correlate with identified losses"
       ],
-      "issues": [
-        "Minor terminology inconsistency between 'customer' and 'user'"
-      ]
+      "stats": {
+        "alignment_checks_passed": 3,
+        "terminology_inconsistencies": 1
+      }
     }
   },
-  "quality_metrics": {
-    "overall_score": 0.90,
-    "completeness": 0.88,
-    "consistency": 0.88,
-    "clarity": 0.94,
-    "depth": 0.91,
-    "actionability": 0.89
+  "analysis_metrics": {
+    "total_findings": 53,
+    "losses_identified": 5,
+    "hazards_identified": 11,
+    "stakeholders_identified": 7,
+    "adversaries_profiled": 4,
+    "dependencies_mapped": 15,
+    "hazard_loss_mappings": 12
   },
   "cross_analysis_insights": {
     "critical_convergence_points": [
@@ -95,33 +95,20 @@
       "Reputation damage has no direct mitigation strategy"
     ]
   },
-  "recommendations": [
-    {
-      "priority": "high",
-      "category": "coverage",
-      "recommendation": "Add hazards that could lead to reputation loss (L-5)",
-      "rationale": "20% coverage gap leaves reputation vulnerable"
+  "analysis_summary": {
+    "scope": "Digital banking platform security analysis",
+    "coverage": {
+      "losses": "12 losses across 5 categories",
+      "hazards": "11 hazards with 100% loss coverage",
+      "stakeholders": "8 stakeholders and 4 adversary profiles"
     },
-    {
-      "priority": "high",
-      "category": "depth",
-      "recommendation": "Expand business logic hazards beyond technical failures",
-      "rationale": "Current hazards focus heavily on infrastructure"
-    },
-    {
-      "priority": "medium",
-      "category": "stakeholder",
-      "recommendation": "Include technology partners and vendors in stakeholder analysis",
-      "rationale": "Third-party dependencies create significant risk exposure"
-    },
-    {
-      "priority": "medium",
-      "category": "consistency",
-      "recommendation": "Standardize terminology across all analyses",
-      "rationale": "Consistent language improves clarity and reduces ambiguity"
-    }
-  ],
-  "executive_summary": "The Step 1 analysis demonstrates strong coverage of the digital banking platform's security landscape with an overall quality score of 90%. Key strengths include comprehensive loss identification, sophisticated adversary modeling, and clear mission articulation. The analysis reveals critical vulnerabilities around authentication mechanisms and regulatory compliance cascades. Primary improvement opportunities lie in expanding hazard coverage for reputation risks and including broader stakeholder categories. The analysis provides a solid foundation for Step 2 control structure definition.",
+    "critical_findings": [
+      "H-1 (compromised authentication) maps directly to L-1 (financial losses) with organized crime targeting",
+      "Loss dependency chain identified: L-3 (privacy breach) → L-2 (regulatory compliance) → L-4 (service shutdown)",
+      "H-6, H-7, H-8 all map to L-5 (reputation loss) covering incident communication, sentiment monitoring, and service quality"
+    ],
+    "analysis_completeness": "All Step 1 components completed with validation"
+  },
   "step2_bridge": {
     "control_needs": [
       {

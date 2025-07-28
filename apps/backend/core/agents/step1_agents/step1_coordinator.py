@@ -14,6 +14,8 @@ from .mission_analyst import MissionAnalystAgent
 from .loss_identification import LossIdentificationAgent
 from .hazard_identification import HazardIdentificationAgent
 from .stakeholder_analyst import StakeholderAnalystAgent
+from .security_constraint import SecurityConstraintAgent
+from .system_boundary import SystemBoundaryAgent
 from .validation_agent import ValidationAgent
 from .base_step1 import CognitiveStyle
 
@@ -27,7 +29,9 @@ class Step1Coordinator:
     2. Loss Identification - Identify unacceptable outcomes
     3. Hazard Identification - Identify hazardous states (depends on losses)
     4. Stakeholder Analyst - Analyze perspectives (depends on losses)
-    5. Validation - Validate and create Step 2 bridge
+    5. Security Constraint - Define required properties (depends on losses/hazards)
+    6. System Boundary - Define analysis scope (depends on all above)
+    7. Validation - Validate and create Step 2 bridge
     
     Supports ASI-ARCH Dream Team execution modes:
     - standard: Single agent per task (default)
@@ -116,8 +120,26 @@ class Step1Coordinator:
                 hazard_task, stakeholder_task
             )
             
-            # Phase 4: Validation
-            self._log_execution("Starting Phase 4: Validation and Quality Assessment")
+            # Phase 4: Security Constraint Definition
+            self._log_execution("Starting Phase 4: Security Constraint Definition")
+            security_constraint_results = await self._run_agent_with_cognitive_styles(
+                SecurityConstraintAgent, context, "Security Constraint Definition"
+            )
+            
+            if self.db_connection:
+                await self._save_security_constraint_results(security_constraint_results)
+            
+            # Phase 5: System Boundary Definition
+            self._log_execution("Starting Phase 5: System Boundary Definition")
+            system_boundary_results = await self._run_agent_with_cognitive_styles(
+                SystemBoundaryAgent, context, "System Boundary Definition"
+            )
+            
+            if self.db_connection:
+                await self._save_system_boundary_results(system_boundary_results)
+            
+            # Phase 6: Validation
+            self._log_execution("Starting Phase 6: Validation and Quality Assessment")
             validation_agent = ValidationAgent(self.analysis_id, self.db_connection)
             validation_results = await validation_agent.analyze(context)
             
@@ -136,6 +158,8 @@ class Step1Coordinator:
                     "loss_identification": loss_results,
                     "hazard_identification": hazard_results,
                     "stakeholder_analysis": stakeholder_results,
+                    "security_constraints": security_constraint_results,
+                    "system_boundaries": system_boundary_results,
                     "validation": validation_results
                 },
                 "executive_summary": validation_results['executive_summary'],
@@ -271,6 +295,10 @@ class Step1Coordinator:
             synthesized.update(self._synthesize_hazard_results(results))
         elif "Stakeholder" in agent_type:
             synthesized.update(self._synthesize_stakeholder_results(results))
+        elif "SecurityConstraint" in agent_type:
+            synthesized.update(self._synthesize_security_constraint_results(results))
+        elif "SystemBoundary" in agent_type:
+            synthesized.update(self._synthesize_system_boundary_results(results))
         else:
             # Generic synthesis - merge all results
             synthesized.update(results[0]["results"])
@@ -326,6 +354,16 @@ class Step1Coordinator:
     def _synthesize_stakeholder_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Synthesize stakeholder analysis results from multiple cognitive styles"""
         # Similar synthesis logic
+        return results[0]["results"]  # Placeholder
+    
+    def _synthesize_security_constraint_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Synthesize security constraint results from multiple cognitive styles"""
+        # Similar to loss synthesis but for security constraints
+        return results[0]["results"]  # Placeholder
+    
+    def _synthesize_system_boundary_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Synthesize system boundary results from multiple cognitive styles"""
+        # Similar synthesis logic for system boundaries
         return results[0]["results"]  # Placeholder
     
     async def _create_analysis_record(self, name: str, description: str):
@@ -567,6 +605,49 @@ class Step1Coordinator:
             json.dumps(criteria['success_indicators'])
         )
     
+    async def _save_security_constraint_results(self, results: Dict[str, Any]):
+        """Save security constraint results to database"""
+        # Save security constraints
+        for constraint in results['security_constraints']:
+            await self.db_connection.execute("""
+                INSERT INTO step1_security_constraints
+                (id, analysis_id, identifier, name, constraint_type, 
+                 related_losses, related_hazards, enforcement_mechanism,
+                 temporal_aspects, criticality)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            """,
+                str(uuid4()),
+                self.analysis_id,
+                constraint['identifier'],
+                constraint['name'],
+                constraint['constraint_type'],
+                json.dumps(constraint['related_losses']),
+                json.dumps(constraint['related_hazards']),
+                json.dumps(constraint['enforcement_mechanism']),
+                json.dumps(constraint['temporal_aspects']),
+                constraint['criticality']
+            )
+    
+    async def _save_system_boundary_results(self, results: Dict[str, Any]):
+        """Save system boundary results to database"""
+        # Save system boundary definition
+        boundary = results['system_boundary']
+        await self.db_connection.execute("""
+            INSERT INTO step1_system_boundaries
+            (id, analysis_id, primary_system, system_elements,
+             external_entities, interfaces, assumptions, exclusions)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        """,
+            str(uuid4()),
+            self.analysis_id,
+            json.dumps(boundary['primary_system']),
+            json.dumps(boundary['system_elements']),
+            json.dumps(boundary['external_entities']),
+            json.dumps(boundary['interfaces']),
+            json.dumps(boundary['assumptions']),
+            json.dumps(boundary['exclusions'])
+        )
+    
     async def _save_stakeholder_results(self, results: Dict[str, Any]):
         """Save stakeholder analysis results to database"""
         # Save stakeholders
@@ -742,6 +823,17 @@ class Step1Coordinator:
                 'min_stakeholders': 3,
                 'min_adversaries': 1
             },
+            'security_constraints': {
+                'required_fields': ['security_constraints', 'constraint_coverage'],
+                'min_count': 3,
+                'constraint_fields': ['identifier', 'name', 'constraint_type',
+                                    'related_losses', 'enforcement_mechanism']
+            },
+            'system_boundaries': {
+                'required_fields': ['system_boundary', 'boundary_analysis'],
+                'boundary_fields': ['primary_system', 'system_elements', 'external_entities',
+                                  'interfaces', 'assumptions', 'exclusions']
+            },
             'validation': {
                 'required_fields': ['overall_status', 'validation_results', 
                                   'quality_metrics', 'step2_bridge'],
@@ -822,6 +914,22 @@ class Step1Coordinator:
                         if len(artifact_data['adversaries']) < criteria['min_adversaries']:
                             artifact_status['issues'].append(
                                 f'Too few adversaries: {len(artifact_data["adversaries"])}'
+                            )
+                
+                elif artifact_name == 'security_constraints' and 'security_constraints' in artifact_data:
+                    for i, constraint in enumerate(artifact_data['security_constraints']):
+                        for field in criteria['constraint_fields']:
+                            if field not in constraint:
+                                artifact_status['issues'].append(
+                                    f'Constraint {i} missing field: {field}'
+                                )
+                
+                elif artifact_name == 'system_boundaries' and 'system_boundary' in artifact_data:
+                    boundary = artifact_data['system_boundary']
+                    for field in criteria['boundary_fields']:
+                        if field not in boundary:
+                            artifact_status['issues'].append(
+                                f'System boundary missing field: {field}'
                             )
                 
                 elif artifact_name == 'validation' and 'validation_results' in artifact_data:
@@ -919,6 +1027,18 @@ class Step1Coordinator:
             with open(stakeholder_path, 'r') as f:
                 results['stakeholder_analysis'] = json.load(f)
         
+        # Load security constraint results
+        security_constraint_path = results_dir / "security_constraint.json"
+        if security_constraint_path.exists():
+            with open(security_constraint_path, 'r') as f:
+                results['security_constraints'] = json.load(f)
+        
+        # Load system boundary results
+        system_boundary_path = results_dir / "system_boundary.json"
+        if system_boundary_path.exists():
+            with open(system_boundary_path, 'r') as f:
+                results['system_boundaries'] = json.load(f)
+        
         # Load validation results if available
         validation_path = results_dir / "validation.json"
         if validation_path.exists():
@@ -952,7 +1072,8 @@ class Step1Coordinator:
         
         # Check that we have minimum required results
         required_results = ['mission_analysis', 'loss_identification', 
-                          'hazard_identification', 'stakeholder_analysis']
+                          'hazard_identification', 'stakeholder_analysis',
+                          'security_constraints', 'system_boundaries']
         
         missing = [r for r in required_results if r not in results]
         if missing:
@@ -1017,6 +1138,12 @@ class Step1Coordinator:
         
         if 'stakeholder_analysis' in results:
             await self._save_stakeholder_results(results['stakeholder_analysis'])
+        
+        if 'security_constraints' in results:
+            await self._save_security_constraint_results(results['security_constraints'])
+        
+        if 'system_boundaries' in results:
+            await self._save_system_boundary_results(results['system_boundaries'])
         
         if 'validation' in results:
             await self._save_validation_results(results['validation'])

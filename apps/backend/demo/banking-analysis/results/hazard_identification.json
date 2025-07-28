@@ -114,14 +114,248 @@
         "when_present": "Continuous risk to compliance posture",
         "duration": "continuous"
       }
+    },
+    {
+      "identifier": "H-6",
+      "description": "System operates with inadequate incident communication protocols",
+      "hazard_category": "capability_lost",
+      "affected_system_property": "incident_response",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "low", "likelihood": "rare"},
+          "incident": {"impact": "high", "likelihood": "likely"},
+          "crisis": {"impact": "catastrophic", "likelihood": "certain"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "minimal", "detection": "easy"},
+          "moderate": {"impact": "moderate", "detection": "moderate"},
+          "severe": {"impact": "high", "detection": "hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "periodic",
+        "when_present": "During security incidents or service disruptions",
+        "duration": "transient"
+      }
+    },
+    {
+      "identifier": "H-7",
+      "description": "System operates without monitoring of public sentiment/social media",
+      "hazard_category": "awareness_compromised",
+      "affected_system_property": "reputation_monitoring",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "low", "likelihood": "possible"},
+          "incident": {"impact": "moderate", "likelihood": "likely"},
+          "viral_event": {"impact": "high", "likelihood": "certain"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "minimal", "detection": "hard"},
+          "moderate": {"impact": "moderate", "detection": "very_hard"},
+          "severe": {"impact": "high", "detection": "extremely_hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "Continuous blind spot for reputation threats",
+        "duration": "continuous"
+      }
+    },
+    {
+      "identifier": "H-8",
+      "description": "System operates with inconsistent service quality during peak periods",
+      "hazard_category": "performance_degraded",
+      "affected_system_property": "service_consistency",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "minimal", "likelihood": "rare"},
+          "peak": {"impact": "moderate", "likelihood": "likely"},
+          "extreme_peak": {"impact": "high", "likelihood": "certain"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "low", "detection": "easy"},
+          "moderate": {"impact": "moderate", "detection": "moderate"},
+          "severe": {"impact": "high", "detection": "hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "periodic",
+        "when_present": "During month-end, holidays, or marketing campaigns",
+        "duration": "intermittent"
+      }
+    },
+    {
+      "identifier": "H-9",
+      "description": "System operates with incorrect financial calculation algorithms",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "calculation_accuracy",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "moderate", "likelihood": "rare"},
+          "high_volume": {"impact": "high", "likelihood": "possible"},
+          "regulatory_change": {"impact": "catastrophic", "likelihood": "likely"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "moderate", "detection": "moderate"},
+          "moderate": {"impact": "high", "detection": "hard"},
+          "severe": {"impact": "catastrophic", "detection": "very_hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "After updates, configuration changes, or regulatory adjustments",
+        "duration": "persistent_until_fixed"
+      }
+    },
+    {
+      "identifier": "H-10",
+      "description": "System operates with improper transaction routing logic",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "transaction_routing",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "moderate", "likelihood": "rare"},
+          "network_changes": {"impact": "high", "likelihood": "possible"},
+          "failover": {"impact": "catastrophic", "likelihood": "likely"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "low", "detection": "easy"},
+          "moderate": {"impact": "moderate", "detection": "moderate"},
+          "severe": {"impact": "high", "detection": "hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "During network topology changes or payment processor updates",
+        "duration": "transient"
+      }
+    },
+    {
+      "identifier": "H-11",
+      "description": "System operates with flawed credit assessment models",
+      "hazard_category": "decision_compromised",
+      "affected_system_property": "risk_assessment",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "moderate", "likelihood": "possible"},
+          "economic_shift": {"impact": "high", "likelihood": "likely"},
+          "regulatory_change": {"impact": "high", "likelihood": "likely"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "low", "detection": "hard"},
+          "moderate": {"impact": "moderate", "detection": "very_hard"},
+          "severe": {"impact": "high", "detection": "extremely_hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "Continuous risk of incorrect credit decisions",
+        "duration": "continuous"
+      }
+    },
+    {
+      "identifier": "H-12",
+      "description": "System operates with compromised session management allowing account takeover",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "session_security",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "moderate", "likelihood": "rare"},
+          "degraded": {"impact": "high", "likelihood": "possible"},
+          "emergency": {"impact": "catastrophic", "likelihood": "likely"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "minimal", "detection": "moderate"},
+          "moderate": {"impact": "moderate", "detection": "hard"},
+          "severe": {"impact": "high", "detection": "very_hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "Continuous vulnerability to session hijacking and fixation attacks",
+        "duration": "continuous"
+      }
+    },
+    {
+      "identifier": "H-13",
+      "description": "System operates without adequate segregation of duties enabling insider fraud",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "access_control",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "moderate", "likelihood": "possible"},
+          "reduced_staff": {"impact": "high", "likelihood": "likely"},
+          "emergency": {"impact": "catastrophic", "likelihood": "certain"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "low", "detection": "hard"},
+          "moderate": {"impact": "moderate", "detection": "very_hard"},
+          "severe": {"impact": "catastrophic", "detection": "extremely_hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "Persistent risk of insider threats and fraudulent activities",
+        "duration": "continuous"
+      }
+    },
+    {
+      "identifier": "H-14",
+      "description": "System operates with vulnerable API endpoints exposing critical functions",
+      "hazard_category": "confidentiality_breached",
+      "affected_system_property": "api_security",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "high", "likelihood": "possible"},
+          "high_traffic": {"impact": "catastrophic", "likelihood": "likely"},
+          "under_attack": {"impact": "catastrophic", "likelihood": "certain"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "moderate", "detection": "moderate"},
+          "moderate": {"impact": "high", "detection": "hard"},
+          "severe": {"impact": "catastrophic", "detection": "very_hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "Continuous exposure of critical functions through insecure APIs",
+        "duration": "continuous"
+      }
+    },
+    {
+      "identifier": "H-15",
+      "description": "System operates without proper data retention/deletion controls violating privacy regulations",
+      "hazard_category": "compliance_violated",
+      "affected_system_property": "data_lifecycle",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {"impact": "moderate", "likelihood": "likely"},
+          "audit_period": {"impact": "high", "likelihood": "certain"},
+          "regulatory_review": {"impact": "catastrophic", "likelihood": "certain"}
+        },
+        "threat_conditions": {
+          "benign": {"impact": "low", "detection": "moderate"},
+          "moderate": {"impact": "moderate", "detection": "hard"},
+          "severe": {"impact": "high", "detection": "very_hard"}
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "Continuous non-compliance with data protection regulations",
+        "duration": "continuous"
+      }
     }
   ],
-  "hazard_count": 5,
+  "hazard_count": 15,
   "hazard_categories": {
-    "integrity_compromised": 2,
-    "confidentiality_breached": 1,
+    "integrity_compromised": 6,
+    "confidentiality_breached": 2,
     "availability_degraded": 1,
-    "capability_lost": 1
+    "capability_lost": 2,
+    "awareness_compromised": 1,
+    "performance_degraded": 1,
+    "decision_compromised": 1,
+    "compliance_violated": 1
   },
   "hazard_loss_mappings": [
     {
@@ -163,6 +397,126 @@
       "relationship_strength": "conditional",
       "rationale": "Incomplete audit logs prevent compliance demonstration during audits",
       "conditions": ["Regulatory audit occurs", "Critical logs missing"]
+    },
+    {
+      "id": "map-6",
+      "hazard_id": "H-6",
+      "loss_id": "L-5",
+      "relationship_strength": "direct",
+      "rationale": "Poor incident communication directly damages market confidence",
+      "conditions": ["Security incident occurs", "Communication delayed or inadequate"]
+    },
+    {
+      "id": "map-7",
+      "hazard_id": "H-7",
+      "loss_id": "L-5",
+      "relationship_strength": "direct",
+      "rationale": "Lack of sentiment monitoring prevents reputation damage detection",
+      "conditions": ["Negative sentiment spreads", "No early warning system"]
+    },
+    {
+      "id": "map-8",
+      "hazard_id": "H-8",
+      "loss_id": "L-5",
+      "relationship_strength": "conditional",
+      "rationale": "Service inconsistency erodes customer trust over time",
+      "conditions": ["Repeated service degradation", "Customer experience impact"]
+    },
+    {
+      "id": "map-9",
+      "hazard_id": "H-9",
+      "loss_id": "L-1",
+      "relationship_strength": "direct",
+      "rationale": "Incorrect calculations directly cause financial losses",
+      "conditions": ["Calculation errors occur", "Errors favor adverse outcomes"]
+    },
+    {
+      "id": "map-10",
+      "hazard_id": "H-9",
+      "loss_id": "L-2",
+      "relationship_strength": "conditional",
+      "rationale": "Calculation errors may violate regulatory requirements",
+      "conditions": ["Errors affect regulated calculations", "Discovered during audit"]
+    },
+    {
+      "id": "map-11",
+      "hazard_id": "H-10",
+      "loss_id": "L-1",
+      "relationship_strength": "conditional",
+      "rationale": "Misrouted transactions may result in financial losses",
+      "conditions": ["Transactions sent to wrong destination", "Recovery fails"]
+    },
+    {
+      "id": "map-12",
+      "hazard_id": "H-11",
+      "loss_id": "L-1",
+      "relationship_strength": "direct",
+      "rationale": "Flawed credit models lead to bad debt and losses",
+      "conditions": ["Models underestimate risk", "Defaults exceed predictions"]
+    },
+    {
+      "id": "map-13",
+      "hazard_id": "H-12",
+      "loss_id": "L-1",
+      "relationship_strength": "direct",
+      "rationale": "Compromised sessions enable unauthorized financial transactions",
+      "conditions": ["Session tokens stolen or fixated", "Insufficient session validation"]
+    },
+    {
+      "id": "map-14",
+      "hazard_id": "H-12",
+      "loss_id": "L-3",
+      "relationship_strength": "conditional",
+      "rationale": "Session hijacking may expose customer data during active sessions",
+      "conditions": ["Session taken over", "Sensitive data accessed in session"]
+    },
+    {
+      "id": "map-15",
+      "hazard_id": "H-13",
+      "loss_id": "L-1",
+      "relationship_strength": "direct",
+      "rationale": "Lack of segregation enables insider fraud and financial losses",
+      "conditions": ["Single person controls entire process", "Fraudulent intent present"]
+    },
+    {
+      "id": "map-16",
+      "hazard_id": "H-13",
+      "loss_id": "L-2",
+      "relationship_strength": "conditional",
+      "rationale": "Insufficient segregation violates regulatory requirements",
+      "conditions": ["Regulatory audit occurs", "Controls found inadequate"]
+    },
+    {
+      "id": "map-17",
+      "hazard_id": "H-14",
+      "loss_id": "L-3",
+      "relationship_strength": "direct",
+      "rationale": "Vulnerable APIs directly expose sensitive customer data",
+      "conditions": ["API exploited", "Authentication/authorization bypassed"]
+    },
+    {
+      "id": "map-18",
+      "hazard_id": "H-14",
+      "loss_id": "L-1",
+      "relationship_strength": "conditional",
+      "rationale": "API vulnerabilities may enable unauthorized transactions",
+      "conditions": ["Critical functions exposed", "Exploitation successful"]
+    },
+    {
+      "id": "map-19",
+      "hazard_id": "H-15",
+      "loss_id": "L-2",
+      "relationship_strength": "direct",
+      "rationale": "Improper data retention directly violates privacy regulations",
+      "conditions": ["Data retained beyond legal limits", "Deletion requests ignored"]
+    },
+    {
+      "id": "map-20",
+      "hazard_id": "H-15",
+      "loss_id": "L-5",
+      "relationship_strength": "conditional",
+      "rationale": "Privacy violations damage reputation when exposed publicly",
+      "conditions": ["Violations discovered", "Public disclosure occurs"]
     }
   ],
   "temporal_analysis": {
@@ -178,6 +532,30 @@
       {
         "hazard_id": "H-5",
         "description": "System operates with incomplete or inaccurate audit logging preventing compliance verification"
+      },
+      {
+        "hazard_id": "H-7",
+        "description": "System operates without monitoring of public sentiment/social media"
+      },
+      {
+        "hazard_id": "H-11",
+        "description": "System operates with flawed credit assessment models"
+      },
+      {
+        "hazard_id": "H-12",
+        "description": "System operates with compromised session management allowing account takeover"
+      },
+      {
+        "hazard_id": "H-13",
+        "description": "System operates without adequate segregation of duties enabling insider fraud"
+      },
+      {
+        "hazard_id": "H-14",
+        "description": "System operates with vulnerable API endpoints exposing critical functions"
+      },
+      {
+        "hazard_id": "H-15",
+        "description": "System operates without proper data retention/deletion controls violating privacy regulations"
       }
     ],
     "periodic": [
@@ -190,14 +568,40 @@
         "hazard_id": "H-4",
         "description": "System operates without real-time fraud detection capabilities",
         "when": "During model updates, system maintenance, or targeted attacks"
+      },
+      {
+        "hazard_id": "H-6",
+        "description": "System operates with inadequate incident communication protocols",
+        "when": "During security incidents or service disruptions"
+      },
+      {
+        "hazard_id": "H-8",
+        "description": "System operates with inconsistent service quality during peak periods",
+        "when": "During month-end, holidays, or marketing campaigns"
       }
     ],
-    "conditional": [],
+    "conditional": [
+      {
+        "hazard_id": "H-9",
+        "description": "System operates with incorrect financial calculation algorithms",
+        "when": "After updates, configuration changes, or regulatory adjustments"
+      },
+      {
+        "hazard_id": "H-10",
+        "description": "System operates with improper transaction routing logic",
+        "when": "During network topology changes or payment processor updates"
+      }
+    ],
     "coverage_gaps": [
       {
         "gap_type": "temporal",
         "description": "Periodic hazards create vulnerability windows",
-        "affected_hazards": ["H-3", "H-4"]
+        "affected_hazards": ["H-3", "H-4", "H-6", "H-8"]
+      },
+      {
+        "gap_type": "conditional",
+        "description": "Conditional hazards create unpredictable risk exposure",
+        "affected_hazards": ["H-9", "H-10"]
       }
     ]
   },
@@ -207,15 +611,15 @@
     "environmental_dependencies": ["network availability", "third-party service uptime", "threat intelligence feeds"]
   },
   "coverage_analysis": {
-    "covered_losses": ["L-1", "L-2", "L-3", "L-4"],
-    "uncovered_losses": ["L-5"],
-    "coverage_percentage": 80.0,
+    "covered_losses": ["L-1", "L-2", "L-3", "L-4", "L-5"],
+    "uncovered_losses": [],
+    "coverage_percentage": 100.0,
     "loss_hazard_ratio": {
-      "L-1": 2,
-      "L-2": 1,
-      "L-3": 1,
+      "L-1": 8,
+      "L-2": 4,
+      "L-3": 3,
       "L-4": 1,
-      "L-5": 0
+      "L-5": 4
     }
   },
   "cognitive_style": "enhanced",

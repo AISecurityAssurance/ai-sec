@@ -1,4 +1,4 @@
-# Minimal requirements for CLI and demo
+# Requirements for CLI and Step 1 analysis
 asyncpg>=0.29.0
 httpx>=0.25.0
 pyyaml>=6.0
@@ -9,3 +9,6 @@ python-dotenv>=1.0.0
 click>=8.1.7
 sqlalchemy>=2.0.0
 aiosqlite>=0.19.0
+# For model providers (only what's needed)
+openai>=1.0.0
+tenacity>=8.0.0

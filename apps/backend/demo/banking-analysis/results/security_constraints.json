@@ -1,0 +1,203 @@
+{
+  "security_constraints": [
+    {
+      "identifier": "SC-1",
+      "constraint_statement": "The system shall verify user identity through multi-factor authentication before granting access to financial functions",
+      "rationale": "Prevents unauthorized access that could lead to financial losses",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-1", "L-3"],
+        "capability_degradation": "Complete loss of access control"
+      }
+    },
+    {
+      "identifier": "SC-2",
+      "constraint_statement": "The system shall maintain confidentiality of all financial data during transmission and storage",
+      "rationale": "Prevents exposure of sensitive customer information",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-3", "L-2"],
+        "capability_degradation": "Loss of data protection capability"
+      }
+    },
+    {
+      "identifier": "SC-3",
+      "constraint_statement": "The system shall maintain availability of critical banking services during declared operational hours",
+      "rationale": "Ensures customers can access their funds and conduct essential transactions",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-4", "L-5"],
+        "capability_degradation": "Service delivery failure"
+      }
+    },
+    {
+      "identifier": "SC-4",
+      "constraint_statement": "The system shall detect and respond to anomalous transaction patterns in real-time",
+      "rationale": "Enables early detection and prevention of fraudulent activities",
+      "constraint_type": "detective",
+      "enforcement_level": "mandatory",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-1"],
+        "capability_degradation": "Loss of fraud detection"
+      }
+    },
+    {
+      "identifier": "SC-5",
+      "constraint_statement": "The system shall maintain complete and accurate audit logs of all security-relevant events",
+      "rationale": "Enables compliance verification and incident investigation",
+      "constraint_type": "detective",
+      "enforcement_level": "mandatory",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-2"],
+        "capability_degradation": "Loss of compliance demonstration"
+      }
+    },
+    {
+      "identifier": "SC-6",
+      "constraint_statement": "The system shall provide timely and accurate incident communication to affected stakeholders",
+      "rationale": "Maintains stakeholder trust and enables appropriate response",
+      "constraint_type": "corrective",
+      "enforcement_level": "mandatory",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-5"],
+        "capability_degradation": "Loss of stakeholder confidence"
+      }
+    },
+    {
+      "identifier": "SC-7",
+      "constraint_statement": "The system shall monitor and respond to reputation threats in public channels",
+      "rationale": "Enables early detection and response to reputation damage",
+      "constraint_type": "detective",
+      "enforcement_level": "recommended",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-5"],
+        "capability_degradation": "Delayed reputation damage detection"
+      }
+    },
+    {
+      "identifier": "SC-8",
+      "constraint_statement": "The system shall maintain consistent service quality across all operational conditions",
+      "rationale": "Preserves customer trust and operational reliability",
+      "constraint_type": "preventive",
+      "enforcement_level": "recommended",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-4", "L-5"],
+        "capability_degradation": "Degraded user experience"
+      }
+    },
+    {
+      "identifier": "SC-9",
+      "constraint_statement": "The system shall ensure accuracy of all financial calculations and transactions",
+      "rationale": "Prevents financial losses and regulatory violations",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-1", "L-2"],
+        "capability_degradation": "Loss of computational integrity"
+      }
+    },
+    {
+      "identifier": "SC-10",
+      "constraint_statement": "The system shall correctly route all transactions to intended destinations",
+      "rationale": "Ensures transaction integrity and prevents misrouting",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-1"],
+        "capability_degradation": "Transaction processing failure"
+      }
+    },
+    {
+      "identifier": "SC-11",
+      "constraint_statement": "The system shall maintain accurate risk assessment for credit decisions",
+      "rationale": "Prevents excessive financial exposure and bad debt",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-1"],
+        "capability_degradation": "Loss of risk management"
+      }
+    },
+    {
+      "identifier": "SC-12",
+      "constraint_statement": "The system shall enforce secure session management for all user interactions",
+      "rationale": "Prevents session hijacking and unauthorized account access",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-1", "L-3"],
+        "capability_degradation": "Loss of session security"
+      }
+    },
+    {
+      "identifier": "SC-13",
+      "constraint_statement": "The system shall enforce segregation of duties for critical financial operations",
+      "rationale": "Prevents insider fraud and unauthorized activities",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-1", "L-2"],
+        "capability_degradation": "Loss of internal controls"
+      }
+    },
+    {
+      "identifier": "SC-14",
+      "constraint_statement": "The system shall protect all API endpoints from unauthorized access and abuse",
+      "rationale": "Prevents exposure of critical functions to attackers",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-1", "L-3", "L-4"],
+        "capability_degradation": "Loss of API security"
+      }
+    },
+    {
+      "identifier": "SC-15",
+      "constraint_statement": "The system shall enforce data retention and deletion policies in compliance with privacy regulations",
+      "rationale": "Ensures regulatory compliance and minimizes privacy exposure",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "mission_impact_if_violated": {
+        "losses_enabled": ["L-2", "L-3"],
+        "capability_degradation": "Loss of privacy compliance"
+      }
+    }
+  ],
+  "constraint_hazard_mappings": [
+    {"constraint_id": "SC-1", "hazard_id": "H-1", "relationship_type": "eliminates"},
+    {"constraint_id": "SC-2", "hazard_id": "H-2", "relationship_type": "eliminates"},
+    {"constraint_id": "SC-3", "hazard_id": "H-3", "relationship_type": "reduces"},
+    {"constraint_id": "SC-4", "hazard_id": "H-4", "relationship_type": "eliminates"},
+    {"constraint_id": "SC-5", "hazard_id": "H-5", "relationship_type": "eliminates"},
+    {"constraint_id": "SC-6", "hazard_id": "H-6", "relationship_type": "eliminates"},
+    {"constraint_id": "SC-7", "hazard_id": "H-7", "relationship_type": "eliminates"},
+    {"constraint_id": "SC-8", "hazard_id": "H-8", "relationship_type": "reduces"},
+    {"constraint_id": "SC-9", "hazard_id": "H-9", "relationship_type": "eliminates"},
+    {"constraint_id": "SC-10", "hazard_id": "H-10", "relationship_type": "eliminates"},
+    {"constraint_id": "SC-11", "hazard_id": "H-11", "relationship_type": "reduces"},
+    {"constraint_id": "SC-12", "hazard_id": "H-12", "relationship_type": "eliminates"},
+    {"constraint_id": "SC-13", "hazard_id": "H-13", "relationship_type": "eliminates"},
+    {"constraint_id": "SC-14", "hazard_id": "H-14", "relationship_type": "eliminates"},
+    {"constraint_id": "SC-15", "hazard_id": "H-15", "relationship_type": "eliminates"},
+    {"constraint_id": "SC-1", "hazard_id": "H-12", "relationship_type": "reduces"},
+    {"constraint_id": "SC-5", "hazard_id": "H-13", "relationship_type": "detects"},
+    {"constraint_id": "SC-9", "hazard_id": "H-11", "relationship_type": "reduces"}
+  ],
+  "constraint_count": 15,
+  "constraint_types": {
+    "preventive": 11,
+    "detective": 3,
+    "corrective": 1,
+    "compensating": 0
+  },
+  "cognitive_style": "enhanced",
+  "analysis_metadata": {
+    "agent_type": "security_constraints",
+    "analysis_id": "demo-banking-2024-01",
+    "timestamp": "2024-01-15T10:25:00Z",
+    "version": "1.0"
+  }
+}

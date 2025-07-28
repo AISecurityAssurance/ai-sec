@@ -17,6 +17,8 @@ class ValidationAgent(BaseStep1Agent):
     - Validate abstraction level consistency
     - Check analysis completeness
     - Identify gaps and inconsistencies
+    - Validate security constraints coverage
+    - Validate system boundaries definition
     - Generate quality metrics
     - Create Step 1 to Step 2 bridge
     """
@@ -41,13 +43,17 @@ class ValidationAgent(BaseStep1Agent):
         completeness_validation = await self._validate_completeness(prior_results)
         consistency_validation = await self._validate_consistency(prior_results)
         coverage_validation = await self._validate_coverage(prior_results)
+        security_constraints_validation = await self._validate_security_constraints(prior_results)
+        system_boundaries_validation = await self._validate_system_boundaries(prior_results)
         
         # Generate quality metrics
         quality_metrics = await self._generate_quality_metrics(
             abstraction_validation,
             completeness_validation,
             consistency_validation,
-            coverage_validation
+            coverage_validation,
+            security_constraints_validation,
+            system_boundaries_validation
         )
         
         # Identify improvement recommendations
@@ -55,7 +61,9 @@ class ValidationAgent(BaseStep1Agent):
             abstraction_validation,
             completeness_validation,
             consistency_validation,
-            coverage_validation
+            coverage_validation,
+            security_constraints_validation,
+            system_boundaries_validation
         )
         
         # Create Step 1 to Step 2 bridge
@@ -72,7 +80,9 @@ class ValidationAgent(BaseStep1Agent):
                 "abstraction": abstraction_validation,
                 "completeness": completeness_validation,
                 "consistency": consistency_validation,
-                "coverage": coverage_validation
+                "coverage": coverage_validation,
+                "security_constraints": security_constraints_validation,
+                "system_boundaries": system_boundaries_validation
             },
             "quality_metrics": quality_metrics,
             "recommendations": recommendations,
@@ -403,16 +413,240 @@ class ValidationAgent(BaseStep1Agent):
         
         return validation
     
+    async def _validate_security_constraints(self, prior_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate security constraints completeness and coverage"""
+        validation = {
+            "status": "pass",
+            "missing_constraints": [],
+            "weak_constraints": [],
+            "constraint_coverage": {},
+            "constraint_score": 100.0
+        }
+        
+        # Get hazards and check for constraints
+        hazards = prior_results.get('hazard_identification', {}).get('hazards', [])
+        hazard_constraints = prior_results.get('hazard_identification', {}).get('security_constraints', {})
+        
+        # Check that all hazards have at least one constraint
+        for hazard in hazards:
+            hazard_id = hazard['identifier']
+            if hazard_id not in hazard_constraints or not hazard_constraints[hazard_id]:
+                validation['missing_constraints'].append({
+                    "hazard_id": hazard_id,
+                    "hazard_description": hazard['description'],
+                    "impact": "critical",
+                    "issue": "No security constraints defined"
+                })
+        
+        # Validate constraint coverage (preventive, detective, corrective, compensating)
+        constraint_types = ['preventive', 'detective', 'corrective', 'compensating']
+        type_coverage = {ct: 0 for ct in constraint_types}
+        total_constraints = 0
+        
+        for hazard_id, constraints in hazard_constraints.items():
+            if constraints:
+                for constraint in constraints:
+                    total_constraints += 1
+                    constraint_type = constraint.get('type', 'preventive')
+                    if constraint_type in type_coverage:
+                        type_coverage[constraint_type] += 1
+                    
+                    # Check constraint strength
+                    if self._is_weak_constraint(constraint):
+                        validation['weak_constraints'].append({
+                            "hazard_id": hazard_id,
+                            "constraint": constraint.get('description', 'Unknown'),
+                            "issue": "Constraint may be too generic or weak"
+                        })
+        
+        # Calculate coverage metrics
+        validation['constraint_coverage'] = {
+            "total_hazards": len(hazards),
+            "hazards_with_constraints": len([h for h in hazards if h['identifier'] in hazard_constraints and hazard_constraints[h['identifier']]]),
+            "total_constraints": total_constraints,
+            "type_distribution": type_coverage,
+            "coverage_balance": self._calculate_constraint_balance(type_coverage)
+        }
+        
+        # Check for critical constraint gaps
+        critical_hazards = [h for h in hazards if h['loss_likelihood'] == 'certain']
+        for hazard in critical_hazards:
+            if hazard['identifier'] not in hazard_constraints or len(hazard_constraints[hazard['identifier']]) < 2:
+                validation['missing_constraints'].append({
+                    "hazard_id": hazard['identifier'],
+                    "hazard_description": hazard['description'],
+                    "impact": "critical",
+                    "issue": "Critical hazard needs multiple constraints"
+                })
+        
+        # Calculate constraint score
+        if len(hazards) > 0:
+            coverage_ratio = validation['constraint_coverage']['hazards_with_constraints'] / len(hazards)
+            balance_score = validation['constraint_coverage']['coverage_balance']
+            weak_penalty = len(validation['weak_constraints']) * 5
+            missing_penalty = len(validation['missing_constraints']) * 10
+            
+            validation['constraint_score'] = max(0, (coverage_ratio * 60) + (balance_score * 40) - weak_penalty - missing_penalty)
+        
+        # Determine status
+        if validation['missing_constraints']:
+            validation['status'] = "fail"
+        elif validation['weak_constraints'] or validation['constraint_score'] < 80:
+            validation['status'] = "warning"
+        
+        return validation
+    
+    async def _validate_system_boundaries(self, prior_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate system boundaries definition and completeness"""
+        validation = {
+            "status": "pass",
+            "missing_boundaries": [],
+            "boundary_issues": [],
+            "boundary_metrics": {},
+            "boundary_score": 100.0
+        }
+        
+        # Get boundary information from mission context
+        mission_context = prior_results.get('mission_analyst', {}).get('mission_context', {})
+        system_boundaries = mission_context.get('boundaries', {})
+        
+        # Check for essential boundary types
+        essential_boundaries = ['system_environment', 'trusted_untrusted', 'internal_external']
+        for boundary_type in essential_boundaries:
+            if boundary_type not in system_boundaries:
+                validation['missing_boundaries'].append({
+                    "boundary_type": boundary_type,
+                    "impact": "major",
+                    "description": f"Missing {boundary_type} boundary definition"
+                })
+        
+        # Validate boundary definitions
+        for boundary_type, boundary_def in system_boundaries.items():
+            # Check for proper boundary structure
+            if not isinstance(boundary_def, dict):
+                validation['boundary_issues'].append({
+                    "boundary_type": boundary_type,
+                    "issue": "Invalid boundary definition structure"
+                })
+                continue
+                
+            # Check for required elements
+            required_elements = ['elements', 'interfaces', 'crossing_points']
+            for element in required_elements:
+                if element not in boundary_def or not boundary_def[element]:
+                    validation['boundary_issues'].append({
+                        "boundary_type": boundary_type,
+                        "missing_element": element,
+                        "issue": f"Missing {element} in boundary definition"
+                    })
+        
+        # Check boundary alignment with stakeholders
+        stakeholders = prior_results.get('stakeholder_analyst', {}).get('stakeholders', [])
+        external_stakeholders = [s for s in stakeholders if s.get('position', 'external') == 'external']
+        
+        if external_stakeholders and 'internal_external' in system_boundaries:
+            external_elements = system_boundaries['internal_external'].get('elements', {}).get('external', [])
+            stakeholder_names = [s['name'] for s in external_stakeholders]
+            
+            # Check if external stakeholders are properly positioned
+            unmapped_stakeholders = [name for name in stakeholder_names if name not in str(external_elements)]
+            if unmapped_stakeholders:
+                validation['boundary_issues'].append({
+                    "boundary_type": "internal_external",
+                    "issue": f"External stakeholders not mapped to boundaries: {unmapped_stakeholders}"
+                })
+        
+        # Check for critical interfaces
+        critical_interfaces = []
+        for boundary_type, boundary_def in system_boundaries.items():
+            if isinstance(boundary_def, dict) and 'interfaces' in boundary_def:
+                for interface in boundary_def.get('interfaces', []):
+                    if interface.get('criticality') == 'critical':
+                        critical_interfaces.append(interface)
+        
+        # Calculate boundary metrics
+        validation['boundary_metrics'] = {
+            "defined_boundaries": len(system_boundaries),
+            "essential_coverage": len([b for b in essential_boundaries if b in system_boundaries]) / len(essential_boundaries) * 100,
+            "critical_interfaces": len(critical_interfaces),
+            "total_crossing_points": sum(len(b.get('crossing_points', [])) for b in system_boundaries.values() if isinstance(b, dict))
+        }
+        
+        # Validate boundary consistency with hazards
+        hazards = prior_results.get('hazard_identification', {}).get('hazards', [])
+        boundary_related_hazards = [h for h in hazards if 'boundary' in h['description'].lower() or 'interface' in h['description'].lower()]
+        
+        if boundary_related_hazards and validation['boundary_metrics']['critical_interfaces'] == 0:
+            validation['boundary_issues'].append({
+                "issue": "Hazards reference boundaries but no critical interfaces defined",
+                "impact": "major"
+            })
+        
+        # Calculate boundary score
+        essential_coverage = validation['boundary_metrics']['essential_coverage']
+        issue_penalty = len(validation['boundary_issues']) * 10
+        missing_penalty = len(validation['missing_boundaries']) * 15
+        
+        validation['boundary_score'] = max(0, essential_coverage - issue_penalty - missing_penalty)
+        
+        # Add bonus for comprehensive boundary definitions
+        if validation['boundary_metrics']['critical_interfaces'] > 0:
+            validation['boundary_score'] = min(100, validation['boundary_score'] + 10)
+        
+        # Determine status
+        if validation['missing_boundaries']:
+            validation['status'] = "fail"
+        elif validation['boundary_issues'] or validation['boundary_score'] < 80:
+            validation['status'] = "warning"
+        
+        return validation
+    
+    def _is_weak_constraint(self, constraint: Dict[str, Any]) -> bool:
+        """Check if a constraint is too generic or weak"""
+        weak_indicators = [
+            "monitor", "review", "assess", "evaluate", "consider",
+            "should", "may", "might", "could", "try"
+        ]
+        
+        description = constraint.get('description', '').lower()
+        return any(indicator in description for indicator in weak_indicators)
+    
+    def _calculate_constraint_balance(self, type_coverage: Dict[str, int]) -> float:
+        """Calculate balance score for constraint type distribution"""
+        total = sum(type_coverage.values())
+        if total == 0:
+            return 0.0
+        
+        # Ideal distribution: preventive (40%), detective (30%), corrective (20%), compensating (10%)
+        ideal_distribution = {
+            'preventive': 0.4,
+            'detective': 0.3,
+            'corrective': 0.2,
+            'compensating': 0.1
+        }
+        
+        balance_score = 100.0
+        for constraint_type, ideal_ratio in ideal_distribution.items():
+            actual_ratio = type_coverage[constraint_type] / total
+            deviation = abs(actual_ratio - ideal_ratio)
+            balance_score -= deviation * 50  # Penalty for deviation
+        
+        return max(0, balance_score)
+    
     async def _generate_quality_metrics(self, abstraction: Dict[str, Any],
                                       completeness: Dict[str, Any],
                                       consistency: Dict[str, Any],
-                                      coverage: Dict[str, Any]) -> Dict[str, Any]:
+                                      coverage: Dict[str, Any],
+                                      security_constraints: Dict[str, Any],
+                                      system_boundaries: Dict[str, Any]) -> Dict[str, Any]:
         """Generate overall quality metrics"""
         metrics = {
             "abstraction_score": abstraction['abstraction_score'],
             "completeness_score": completeness['completeness_score'],
             "consistency_score": consistency['consistency_score'],
             "coverage_score": coverage['coverage_score'],
+            "security_constraints_score": security_constraints['constraint_score'],
+            "system_boundaries_score": system_boundaries['boundary_score'],
             "overall_score": 0.0,
             "quality_level": "unknown",
             "strengths": [],
@@ -421,17 +655,21 @@ class ValidationAgent(BaseStep1Agent):
         
         # Calculate weighted overall score
         weights = {
-            "abstraction": 0.3,
-            "completeness": 0.25,
-            "consistency": 0.25,
-            "coverage": 0.2
+            "abstraction": 0.2,
+            "completeness": 0.2,
+            "consistency": 0.2,
+            "coverage": 0.15,
+            "security_constraints": 0.15,
+            "system_boundaries": 0.1
         }
         
         metrics['overall_score'] = (
             metrics['abstraction_score'] * weights['abstraction'] +
             metrics['completeness_score'] * weights['completeness'] +
             metrics['consistency_score'] * weights['consistency'] +
-            metrics['coverage_score'] * weights['coverage']
+            metrics['coverage_score'] * weights['coverage'] +
+            metrics['security_constraints_score'] * weights['security_constraints'] +
+            metrics['system_boundaries_score'] * weights['system_boundaries']
         )
         
         # Determine quality level
@@ -455,6 +693,10 @@ class ValidationAgent(BaseStep1Agent):
             metrics['strengths'].append("High internal consistency")
         if metrics['coverage_score'] >= 90:
             metrics['strengths'].append("Thorough loss and hazard coverage")
+        if metrics['security_constraints_score'] >= 90:
+            metrics['strengths'].append("Robust security constraint coverage")
+        if metrics['system_boundaries_score'] >= 90:
+            metrics['strengths'].append("Well-defined system boundaries")
         
         # Identify weaknesses
         if metrics['abstraction_score'] < 70:
@@ -465,13 +707,19 @@ class ValidationAgent(BaseStep1Agent):
             metrics['weaknesses'].append("Internal inconsistencies")
         if metrics['coverage_score'] < 70:
             metrics['weaknesses'].append("Insufficient coverage")
+        if metrics['security_constraints_score'] < 70:
+            metrics['weaknesses'].append("Weak or missing security constraints")
+        if metrics['system_boundaries_score'] < 70:
+            metrics['weaknesses'].append("Poorly defined system boundaries")
         
         return metrics
     
     async def _generate_recommendations(self, abstraction: Dict[str, Any],
                                       completeness: Dict[str, Any],
                                       consistency: Dict[str, Any],
-                                      coverage: Dict[str, Any]) -> List[Dict[str, Any]]:
+                                      coverage: Dict[str, Any],
+                                      security_constraints: Dict[str, Any],
+                                      system_boundaries: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Generate improvement recommendations"""
         recommendations = []
         
@@ -519,6 +767,51 @@ class ValidationAgent(BaseStep1Agent):
                         "specific_actions": [f"Add hazards for {item}" for item in gap['items'][:3]]
                     })
         
+        # Security constraints recommendations
+        if security_constraints['missing_constraints']:
+            recommendations.append({
+                "priority": "critical",
+                "category": "security_constraints",
+                "recommendation": "Define security constraints for all hazards",
+                "specific_actions": [
+                    f"Add constraints for hazard {c['hazard_id']}" 
+                    for c in security_constraints['missing_constraints'][:3]
+                ]
+            })
+        
+        if security_constraints['weak_constraints']:
+            recommendations.append({
+                "priority": "high",
+                "category": "security_constraints",
+                "recommendation": "Strengthen weak security constraints",
+                "specific_actions": [
+                    f"Revise constraint: {c['constraint'][:50]}..." 
+                    for c in security_constraints['weak_constraints'][:3]
+                ]
+            })
+        
+        # System boundaries recommendations
+        if system_boundaries['missing_boundaries']:
+            recommendations.append({
+                "priority": "high",
+                "category": "system_boundaries",
+                "recommendation": "Define missing system boundaries",
+                "specific_actions": [
+                    f"Define {b['boundary_type']} boundary" 
+                    for b in system_boundaries['missing_boundaries']
+                ]
+            })
+        
+        if system_boundaries['boundary_issues']:
+            recommendations.append({
+                "priority": "medium",
+                "category": "system_boundaries",
+                "recommendation": "Address boundary definition issues",
+                "specific_actions": [
+                    issue['issue'] for issue in system_boundaries['boundary_issues'][:3]
+                ]
+            })
+        
         return sorted(recommendations, key=lambda x: {'critical': 0, 'high': 1, 'medium': 2, 'low': 3}[x['priority']])
     
     async def _create_step2_bridge(self, prior_results: Dict[str, Any]) -> Dict[str, Any]:
@@ -527,6 +820,8 @@ class ValidationAgent(BaseStep1Agent):
             "control_needs": {},
             "implied_boundaries": {},
             "architectural_hints": {},
+            "security_constraint_mapping": {},
+            "boundary_control_requirements": {},
             "transition_guidance": []
         }
         
@@ -578,11 +873,47 @@ class ValidationAgent(BaseStep1Agent):
                     "criticality": "required"
                 }
         
+        # Map security constraints to control needs
+        security_constraints = prior_results.get('hazard_identification', {}).get('security_constraints', {})
+        constraint_types = {'preventive': [], 'detective': [], 'corrective': [], 'compensating': []}
+        
+        for hazard_id, constraints in security_constraints.items():
+            for constraint in constraints:
+                constraint_type = constraint.get('type', 'preventive')
+                if constraint_type in constraint_types:
+                    constraint_types[constraint_type].append({
+                        "hazard_id": hazard_id,
+                        "constraint": constraint.get('description', ''),
+                        "implementation_hint": constraint.get('implementation_hint', '')
+                    })
+        
+        bridge['security_constraint_mapping'] = constraint_types
+        
+        # Define boundary control requirements
+        system_boundaries = mission_context.get('boundaries', {})
+        boundary_controls = {}
+        
+        for boundary_type, boundary_def in system_boundaries.items():
+            if isinstance(boundary_def, dict):
+                boundary_controls[boundary_type] = {
+                    "crossing_points": len(boundary_def.get('crossing_points', [])),
+                    "critical_interfaces": [i for i in boundary_def.get('interfaces', []) if i.get('criticality') == 'critical'],
+                    "control_requirement": self._determine_boundary_control_requirement(boundary_type)
+                }
+        
+        bridge['boundary_control_requirements'] = boundary_controls
+        
         # Provide architectural hints
         mission_context = prior_results.get('mission_analyst', {}).get('mission_context', {})
         if mission_context.get('criticality') == 'mission_critical':
             bridge['architectural_hints']['redundancy'] = "High availability architecture required"
             bridge['architectural_hints']['separation'] = "Security zone separation essential"
+        
+        # Add hints based on constraint types
+        if len(constraint_types['preventive']) > len(constraint_types['detective']):
+            bridge['architectural_hints']['focus'] = "Prevention-focused architecture recommended"
+        else:
+            bridge['architectural_hints']['focus'] = "Detection and response architecture recommended"
         
         # Transition guidance
         bridge['transition_guidance'] = [
@@ -595,8 +926,20 @@ class ValidationAgent(BaseStep1Agent):
                 "description": "Implied boundaries become explicit control interfaces"
             },
             {
+                "step": "Implement security constraints as control actions",
+                "description": "Transform constraints into specific control actions and feedback loops"
+            },
+            {
+                "step": "Establish boundary control points",
+                "description": "Place controllers at critical boundary crossing points"
+            },
+            {
                 "step": "Allocate losses to controllers",
                 "description": "Each controller must prevent specific losses"
+            },
+            {
+                "step": "Design control channels",
+                "description": "Ensure secure and reliable control command paths"
             }
         ]
         
@@ -625,20 +968,35 @@ class ValidationAgent(BaseStep1Agent):
         losses = prior_results.get('loss_identification', {}).get('losses', [])
         hazards = prior_results.get('hazard_identification', {}).get('hazards', [])
         adversaries = prior_results.get('stakeholder_analyst', {}).get('adversaries', [])
+        security_constraints = prior_results.get('hazard_identification', {}).get('security_constraints', {})
+        system_boundaries = prior_results.get('mission_analyst', {}).get('mission_context', {}).get('boundaries', {})
+        
+        # Count total constraints
+        total_constraints = sum(len(constraints) for constraints in security_constraints.values())
+        hazards_with_constraints = len([h for h in hazards if h['identifier'] in security_constraints and security_constraints[h['identifier']]])
         
         summary['key_findings'] = {
             "losses_identified": len(losses),
             "hazards_identified": len(hazards),
             "critical_losses": len([l for l in losses if l['severity_classification']['magnitude'] == 'catastrophic']),
             "adversary_classes": len(adversaries),
-            "highest_threat": max((a['profile']['sophistication'] for a in adversaries), default='none')
+            "highest_threat": max((a['profile']['sophistication'] for a in adversaries), default='none'),
+            "security_constraints_defined": total_constraints,
+            "hazards_with_constraints": hazards_with_constraints,
+            "system_boundaries_defined": len(system_boundaries)
         }
         
         # Risk landscape
+        unconstrained_hazards = [h for h in hazards if h['identifier'] not in security_constraints or not security_constraints[h['identifier']]]
+        missing_boundaries = ['system_environment', 'trusted_untrusted', 'internal_external']
+        missing_boundaries = [b for b in missing_boundaries if b not in system_boundaries]
+        
         summary['risk_landscape'] = {
             "primary_risks": self._identify_primary_risks(losses, hazards),
             "threat_level": prior_results.get('stakeholder_analyst', {}).get('adversary_analysis', {}).get('combined_threat_level', 'unknown'),
-            "coverage_gaps": len(prior_results.get('hazard_identification', {}).get('coverage_analysis', {}).get('uncovered_losses', []))
+            "coverage_gaps": len(prior_results.get('hazard_identification', {}).get('coverage_analysis', {}).get('uncovered_losses', [])),
+            "unconstrained_hazards": len(unconstrained_hazards),
+            "missing_critical_boundaries": len(missing_boundaries)
         }
         
         # Quality assessment
@@ -657,6 +1015,12 @@ class ValidationAgent(BaseStep1Agent):
         
         if summary['risk_landscape']['coverage_gaps'] > 0:
             summary['next_steps'].append("Review and address coverage gaps")
+        
+        if summary['risk_landscape']['unconstrained_hazards'] > 0:
+            summary['next_steps'].append(f"Define security constraints for {summary['risk_landscape']['unconstrained_hazards']} unconstrained hazards")
+        
+        if summary['risk_landscape']['missing_critical_boundaries'] > 0:
+            summary['next_steps'].append(f"Define {summary['risk_landscape']['missing_critical_boundaries']} missing critical boundaries")
         
         summary['next_steps'].append("Review Step 1 to Step 2 bridge for architectural planning")
         
@@ -694,6 +1058,17 @@ class ValidationAgent(BaseStep1Agent):
             return "review_recommended"
         else:
             return "revision_required"
+    
+    def _determine_boundary_control_requirement(self, boundary_type: str) -> str:
+        """Determine control requirement for a boundary type"""
+        control_requirements = {
+            "system_environment": "Strong isolation and input validation controls",
+            "trusted_untrusted": "Authentication, authorization, and audit controls",
+            "internal_external": "Access control and monitoring controls",
+            "security_perimeter": "Defense-in-depth controls",
+            "data_classification": "Encryption and data loss prevention controls"
+        }
+        return control_requirements.get(boundary_type, "Standard boundary controls")
     
     def validate_abstraction_level(self, content: str) -> bool:
         """Validation agent validates its own abstraction"""

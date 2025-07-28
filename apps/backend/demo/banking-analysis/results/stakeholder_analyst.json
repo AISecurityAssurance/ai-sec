@@ -144,14 +144,71 @@
         "interest_level": "medium",
         "engagement_strategy": "keep_satisfied"
       }
+    },
+    {
+      "name": "Technology Partners",
+      "stakeholder_type": "vendor",
+      "description": "Payment processors, cloud providers, and infrastructure partners",
+      "criticality": "essential",
+      "mission_perspective": {
+        "primary_needs": ["stable_integration", "clear_requirements", "predictable_volumes"],
+        "value_derived": "Revenue from service provision and strategic partnership",
+        "success_criteria": "Reliable service delivery meeting SLAs"
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-4",
+          "impact": "major",
+          "description": "Partner failures cascade to service unavailability"
+        },
+        {
+          "loss_id": "L-2",
+          "impact": "moderate",
+          "description": "Partner compliance issues affect bank operations"
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "medium",
+        "interest_level": "medium",
+        "engagement_strategy": "keep_informed"
+      }
+    },
+    {
+      "name": "Third-party Integrators",
+      "stakeholder_type": "vendor",
+      "description": "Fintech apps, data aggregators, and API consumers",
+      "criticality": "important",
+      "mission_perspective": {
+        "primary_needs": ["api_access", "data_availability", "stable_interfaces"],
+        "value_derived": "Ability to provide value-added services to mutual customers",
+        "success_criteria": "Reliable API access and data consistency"
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-3",
+          "impact": "major",
+          "description": "Integration vulnerabilities expose customer data"
+        },
+        {
+          "loss_id": "L-5",
+          "impact": "moderate",
+          "description": "Third-party incidents reflect on bank reputation"
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "low",
+        "interest_level": "high",
+        "engagement_strategy": "keep_informed"
+      }
     }
   ],
-  "stakeholder_count": 5,
+  "stakeholder_count": 7,
   "stakeholder_types": {
     "user": 2,
     "operator": 1,
     "regulator": 1,
-    "beneficiary": 1
+    "beneficiary": 1,
+    "vendor": 2
   },
   "adversaries": [
     {
@@ -226,9 +283,13 @@
       {"name": "Shareholders", "type": "beneficiary", "strategy": "keep_satisfied"}
     ],
     "low_influence_high_interest": [
-      {"name": "Bank Operations Staff", "type": "operator", "strategy": "keep_informed"}
+      {"name": "Bank Operations Staff", "type": "operator", "strategy": "keep_informed"},
+      {"name": "Third-party Integrators", "type": "vendor", "strategy": "keep_informed"}
     ],
-    "low_influence_low_interest": []
+    "low_influence_low_interest": [],
+    "medium_influence_medium_interest": [
+      {"name": "Technology Partners", "type": "vendor", "strategy": "keep_informed"}
+    ]
   },
   "adversary_analysis": {
     "threat_landscape": {
@@ -309,6 +370,18 @@
       "nature": "Threat and target",
       "criticality": "hostile",
       "failure_impact": "Direct harm to users through system compromise"
+    },
+    {
+      "relationship": "Bank-Technology Partner",
+      "nature": "Service dependency",
+      "criticality": "essential",
+      "failure_impact": "Service degradation or complete unavailability"
+    },
+    {
+      "relationship": "Third-party-User",
+      "nature": "Extended service ecosystem",
+      "criticality": "important",
+      "failure_impact": "Data exposure or degraded user experience"
     }
   ],
   "cognitive_style": "enhanced",

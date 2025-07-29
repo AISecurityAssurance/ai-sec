@@ -905,15 +905,8 @@ MINIMUM REQUIREMENT: Fewer than 8 stakeholders will be considered incomplete. En
             # Call LLM
             response = await self.call_llm(prompt)
             
-            # Parse JSON response
-            content = response.strip()
-            # Extract JSON from markdown code blocks if present
-            if "```json" in content:
-                content = content.split("```json")[1].split("```")[0].strip()
-            elif "```" in content:
-                content = content.split("```")[1].split("```")[0].strip()
-            
-            stakeholder_data = json.loads(content)
+            # Parse JSON response using robust parser
+            stakeholder_data = await self.parse_llm_json_response(response)
             
             # Validate structure
             if "stakeholders" not in stakeholder_data or "adversaries" not in stakeholder_data:

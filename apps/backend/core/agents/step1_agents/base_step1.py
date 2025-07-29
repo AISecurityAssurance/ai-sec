@@ -1,7 +1,7 @@
 """
 Base class for STPA-Sec Step 1 agents
 """
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union
 from abc import ABC, abstractmethod
 import asyncio
 import json
@@ -16,6 +16,7 @@ import asyncpg
 from core.agents.base import BaseAnalysisAgent
 from core.models.schemas import AgentContext, AgentResult
 from core.model_providers import get_model_client, ModelResponse
+from core.utils.json_parser import parse_llm_json
 from enum import Enum
 
 
@@ -225,6 +226,32 @@ class BaseStep1Agent(ABC):
             return response.content
         except Exception as e:
             raise RuntimeError(f"LLM call failed: {str(e)}") from e
+    
+    async def parse_llm_json_response(self, response: str) -> Union[Dict, List]:
+        """
+        Parse JSON from LLM response with error recovery.
+        
+        Args:
+            response: Raw LLM response that should contain JSON
+            
+        Returns:
+            Parsed JSON object (dict or list)
+            
+        Raises:
+            ValueError: If JSON cannot be parsed after all attempts
+        """
+        try:
+            return parse_llm_json(response)
+        except ValueError as e:
+            # Log for debugging
+            await self.log_activity(
+                f"JSON parsing failed in {self.__class__.__name__}",
+                {
+                    "error": str(e),
+                    "response_preview": response[:500] if response else "Empty response"
+                }
+            )
+            raise
     
     def get_cognitive_style_prompt_modifier(self) -> str:
         """

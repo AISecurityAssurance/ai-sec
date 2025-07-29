@@ -428,15 +428,8 @@ Use these questions to ensure comprehensive coverage without missing critical ha
             # Call LLM
             response = await self.call_llm(prompt)
             
-            # Parse JSON response
-            content = response.strip()
-            # Extract JSON from markdown code blocks if present
-            if "```json" in content:
-                content = content.split("```json")[1].split("```")[0].strip()
-            elif "```" in content:
-                content = content.split("```")[1].split("```")[0].strip()
-            
-            hazards = json.loads(content)
+            # Parse JSON response using robust parser
+            hazards = await self.parse_llm_json_response(response)
             
             # Validate structure
             if not isinstance(hazards, list):

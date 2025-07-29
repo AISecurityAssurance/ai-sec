@@ -1,12 +1,12 @@
 analysis:
   description: STPA-Sec Step 1 analysis using standard single-agent approach with
     GPT-4 Turbo
-  name: Smart Grid
-  output_dir: ./analyses/smart-grid
+  name: Databricks System That Does Something
+  output_dir: ./analyses/databricks
 execution:
   mode: standard
 input:
-  path: example_systems/smart-grid/description.txt
+  path: example_systems/databricks/MWS_AWS_Architecture.png
   type: file
 model:
   api_key_env: AZURE_OPENAI_API_KEY

@@ -148,6 +148,9 @@ class Step1CLI:
                 model_info['execution_mode'] = execution_mode
                 results['model_info'] = model_info
                 
+                # Add system description to results
+                results['system_description'] = system_description
+                
                 # Save results
                 await self._save_results(config, results, db_name)
                 
@@ -569,7 +572,12 @@ class Step1CLI:
         return model_info
     
     def _read_system_description(self, config: dict) -> str:
-        """Read system description from configured source"""
+        """Read system description from configured source using extensible processors"""
+        from analysis.inputs import InputProcessor
+        
+        processor = InputProcessor()
+        
+        # Get input configuration
         input_config = config.get('input', {})
         input_type = input_config.get('type', 'file')
         
@@ -620,16 +628,52 @@ class Step1CLI:
                     sys.exit(1)
             
             try:
-                with open(input_file, 'r') as f:
-                    content = f.read()
-                    self.console.print(f"[green]Loaded system description from: {input_file}[/green]")
-                    return content
+                # Use the new input processor
+                result = processor.process(str(input_file))
+                
+                # Display processing info
+                input_type_str = result.source_type.value
+                self.console.print(f"[green]Loaded {input_type_str} input from: {input_file}[/green]")
+                
+                # Only show assumptions if they're meaningful (not just restating the obvious)
+                if result.assumptions and result.confidence < 0.3:
+                    self.console.print("\n[dim]Note: Limited information available for analysis[/dim]\n")
+                
+                return result.content
+                
             except Exception as e:
-                self.console.print(f"[red]Error reading input file: {e}[/red]")
+                self.console.print(f"[red]Error processing input: {e}[/red]")
                 sys.exit(1)
         
-        # Add support for other input types later
-        return ""
+        elif input_type == 'directory':
+            # Handle directory input
+            dir_path = input_config.get('path')
+            if not dir_path:
+                self.console.print("[red]No directory path specified[/red]")
+                sys.exit(1)
+                
+            exclude_patterns = input_config.get('exclude', [])
+            
+            try:
+                result = processor.process(dir_path, exclude=exclude_patterns)
+                
+                self.console.print(f"[green]Processed directory: {dir_path}[/green]")
+                self.console.print(f"[dim]Files analyzed: {len(result.metadata.get('processed_files', []))}[/dim]")
+                
+                if result.assumptions:
+                    self.console.print("\n[yellow]Assumptions:[/yellow]")
+                    for assumption in result.assumptions:
+                        self.console.print(f"  • {assumption}")
+                
+                return result.content
+                
+            except Exception as e:
+                self.console.print(f"[red]Error processing directory: {e}[/red]")
+                sys.exit(1)
+        
+        else:
+            self.console.print(f"[red]Unsupported input type: {input_type}[/red]")
+            sys.exit(1)
     
     async def _save_results(self, config: dict, results: dict, db_name: str):
         """Save results in configured formats"""
@@ -711,9 +755,21 @@ class Step1CLI:
         
         self.console.print(f"\n[bold green]Step 1 STPA-Sec Analysis Results ({execution_mode} mode)[/bold green]\n")
         
+        # Display system description if available
+        system_desc = results.get('system_description', '')
+        if system_desc:
+            # Show first 500 chars of system description
+            truncated = system_desc[:500] + '...' if len(system_desc) > 500 else system_desc
+            self.console.print(Panel(
+                truncated,
+                title="System Description",
+                border_style="dim"
+            ))
+            self.console.print("")
+        
         # Extract results sections
         analysis_results = results.get('results', {})
-        mission_results = analysis_results.get('mission_analyst', {})
+        mission_results = analysis_results.get('mission_analysis', {})
         loss_results = analysis_results.get('loss_identification', {})
         hazard_results = analysis_results.get('hazard_identification', {})
         constraint_results = analysis_results.get('security_constraints', {})
@@ -1017,11 +1073,16 @@ class Step1CLI:
                     f.write(f"- **Model:** {model_info.get('model', 'unknown')}\n")
                     f.write(f"- **Execution Mode:** {model_info.get('execution_mode', 'standard')}\n")
                 
-                f.write("\n")
+                # System Description
+                system_desc = results.get('system_description', '')
+                if system_desc:
+                    f.write("## System Description\n\n")
+                    f.write(system_desc)
+                    f.write("\n\n")
                 
                 # Extract results sections
                 analysis_results = results.get('results', {})
-                mission_results = analysis_results.get('mission_analyst', {})
+                mission_results = analysis_results.get('mission_analysis', {})
                 loss_results = analysis_results.get('loss_identification', {})
                 hazard_results = analysis_results.get('hazard_identification', {})
                 constraint_results = analysis_results.get('security_constraints', {})

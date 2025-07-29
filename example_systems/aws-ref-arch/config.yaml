@@ -1,0 +1,18 @@
+analysis:
+  description: STPA-Sec Step 1 analysis of AWS Reference Architecture diagram
+  name: AWS Reference Architecture Security Analysis
+  output_dir: ./analyses/aws-ref-arch
+execution:
+  mode: standard
+input:
+  path: example_systems/AWSRefArch.png
+  type: file
+model:
+  api_key_env: AZURE_OPENAI_API_KEY
+  name: gpt-4o
+  provider: openai
+  base_url: https://ai-sec-openai.openai.azure.com/ 
+output:
+  exports:
+  - format: json
+  - format: markdown

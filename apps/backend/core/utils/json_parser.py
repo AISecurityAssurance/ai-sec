@@ -52,6 +52,14 @@ class RobustJSONParser:
             logger.error(f"JSON parsing failed after fixes: {e}")
             logger.debug(f"Attempted to parse: {fixed[:500]}...")
             
+            # Try to show the area around the error
+            if hasattr(e, 'pos') and e.pos:
+                error_pos = e.pos
+                start = max(0, error_pos - 200)
+                end = min(len(fixed), error_pos + 200)
+                logger.error(f"JSON around error position {error_pos}:")
+                logger.error(f"{fixed[start:end]}")
+            
             # Last resort: try to extract valid JSON array/object
             extracted = RobustJSONParser._extract_json_structure(fixed)
             if extracted:
@@ -71,6 +79,19 @@ class RobustJSONParser:
         # Remove comments (// and /* */ style)
         fixed = re.sub(r'//.*?$', '', fixed, flags=re.MULTILINE)
         fixed = re.sub(r'/\*.*?\*/', '', fixed, flags=re.DOTALL)
+        
+        # Remove any text before the first { or [
+        json_start = min(
+            fixed.find('{') if fixed.find('{') >= 0 else len(fixed),
+            fixed.find('[') if fixed.find('[') >= 0 else len(fixed)
+        )
+        if json_start > 0 and json_start < len(fixed):
+            fixed = fixed[json_start:]
+        
+        # Remove any text after the last } or ]
+        last_brace = max(fixed.rfind('}'), fixed.rfind(']'))
+        if last_brace > 0:
+            fixed = fixed[:last_brace + 1]
         
         # Fix missing commas between array elements or object properties
         # Look for patterns like: "}\n{" or "]\n[" or "value"\n"key"

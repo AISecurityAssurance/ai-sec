@@ -137,19 +137,47 @@ class Step1CLI:
                     db_name=db_name
                 )
                 
-                # Run analysis
+                # Store config file path for resolving relative paths
+                self._config_file_path = config_path
+                
+                # Resolve input path relative to config file location
+                input_path = Path(config['input']['path'])
+                if not input_path.is_absolute():
+                    # Find the actual config file location that was loaded
+                    config_file_path = self._resolve_config_path(config_path)
+                    config_dir = config_file_path.parent
+                    
+                    # Special handling for paths in config
+                    # If the path starts with 'example_systems/', it's relative to project root
+                    if str(input_path).startswith('example_systems/'):
+                        # In Docker, example_systems is mounted at /example_systems
+                        if Path('/app').exists() and str(Path(__file__).absolute()).startswith('/app'):
+                            input_path = Path('/') / input_path
+                        else:
+                            # On host, use project root
+                            project_root = Path(__file__).parent.parent.parent
+                            input_path = project_root / input_path
+                    else:
+                        # Otherwise, it's relative to config file
+                        input_path = config_dir / input_path
+                
+                # Create input configs for Input Agent
+                input_configs = [{
+                    'path': str(input_path),
+                    'type': config['input'].get('type', 'file')
+                }]
+                
+                # Run analysis with Input Agent
                 results = await coordinator.perform_analysis(
                     system_description=system_description,
-                    analysis_name=config['analysis']['name']
+                    analysis_name=config['analysis']['name'],
+                    input_configs=input_configs
                 )
                 
                 # Add model information to results
                 model_info = self._get_model_info()
                 model_info['execution_mode'] = execution_mode
                 results['model_info'] = model_info
-                
-                # Add system description to results
-                results['system_description'] = system_description
                 
                 # Save results
                 await self._save_results(config, results, db_name)
@@ -302,6 +330,9 @@ class Step1CLI:
                     self.console.print(f"  - {p}")
                 sys.exit(1)
         
+        # Store the resolved config file path for later use
+        self._resolved_config_path = config_file
+        
         try:
             with open(config_file, 'r') as f:
                 config = yaml.safe_load(f)
@@ -310,6 +341,40 @@ class Step1CLI:
         except Exception as e:
             self.console.print(f"[red]Error loading config: {e}[/red]")
             sys.exit(1)
+    
+    def _resolve_config_path(self, config_path: str) -> Path:
+        """Get the resolved config file path"""
+        # If we already resolved it during load, return that
+        if hasattr(self, '_resolved_config_path'):
+            return self._resolved_config_path
+        
+        # Otherwise resolve it again (shouldn't happen)
+        path = Path(config_path)
+        if path.is_absolute() and path.exists():
+            return path
+        
+        # Try the same logic as _load_config
+        if Path('/app').exists() and str(Path(__file__).absolute()).startswith('/app'):
+            # Docker environment
+            search_paths = [
+                Path('/') / config_path,
+                Path('/app').parent / config_path,
+                Path.cwd() / config_path,
+            ]
+        else:
+            # Host environment
+            root_dir = Path(__file__).parent.parent.parent
+            search_paths = [
+                root_dir / config_path,
+                Path.cwd() / config_path,
+            ]
+        
+        for search_path in search_paths:
+            if search_path.exists():
+                return search_path
+        
+        # Default to current directory if not found
+        return Path.cwd() / config_path
     
     def _validate_config(self, config: dict):
         """Validate configuration structure"""
@@ -755,16 +820,26 @@ class Step1CLI:
         
         self.console.print(f"\n[bold green]Step 1 STPA-Sec Analysis Results ({execution_mode} mode)[/bold green]\n")
         
-        # Display system description if available
-        system_desc = results.get('system_description', '')
-        if system_desc:
-            # Show first 500 chars of system description
-            truncated = system_desc[:500] + '...' if len(system_desc) > 500 else system_desc
-            self.console.print(Panel(
-                truncated,
-                title="System Description",
-                border_style="dim"
-            ))
+        # Display input summary if available
+        input_summary = results.get('input_summary')
+        if input_summary and input_summary.get('input_registry'):
+            # Show input summary table
+            from rich.table import Table
+            table = Table(title="Input Analysis Summary")
+            table.add_column("Input Name", style="cyan")
+            table.add_column("Type", style="magenta")
+            table.add_column("Summary", style="green")
+            table.add_column("Confidence", style="yellow")
+            
+            for inp in input_summary['input_registry']:
+                table.add_row(
+                    inp['filename'],
+                    inp['type'].replace('_', ' ').title(),
+                    inp['summary'],
+                    f"{inp['confidence']:.0%}"
+                )
+            
+            self.console.print(table)
             self.console.print("")
         
         # Extract results sections
@@ -915,6 +990,7 @@ class Step1CLI:
                     self.console.print(f"    Targets: {', '.join(targets)}")
         
         # Create summary table at the end
+        from rich.table import Table
         table = Table(title="Analysis Summary", show_header=True)
         table.add_column("Component", style="cyan", width=25)
         table.add_column("Count", justify="right", style="green")
@@ -967,6 +1043,7 @@ class Step1CLI:
         """Display completeness check results"""
         
         # Create completeness table
+        from rich.table import Table
         table = Table(title="Analysis Completeness Check")
         table.add_column("Artifact", style="cyan")
         table.add_column("Status", style="green")
@@ -1073,12 +1150,17 @@ class Step1CLI:
                     f.write(f"- **Model:** {model_info.get('model', 'unknown')}\n")
                     f.write(f"- **Execution Mode:** {model_info.get('execution_mode', 'standard')}\n")
                 
-                # System Description
-                system_desc = results.get('system_description', '')
-                if system_desc:
-                    f.write("## System Description\n\n")
-                    f.write(system_desc)
-                    f.write("\n\n")
+                # Input Summary
+                input_summary = results.get('input_summary')
+                if input_summary and input_summary.get('input_registry'):
+                    f.write("## Input Analysis Summary\n\n")
+                    f.write("| Input Name | Type | Summary | Confidence |\n")
+                    f.write("|------------|------|---------|------------|\n")
+                    
+                    for inp in input_summary['input_registry']:
+                        f.write(f"| {inp['filename']} | {inp['type'].replace('_', ' ').title()} | "
+                               f"{inp['summary']} | {inp['confidence']:.0%} |\n")
+                    f.write("\n")
                 
                 # Extract results sections
                 analysis_results = results.get('results', {})

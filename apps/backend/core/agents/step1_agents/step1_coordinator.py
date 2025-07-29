@@ -18,6 +18,7 @@ from .security_constraint_agent import SecurityConstraintAgent
 from .system_boundary_agent import SystemBoundaryAgent
 from .validation_agent import ValidationAgent
 from .base_step1 import CognitiveStyle
+from core.agents.input_agent import InputAgent
 
 
 class Step1Coordinator:
@@ -62,13 +63,15 @@ class Step1Coordinator:
         }
         
     async def perform_analysis(self, system_description: str, 
-                             analysis_name: str = "Step 1 Analysis") -> Dict[str, Any]:
+                             analysis_name: str = "Step 1 Analysis",
+                             input_configs: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
         """
         Perform complete Step 1 analysis
         
         Args:
-            system_description: Natural language description of the system
+            system_description: Natural language description of the system (for backward compatibility)
             analysis_name: Name for this analysis
+            input_configs: Optional list of input configurations for Input Agent
             
         Returns:
             Complete Step 1 analysis results
@@ -85,6 +88,17 @@ class Step1Coordinator:
             else:
                 self._owns_connection = False
             
+            # Process inputs with Input Agent if configs provided
+            input_summary = None
+            input_agent = None
+            if input_configs:
+                self._log_execution("Processing inputs with Input Agent")
+                input_agent = InputAgent(self.analysis_id, self.db_connection)
+                input_summary = await input_agent.process_inputs(input_configs)
+                
+                # Get system description from Input Agent
+                system_description = input_agent.query('system_description') or system_description
+            
             # Create analysis record
             await self._create_analysis_record(analysis_name, system_description)
             
@@ -92,7 +106,9 @@ class Step1Coordinator:
             context = {
                 "system_description": system_description,
                 "analysis_id": self.analysis_id,
-                "timestamp": start_time.isoformat()
+                "timestamp": start_time.isoformat(),
+                "input_agent": input_agent,
+                "input_summary": input_summary
             }
             
             # Phase 1: Mission Analysis
@@ -175,7 +191,7 @@ class Step1Coordinator:
                     "mission_analysis": mission_results,
                     "loss_identification": loss_results,
                     "hazard_identification": hazard_results,
-                    "stakeholder_analysis": stakeholder_results,
+                    "stakeholder_analyst": stakeholder_results,  # Keep consistent with agent naming
                     "security_constraints": security_constraint_results,
                     "system_boundaries": system_boundary_results,
                     "validation": validation_results
@@ -184,6 +200,10 @@ class Step1Coordinator:
                 "step2_bridge": validation_results['step2_bridge'],
                 "execution_log": self.execution_log
             }
+            
+            # Add input summary if available
+            if input_summary:
+                final_results['input_summary'] = input_summary
             
             # Update analysis record with completion
             if self.db_connection:

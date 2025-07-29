@@ -1,0 +1,904 @@
+{
+  "hazards": [
+    {
+      "description": "System operates in a state where drones navigate with corrupted GPS data due to signal interference or spoofing",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "data_integrity",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "During GPS jamming/spoofing events",
+        "duration": "transient"
+      },
+      "identifier": "H-1"
+    },
+    {
+      "description": "System operates in a state where sensitive patient data is transmitted without encryption over insecure communication channels",
+      "hazard_category": "confidentiality_breached",
+      "affected_system_property": "data_protection",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "When secure communication protocols are bypassed or unavailable",
+        "duration": "intermittent"
+      },
+      "identifier": "H-2"
+    },
+    {
+      "description": "System operates in a state where drones fail to avoid obstacles due to corrupted sensor data caused by environmental interference",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "data_integrity",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "During adverse weather or electromagnetic interference",
+        "duration": "transient"
+      },
+      "identifier": "H-3"
+    },
+    {
+      "description": "System operates in a state where drones are unable to land safely due to misidentified landing zones by computer vision algorithms",
+      "hazard_category": "capability_loss",
+      "affected_system_property": "operational_capability",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "During low visibility or cluttered environments",
+        "duration": "transient"
+      },
+      "identifier": "H-4"
+    },
+    {
+      "description": "System operates in a state where unauthorized users gain access to fleet control systems and alter mission priorities",
+      "hazard_category": "confidentiality_breached",
+      "affected_system_property": "data_protection",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "When access controls are compromised",
+        "duration": "continuous"
+      },
+      "identifier": "H-5"
+    },
+    {
+      "description": "System operates in a state where drones experience unexpected power loss during critical operations",
+      "hazard_category": "availability_degraded",
+      "affected_system_property": "service_availability",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "During battery failure or insufficient charging",
+        "duration": "transient"
+      },
+      "identifier": "H-6"
+    },
+    {
+      "description": "System operates in a state where medical payload tracking records are tampered with, leading to chain-of-custody violations",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "data_integrity",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "During blockchain data tampering or system compromise",
+        "duration": "intermittent"
+      },
+      "identifier": "H-7"
+    },
+    {
+      "description": "System operates in a state where drones fail to communicate with ground control due to communication network disruptions",
+      "hazard_category": "availability_degraded",
+      "affected_system_property": "service_availability",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "During cellular or satellite network outages",
+        "duration": "transient"
+      },
+      "identifier": "H-8"
+    },
+    {
+      "description": "System operates in a state where drones fail to adapt to adverse weather conditions, leading to mission failure",
+      "hazard_category": "mission_degraded",
+      "affected_system_property": "mission_effectiveness",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "low",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "During severe weather events",
+        "duration": "transient"
+      },
+      "identifier": "H-9"
+    },
+    {
+      "description": "System operates in a state where drones are hijacked remotely, allowing attackers to redirect or repurpose their missions",
+      "hazard_category": "capability_loss",
+      "affected_system_property": "operational_capability",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "During cyberattacks targeting drone control systems",
+        "duration": "continuous"
+      },
+      "identifier": "H-10"
+    },
+    {
+      "description": "System operates in a state where regulatory compliance records are incomplete or tampered with, leading to legal violations",
+      "hazard_category": "non_compliance",
+      "affected_system_property": "regulatory_compliance",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "During record tampering or system compromise",
+        "duration": "intermittent"
+      },
+      "identifier": "H-11"
+    },
+    {
+      "description": "System operates in a state where fleet coordination algorithms produce conflicting commands, leading to cascading mission failures",
+      "hazard_category": "mission_degraded",
+      "affected_system_property": "mission_effectiveness",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "During algorithm misconfiguration or data inconsistency",
+        "duration": "transient"
+      },
+      "identifier": "H-12"
+    }
+  ],
+  "hazard_count": 12,
+  "hazard_categories": {
+    "integrity_compromised": 3,
+    "confidentiality_breached": 2,
+    "capability_loss": 2,
+    "availability_degraded": 2,
+    "mission_degraded": 2,
+    "non_compliance": 1
+  },
+  "hazard_loss_mappings": [
+    {
+      "hazard_id": "H-1",
+      "loss_id": "L-1",
+      "relationship_strength": "conditional",
+      "rationale": "Corrupted GPS data may lead to drones being unable to navigate correctly, potentially delaying or failing medical supply deliveries.",
+      "conditions": [
+        "Critical medical supplies are in transit",
+        "GPS-based navigation is the primary guidance system"
+      ],
+      "id": "e58aece2-a629-4667-8e80-cb105be6da11"
+    },
+    {
+      "hazard_id": "H-2",
+      "loss_id": "L-2",
+      "relationship_strength": "direct",
+      "rationale": "Transmitting sensitive patient data without encryption directly exposes it to unauthorized access, leading to loss of privacy.",
+      "conditions": [],
+      "id": "b49f370a-0ee4-4723-bf71-fa5cf4ef50d2"
+    },
+    {
+      "hazard_id": "H-3",
+      "loss_id": "L-1",
+      "relationship_strength": "conditional",
+      "rationale": "Corrupted sensor data may prevent drones from avoiding obstacles, potentially causing crashes and delays in delivering critical medical supplies.",
+      "conditions": [
+        "Critical medical supplies are being carried",
+        "Obstacle avoidance is dependent on affected sensors"
+      ],
+      "id": "8ecbd633-32d0-4c2e-8d66-bff5b5c8cfc1"
+    },
+    {
+      "hazard_id": "H-3",
+      "loss_id": "L-8",
+      "relationship_strength": "indirect",
+      "rationale": "Corrupted sensor data could cause drones to collide with objects or crash, potentially leading to environmental damage.",
+      "conditions": [
+        "Drone crashes in an environmentally sensitive area",
+        "Hazardous materials (e.g., batteries) are involved"
+      ],
+      "id": "1b8a793e-35f1-4cc1-9286-efa3c7559103"
+    },
+    {
+      "hazard_id": "H-4",
+      "loss_id": "L-1",
+      "relationship_strength": "conditional",
+      "rationale": "Misidentified landing zones may prevent drones from safely completing deliveries, potentially delaying critical medical supplies.",
+      "conditions": [
+        "Critical supplies are on board",
+        "The mission relies on accurate landing zone identification"
+      ],
+      "id": "8744eba9-d1ab-4d8f-be9f-a98f0fb94a51"
+    },
+    {
+      "hazard_id": "H-4",
+      "loss_id": "L-8",
+      "relationship_strength": "indirect",
+      "rationale": "Misidentified landing zones could result in crashes or landings in unsafe areas, leading to environmental damage.",
+      "conditions": [
+        "Landing occurs in an environmentally sensitive area",
+        "Drone crash causes hazardous material leakage"
+      ],
+      "id": "1a60487d-b6ab-4756-91e0-cd1628c76697"
+    },
+    {
+      "hazard_id": "H-5",
+      "loss_id": "L-2",
+      "relationship_strength": "direct",
+      "rationale": "Unauthorized access to fleet control systems can expose sensitive medical data, directly breaching patient privacy.",
+      "conditions": [],
+      "id": "00cce043-93b4-4d01-b2a2-f1d45575fecc"
+    },
+    {
+      "hazard_id": "H-5",
+      "loss_id": "L-6",
+      "relationship_strength": "conditional",
+      "rationale": "Unauthorized users could alter mission priorities, potentially leading to theft of high-value medical cargo.",
+      "conditions": [
+        "Drones are carrying valuable medical supplies",
+        "Attackers have sufficient control to reroute drones"
+      ],
+      "id": "99f76b7c-eabd-4784-a299-741ea5ce3a47"
+    },
+    {
+      "hazard_id": "H-6",
+      "loss_id": "L-1",
+      "relationship_strength": "conditional",
+      "rationale": "Unexpected power loss during critical operations may cause mission failures, delaying delivery of critical medical supplies.",
+      "conditions": [
+        "Critical medical supplies are on board",
+        "No redundant power systems are available"
+      ],
+      "id": "23a884ed-8e6d-4702-b384-0ca317ab0e87"
+    },
+    {
+      "hazard_id": "H-6",
+      "loss_id": "L-7",
+      "relationship_strength": "indirect",
+      "rationale": "Frequent power losses could damage the public's perception of the system's reliability, harming its reputation.",
+      "conditions": [
+        "Power failures occur repeatedly in public or high-visibility missions"
+      ],
+      "id": "02b6af53-9594-4a69-9178-98502c1fe624"
+    },
+    {
+      "hazard_id": "H-7",
+      "loss_id": "L-2",
+      "relationship_strength": "direct",
+      "rationale": "Tampering with medical payload tracking records could expose sensitive patient data, breaching privacy.",
+      "conditions": [],
+      "id": "f828084b-2f2e-4a57-a557-bd1eb7e58ed6"
+    },
+    {
+      "hazard_id": "H-7",
+      "loss_id": "L-4",
+      "relationship_strength": "direct",
+      "rationale": "Tampered chain-of-custody records could lead to regulatory non-compliance and legal penalties.",
+      "conditions": [],
+      "id": "e1847902-5a64-4e96-8009-44dc4f018ab5"
+    },
+    {
+      "hazard_id": "H-8",
+      "loss_id": "L-3",
+      "relationship_strength": "direct",
+      "rationale": "Communication network disruptions could prevent drones from responding during critical operational periods, leading to loss of service availability.",
+      "conditions": [],
+      "id": "52ff8044-adc9-4386-9165-a164e3840a23"
+    },
+    {
+      "hazard_id": "H-9",
+      "loss_id": "L-5",
+      "relationship_strength": "conditional",
+      "rationale": "Failure to adapt to adverse weather conditions may cause cascading mission failures due to poor fleet coordination.",
+      "conditions": [
+        "Multiple drones are deployed in adverse weather",
+        "Weather conditions exceed system tolerances"
+      ],
+      "id": "f732c46b-0d1b-4a9d-8c36-a11ac1e008c9"
+    },
+    {
+      "hazard_id": "H-9",
+      "loss_id": "L-8",
+      "relationship_strength": "indirect",
+      "rationale": "Adverse weather conditions could cause drones to crash, potentially leading to environmental damage.",
+      "conditions": [
+        "Drone crashes in environmentally sensitive areas",
+        "Batteries or hazardous materials are involved"
+      ],
+      "id": "04a615bb-cdd8-4123-987c-a2441c47b54d"
+    },
+    {
+      "hazard_id": "H-10",
+      "loss_id": "L-6",
+      "relationship_strength": "direct",
+      "rationale": "Remote hijacking of drones could enable attackers to redirect or steal high-value medical cargo.",
+      "conditions": [],
+      "id": "40ed3820-000a-4d78-bab4-5ec6adbc46db"
+    },
+    {
+      "hazard_id": "H-10",
+      "loss_id": "L-7",
+      "relationship_strength": "indirect",
+      "rationale": "Hijacked drones could create public perception of an unsafe system, damaging reputation.",
+      "conditions": [
+        "The hijacking incident becomes publicly known",
+        "Hijackers use drones for harmful purposes"
+      ],
+      "id": "effd7ba6-088b-410c-9ec5-6f55cc3020e9"
+    },
+    {
+      "hazard_id": "H-11",
+      "loss_id": "L-4",
+      "relationship_strength": "direct",
+      "rationale": "Incomplete or tampered records directly violate regulatory compliance requirements, leading to legal penalties.",
+      "conditions": [],
+      "id": "820d1d1c-0d39-4ee2-9664-00957125f9bd"
+    },
+    {
+      "hazard_id": "H-12",
+      "loss_id": "L-5",
+      "relationship_strength": "direct",
+      "rationale": "Conflicting fleet coordination commands could cause cascading failures across emergency missions, leading to loss of mission success.",
+      "conditions": [],
+      "id": "d525e163-29c2-445a-bfbf-7c43674bdf72"
+    },
+    {
+      "hazard_id": "H-12",
+      "loss_id": "L-7",
+      "relationship_strength": "indirect",
+      "rationale": "Cascading mission failures could harm the public's perception of the system's reliability, damaging reputation.",
+      "conditions": [
+        "Failures occur in high-visibility or critical missions",
+        "Failures are publicized or widely noticed"
+      ],
+      "id": "d6a1a70e-5b14-4ddd-9d3d-56eeef3dd428"
+    }
+  ],
+  "temporal_analysis": {
+    "always_present": [],
+    "periodic": [],
+    "conditional": [
+      {
+        "hazard_id": "H-1",
+        "description": "System operates in a state where drones navigate with corrupted GPS data due to signal interference or spoofing",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-2",
+        "description": "System operates in a state where sensitive patient data is transmitted without encryption over insecure communication channels",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-3",
+        "description": "System operates in a state where drones fail to avoid obstacles due to corrupted sensor data caused by environmental interference",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-4",
+        "description": "System operates in a state where drones are unable to land safely due to misidentified landing zones by computer vision algorithms",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-5",
+        "description": "System operates in a state where unauthorized users gain access to fleet control systems and alter mission priorities",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-6",
+        "description": "System operates in a state where drones experience unexpected power loss during critical operations",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-7",
+        "description": "System operates in a state where medical payload tracking records are tampered with, leading to chain-of-custody violations",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-8",
+        "description": "System operates in a state where drones fail to communicate with ground control due to communication network disruptions",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-9",
+        "description": "System operates in a state where drones fail to adapt to adverse weather conditions, leading to mission failure",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-10",
+        "description": "System operates in a state where drones are hijacked remotely, allowing attackers to redirect or repurpose their missions",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-11",
+        "description": "System operates in a state where regulatory compliance records are incomplete or tampered with, leading to legal violations",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-12",
+        "description": "System operates in a state where fleet coordination algorithms produce conflicting commands, leading to cascading mission failures",
+        "conditions": []
+      }
+    ],
+    "coverage_gaps": []
+  },
+  "environmental_analysis": {
+    "operational_sensitivity": {
+      "H-1": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-2": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      },
+      "H-3": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-4": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-5": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      },
+      "H-6": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-7": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-8": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-9": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-10": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      },
+      "H-11": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      },
+      "H-12": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      }
+    },
+    "threat_sensitivity": {
+      "H-1": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-2": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-3": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-4": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-5": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-6": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-7": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-8": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-9": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-10": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-11": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-12": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      }
+    },
+    "combined_risk_scenarios": [
+      {
+        "scenario": "Multiple high-impact hazards under stress",
+        "hazards": [
+          "H-1",
+          "H-2",
+          "H-3",
+          "H-4",
+          "H-5",
+          "H-6",
+          "H-7",
+          "H-8",
+          "H-9",
+          "H-10",
+          "H-11",
+          "H-12"
+        ],
+        "risk_level": "extreme"
+      }
+    ]
+  },
+  "coverage_analysis": {
+    "covered_losses": [
+      "L-7",
+      "L-4",
+      "L-1",
+      "L-6",
+      "L-5",
+      "L-2",
+      "L-3",
+      "L-8"
+    ],
+    "uncovered_losses": [],
+    "coverage_percentage": 100.0,
+    "loss_hazard_ratio": {
+      "L-1": 4,
+      "L-2": 3,
+      "L-3": 1,
+      "L-4": 2,
+      "L-5": 2,
+      "L-6": 2,
+      "L-7": 3,
+      "L-8": 3
+    }
+  },
+  "cognitive_style": "balanced"
+}

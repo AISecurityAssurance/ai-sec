@@ -383,7 +383,7 @@ Examples:
 - "System operates with insufficient resources to handle requests" → availability_degraded
 - "System operates without ability to detect anomalies" → capability_loss
 
-HAZARD IDENTIFICATION CHECKLIST - Aim for 12-15 hazards covering these areas:
+HAZARD IDENTIFICATION CHECKLIST - Aim for 15-20 hazards covering these areas:
 □ Authentication & Authorization (user identity verification, session management)
 □ Data Protection (encryption state, access control, data retention)
 □ System Integrity (data accuracy, data consistency, audit trails)
@@ -392,8 +392,15 @@ HAZARD IDENTIFICATION CHECKLIST - Aim for 12-15 hazards covering these areas:
 □ Operational Security (segregation of duties, insider threats, privileged access)
 □ External Interfaces (API security, third-party integrations, data exchanges)
 □ Resilience (backup/recovery states, failover capabilities, incident response)
+□ Physical Safety (if applicable: collision states, mechanical failures, environmental hazards)
+□ Communication Security (signal integrity, jamming resistance, network availability)
 
-MINIMUM REQUIREMENT: Identify at least 12 hazards for comprehensive coverage. Fewer than 12 hazards will be considered incomplete."""
+REQUIREMENTS: 
+- MINIMUM: 12 hazards (fewer will be rejected as incomplete)
+- TARGET: 15-20 hazards for comprehensive coverage
+- MAXIMUM: 25 hazards (focus on quality over quantity)
+
+Ensure hazards are diverse, covering different aspects of the system rather than variations of the same issue."""
         
         try:
             # Call LLM

@@ -1,0 +1,3041 @@
+{
+  "analysis_id": "72efb502-7e60-455d-b470-cf798f37c749",
+  "analysis_name": "Medical Drone Fleet Security Analysis - GPT-4 Turbo Standard",
+  "timestamp": "2025-07-29T05:01:18.332776",
+  "duration": 114.485532,
+  "status": "revision_required",
+  "results": {
+    "mission_analysis": {
+      "problem_statement": {
+        "purpose_what": "rapidly deliver time-critical medical supplies and enable remote medical intervention in emergencies",
+        "method_how": "autonomous aerial systems with coordinated fleet operations, telemedicine capabilities, and real-time decision-making",
+        "goals_why": "minimize response times, improve patient outcomes, and extend emergency medical services to underserved areas",
+        "full_statement": "A System to rapidly deliver time-critical medical supplies and enable remote medical intervention in emergencies by means of autonomous aerial systems with coordinated fleet operations, telemedicine capabilities, and real-time decision-making in order to minimize response times, improve patient outcomes, and extend emergency medical services to underserved areas"
+      },
+      "mission_context": {
+        "domain": "healthcare",
+        "criticality": "catastrophic",
+        "operational_tempo": {
+          "pattern": "on_demand",
+          "peak_periods": [
+            "natural disasters",
+            "mass casualty events",
+            "high-traffic urban incidents"
+          ],
+          "availability_requirement": "99.99%"
+        },
+        "key_capabilities": [
+          "autonomous navigation and obstacle avoidance",
+          "real-time medical payload delivery",
+          "dynamic fleet coordination and resource allocation",
+          "telemedicine connectivity for remote diagnostics",
+          "safe and reliable integration with civilian airspace"
+        ]
+      },
+      "operational_constraints": {
+        "regulatory": {
+          "frameworks": [
+            "FAA Part 135",
+            "FDA medical device transport compliance",
+            "HIPAA",
+            "ISO 13485",
+            "EASA drone regulations"
+          ],
+          "audit_frequency": "periodic",
+          "change_approval": "required"
+        },
+        "business": {
+          "availability_requirement": "99.99% uptime",
+          "operational_volume": "capable of scaling to thousands of missions per day across regional hubs",
+          "legacy_integration": "required for emergency dispatch systems and hospital information systems"
+        },
+        "organizational": {
+          "risk_appetite": "low",
+          "security_maturity": "defined",
+          "change_capacity": "moderate"
+        }
+      },
+      "environmental_assumptions": {
+        "user_behavior": [
+          "emergency responders rely on the system during critical situations",
+          "patients and bystanders may not be familiar with drone operations",
+          "healthcare providers depend on secure and reliable telemedicine connections"
+        ],
+        "threat_landscape": [
+          "intentional interference such as GPS jamming or drone hijacking",
+          "cyberattacks targeting patient data or communication networks",
+          "physical theft of high-value medical payloads"
+        ],
+        "infrastructure": [
+          "reliable cellular/satellite network availability",
+          "stable GPS/GNSS systems with inertial backup",
+          "power grid stability for charging infrastructure"
+        ],
+        "trust_relationships": [
+          "healthcare providers and drone operators",
+          "emergency dispatch systems and fleet management",
+          "patients and the medical system through secure data handling"
+        ]
+      },
+      "abstraction_validated": true,
+      "cognitive_style": "balanced"
+    },
+    "loss_identification": {
+      "losses": [
+        {
+          "description": "Loss of human life due to delayed or failed delivery of critical medical supplies during emergencies",
+          "loss_category": "life",
+          "severity_classification": {
+            "magnitude": "catastrophic",
+            "scope": "mission_wide",
+            "duration": "permanent",
+            "reversibility": "impossible",
+            "detection_difficulty": "moderate"
+          },
+          "mission_impact": {
+            "primary_capability_loss": [
+              "real-time medical payload delivery",
+              "autonomous navigation and obstacle avoidance"
+            ],
+            "cascading_effects": [
+              "loss of trust in the system",
+              "increased burden on traditional emergency services"
+            ],
+            "stakeholder_harm": {
+              "patients": {
+                "type": "death",
+                "severity": "catastrophic"
+              }
+            }
+          },
+          "identifier": "L-1"
+        },
+        {
+          "description": "Loss of patient privacy due to unauthorized access or exposure of sensitive medical data",
+          "loss_category": "privacy",
+          "severity_classification": {
+            "magnitude": "major",
+            "scope": "customer_wide",
+            "duration": "long_term",
+            "reversibility": "very_difficult",
+            "detection_difficulty": "hard"
+          },
+          "mission_impact": {
+            "primary_capability_loss": [
+              "telemedicine connectivity for remote diagnostics"
+            ],
+            "cascading_effects": [
+              "loss of public confidence in telemedicine services",
+              "regulatory penalties for HIPAA violations"
+            ],
+            "stakeholder_harm": {
+              "patients": {
+                "type": "privacy violation",
+                "severity": "major"
+              },
+              "healthcare providers": {
+                "type": "reputation damage",
+                "severity": "major"
+              }
+            }
+          },
+          "identifier": "L-2"
+        },
+        {
+          "description": "Loss of service availability during a critical operational period, preventing timely response to emergencies",
+          "loss_category": "mission",
+          "severity_classification": {
+            "magnitude": "catastrophic",
+            "scope": "mission_wide",
+            "duration": "short_term",
+            "reversibility": "difficult",
+            "detection_difficulty": "moderate"
+          },
+          "mission_impact": {
+            "primary_capability_loss": [
+              "real-time medical payload delivery",
+              "dynamic fleet coordination and resource allocation"
+            ],
+            "cascading_effects": [
+              "increased fatalities and injuries during emergencies",
+              "overload on alternative emergency response systems"
+            ],
+            "stakeholder_harm": {
+              "patients": {
+                "type": "delayed care",
+                "severity": "catastrophic"
+              }
+            }
+          },
+          "identifier": "L-3"
+        },
+        {
+          "description": "Loss of regulatory compliance resulting in fines, legal penalties, and operational restrictions",
+          "loss_category": "regulatory",
+          "severity_classification": {
+            "magnitude": "major",
+            "scope": "organization_wide",
+            "duration": "long_term",
+            "reversibility": "very_difficult",
+            "detection_difficulty": "moderate"
+          },
+          "mission_impact": {
+            "primary_capability_loss": [
+              "safe and reliable integration with civilian airspace"
+            ],
+            "cascading_effects": [
+              "halted operations due to regulatory injunctions",
+              "inability to expand into new regions"
+            ],
+            "stakeholder_harm": {
+              "operators": {
+                "type": "financial penalties",
+                "severity": "major"
+              },
+              "patients": {
+                "type": "reduced service availability",
+                "severity": "major"
+              }
+            }
+          },
+          "identifier": "L-4"
+        },
+        {
+          "description": "Loss of fleet coordination leading to cascading failures across multiple emergency missions",
+          "loss_category": "mission",
+          "severity_classification": {
+            "magnitude": "catastrophic",
+            "scope": "mission_wide",
+            "duration": "medium_term",
+            "reversibility": "difficult",
+            "detection_difficulty": "moderate"
+          },
+          "mission_impact": {
+            "primary_capability_loss": [
+              "dynamic fleet coordination and resource allocation"
+            ],
+            "cascading_effects": [
+              "multiple mission failures",
+              "increased system recovery time"
+            ],
+            "stakeholder_harm": {
+              "patients": {
+                "type": "delayed care",
+                "severity": "catastrophic"
+              }
+            }
+          },
+          "identifier": "L-5"
+        },
+        {
+          "description": "Loss of financial assets due to theft of high-value medical cargo or drones",
+          "loss_category": "financial",
+          "severity_classification": {
+            "magnitude": "major",
+            "scope": "organization_wide",
+            "duration": "long_term",
+            "reversibility": "difficult",
+            "detection_difficulty": "hard"
+          },
+          "mission_impact": {
+            "primary_capability_loss": [
+              "medical payload management",
+              "real-time medical payload delivery"
+            ],
+            "cascading_effects": [
+              "increased operational costs for security enhancements",
+              "damage to stakeholder trust"
+            ],
+            "stakeholder_harm": {
+              "operators": {
+                "type": "financial loss",
+                "severity": "major"
+              },
+              "pharmaceutical suppliers": {
+                "type": "supply chain disruption",
+                "severity": "major"
+              }
+            }
+          },
+          "identifier": "L-6"
+        },
+        {
+          "description": "Damage to public reputation due to perception of unsafe or unreliable operations, particularly in populated areas",
+          "loss_category": "reputation",
+          "severity_classification": {
+            "magnitude": "major",
+            "scope": "market_wide",
+            "duration": "long_term",
+            "reversibility": "very_difficult",
+            "detection_difficulty": "moderate"
+          },
+          "mission_impact": {
+            "primary_capability_loss": [
+              "safe and reliable integration with civilian airspace"
+            ],
+            "cascading_effects": [
+              "reduced adoption of the service",
+              "difficulty obtaining stakeholder buy-in"
+            ],
+            "stakeholder_harm": {
+              "operators": {
+                "type": "reputation damage",
+                "severity": "major"
+              },
+              "public": {
+                "type": "loss of trust",
+                "severity": "major"
+              }
+            }
+          },
+          "identifier": "L-7"
+        },
+        {
+          "description": "Environmental damage caused by uncontrolled drone crashes or battery leakage during adverse conditions",
+          "loss_category": "environmental",
+          "severity_classification": {
+            "magnitude": "moderate",
+            "scope": "local",
+            "duration": "medium_term",
+            "reversibility": "possible",
+            "detection_difficulty": "easy"
+          },
+          "mission_impact": {
+            "primary_capability_loss": [
+              "safe and reliable integration with civilian airspace"
+            ],
+            "cascading_effects": [
+              "negative environmental impact",
+              "increased regulatory scrutiny"
+            ],
+            "stakeholder_harm": {
+              "public": {
+                "type": "environmental harm",
+                "severity": "moderate"
+              }
+            }
+          },
+          "identifier": "L-8"
+        }
+      ],
+      "loss_count": 8,
+      "loss_categories": {
+        "life": 1,
+        "privacy": 1,
+        "mission": 2,
+        "regulatory": 1,
+        "financial": 1,
+        "reputation": 1,
+        "environmental": 1
+      },
+      "dependencies": [
+        {
+          "primary_loss_id": "L-3",
+          "dependent_loss_id": "L-1",
+          "dependency_type": "triggers",
+          "dependency_strength": "certain",
+          "time_relationship": {
+            "sequence": "immediate",
+            "typical_delay": "No delay; loss of service availability directly affects delivery of medical supplies",
+            "persistence": "sustained"
+          },
+          "rationale": "Loss of service availability during critical operations prevents timely delivery of medical supplies, which can lead directly to loss of human life in emergencies.",
+          "id": "82101052-edd4-44d4-9077-335c476384a8"
+        },
+        {
+          "primary_loss_id": "L-5",
+          "dependent_loss_id": "L-3",
+          "dependency_type": "triggers",
+          "dependency_strength": "likely",
+          "time_relationship": {
+            "sequence": "concurrent",
+            "typical_delay": "Occurs simultaneously as coordination issues arise during operations",
+            "persistence": "variable"
+          },
+          "rationale": "Loss of fleet coordination disrupts operational workflows, which can lead to service unavailability during critical periods.",
+          "id": "adfa8b5d-8ddb-4c7e-ab89-5eee8399d592"
+        },
+        {
+          "primary_loss_id": "L-2",
+          "dependent_loss_id": "L-7",
+          "dependency_type": "amplifies",
+          "dependency_strength": "likely",
+          "time_relationship": {
+            "sequence": "delayed",
+            "typical_delay": "Public perception impacts emerge after privacy breaches are reported",
+            "persistence": "sustained"
+          },
+          "rationale": "Unauthorized access to sensitive medical data damages public trust and reputation, leading to a negative perception of the system's reliability and safety.",
+          "id": "423f921d-97ad-4528-8130-734f3759696c"
+        },
+        {
+          "primary_loss_id": "L-7",
+          "dependent_loss_id": "L-4",
+          "dependency_type": "amplifies",
+          "dependency_strength": "possible",
+          "time_relationship": {
+            "sequence": "delayed",
+            "typical_delay": "Regulatory investigations and penalties often follow reputation damage",
+            "persistence": "variable"
+          },
+          "rationale": "Damage to public reputation can lead to increased scrutiny from regulatory bodies, potentially resulting in fines, legal penalties, or operational restrictions.",
+          "id": "d60d48d7-1f2c-4329-972a-081bf05b1e22"
+        },
+        {
+          "primary_loss_id": "L-6",
+          "dependent_loss_id": "L-3",
+          "dependency_type": "enables",
+          "dependency_strength": "likely",
+          "time_relationship": {
+            "sequence": "immediate",
+            "typical_delay": "Loss of financial assets immediately limits operational capacity",
+            "persistence": "sustained"
+          },
+          "rationale": "The theft of high-value medical cargo or drones reduces available resources, making it difficult to maintain service availability during critical operational periods.",
+          "id": "9626eabf-1c01-47eb-9c52-540ecc16e3f7"
+        },
+        {
+          "primary_loss_id": "L-8",
+          "dependent_loss_id": "L-7",
+          "dependency_type": "amplifies",
+          "dependency_strength": "likely",
+          "time_relationship": {
+            "sequence": "delayed",
+            "typical_delay": "Environmental damage impacts public perception after incidents are publicized",
+            "persistence": "temporary"
+          },
+          "rationale": "Environmental damage from drone crashes or battery leakage creates public outrage and damages the organization's reputation, particularly in communities directly affected.",
+          "id": "f71e342a-7652-466f-a6f3-a281606b4031"
+        },
+        {
+          "primary_loss_id": "L-4",
+          "dependent_loss_id": "L-3",
+          "dependency_type": "triggers",
+          "dependency_strength": "likely",
+          "time_relationship": {
+            "sequence": "delayed",
+            "typical_delay": "Operational restrictions due to non-compliance take time to manifest but affect service availability",
+            "persistence": "sustained"
+          },
+          "rationale": "Loss of regulatory compliance can result in operational restrictions, which reduce the organization's ability to maintain service availability during emergencies.",
+          "id": "8859d035-c0fd-4da3-9277-bb8e88892933"
+        },
+        {
+          "primary_loss_id": "L-5",
+          "dependent_loss_id": "L-1",
+          "dependency_type": "triggers",
+          "dependency_strength": "likely",
+          "time_relationship": {
+            "sequence": "immediate",
+            "typical_delay": "Coordination issues directly delay delivery of medical supplies",
+            "persistence": "variable"
+          },
+          "rationale": "Loss of fleet coordination disrupts delivery schedules, causing delayed or failed delivery of critical medical supplies, which can result in loss of human life during emergencies.",
+          "id": "00a2948c-1ec0-4aba-ab16-d5c8a8120291"
+        },
+        {
+          "primary_loss_id": "L-8",
+          "dependent_loss_id": "L-4",
+          "dependency_type": "triggers",
+          "dependency_strength": "possible",
+          "time_relationship": {
+            "sequence": "delayed",
+            "typical_delay": "Regulatory consequences of environmental damage take time to materialize",
+            "persistence": "variable"
+          },
+          "rationale": "Environmental damage caused by drone crashes or battery leakage may lead to regulatory penalties or operational restrictions due to non-compliance with environmental laws.",
+          "id": "b9c51d7d-78aa-4f06-b7d3-43e5255b1801"
+        }
+      ],
+      "cascade_analysis": {
+        "primary_losses": [
+          "L-2",
+          "L-5",
+          "L-6",
+          "L-8"
+        ],
+        "cascade_chains": [
+          {
+            "chain": [
+              "L-2",
+              "L-7",
+              "L-4",
+              "L-3",
+              "L-1"
+            ],
+            "trigger": "L-2",
+            "terminal_losses": [
+              "L-1"
+            ],
+            "chain_length": 5
+          },
+          {
+            "chain": [
+              "L-5",
+              "L-3",
+              "L-1"
+            ],
+            "trigger": "L-5",
+            "terminal_losses": [
+              "L-1"
+            ],
+            "chain_length": 3
+          },
+          {
+            "chain": [
+              "L-6",
+              "L-3",
+              "L-1"
+            ],
+            "trigger": "L-6",
+            "terminal_losses": [
+              "L-1"
+            ],
+            "chain_length": 3
+          },
+          {
+            "chain": [
+              "L-8",
+              "L-7",
+              "L-4",
+              "L-3",
+              "L-1"
+            ],
+            "trigger": "L-8",
+            "terminal_losses": [
+              "L-1"
+            ],
+            "chain_length": 5
+          }
+        ],
+        "max_cascade_depth": 5
+      },
+      "severity_distribution": {
+        "catastrophic": 3,
+        "major": 4,
+        "moderate": 1,
+        "minor": 0
+      },
+      "cognitive_style": "balanced"
+    },
+    "hazard_identification": {
+      "hazards": [
+        {
+          "description": "System operates in a state where drones navigate with corrupted GPS data due to signal interference or spoofing",
+          "hazard_category": "integrity_compromised",
+          "affected_system_property": "data_integrity",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "possible"
+              },
+              "degraded": {
+                "impact": "high",
+                "likelihood": "likely"
+              },
+              "emergency": {
+                "impact": "high",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "conditional",
+            "when_present": "During GPS jamming/spoofing events",
+            "duration": "transient"
+          },
+          "identifier": "H-1"
+        },
+        {
+          "description": "System operates in a state where sensitive patient data is transmitted without encryption over insecure communication channels",
+          "hazard_category": "confidentiality_breached",
+          "affected_system_property": "data_protection",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "high",
+                "likelihood": "rare"
+              },
+              "degraded": {
+                "impact": "high",
+                "likelihood": "possible"
+              },
+              "emergency": {
+                "impact": "high",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "conditional",
+            "when_present": "When secure communication protocols are bypassed or unavailable",
+            "duration": "intermittent"
+          },
+          "identifier": "H-2"
+        },
+        {
+          "description": "System operates in a state where drones fail to avoid obstacles due to corrupted sensor data caused by environmental interference",
+          "hazard_category": "integrity_compromised",
+          "affected_system_property": "data_integrity",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "rare"
+              },
+              "degraded": {
+                "impact": "high",
+                "likelihood": "likely"
+              },
+              "emergency": {
+                "impact": "high",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "conditional",
+            "when_present": "During adverse weather or electromagnetic interference",
+            "duration": "transient"
+          },
+          "identifier": "H-3"
+        },
+        {
+          "description": "System operates in a state where drones are unable to land safely due to misidentified landing zones by computer vision algorithms",
+          "hazard_category": "capability_loss",
+          "affected_system_property": "operational_capability",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "possible"
+              },
+              "degraded": {
+                "impact": "high",
+                "likelihood": "likely"
+              },
+              "emergency": {
+                "impact": "high",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "conditional",
+            "when_present": "During low visibility or cluttered environments",
+            "duration": "transient"
+          },
+          "identifier": "H-4"
+        },
+        {
+          "description": "System operates in a state where unauthorized users gain access to fleet control systems and alter mission priorities",
+          "hazard_category": "confidentiality_breached",
+          "affected_system_property": "data_protection",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "high",
+                "likelihood": "rare"
+              },
+              "degraded": {
+                "impact": "high",
+                "likelihood": "possible"
+              },
+              "emergency": {
+                "impact": "high",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "conditional",
+            "when_present": "When access controls are compromised",
+            "duration": "continuous"
+          },
+          "identifier": "H-5"
+        },
+        {
+          "description": "System operates in a state where drones experience unexpected power loss during critical operations",
+          "hazard_category": "availability_degraded",
+          "affected_system_property": "service_availability",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "rare"
+              },
+              "degraded": {
+                "impact": "high",
+                "likelihood": "possible"
+              },
+              "emergency": {
+                "impact": "high",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "conditional",
+            "when_present": "During battery failure or insufficient charging",
+            "duration": "transient"
+          },
+          "identifier": "H-6"
+        },
+        {
+          "description": "System operates in a state where medical payload tracking records are tampered with, leading to chain-of-custody violations",
+          "hazard_category": "integrity_compromised",
+          "affected_system_property": "data_integrity",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "rare"
+              },
+              "degraded": {
+                "impact": "high",
+                "likelihood": "possible"
+              },
+              "emergency": {
+                "impact": "high",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "conditional",
+            "when_present": "During blockchain data tampering or system compromise",
+            "duration": "intermittent"
+          },
+          "identifier": "H-7"
+        },
+        {
+          "description": "System operates in a state where drones fail to communicate with ground control due to communication network disruptions",
+          "hazard_category": "availability_degraded",
+          "affected_system_property": "service_availability",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "rare"
+              },
+              "degraded": {
+                "impact": "high",
+                "likelihood": "likely"
+              },
+              "emergency": {
+                "impact": "high",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "conditional",
+            "when_present": "During cellular or satellite network outages",
+            "duration": "transient"
+          },
+          "identifier": "H-8"
+        },
+        {
+          "description": "System operates in a state where drones fail to adapt to adverse weather conditions, leading to mission failure",
+          "hazard_category": "mission_degraded",
+          "affected_system_property": "mission_effectiveness",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "low",
+                "likelihood": "rare"
+              },
+              "degraded": {
+                "impact": "high",
+                "likelihood": "likely"
+              },
+              "emergency": {
+                "impact": "high",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "conditional",
+            "when_present": "During severe weather events",
+            "duration": "transient"
+          },
+          "identifier": "H-9"
+        },
+        {
+          "description": "System operates in a state where drones are hijacked remotely, allowing attackers to redirect or repurpose their missions",
+          "hazard_category": "capability_loss",
+          "affected_system_property": "operational_capability",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "high",
+                "likelihood": "rare"
+              },
+              "degraded": {
+                "impact": "high",
+                "likelihood": "possible"
+              },
+              "emergency": {
+                "impact": "high",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "conditional",
+            "when_present": "During cyberattacks targeting drone control systems",
+            "duration": "continuous"
+          },
+          "identifier": "H-10"
+        },
+        {
+          "description": "System operates in a state where regulatory compliance records are incomplete or tampered with, leading to legal violations",
+          "hazard_category": "non_compliance",
+          "affected_system_property": "regulatory_compliance",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "high",
+                "likelihood": "rare"
+              },
+              "degraded": {
+                "impact": "high",
+                "likelihood": "possible"
+              },
+              "emergency": {
+                "impact": "high",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "conditional",
+            "when_present": "During record tampering or system compromise",
+            "duration": "intermittent"
+          },
+          "identifier": "H-11"
+        },
+        {
+          "description": "System operates in a state where fleet coordination algorithms produce conflicting commands, leading to cascading mission failures",
+          "hazard_category": "mission_degraded",
+          "affected_system_property": "mission_effectiveness",
+          "environmental_factors": {
+            "operational_conditions": {
+              "normal": {
+                "impact": "moderate",
+                "likelihood": "rare"
+              },
+              "degraded": {
+                "impact": "high",
+                "likelihood": "likely"
+              },
+              "emergency": {
+                "impact": "high",
+                "likelihood": "likely"
+              }
+            },
+            "threat_conditions": {
+              "benign": {
+                "impact": "minimal",
+                "detection": "easy"
+              },
+              "moderate": {
+                "impact": "moderate",
+                "detection": "moderate"
+              },
+              "severe": {
+                "impact": "high",
+                "detection": "hard"
+              }
+            }
+          },
+          "temporal_nature": {
+            "existence": "conditional",
+            "when_present": "During algorithm misconfiguration or data inconsistency",
+            "duration": "transient"
+          },
+          "identifier": "H-12"
+        }
+      ],
+      "hazard_count": 12,
+      "hazard_categories": {
+        "integrity_compromised": 3,
+        "confidentiality_breached": 2,
+        "capability_loss": 2,
+        "availability_degraded": 2,
+        "mission_degraded": 2,
+        "non_compliance": 1
+      },
+      "hazard_loss_mappings": [
+        {
+          "hazard_id": "H-1",
+          "loss_id": "L-1",
+          "relationship_strength": "conditional",
+          "rationale": "Corrupted GPS data may lead to drones being unable to navigate correctly, potentially delaying or failing medical supply deliveries.",
+          "conditions": [
+            "Critical medical supplies are in transit",
+            "GPS-based navigation is the primary guidance system"
+          ],
+          "id": "e58aece2-a629-4667-8e80-cb105be6da11"
+        },
+        {
+          "hazard_id": "H-2",
+          "loss_id": "L-2",
+          "relationship_strength": "direct",
+          "rationale": "Transmitting sensitive patient data without encryption directly exposes it to unauthorized access, leading to loss of privacy.",
+          "conditions": [],
+          "id": "b49f370a-0ee4-4723-bf71-fa5cf4ef50d2"
+        },
+        {
+          "hazard_id": "H-3",
+          "loss_id": "L-1",
+          "relationship_strength": "conditional",
+          "rationale": "Corrupted sensor data may prevent drones from avoiding obstacles, potentially causing crashes and delays in delivering critical medical supplies.",
+          "conditions": [
+            "Critical medical supplies are being carried",
+            "Obstacle avoidance is dependent on affected sensors"
+          ],
+          "id": "8ecbd633-32d0-4c2e-8d66-bff5b5c8cfc1"
+        },
+        {
+          "hazard_id": "H-3",
+          "loss_id": "L-8",
+          "relationship_strength": "indirect",
+          "rationale": "Corrupted sensor data could cause drones to collide with objects or crash, potentially leading to environmental damage.",
+          "conditions": [
+            "Drone crashes in an environmentally sensitive area",
+            "Hazardous materials (e.g., batteries) are involved"
+          ],
+          "id": "1b8a793e-35f1-4cc1-9286-efa3c7559103"
+        },
+        {
+          "hazard_id": "H-4",
+          "loss_id": "L-1",
+          "relationship_strength": "conditional",
+          "rationale": "Misidentified landing zones may prevent drones from safely completing deliveries, potentially delaying critical medical supplies.",
+          "conditions": [
+            "Critical supplies are on board",
+            "The mission relies on accurate landing zone identification"
+          ],
+          "id": "8744eba9-d1ab-4d8f-be9f-a98f0fb94a51"
+        },
+        {
+          "hazard_id": "H-4",
+          "loss_id": "L-8",
+          "relationship_strength": "indirect",
+          "rationale": "Misidentified landing zones could result in crashes or landings in unsafe areas, leading to environmental damage.",
+          "conditions": [
+            "Landing occurs in an environmentally sensitive area",
+            "Drone crash causes hazardous material leakage"
+          ],
+          "id": "1a60487d-b6ab-4756-91e0-cd1628c76697"
+        },
+        {
+          "hazard_id": "H-5",
+          "loss_id": "L-2",
+          "relationship_strength": "direct",
+          "rationale": "Unauthorized access to fleet control systems can expose sensitive medical data, directly breaching patient privacy.",
+          "conditions": [],
+          "id": "00cce043-93b4-4d01-b2a2-f1d45575fecc"
+        },
+        {
+          "hazard_id": "H-5",
+          "loss_id": "L-6",
+          "relationship_strength": "conditional",
+          "rationale": "Unauthorized users could alter mission priorities, potentially leading to theft of high-value medical cargo.",
+          "conditions": [
+            "Drones are carrying valuable medical supplies",
+            "Attackers have sufficient control to reroute drones"
+          ],
+          "id": "99f76b7c-eabd-4784-a299-741ea5ce3a47"
+        },
+        {
+          "hazard_id": "H-6",
+          "loss_id": "L-1",
+          "relationship_strength": "conditional",
+          "rationale": "Unexpected power loss during critical operations may cause mission failures, delaying delivery of critical medical supplies.",
+          "conditions": [
+            "Critical medical supplies are on board",
+            "No redundant power systems are available"
+          ],
+          "id": "23a884ed-8e6d-4702-b384-0ca317ab0e87"
+        },
+        {
+          "hazard_id": "H-6",
+          "loss_id": "L-7",
+          "relationship_strength": "indirect",
+          "rationale": "Frequent power losses could damage the public's perception of the system's reliability, harming its reputation.",
+          "conditions": [
+            "Power failures occur repeatedly in public or high-visibility missions"
+          ],
+          "id": "02b6af53-9594-4a69-9178-98502c1fe624"
+        },
+        {
+          "hazard_id": "H-7",
+          "loss_id": "L-2",
+          "relationship_strength": "direct",
+          "rationale": "Tampering with medical payload tracking records could expose sensitive patient data, breaching privacy.",
+          "conditions": [],
+          "id": "f828084b-2f2e-4a57-a557-bd1eb7e58ed6"
+        },
+        {
+          "hazard_id": "H-7",
+          "loss_id": "L-4",
+          "relationship_strength": "direct",
+          "rationale": "Tampered chain-of-custody records could lead to regulatory non-compliance and legal penalties.",
+          "conditions": [],
+          "id": "e1847902-5a64-4e96-8009-44dc4f018ab5"
+        },
+        {
+          "hazard_id": "H-8",
+          "loss_id": "L-3",
+          "relationship_strength": "direct",
+          "rationale": "Communication network disruptions could prevent drones from responding during critical operational periods, leading to loss of service availability.",
+          "conditions": [],
+          "id": "52ff8044-adc9-4386-9165-a164e3840a23"
+        },
+        {
+          "hazard_id": "H-9",
+          "loss_id": "L-5",
+          "relationship_strength": "conditional",
+          "rationale": "Failure to adapt to adverse weather conditions may cause cascading mission failures due to poor fleet coordination.",
+          "conditions": [
+            "Multiple drones are deployed in adverse weather",
+            "Weather conditions exceed system tolerances"
+          ],
+          "id": "f732c46b-0d1b-4a9d-8c36-a11ac1e008c9"
+        },
+        {
+          "hazard_id": "H-9",
+          "loss_id": "L-8",
+          "relationship_strength": "indirect",
+          "rationale": "Adverse weather conditions could cause drones to crash, potentially leading to environmental damage.",
+          "conditions": [
+            "Drone crashes in environmentally sensitive areas",
+            "Batteries or hazardous materials are involved"
+          ],
+          "id": "04a615bb-cdd8-4123-987c-a2441c47b54d"
+        },
+        {
+          "hazard_id": "H-10",
+          "loss_id": "L-6",
+          "relationship_strength": "direct",
+          "rationale": "Remote hijacking of drones could enable attackers to redirect or steal high-value medical cargo.",
+          "conditions": [],
+          "id": "40ed3820-000a-4d78-bab4-5ec6adbc46db"
+        },
+        {
+          "hazard_id": "H-10",
+          "loss_id": "L-7",
+          "relationship_strength": "indirect",
+          "rationale": "Hijacked drones could create public perception of an unsafe system, damaging reputation.",
+          "conditions": [
+            "The hijacking incident becomes publicly known",
+            "Hijackers use drones for harmful purposes"
+          ],
+          "id": "effd7ba6-088b-410c-9ec5-6f55cc3020e9"
+        },
+        {
+          "hazard_id": "H-11",
+          "loss_id": "L-4",
+          "relationship_strength": "direct",
+          "rationale": "Incomplete or tampered records directly violate regulatory compliance requirements, leading to legal penalties.",
+          "conditions": [],
+          "id": "820d1d1c-0d39-4ee2-9664-00957125f9bd"
+        },
+        {
+          "hazard_id": "H-12",
+          "loss_id": "L-5",
+          "relationship_strength": "direct",
+          "rationale": "Conflicting fleet coordination commands could cause cascading failures across emergency missions, leading to loss of mission success.",
+          "conditions": [],
+          "id": "d525e163-29c2-445a-bfbf-7c43674bdf72"
+        },
+        {
+          "hazard_id": "H-12",
+          "loss_id": "L-7",
+          "relationship_strength": "indirect",
+          "rationale": "Cascading mission failures could harm the public's perception of the system's reliability, damaging reputation.",
+          "conditions": [
+            "Failures occur in high-visibility or critical missions",
+            "Failures are publicized or widely noticed"
+          ],
+          "id": "d6a1a70e-5b14-4ddd-9d3d-56eeef3dd428"
+        }
+      ],
+      "temporal_analysis": {
+        "always_present": [],
+        "periodic": [],
+        "conditional": [
+          {
+            "hazard_id": "H-1",
+            "description": "System operates in a state where drones navigate with corrupted GPS data due to signal interference or spoofing",
+            "conditions": []
+          },
+          {
+            "hazard_id": "H-2",
+            "description": "System operates in a state where sensitive patient data is transmitted without encryption over insecure communication channels",
+            "conditions": []
+          },
+          {
+            "hazard_id": "H-3",
+            "description": "System operates in a state where drones fail to avoid obstacles due to corrupted sensor data caused by environmental interference",
+            "conditions": []
+          },
+          {
+            "hazard_id": "H-4",
+            "description": "System operates in a state where drones are unable to land safely due to misidentified landing zones by computer vision algorithms",
+            "conditions": []
+          },
+          {
+            "hazard_id": "H-5",
+            "description": "System operates in a state where unauthorized users gain access to fleet control systems and alter mission priorities",
+            "conditions": []
+          },
+          {
+            "hazard_id": "H-6",
+            "description": "System operates in a state where drones experience unexpected power loss during critical operations",
+            "conditions": []
+          },
+          {
+            "hazard_id": "H-7",
+            "description": "System operates in a state where medical payload tracking records are tampered with, leading to chain-of-custody violations",
+            "conditions": []
+          },
+          {
+            "hazard_id": "H-8",
+            "description": "System operates in a state where drones fail to communicate with ground control due to communication network disruptions",
+            "conditions": []
+          },
+          {
+            "hazard_id": "H-9",
+            "description": "System operates in a state where drones fail to adapt to adverse weather conditions, leading to mission failure",
+            "conditions": []
+          },
+          {
+            "hazard_id": "H-10",
+            "description": "System operates in a state where drones are hijacked remotely, allowing attackers to redirect or repurpose their missions",
+            "conditions": []
+          },
+          {
+            "hazard_id": "H-11",
+            "description": "System operates in a state where regulatory compliance records are incomplete or tampered with, leading to legal violations",
+            "conditions": []
+          },
+          {
+            "hazard_id": "H-12",
+            "description": "System operates in a state where fleet coordination algorithms produce conflicting commands, leading to cascading mission failures",
+            "conditions": []
+          }
+        ],
+        "coverage_gaps": []
+      },
+      "environmental_analysis": {
+        "operational_sensitivity": {
+          "H-1": {
+            "worst_case_condition": "degraded",
+            "impact": "high"
+          },
+          "H-2": {
+            "worst_case_condition": "normal",
+            "impact": "high"
+          },
+          "H-3": {
+            "worst_case_condition": "degraded",
+            "impact": "high"
+          },
+          "H-4": {
+            "worst_case_condition": "degraded",
+            "impact": "high"
+          },
+          "H-5": {
+            "worst_case_condition": "normal",
+            "impact": "high"
+          },
+          "H-6": {
+            "worst_case_condition": "degraded",
+            "impact": "high"
+          },
+          "H-7": {
+            "worst_case_condition": "degraded",
+            "impact": "high"
+          },
+          "H-8": {
+            "worst_case_condition": "degraded",
+            "impact": "high"
+          },
+          "H-9": {
+            "worst_case_condition": "degraded",
+            "impact": "high"
+          },
+          "H-10": {
+            "worst_case_condition": "normal",
+            "impact": "high"
+          },
+          "H-11": {
+            "worst_case_condition": "normal",
+            "impact": "high"
+          },
+          "H-12": {
+            "worst_case_condition": "degraded",
+            "impact": "high"
+          }
+        },
+        "threat_sensitivity": {
+          "H-1": {
+            "escalation_pattern": "System shows progressive degradation with threat escalation"
+          },
+          "H-2": {
+            "escalation_pattern": "System shows progressive degradation with threat escalation"
+          },
+          "H-3": {
+            "escalation_pattern": "System shows progressive degradation with threat escalation"
+          },
+          "H-4": {
+            "escalation_pattern": "System shows progressive degradation with threat escalation"
+          },
+          "H-5": {
+            "escalation_pattern": "System shows progressive degradation with threat escalation"
+          },
+          "H-6": {
+            "escalation_pattern": "System shows progressive degradation with threat escalation"
+          },
+          "H-7": {
+            "escalation_pattern": "System shows progressive degradation with threat escalation"
+          },
+          "H-8": {
+            "escalation_pattern": "System shows progressive degradation with threat escalation"
+          },
+          "H-9": {
+            "escalation_pattern": "System shows progressive degradation with threat escalation"
+          },
+          "H-10": {
+            "escalation_pattern": "System shows progressive degradation with threat escalation"
+          },
+          "H-11": {
+            "escalation_pattern": "System shows progressive degradation with threat escalation"
+          },
+          "H-12": {
+            "escalation_pattern": "System shows progressive degradation with threat escalation"
+          }
+        },
+        "combined_risk_scenarios": [
+          {
+            "scenario": "Multiple high-impact hazards under stress",
+            "hazards": [
+              "H-1",
+              "H-2",
+              "H-3",
+              "H-4",
+              "H-5",
+              "H-6",
+              "H-7",
+              "H-8",
+              "H-9",
+              "H-10",
+              "H-11",
+              "H-12"
+            ],
+            "risk_level": "extreme"
+          }
+        ]
+      },
+      "coverage_analysis": {
+        "covered_losses": [
+          "L-7",
+          "L-4",
+          "L-1",
+          "L-6",
+          "L-5",
+          "L-2",
+          "L-3",
+          "L-8"
+        ],
+        "uncovered_losses": [],
+        "coverage_percentage": 100.0,
+        "loss_hazard_ratio": {
+          "L-1": 4,
+          "L-2": 3,
+          "L-3": 1,
+          "L-4": 2,
+          "L-5": 2,
+          "L-6": 2,
+          "L-7": 3,
+          "L-8": 3
+        }
+      },
+      "cognitive_style": "balanced"
+    },
+    "stakeholder_analysis": {
+      "stakeholders": [
+        {
+          "name": "Individual Emergency Patients",
+          "stakeholder_type": "user",
+          "description": "Patients in critical medical situations relying on the system for rapid delivery of lifesaving medical supplies.",
+          "criticality": "primary",
+          "mission_perspective": {
+            "primary_needs": [
+              "timely medical supply delivery",
+              "accurate telemedicine diagnostics"
+            ],
+            "value_derived": "Improved chances of recovery and survival in emergencies.",
+            "success_criteria": "Rapid and accurate delivery of medical payloads."
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-1",
+              "impact": "catastrophic",
+              "description": "Delayed or failed medical intervention results in loss of life."
+            },
+            {
+              "loss_id": "L-2",
+              "impact": "major",
+              "description": "Unauthorized exposure of their sensitive medical data."
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "low",
+            "interest_level": "high",
+            "engagement_strategy": "keep_informed"
+          }
+        },
+        {
+          "name": "Healthcare Providers",
+          "stakeholder_type": "user",
+          "description": "Doctors, nurses, and paramedics using telemedicine capabilities and receiving critical supplies delivered by drones.",
+          "criticality": "primary",
+          "mission_perspective": {
+            "primary_needs": [
+              "real-time patient monitoring",
+              "delivery of specialized medical equipment"
+            ],
+            "value_derived": "Enhanced ability to manage time-sensitive medical emergencies effectively.",
+            "success_criteria": "Reliable connectivity and accurate delivery."
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-3",
+              "impact": "major",
+              "description": "Loss of service availability disrupts medical workflows."
+            },
+            {
+              "loss_id": "L-5",
+              "impact": "major",
+              "description": "Loss of fleet coordination affects multiple ongoing emergency missions."
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "medium",
+            "interest_level": "high",
+            "engagement_strategy": "manage_closely"
+          }
+        },
+        {
+          "name": "Drone Fleet Operators",
+          "stakeholder_type": "operator",
+          "description": "Personnel responsible for managing, monitoring, and maintaining the drone fleet.",
+          "criticality": "essential",
+          "mission_perspective": {
+            "primary_needs": [
+              "fleet coordination",
+              "airspace deconfliction",
+              "real-time operational oversight"
+            ],
+            "value_derived": "Ensured safe and efficient drone operations.",
+            "success_criteria": "Minimized downtime and optimized fleet utilization."
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-3",
+              "impact": "major",
+              "description": "Service interruptions prevent fleet operations during emergencies."
+            },
+            {
+              "loss_id": "L-5",
+              "impact": "catastrophic",
+              "description": "Cascading failures lead to loss of fleet coordination."
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "high",
+            "interest_level": "medium",
+            "engagement_strategy": "keep_satisfied"
+          }
+        },
+        {
+          "name": "Security Operations Team",
+          "stakeholder_type": "operator",
+          "description": "Team responsible for identifying and mitigating cyber and physical threats to the system.",
+          "criticality": "essential",
+          "mission_perspective": {
+            "primary_needs": [
+              "intrusion detection",
+              "data protection",
+              "incident response"
+            ],
+            "value_derived": "Secure operations and protection of sensitive medical data.",
+            "success_criteria": "Zero unauthorized access and rapid threat resolution."
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-2",
+              "impact": "major",
+              "description": "Unauthorized access to sensitive medical data."
+            },
+            {
+              "loss_id": "L-6",
+              "impact": "moderate",
+              "description": "Theft of high-value medical cargo or drones."
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "high",
+            "interest_level": "high",
+            "engagement_strategy": "manage_closely"
+          }
+        },
+        {
+          "name": "Executive Management",
+          "stakeholder_type": "owner",
+          "description": "Leadership responsible for strategic decisions, funding, and oversight of the system.",
+          "criticality": "important",
+          "mission_perspective": {
+            "primary_needs": [
+              "system reliability",
+              "regulatory compliance",
+              "public trust"
+            ],
+            "value_derived": "Sustainable operations and positive public perception.",
+            "success_criteria": "Compliance with regulations and financial stability."
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-4",
+              "impact": "major",
+              "description": "Loss of regulatory compliance leads to fines and restrictions."
+            },
+            {
+              "loss_id": "L-7",
+              "impact": "moderate",
+              "description": "Damage to reputation due to perceived unsafe operations."
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "very_high",
+            "interest_level": "high",
+            "engagement_strategy": "manage_closely"
+          }
+        },
+        {
+          "name": "FAA (Federal Aviation Administration)",
+          "stakeholder_type": "regulator",
+          "description": "Aviation authority overseeing airspace safety and compliance of autonomous drone operations.",
+          "criticality": "essential",
+          "mission_perspective": {
+            "primary_needs": [
+              "safe airspace integration",
+              "adherence to Part 135 regulations"
+            ],
+            "value_derived": "Ensured safety of civilian airspace.",
+            "success_criteria": "Zero airspace violations and compliance with safety regulations."
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-4",
+              "impact": "major",
+              "description": "Non-compliance results in operational restrictions."
+            },
+            {
+              "loss_id": "L-8",
+              "impact": "moderate",
+              "description": "Environmental damage due to uncontrolled crashes."
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "high",
+            "interest_level": "medium",
+            "engagement_strategy": "keep_satisfied"
+          }
+        },
+        {
+          "name": "Cloud Service Provider",
+          "stakeholder_type": "supplier",
+          "description": "Provider of cloud infrastructure for mission planning and analytics.",
+          "criticality": "important",
+          "mission_perspective": {
+            "primary_needs": [
+              "high availability",
+              "secure data storage"
+            ],
+            "value_derived": "Reliable backend operations and system scalability.",
+            "success_criteria": "99.99% uptime and zero data breaches."
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-3",
+              "impact": "major",
+              "description": "Loss of service availability disrupts emergency response."
+            },
+            {
+              "loss_id": "L-2",
+              "impact": "moderate",
+              "description": "Data breaches compromise sensitive medical information."
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "medium",
+            "interest_level": "medium",
+            "engagement_strategy": "keep_informed"
+          }
+        },
+        {
+          "name": "Local Community",
+          "stakeholder_type": "society",
+          "description": "Residents in urban and rural areas impacted by drone operations.",
+          "criticality": "secondary",
+          "mission_perspective": {
+            "primary_needs": [
+              "safe drone operations",
+              "privacy protection"
+            ],
+            "value_derived": "Improved access to emergency medical services.",
+            "success_criteria": "Minimal disruptions and privacy ensured."
+          },
+          "loss_exposure": [
+            {
+              "loss_id": "L-7",
+              "impact": "moderate",
+              "description": "Damage to public reputation affects trust in the system."
+            },
+            {
+              "loss_id": "L-8",
+              "impact": "minor",
+              "description": "Environmental damage affects community safety."
+            }
+          ],
+          "influence_interest": {
+            "influence_level": "low",
+            "interest_level": "high",
+            "engagement_strategy": "monitor"
+          }
+        }
+      ],
+      "stakeholder_count": 8,
+      "stakeholder_types": {
+        "user": 2,
+        "operator": 2,
+        "owner": 1,
+        "regulator": 1,
+        "supplier": 1,
+        "society": 1
+      },
+      "adversaries": [
+        {
+          "adversary_class": "nation_state",
+          "profile": {
+            "sophistication": "advanced",
+            "resources": "unlimited",
+            "persistence": "long_term",
+            "primary_interest": "strategic_advantage",
+            "geographic_scope": "global"
+          },
+          "mission_targets": {
+            "interested_in": [
+              "airspace disruption",
+              "exploitation of medical data"
+            ],
+            "value_perception": "strategic_target",
+            "historical_interest": "active_reconnaissance"
+          }
+        },
+        {
+          "adversary_class": "organized_crime",
+          "profile": {
+            "sophistication": "high",
+            "resources": "significant",
+            "persistence": "campaign_based",
+            "primary_interest": "financial_gain",
+            "geographic_scope": "international"
+          },
+          "mission_targets": {
+            "interested_in": [
+              "theft of high-value cargo",
+              "ransomware targeting medical data"
+            ],
+            "value_perception": "high_value_target",
+            "historical_interest": "known_targeting"
+          }
+        },
+        {
+          "adversary_class": "hacktivist",
+          "profile": {
+            "sophistication": "moderate",
+            "resources": "limited",
+            "persistence": "short_term",
+            "primary_interest": "ideological",
+            "geographic_scope": "regional"
+          },
+          "mission_targets": {
+            "interested_in": [
+              "privacy violations",
+              "disruption of operations"
+            ],
+            "value_perception": "symbolic_target",
+            "historical_interest": "periodic_campaigns"
+          }
+        }
+      ],
+      "adversary_count": 3,
+      "stakeholder_matrix": {
+        "high_influence_high_interest": [
+          {
+            "name": "Security Operations Team",
+            "type": "operator",
+            "strategy": "manage_closely"
+          },
+          {
+            "name": "Executive Management",
+            "type": "owner",
+            "strategy": "manage_closely"
+          }
+        ],
+        "high_influence_low_interest": [
+          {
+            "name": "Drone Fleet Operators",
+            "type": "operator",
+            "strategy": "keep_satisfied"
+          },
+          {
+            "name": "FAA (Federal Aviation Administration)",
+            "type": "regulator",
+            "strategy": "keep_satisfied"
+          }
+        ],
+        "low_influence_high_interest": [
+          {
+            "name": "Individual Emergency Patients",
+            "type": "user",
+            "strategy": "keep_informed"
+          },
+          {
+            "name": "Healthcare Providers",
+            "type": "user",
+            "strategy": "manage_closely"
+          },
+          {
+            "name": "Local Community",
+            "type": "society",
+            "strategy": "monitor"
+          }
+        ],
+        "low_influence_low_interest": [
+          {
+            "name": "Cloud Service Provider",
+            "type": "supplier",
+            "strategy": "keep_informed"
+          }
+        ]
+      },
+      "adversary_analysis": {
+        "threat_landscape": {
+          "sophistication_range": "Low to Advanced (full spectrum)",
+          "resource_availability": "Unlimited resources available (nation-state)",
+          "persistence_patterns": [
+            "Long-term campaigns likely"
+          ]
+        },
+        "mission_attractiveness": {
+          "overall_rating": "high",
+          "factors": [
+            "Multiple adversaries see high value",
+            "Historical evidence of targeting"
+          ],
+          "most_interested_adversaries": [
+            "nation_state",
+            "organized_crime"
+          ]
+        },
+        "combined_threat_level": "severe"
+      },
+      "mission_success_criteria": {
+        "success_states": {
+          "user_success": {
+            "description": "Users can reliably achieve their goals through the system",
+            "violated_by_losses": [
+              "L-2",
+              "L-3",
+              "L-5",
+              "L-6"
+            ],
+            "evidence_of_success": "High usage rates, positive feedback, goal achievement metrics"
+          },
+          "operational_success": {
+            "description": "System operates efficiently within defined parameters",
+            "violated_by_losses": [
+              "L-3",
+              "L-5"
+            ],
+            "evidence_of_success": "Stable operations, manageable workload, effective controls"
+          },
+          "regulatory_success": {
+            "description": "System maintains continuous compliance with all regulations",
+            "violated_by_losses": [
+              "L-2",
+              "L-4"
+            ],
+            "evidence_of_success": "Clean audits, no violations, proactive compliance"
+          },
+          "security_success": {
+            "description": "System successfully resists adversary attempts",
+            "violated_by_losses": [
+              "L-1",
+              "L-2",
+              "L-3",
+              "L-4",
+              "L-5",
+              "L-6",
+              "L-7",
+              "L-8"
+            ],
+            "evidence_of_success": "No successful compromises, threats detected and mitigated"
+          }
+        },
+        "success_indicators": {
+          "behavioral_indicators": [
+            "Users actively choose to use the system",
+            "Stakeholders express confidence in the system",
+            "No abnormal user behavior patterns"
+          ],
+          "performance_indicators": [
+            "System meets defined performance targets",
+            "Error rates within acceptable thresholds",
+            "Recovery objectives consistently met"
+          ],
+          "external_indicators": [
+            "Positive stakeholder assessments",
+            "Regulatory approval maintained",
+            "Market position stable or improving"
+          ]
+        }
+      },
+      "critical_relationships": [
+        {
+          "relationship": "User-Operator",
+          "nature": "Service delivery and support",
+          "criticality": "essential",
+          "failure_impact": "Users cannot achieve goals, operators cannot fulfill duties"
+        },
+        {
+          "relationship": "Operator-Regulator",
+          "nature": "Compliance and oversight",
+          "criticality": "required",
+          "failure_impact": "Regulatory violations and enforcement actions"
+        },
+        {
+          "relationship": "Adversary-User",
+          "nature": "Threat and target",
+          "criticality": "hostile",
+          "failure_impact": "Direct harm to users through system compromise"
+        }
+      ]
+    },
+    "security_constraints": {
+      "security_constraints": [
+        {
+          "identifier": "SC-1",
+          "name": "Integrity of Navigation Data Constraint",
+          "constraint_statement": "The system shall ensure that navigation data used for autonomous flight is verified for integrity before being utilized by drones.",
+          "rationale": "To prevent drones from operating with corrupted GPS data, which could compromise navigation and mission success.",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "enforcement_mechanism": "Technical controls, policies, and procedures for data integrity verification",
+          "addresses_hazards": [
+            "H-1"
+          ],
+          "prevents_losses": [
+            "L-1",
+            "L-8"
+          ],
+          "related_losses": [
+            "L-1",
+            "L-3",
+            "L-8"
+          ],
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-1",
+              "L-8"
+            ],
+            "capability_degradation": "Loss of accurate navigation and increased risk of mission failure."
+          }
+        },
+        {
+          "identifier": "SC-2",
+          "name": "Encryption of Communication Channels Constraint",
+          "constraint_statement": "The system shall ensure that all sensitive data transmitted between drones, ground control, and healthcare providers is encrypted to maintain confidentiality.",
+          "rationale": "To prevent unauthorized access to sensitive patient data during transmission.",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "enforcement_mechanism": "Technical controls, policies, and procedures for secure communication protocols",
+          "addresses_hazards": [
+            "H-2"
+          ],
+          "prevents_losses": [
+            "L-2"
+          ],
+          "related_losses": [
+            "L-2",
+            "L-7"
+          ],
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-2"
+            ],
+            "capability_degradation": "Exposure of sensitive patient data, leading to loss of privacy and regulatory violations."
+          }
+        },
+        {
+          "identifier": "SC-3",
+          "name": "Integrity of Sensor Data Constraint",
+          "constraint_statement": "The system shall ensure that sensor data used for obstacle avoidance is validated and cross-checked for consistency.",
+          "rationale": "To prevent drones from failing to avoid obstacles due to corrupted or unreliable sensor data.",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "enforcement_mechanism": "Technical controls, policies, and redundancy mechanisms for sensor data validation",
+          "addresses_hazards": [
+            "H-3"
+          ],
+          "prevents_losses": [
+            "L-1",
+            "L-8"
+          ],
+          "related_losses": [
+            "L-1",
+            "L-3",
+            "L-8"
+          ],
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-1",
+              "L-8"
+            ],
+            "capability_degradation": "Increased risk of collisions and mission failure."
+          }
+        },
+        {
+          "identifier": "SC-4",
+          "name": "Safe Landing Zone Verification Constraint",
+          "constraint_statement": "The system shall verify landing zone suitability using redundant data sources and algorithms before initiating the landing sequence.",
+          "rationale": "To ensure drones can safely land without risks posed by misidentified landing zones.",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "enforcement_mechanism": "Technical controls and redundancy in landing zone assessment algorithms",
+          "addresses_hazards": [
+            "H-4"
+          ],
+          "prevents_losses": [
+            "L-1",
+            "L-7"
+          ],
+          "related_losses": [
+            "L-1",
+            "L-3",
+            "L-7",
+            "L-8"
+          ],
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-1"
+            ],
+            "capability_degradation": "Unsafe landings lead to mission failure and risk to nearby individuals."
+          }
+        },
+        {
+          "identifier": "SC-5",
+          "name": "Access Control for Fleet Management Systems Constraint",
+          "constraint_statement": "The system shall enforce strong authentication and authorization mechanisms for all access to fleet control systems.",
+          "rationale": "To prevent unauthorized users from altering mission priorities or gaining control of the fleet.",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "enforcement_mechanism": "Technical controls and access management policies",
+          "addresses_hazards": [
+            "H-5"
+          ],
+          "prevents_losses": [
+            "L-1",
+            "L-5"
+          ],
+          "related_losses": [
+            "L-1",
+            "L-5",
+            "L-7"
+          ],
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-1",
+              "L-5"
+            ],
+            "capability_degradation": "Loss of control over fleet operations, leading to cascading mission failures."
+          }
+        },
+        {
+          "identifier": "SC-6",
+          "name": "Power Resilience Constraint",
+          "constraint_statement": "The system shall ensure that drones have sufficient power reserves and backup mechanisms to complete critical operations.",
+          "rationale": "To prevent unexpected power loss during critical missions.",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "enforcement_mechanism": "Technical controls and redundancy in power systems",
+          "addresses_hazards": [
+            "H-6"
+          ],
+          "prevents_losses": [
+            "L-1",
+            "L-3",
+            "L-8"
+          ],
+          "related_losses": [
+            "L-1",
+            "L-3",
+            "L-8"
+          ],
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-1",
+              "L-3"
+            ],
+            "capability_degradation": "Mission failure due to loss of power mid-operation."
+          }
+        },
+        {
+          "identifier": "SC-7",
+          "name": "Chain of Custody Integrity Constraint",
+          "constraint_statement": "The system shall ensure the integrity and traceability of medical payload tracking records throughout the supply chain.",
+          "rationale": "To prevent tampering with medical payload tracking, ensuring accurate chain-of-custody records.",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "enforcement_mechanism": "Technical controls, policies, and procedures for data integrity",
+          "addresses_hazards": [
+            "H-7"
+          ],
+          "prevents_losses": [
+            "L-6",
+            "L-7"
+          ],
+          "related_losses": [
+            "L-6",
+            "L-7"
+          ],
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-6",
+              "L-7"
+            ],
+            "capability_degradation": "Loss of trust in medical supply tracking, leading to operational and reputational damage."
+          }
+        },
+        {
+          "identifier": "SC-8",
+          "name": "Resilience of Communication Constraint",
+          "constraint_statement": "The system shall ensure communication redundancy to maintain connectivity during critical operations.",
+          "rationale": "To prevent communication network disruptions from disabling drone operations.",
+          "constraint_type": "preventive",
+          "enforcement_level": "mandatory",
+          "enforcement_mechanism": "Technical controls and redundancy in communication systems",
+          "addresses_hazards": [
+            "H-8"
+          ],
+          "prevents_losses": [
+            "L-3",
+            "L-5"
+          ],
+          "related_losses": [
+            "L-3",
+            "L-5"
+          ],
+          "mission_impact_if_violated": {
+            "losses_enabled": [
+              "L-3"
+            ],
+            "capability_degradation": "Loss of communication leads to mission failures and cascading coordination issues."
+          }
+        }
+      ],
+      "constraint_coverage": {
+        "total_hazards": 12,
+        "hazards_with_constraints": 8,
+        "total_constraints": 8,
+        "coverage_balance": 0.6666666666666666,
+        "type_distribution": {
+          "preventive": 8,
+          "detective": 0,
+          "corrective": 0,
+          "compensating": 0
+        }
+      },
+      "constraint_hazard_mappings": [
+        {
+          "constraint_id": "SC-1",
+          "hazard_id": "H-1",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-2",
+          "hazard_id": "H-2",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-3",
+          "hazard_id": "H-3",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-4",
+          "hazard_id": "H-4",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-5",
+          "hazard_id": "H-5",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-6",
+          "hazard_id": "H-6",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-7",
+          "hazard_id": "H-7",
+          "relationship_type": "eliminates"
+        },
+        {
+          "constraint_id": "SC-8",
+          "hazard_id": "H-8",
+          "relationship_type": "eliminates"
+        }
+      ],
+      "constraint_count": 8,
+      "constraint_types": {
+        "preventive": 8,
+        "detective": 0,
+        "corrective": 0,
+        "compensating": 0
+      },
+      "cognitive_style": "balanced",
+      "analysis_metadata": {
+        "agent_type": "security_constraints",
+        "analysis_id": "72efb502-7e60-455d-b470-cf798f37c749",
+        "timestamp": "2025-07-29T05:02:51.416286Z",
+        "version": "1.0"
+      }
+    },
+    "system_boundaries": {
+      "system_boundaries": [
+        {
+          "boundary_name": "Trust Boundaries",
+          "boundary_type": "trust",
+          "description": "Defines where trust transitions occur within the system, including interactions with external entities or components.",
+          "definition_criteria": {
+            "criterion1": "Trust boundaries indicate a change in security assumptions.",
+            "criterion2": "Transitions occur when data or commands flow across different administrative or security domains."
+          },
+          "elements": [
+            {
+              "element_name": "Between Drone Fleet and Ground Control Station",
+              "element_type": "interface",
+              "position": "crossing",
+              "assumptions": {
+                "key": "Assumes encrypted communication to prevent interception."
+              },
+              "constraints": {
+                "key": "Must use secure communication protocols (e.g., TLS)."
+              }
+            },
+            {
+              "element_name": "Between Cloud Mission Planning Platform and External Weather Data Service",
+              "element_type": "interface",
+              "position": "crossing",
+              "assumptions": {
+                "key": "Assumes weather data is from a trusted and verified source."
+              },
+              "constraints": {
+                "key": "External service must provide an API key for access."
+              }
+            },
+            {
+              "element_name": "Between Blockchain Supply Chain System and Pharmacy Systems",
+              "element_type": "interface",
+              "position": "crossing",
+              "assumptions": {
+                "key": "Assumes pharmacy systems can authenticate blockchain access."
+              },
+              "constraints": {
+                "key": "Pharmacy systems must comply with data integrity protocols."
+              }
+            }
+          ]
+        },
+        {
+          "boundary_name": "Data Governance Boundaries",
+          "boundary_type": "data_governance",
+          "description": "Defines the flow of data across the system and into external domains.",
+          "definition_criteria": {
+            "criterion1": "Data transitions involve movement between systems or stakeholders.",
+            "criterion2": "Governance ensures data security, privacy, and compliance."
+          },
+          "elements": [
+            {
+              "element_name": "Patient Vital Signs Data to Telemedicine Platform",
+              "element_type": "data",
+              "position": "crossing",
+              "assumptions": {
+                "key": "Assumes data is encrypted during transmission."
+              },
+              "constraints": {
+                "key": "Must comply with HIPAA privacy requirements."
+              }
+            },
+            {
+              "element_name": "Drone Navigation Data to Air Traffic Control",
+              "element_type": "data",
+              "position": "crossing",
+              "assumptions": {
+                "key": "Assumes ATC systems process navigation data in real-time."
+              },
+              "constraints": {
+                "key": "Data sharing must comply with FAA regulations."
+              }
+            },
+            {
+              "element_name": "Medical Supply Tracking Data to Blockchain",
+              "element_type": "data",
+              "position": "crossing",
+              "assumptions": {
+                "key": "Assumes blockchain provides immutable transaction records."
+              },
+              "constraints": {
+                "key": "Data must be authenticated before being committed."
+              }
+            }
+          ]
+        }
+      ],
+      "system_boundary": {
+        "boundary_name": "Trust Boundaries",
+        "boundary_type": "trust",
+        "description": "Defines where trust transitions occur within the system, including interactions with external entities or components.",
+        "definition_criteria": {
+          "criterion1": "Trust boundaries indicate a change in security assumptions.",
+          "criterion2": "Transitions occur when data or commands flow across different administrative or security domains."
+        },
+        "elements": [
+          {
+            "element_name": "Between Drone Fleet and Ground Control Station",
+            "element_type": "interface",
+            "position": "crossing",
+            "assumptions": {
+              "key": "Assumes encrypted communication to prevent interception."
+            },
+            "constraints": {
+              "key": "Must use secure communication protocols (e.g., TLS)."
+            }
+          },
+          {
+            "element_name": "Between Cloud Mission Planning Platform and External Weather Data Service",
+            "element_type": "interface",
+            "position": "crossing",
+            "assumptions": {
+              "key": "Assumes weather data is from a trusted and verified source."
+            },
+            "constraints": {
+              "key": "External service must provide an API key for access."
+            }
+          },
+          {
+            "element_name": "Between Blockchain Supply Chain System and Pharmacy Systems",
+            "element_type": "interface",
+            "position": "crossing",
+            "assumptions": {
+              "key": "Assumes pharmacy systems can authenticate blockchain access."
+            },
+            "constraints": {
+              "key": "Pharmacy systems must comply with data integrity protocols."
+            }
+          }
+        ],
+        "primary_system": [],
+        "system_elements": [],
+        "external_entities": [],
+        "interfaces": [],
+        "assumptions": [
+          "Between Drone Fleet and Ground Control Station: Assumes encrypted communication to prevent interception.",
+          "Between Cloud Mission Planning Platform and External Weather Data Service: Assumes weather data is from a trusted and verified source.",
+          "Between Blockchain Supply Chain System and Pharmacy Systems: Assumes pharmacy systems can authenticate blockchain access.",
+          "Patient Vital Signs Data to Telemedicine Platform: Assumes data is encrypted during transmission.",
+          "Drone Navigation Data to Air Traffic Control: Assumes ATC systems process navigation data in real-time.",
+          "Medical Supply Tracking Data to Blockchain: Assumes blockchain provides immutable transaction records."
+        ],
+        "exclusions": [
+          "Between Drone Fleet and Ground Control Station: Must use secure communication protocols (e.g., TLS).",
+          "Between Cloud Mission Planning Platform and External Weather Data Service: External service must provide an API key for access.",
+          "Between Blockchain Supply Chain System and Pharmacy Systems: Pharmacy systems must comply with data integrity protocols.",
+          "Patient Vital Signs Data to Telemedicine Platform: Must comply with HIPAA privacy requirements.",
+          "Drone Navigation Data to Air Traffic Control: Data sharing must comply with FAA regulations.",
+          "Medical Supply Tracking Data to Blockchain: Data must be authenticated before being committed."
+        ]
+      },
+      "boundary_analysis": {
+        "primary_system": [],
+        "system_elements": [],
+        "external_entities": [],
+        "interfaces": [],
+        "assumptions": [
+          "Between Drone Fleet and Ground Control Station: Assumes encrypted communication to prevent interception.",
+          "Between Cloud Mission Planning Platform and External Weather Data Service: Assumes weather data is from a trusted and verified source.",
+          "Between Blockchain Supply Chain System and Pharmacy Systems: Assumes pharmacy systems can authenticate blockchain access.",
+          "Patient Vital Signs Data to Telemedicine Platform: Assumes data is encrypted during transmission.",
+          "Drone Navigation Data to Air Traffic Control: Assumes ATC systems process navigation data in real-time.",
+          "Medical Supply Tracking Data to Blockchain: Assumes blockchain provides immutable transaction records."
+        ],
+        "exclusions": [
+          "Between Drone Fleet and Ground Control Station: Must use secure communication protocols (e.g., TLS).",
+          "Between Cloud Mission Planning Platform and External Weather Data Service: External service must provide an API key for access.",
+          "Between Blockchain Supply Chain System and Pharmacy Systems: Pharmacy systems must comply with data integrity protocols.",
+          "Patient Vital Signs Data to Telemedicine Platform: Must comply with HIPAA privacy requirements.",
+          "Drone Navigation Data to Air Traffic Control: Data sharing must comply with FAA regulations.",
+          "Medical Supply Tracking Data to Blockchain: Data must be authenticated before being committed."
+        ],
+        "boundary_coverage": {
+          "total_boundaries_defined": 2,
+          "critical_interfaces_identified": 0,
+          "external_dependencies": 0
+        }
+      },
+      "boundary_relationships": [],
+      "boundary_summary": {
+        "total_boundaries": 2,
+        "boundary_types": {
+          "trust": 1,
+          "data_governance": 1
+        },
+        "total_elements": 6,
+        "critical_interfaces": 0,
+        "external_dependencies": 0
+      },
+      "cognitive_style": "balanced",
+      "analysis_metadata": {
+        "agent_type": "system_boundaries",
+        "analysis_id": "72efb502-7e60-455d-b470-cf798f37c749",
+        "timestamp": "2025-07-29T05:03:12.802518Z",
+        "version": "1.0"
+      }
+    },
+    "validation": {
+      "validation_results": {
+        "mission_clarity": {
+          "status": "pass",
+          "violations": [],
+          "warnings": [],
+          "abstraction_score": 100
+        },
+        "loss_completeness": {
+          "status": "fail",
+          "missing_elements": [
+            {
+              "element": "security_constraints",
+              "impact": "critical",
+              "description": "security_constraints analysis not performed"
+            },
+            {
+              "element": "system_boundaries",
+              "impact": "critical",
+              "description": "system_boundaries analysis not performed"
+            }
+          ],
+          "incomplete_elements": [],
+          "completeness_score": 40
+        },
+        "hazard_coverage": {
+          "status": "pass",
+          "coverage_gaps": [
+            {
+              "type": "missing_stakeholder_types",
+              "items": [
+                "partner"
+              ],
+              "impact": "minor",
+              "description": "Stakeholder types not represented"
+            }
+          ],
+          "coverage_metrics": {
+            "loss_coverage": {
+              "total_losses": 8,
+              "covered_losses": 8,
+              "coverage_percentage": 100.0
+            },
+            "stakeholder_coverage": {
+              "expected_types": 6,
+              "covered_types": 6,
+              "coverage_percentage": 100.0
+            },
+            "hazard_category_coverage": {
+              "expected_categories": 4,
+              "covered_categories": 6,
+              "coverage_percentage": 150.0
+            }
+          },
+          "coverage_score": 116.66666666666667
+        },
+        "stakeholder_coverage": {
+          "status": "pass",
+          "inconsistencies": [],
+          "cross_references": [
+            {
+              "check": "domain_consistency",
+              "status": "verified",
+              "details": "Domain 'healthcare' used consistently"
+            }
+          ],
+          "consistency_score": 100
+        },
+        "security_constraints": {
+          "status": "fail",
+          "missing_constraints": [
+            {
+              "hazard_id": "H-1",
+              "hazard_description": "System operates in a state where drones navigate with corrupted GPS data due to signal interference or spoofing",
+              "impact": "critical",
+              "issue": "No security constraints defined"
+            },
+            {
+              "hazard_id": "H-2",
+              "hazard_description": "System operates in a state where sensitive patient data is transmitted without encryption over insecure communication channels",
+              "impact": "critical",
+              "issue": "No security constraints defined"
+            },
+            {
+              "hazard_id": "H-3",
+              "hazard_description": "System operates in a state where drones fail to avoid obstacles due to corrupted sensor data caused by environmental interference",
+              "impact": "critical",
+              "issue": "No security constraints defined"
+            },
+            {
+              "hazard_id": "H-4",
+              "hazard_description": "System operates in a state where drones are unable to land safely due to misidentified landing zones by computer vision algorithms",
+              "impact": "critical",
+              "issue": "No security constraints defined"
+            },
+            {
+              "hazard_id": "H-5",
+              "hazard_description": "System operates in a state where unauthorized users gain access to fleet control systems and alter mission priorities",
+              "impact": "critical",
+              "issue": "No security constraints defined"
+            },
+            {
+              "hazard_id": "H-6",
+              "hazard_description": "System operates in a state where drones experience unexpected power loss during critical operations",
+              "impact": "critical",
+              "issue": "No security constraints defined"
+            },
+            {
+              "hazard_id": "H-7",
+              "hazard_description": "System operates in a state where medical payload tracking records are tampered with, leading to chain-of-custody violations",
+              "impact": "critical",
+              "issue": "No security constraints defined"
+            },
+            {
+              "hazard_id": "H-8",
+              "hazard_description": "System operates in a state where drones fail to communicate with ground control due to communication network disruptions",
+              "impact": "critical",
+              "issue": "No security constraints defined"
+            },
+            {
+              "hazard_id": "H-9",
+              "hazard_description": "System operates in a state where drones fail to adapt to adverse weather conditions, leading to mission failure",
+              "impact": "critical",
+              "issue": "No security constraints defined"
+            },
+            {
+              "hazard_id": "H-10",
+              "hazard_description": "System operates in a state where drones are hijacked remotely, allowing attackers to redirect or repurpose their missions",
+              "impact": "critical",
+              "issue": "No security constraints defined"
+            },
+            {
+              "hazard_id": "H-11",
+              "hazard_description": "System operates in a state where regulatory compliance records are incomplete or tampered with, leading to legal violations",
+              "impact": "critical",
+              "issue": "No security constraints defined"
+            },
+            {
+              "hazard_id": "H-12",
+              "hazard_description": "System operates in a state where fleet coordination algorithms produce conflicting commands, leading to cascading mission failures",
+              "impact": "critical",
+              "issue": "No security constraints defined"
+            },
+            {
+              "hazard_id": "H-1",
+              "hazard_description": "System operates in a state where drones navigate with corrupted GPS data due to signal interference or spoofing",
+              "impact": "critical",
+              "issue": "Critical hazard needs multiple constraints (currently has 0)"
+            },
+            {
+              "hazard_id": "H-3",
+              "hazard_description": "System operates in a state where drones fail to avoid obstacles due to corrupted sensor data caused by environmental interference",
+              "impact": "critical",
+              "issue": "Critical hazard needs multiple constraints (currently has 0)"
+            },
+            {
+              "hazard_id": "H-6",
+              "hazard_description": "System operates in a state where drones experience unexpected power loss during critical operations",
+              "impact": "critical",
+              "issue": "Critical hazard needs multiple constraints (currently has 0)"
+            },
+            {
+              "hazard_id": "H-7",
+              "hazard_description": "System operates in a state where medical payload tracking records are tampered with, leading to chain-of-custody violations",
+              "impact": "critical",
+              "issue": "Critical hazard needs multiple constraints (currently has 0)"
+            },
+            {
+              "hazard_id": "H-8",
+              "hazard_description": "System operates in a state where drones fail to communicate with ground control due to communication network disruptions",
+              "impact": "critical",
+              "issue": "Critical hazard needs multiple constraints (currently has 0)"
+            },
+            {
+              "hazard_id": "H-9",
+              "hazard_description": "System operates in a state where drones fail to adapt to adverse weather conditions, leading to mission failure",
+              "impact": "critical",
+              "issue": "Critical hazard needs multiple constraints (currently has 0)"
+            },
+            {
+              "hazard_id": "H-12",
+              "hazard_description": "System operates in a state where fleet coordination algorithms produce conflicting commands, leading to cascading mission failures",
+              "impact": "critical",
+              "issue": "Critical hazard needs multiple constraints (currently has 0)"
+            }
+          ],
+          "weak_constraints": [],
+          "constraint_coverage": {
+            "total_hazards": 12,
+            "hazards_with_constraints": 0,
+            "total_constraints": 0,
+            "type_distribution": {
+              "preventive": 0,
+              "detective": 0,
+              "corrective": 0,
+              "compensating": 0
+            },
+            "coverage_balance": 0.0
+          },
+          "constraint_score": 0
+        },
+        "system_boundaries": {
+          "status": "fail",
+          "missing_boundaries": [
+            {
+              "boundary_type": "system_scope",
+              "impact": "major",
+              "description": "Missing system_scope boundary definition"
+            },
+            {
+              "boundary_type": "trust",
+              "impact": "major",
+              "description": "Missing trust boundary definition"
+            },
+            {
+              "boundary_type": "responsibility",
+              "impact": "major",
+              "description": "Missing responsibility boundary definition"
+            },
+            {
+              "boundary_type": "data_governance",
+              "impact": "major",
+              "description": "Missing data_governance boundary definition"
+            }
+          ],
+          "boundary_issues": [],
+          "boundary_metrics": {
+            "defined_boundaries": 0,
+            "essential_coverage": 0.0,
+            "critical_interfaces": 0,
+            "total_elements": 0
+          },
+          "boundary_score": 0
+        }
+      },
+      "quality_metrics": {
+        "abstraction_score": 100,
+        "completeness_score": 40,
+        "consistency_score": 100,
+        "coverage_score": 116.66666666666667,
+        "security_constraints_score": 0,
+        "system_boundaries_score": 0,
+        "overall_score": 65.5,
+        "quality_level": "needs_improvement",
+        "strengths": [
+          "Excellent abstraction level maintenance",
+          "High internal consistency",
+          "Thorough loss and hazard coverage"
+        ],
+        "weaknesses": [
+          "Missing required elements",
+          "Weak or missing security constraints",
+          "Poorly defined system boundaries"
+        ]
+      },
+      "recommendations": [
+        {
+          "priority": "critical",
+          "category": "completeness",
+          "recommendation": "Complete missing analysis elements",
+          "specific_actions": [
+            "Perform security_constraints analysis",
+            "Perform system_boundaries analysis"
+          ]
+        },
+        {
+          "priority": "critical",
+          "category": "security_constraints",
+          "recommendation": "Define security constraints for all hazards",
+          "specific_actions": [
+            "Add constraints for hazard H-1",
+            "Add constraints for hazard H-2",
+            "Add constraints for hazard H-3"
+          ]
+        },
+        {
+          "priority": "high",
+          "category": "system_boundaries",
+          "recommendation": "Define missing system boundaries",
+          "specific_actions": [
+            "Define system_scope boundary",
+            "Define trust boundary",
+            "Define responsibility boundary",
+            "Define data_governance boundary"
+          ]
+        }
+      ],
+      "step2_bridge": {
+        "control_needs": {
+          "integrity_controls": {
+            "need": "Ensure system operates with verified integrity",
+            "addresses_hazards": [
+              "H-1",
+              "H-3",
+              "H-7"
+            ],
+            "criticality": "essential"
+          },
+          "confidentiality_controls": {
+            "need": "Protect information from unauthorized observation",
+            "addresses_hazards": [
+              "H-2",
+              "H-5"
+            ],
+            "criticality": "essential"
+          },
+          "capability_controls": {
+            "need": "Preserve critical system capabilities",
+            "addresses_hazards": [
+              "H-4",
+              "H-10"
+            ],
+            "criticality": "essential"
+          },
+          "availability_controls": {
+            "need": "Maintain service despite disruptions",
+            "addresses_hazards": [
+              "H-6",
+              "H-8"
+            ],
+            "criticality": "essential"
+          }
+        },
+        "implied_boundaries": {
+          "user_system": {
+            "between": [
+              "users",
+              "system"
+            ],
+            "nature": "service_delivery",
+            "criticality": "primary"
+          },
+          "system_regulator": {
+            "between": [
+              "system",
+              "regulators"
+            ],
+            "nature": "compliance_reporting",
+            "criticality": "required"
+          }
+        },
+        "architectural_hints": {
+          "focus": "Detection and response architecture recommended"
+        },
+        "security_constraint_mapping": {
+          "preventive": [],
+          "detective": [],
+          "corrective": [],
+          "compensating": []
+        },
+        "boundary_control_requirements": {},
+        "transition_guidance": [
+          {
+            "step": "Map control needs to control structure",
+            "description": "Each control need requires one or more controllers in Step 2"
+          },
+          {
+            "step": "Define control boundaries",
+            "description": "Implied boundaries become explicit control interfaces"
+          },
+          {
+            "step": "Implement security constraints as control actions",
+            "description": "Transform constraints into specific control actions and feedback loops"
+          },
+          {
+            "step": "Establish boundary control points",
+            "description": "Place controllers at critical boundary crossing points"
+          },
+          {
+            "step": "Allocate losses to controllers",
+            "description": "Each controller must prevent specific losses"
+          },
+          {
+            "step": "Design control channels",
+            "description": "Ensure secure and reliable control command paths"
+          }
+        ]
+      },
+      "executive_summary": {
+        "analysis_scope": {
+          "system": "rapidly deliver time-critical medical supplies and enable remote medical intervention in emergencies",
+          "domain": "healthcare",
+          "criticality": "catastrophic"
+        },
+        "key_findings": {
+          "losses_identified": 8,
+          "hazards_identified": 12,
+          "critical_losses": 3,
+          "adversary_classes": 3,
+          "highest_threat": "moderate",
+          "security_constraints_defined": 0,
+          "hazards_with_constraints": 0,
+          "system_boundaries_defined": 0
+        },
+        "risk_landscape": {
+          "primary_risks": [
+            "3 catastrophic losses possible",
+            "Direct financial exposure identified"
+          ],
+          "threat_level": "severe",
+          "coverage_gaps": 0,
+          "unconstrained_hazards": 12,
+          "missing_critical_boundaries": 3
+        },
+        "quality_assessment": {
+          "overall_quality": "needs_improvement",
+          "quality_score": 65.5,
+          "strengths": [
+            "Excellent abstraction level maintenance",
+            "High internal consistency"
+          ],
+          "improvement_areas": [
+            "Missing required elements",
+            "Weak or missing security constraints"
+          ]
+        },
+        "next_steps": [
+          "Address quality issues before proceeding to Step 2",
+          "Define security constraints for 12 unconstrained hazards",
+          "Define 3 missing critical boundaries",
+          "Review Step 1 to Step 2 bridge for architectural planning"
+        ]
+      },
+      "validation_timestamp": "2025-07-29T05:03:12.811967",
+      "overall_status": "revision_required"
+    }
+  },
+  "executive_summary": {
+    "analysis_scope": {
+      "system": "rapidly deliver time-critical medical supplies and enable remote medical intervention in emergencies",
+      "domain": "healthcare",
+      "criticality": "catastrophic"
+    },
+    "key_findings": {
+      "losses_identified": 8,
+      "hazards_identified": 12,
+      "critical_losses": 3,
+      "adversary_classes": 3,
+      "highest_threat": "moderate",
+      "security_constraints_defined": 0,
+      "hazards_with_constraints": 0,
+      "system_boundaries_defined": 0
+    },
+    "risk_landscape": {
+      "primary_risks": [
+        "3 catastrophic losses possible",
+        "Direct financial exposure identified"
+      ],
+      "threat_level": "severe",
+      "coverage_gaps": 0,
+      "unconstrained_hazards": 12,
+      "missing_critical_boundaries": 3
+    },
+    "quality_assessment": {
+      "overall_quality": "needs_improvement",
+      "quality_score": 65.5,
+      "strengths": [
+        "Excellent abstraction level maintenance",
+        "High internal consistency"
+      ],
+      "improvement_areas": [
+        "Missing required elements",
+        "Weak or missing security constraints"
+      ]
+    },
+    "next_steps": [
+      "Address quality issues before proceeding to Step 2",
+      "Define security constraints for 12 unconstrained hazards",
+      "Define 3 missing critical boundaries",
+      "Review Step 1 to Step 2 bridge for architectural planning"
+    ]
+  },
+  "step2_bridge": {
+    "control_needs": {
+      "integrity_controls": {
+        "need": "Ensure system operates with verified integrity",
+        "addresses_hazards": [
+          "H-1",
+          "H-3",
+          "H-7"
+        ],
+        "criticality": "essential"
+      },
+      "confidentiality_controls": {
+        "need": "Protect information from unauthorized observation",
+        "addresses_hazards": [
+          "H-2",
+          "H-5"
+        ],
+        "criticality": "essential"
+      },
+      "capability_controls": {
+        "need": "Preserve critical system capabilities",
+        "addresses_hazards": [
+          "H-4",
+          "H-10"
+        ],
+        "criticality": "essential"
+      },
+      "availability_controls": {
+        "need": "Maintain service despite disruptions",
+        "addresses_hazards": [
+          "H-6",
+          "H-8"
+        ],
+        "criticality": "essential"
+      }
+    },
+    "implied_boundaries": {
+      "user_system": {
+        "between": [
+          "users",
+          "system"
+        ],
+        "nature": "service_delivery",
+        "criticality": "primary"
+      },
+      "system_regulator": {
+        "between": [
+          "system",
+          "regulators"
+        ],
+        "nature": "compliance_reporting",
+        "criticality": "required"
+      }
+    },
+    "architectural_hints": {
+      "focus": "Detection and response architecture recommended"
+    },
+    "security_constraint_mapping": {
+      "preventive": [],
+      "detective": [],
+      "corrective": [],
+      "compensating": []
+    },
+    "boundary_control_requirements": {},
+    "transition_guidance": [
+      {
+        "step": "Map control needs to control structure",
+        "description": "Each control need requires one or more controllers in Step 2"
+      },
+      {
+        "step": "Define control boundaries",
+        "description": "Implied boundaries become explicit control interfaces"
+      },
+      {
+        "step": "Implement security constraints as control actions",
+        "description": "Transform constraints into specific control actions and feedback loops"
+      },
+      {
+        "step": "Establish boundary control points",
+        "description": "Place controllers at critical boundary crossing points"
+      },
+      {
+        "step": "Allocate losses to controllers",
+        "description": "Each controller must prevent specific losses"
+      },
+      {
+        "step": "Design control channels",
+        "description": "Ensure secure and reliable control command paths"
+      }
+    ]
+  },
+  "execution_log": [
+    {
+      "timestamp": "2025-07-29T05:01:18.335028",
+      "message": "Starting Phase 1: Mission Analysis",
+      "type": "info"
+    },
+    {
+      "timestamp": "2025-07-29T05:01:26.962284",
+      "message": "Starting Phase 2: Loss Identification",
+      "type": "info"
+    },
+    {
+      "timestamp": "2025-07-29T05:01:51.845160",
+      "message": "Starting Phase 3: Hazard and Stakeholder Analysis (parallel)",
+      "type": "info"
+    },
+    {
+      "timestamp": "2025-07-29T05:02:35.500648",
+      "message": "Starting Phase 4: Security Constraint Definition",
+      "type": "info"
+    },
+    {
+      "timestamp": "2025-07-29T05:02:51.432493",
+      "message": "Starting Phase 5: System Boundary Definition",
+      "type": "info"
+    },
+    {
+      "timestamp": "2025-07-29T05:03:12.805342",
+      "message": "Starting Phase 6: Validation and Quality Assessment",
+      "type": "info"
+    },
+    {
+      "timestamp": "2025-07-29T05:03:12.819947",
+      "message": "Step 1 analysis completed successfully",
+      "type": "info"
+    }
+  ],
+  "completeness_check": {
+    "is_complete": true,
+    "missing_artifacts": [],
+    "validation_issues": [],
+    "artifact_status": {
+      "mission_analysis": {
+        "present": true,
+        "complete": true,
+        "issues": []
+      },
+      "loss_identification": {
+        "present": true,
+        "complete": true,
+        "issues": []
+      },
+      "hazard_identification": {
+        "present": true,
+        "complete": true,
+        "issues": []
+      },
+      "stakeholder_analysis": {
+        "present": true,
+        "complete": true,
+        "issues": []
+      },
+      "security_constraints": {
+        "present": true,
+        "complete": true,
+        "issues": []
+      },
+      "system_boundaries": {
+        "present": true,
+        "complete": true,
+        "issues": []
+      },
+      "validation": {
+        "present": true,
+        "complete": true,
+        "issues": []
+      }
+    },
+    "summary": "All artifacts generated successfully"
+  },
+  "model_info": {
+    "provider": "openai",
+    "model": "gpt-4o",
+    "temperature": 0.7,
+    "max_tokens": 4096,
+    "type": "Azure OpenAI",
+    "execution_mode": "standard"
+  }
+}

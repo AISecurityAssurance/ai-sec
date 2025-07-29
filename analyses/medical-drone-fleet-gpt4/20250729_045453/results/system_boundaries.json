@@ -1,0 +1,460 @@
+{
+  "system_boundaries": [
+    {
+      "boundary_name": "System Scope",
+      "boundary_type": "system_scope",
+      "description": "Defines the boundary of components, systems, and interfaces that are either controlled by the organization or external dependencies.",
+      "definition_criteria": {
+        "criterion1": "Components fully controlled by the organization are inside.",
+        "criterion2": "External systems and services critical to the platform\u2019s operation but outside our direct control are outside."
+      },
+      "elements": [
+        {
+          "element_name": "Core Application Server",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "key": "Fully controlled and maintained by our organization."
+          },
+          "constraints": {
+            "key": "Must comply with security and operational policies."
+          }
+        },
+        {
+          "element_name": "Primary Database (PostgreSQL Cluster)",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "key": "Located within our managed cloud infrastructure."
+          },
+          "constraints": {
+            "key": "Data encryption must be enforced at rest and in transit."
+          }
+        },
+        {
+          "element_name": "API Gateway",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "key": "Acts as the central point for external communication."
+          },
+          "constraints": {
+            "key": "Authentication and rate-limiting must be implemented."
+          }
+        },
+        {
+          "element_name": "Customer Devices (Web Browsers, iOS/Android Mobile Apps)",
+          "element_type": "component",
+          "position": "outside",
+          "assumptions": {
+            "key": "Users are responsible for keeping their devices secure."
+          },
+          "constraints": {
+            "key": "Device security impacts the security of the overall platform."
+          }
+        },
+        {
+          "element_name": "Payment Processor Networks (ACH, SWIFT, Card Networks)",
+          "element_type": "actor",
+          "position": "outside",
+          "assumptions": {
+            "key": "Critical external systems for payment processing."
+          },
+          "constraints": {
+            "key": "Payment processing SLAs must be adhered to."
+          }
+        },
+        {
+          "element_name": "Third-party Identity Verification Service",
+          "element_type": "actor",
+          "position": "outside",
+          "assumptions": {
+            "key": "Provides KYC checks for account creation and regulatory compliance."
+          },
+          "constraints": {
+            "key": "Service must comply with applicable privacy laws (e.g., GDPR)."
+          }
+        },
+        {
+          "element_name": "RESTful API for Mobile Application",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "key": "Serves as the primary communication channel for mobile apps."
+          },
+          "constraints": {
+            "key": "Must be secured using TLS 1.2 or higher."
+          }
+        },
+        {
+          "element_name": "OAuth2 Integration with Identity Provider",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "key": "Used for secure user authentication."
+          },
+          "constraints": {
+            "key": "Tokens must have an expiration policy."
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Trust Boundaries",
+      "boundary_type": "trust",
+      "description": "Defines points where trust changes between different actors or components in the system.",
+      "definition_criteria": {
+        "criterion1": "Trust boundaries exist where data or control flows between trusted and untrusted entities.",
+        "criterion2": "Boundaries can also exist within the system where trust levels vary between components."
+      },
+      "elements": [
+        {
+          "element_name": "Between Client Application (Mobile/Web) and API Gateway",
+          "element_type": "interface",
+          "position": "crossing",
+          "assumptions": {
+            "key": "The client application is outside our trust boundary."
+          },
+          "constraints": {
+            "key": "All requests must be authenticated and validated."
+          }
+        },
+        {
+          "element_name": "Between Application Server and Payment Processor Network",
+          "element_type": "interface",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Payment processor networks are external and not fully trusted."
+          },
+          "constraints": {
+            "key": "Use secure communication protocols (e.g., TLS)."
+          }
+        },
+        {
+          "element_name": "Between Primary Database and Backup Storage",
+          "element_type": "component",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Backup storage may reside in a different trust zone."
+          },
+          "constraints": {
+            "key": "Data must be encrypted during transfer and storage."
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Data Governance Boundaries",
+      "boundary_type": "data_governance",
+      "description": "Defines the flow of data between different components, systems, and external parties.",
+      "definition_criteria": {
+        "criterion1": "Data governance boundaries exist when data transitions between ownership or geographical jurisdictions.",
+        "criterion2": "Ensuring regulatory compliance and data protection is key to these boundaries."
+      },
+      "elements": [
+        {
+          "element_name": "Customer PII to Credit Bureau",
+          "element_type": "data",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Data is securely transmitted to the credit bureau for credit checks."
+          },
+          "constraints": {
+            "key": "Transmission must comply with GDPR and other privacy laws."
+          }
+        },
+        {
+          "element_name": "Transaction Data to Regulatory Authority",
+          "element_type": "data",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Data is shared via secure file transfer protocols."
+          },
+          "constraints": {
+            "key": "Must comply with AML/BSA reporting requirements."
+          }
+        },
+        {
+          "element_name": "Account Data to Disaster Recovery Site",
+          "element_type": "data",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Data is replicated in near real-time to ensure availability."
+          },
+          "constraints": {
+            "key": "Replication must be encrypted and comply with data sovereignty laws."
+          }
+        }
+      ]
+    }
+  ],
+  "system_boundary": {
+    "boundary_name": "System Scope",
+    "boundary_type": "system_scope",
+    "description": "Defines the boundary of components, systems, and interfaces that are either controlled by the organization or external dependencies.",
+    "definition_criteria": {
+      "criterion1": "Components fully controlled by the organization are inside.",
+      "criterion2": "External systems and services critical to the platform\u2019s operation but outside our direct control are outside."
+    },
+    "elements": [
+      {
+        "element_name": "Core Application Server",
+        "element_type": "component",
+        "position": "inside",
+        "assumptions": {
+          "key": "Fully controlled and maintained by our organization."
+        },
+        "constraints": {
+          "key": "Must comply with security and operational policies."
+        }
+      },
+      {
+        "element_name": "Primary Database (PostgreSQL Cluster)",
+        "element_type": "component",
+        "position": "inside",
+        "assumptions": {
+          "key": "Located within our managed cloud infrastructure."
+        },
+        "constraints": {
+          "key": "Data encryption must be enforced at rest and in transit."
+        }
+      },
+      {
+        "element_name": "API Gateway",
+        "element_type": "component",
+        "position": "inside",
+        "assumptions": {
+          "key": "Acts as the central point for external communication."
+        },
+        "constraints": {
+          "key": "Authentication and rate-limiting must be implemented."
+        }
+      },
+      {
+        "element_name": "Customer Devices (Web Browsers, iOS/Android Mobile Apps)",
+        "element_type": "component",
+        "position": "outside",
+        "assumptions": {
+          "key": "Users are responsible for keeping their devices secure."
+        },
+        "constraints": {
+          "key": "Device security impacts the security of the overall platform."
+        }
+      },
+      {
+        "element_name": "Payment Processor Networks (ACH, SWIFT, Card Networks)",
+        "element_type": "actor",
+        "position": "outside",
+        "assumptions": {
+          "key": "Critical external systems for payment processing."
+        },
+        "constraints": {
+          "key": "Payment processing SLAs must be adhered to."
+        }
+      },
+      {
+        "element_name": "Third-party Identity Verification Service",
+        "element_type": "actor",
+        "position": "outside",
+        "assumptions": {
+          "key": "Provides KYC checks for account creation and regulatory compliance."
+        },
+        "constraints": {
+          "key": "Service must comply with applicable privacy laws (e.g., GDPR)."
+        }
+      },
+      {
+        "element_name": "RESTful API for Mobile Application",
+        "element_type": "interface",
+        "position": "interface",
+        "assumptions": {
+          "key": "Serves as the primary communication channel for mobile apps."
+        },
+        "constraints": {
+          "key": "Must be secured using TLS 1.2 or higher."
+        }
+      },
+      {
+        "element_name": "OAuth2 Integration with Identity Provider",
+        "element_type": "interface",
+        "position": "interface",
+        "assumptions": {
+          "key": "Used for secure user authentication."
+        },
+        "constraints": {
+          "key": "Tokens must have an expiration policy."
+        }
+      }
+    ],
+    "primary_system": [
+      "Core Application Server",
+      "Primary Database (PostgreSQL Cluster)",
+      "API Gateway"
+    ],
+    "system_elements": [
+      "Core Application Server",
+      "Primary Database (PostgreSQL Cluster)",
+      "API Gateway"
+    ],
+    "external_entities": [
+      "Customer Devices (Web Browsers, iOS/Android Mobile Apps)",
+      "Third-party Identity Verification Service",
+      "Payment Processor Networks (ACH, SWIFT, Card Networks)"
+    ],
+    "interfaces": [
+      {
+        "name": "RESTful API for Mobile Application",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "Serves as the primary communication channel for mobile apps."
+        },
+        "constraints": {
+          "key": "Must be secured using TLS 1.2 or higher."
+        }
+      },
+      {
+        "name": "OAuth2 Integration with Identity Provider",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "Used for secure user authentication."
+        },
+        "constraints": {
+          "key": "Tokens must have an expiration policy."
+        }
+      }
+    ],
+    "assumptions": [
+      "Core Application Server: Fully controlled and maintained by our organization.",
+      "Primary Database (PostgreSQL Cluster): Located within our managed cloud infrastructure.",
+      "API Gateway: Acts as the central point for external communication.",
+      "Customer Devices (Web Browsers, iOS/Android Mobile Apps): Users are responsible for keeping their devices secure.",
+      "Payment Processor Networks (ACH, SWIFT, Card Networks): Critical external systems for payment processing.",
+      "Third-party Identity Verification Service: Provides KYC checks for account creation and regulatory compliance.",
+      "RESTful API for Mobile Application: Serves as the primary communication channel for mobile apps.",
+      "OAuth2 Integration with Identity Provider: Used for secure user authentication.",
+      "Between Client Application (Mobile/Web) and API Gateway: The client application is outside our trust boundary.",
+      "Between Application Server and Payment Processor Network: Payment processor networks are external and not fully trusted.",
+      "Between Primary Database and Backup Storage: Backup storage may reside in a different trust zone.",
+      "Customer PII to Credit Bureau: Data is securely transmitted to the credit bureau for credit checks.",
+      "Transaction Data to Regulatory Authority: Data is shared via secure file transfer protocols.",
+      "Account Data to Disaster Recovery Site: Data is replicated in near real-time to ensure availability."
+    ],
+    "exclusions": [
+      "Core Application Server: Must comply with security and operational policies.",
+      "Primary Database (PostgreSQL Cluster): Data encryption must be enforced at rest and in transit.",
+      "API Gateway: Authentication and rate-limiting must be implemented.",
+      "Customer Devices (Web Browsers, iOS/Android Mobile Apps): Device security impacts the security of the overall platform.",
+      "Payment Processor Networks (ACH, SWIFT, Card Networks): Payment processing SLAs must be adhered to.",
+      "Third-party Identity Verification Service: Service must comply with applicable privacy laws (e.g., GDPR).",
+      "RESTful API for Mobile Application: Must be secured using TLS 1.2 or higher.",
+      "OAuth2 Integration with Identity Provider: Tokens must have an expiration policy.",
+      "Between Client Application (Mobile/Web) and API Gateway: All requests must be authenticated and validated.",
+      "Between Application Server and Payment Processor Network: Use secure communication protocols (e.g., TLS).",
+      "Between Primary Database and Backup Storage: Data must be encrypted during transfer and storage.",
+      "Customer PII to Credit Bureau: Transmission must comply with GDPR and other privacy laws.",
+      "Transaction Data to Regulatory Authority: Must comply with AML/BSA reporting requirements.",
+      "Account Data to Disaster Recovery Site: Replication must be encrypted and comply with data sovereignty laws."
+    ]
+  },
+  "boundary_analysis": {
+    "primary_system": [
+      "Core Application Server",
+      "Primary Database (PostgreSQL Cluster)",
+      "API Gateway"
+    ],
+    "system_elements": [
+      "Core Application Server",
+      "Primary Database (PostgreSQL Cluster)",
+      "API Gateway"
+    ],
+    "external_entities": [
+      "Customer Devices (Web Browsers, iOS/Android Mobile Apps)",
+      "Third-party Identity Verification Service",
+      "Payment Processor Networks (ACH, SWIFT, Card Networks)"
+    ],
+    "interfaces": [
+      {
+        "name": "RESTful API for Mobile Application",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "Serves as the primary communication channel for mobile apps."
+        },
+        "constraints": {
+          "key": "Must be secured using TLS 1.2 or higher."
+        }
+      },
+      {
+        "name": "OAuth2 Integration with Identity Provider",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "Used for secure user authentication."
+        },
+        "constraints": {
+          "key": "Tokens must have an expiration policy."
+        }
+      }
+    ],
+    "assumptions": [
+      "Core Application Server: Fully controlled and maintained by our organization.",
+      "Primary Database (PostgreSQL Cluster): Located within our managed cloud infrastructure.",
+      "API Gateway: Acts as the central point for external communication.",
+      "Customer Devices (Web Browsers, iOS/Android Mobile Apps): Users are responsible for keeping their devices secure.",
+      "Payment Processor Networks (ACH, SWIFT, Card Networks): Critical external systems for payment processing.",
+      "Third-party Identity Verification Service: Provides KYC checks for account creation and regulatory compliance.",
+      "RESTful API for Mobile Application: Serves as the primary communication channel for mobile apps.",
+      "OAuth2 Integration with Identity Provider: Used for secure user authentication.",
+      "Between Client Application (Mobile/Web) and API Gateway: The client application is outside our trust boundary.",
+      "Between Application Server and Payment Processor Network: Payment processor networks are external and not fully trusted.",
+      "Between Primary Database and Backup Storage: Backup storage may reside in a different trust zone.",
+      "Customer PII to Credit Bureau: Data is securely transmitted to the credit bureau for credit checks.",
+      "Transaction Data to Regulatory Authority: Data is shared via secure file transfer protocols.",
+      "Account Data to Disaster Recovery Site: Data is replicated in near real-time to ensure availability."
+    ],
+    "exclusions": [
+      "Core Application Server: Must comply with security and operational policies.",
+      "Primary Database (PostgreSQL Cluster): Data encryption must be enforced at rest and in transit.",
+      "API Gateway: Authentication and rate-limiting must be implemented.",
+      "Customer Devices (Web Browsers, iOS/Android Mobile Apps): Device security impacts the security of the overall platform.",
+      "Payment Processor Networks (ACH, SWIFT, Card Networks): Payment processing SLAs must be adhered to.",
+      "Third-party Identity Verification Service: Service must comply with applicable privacy laws (e.g., GDPR).",
+      "RESTful API for Mobile Application: Must be secured using TLS 1.2 or higher.",
+      "OAuth2 Integration with Identity Provider: Tokens must have an expiration policy.",
+      "Between Client Application (Mobile/Web) and API Gateway: All requests must be authenticated and validated.",
+      "Between Application Server and Payment Processor Network: Use secure communication protocols (e.g., TLS).",
+      "Between Primary Database and Backup Storage: Data must be encrypted during transfer and storage.",
+      "Customer PII to Credit Bureau: Transmission must comply with GDPR and other privacy laws.",
+      "Transaction Data to Regulatory Authority: Must comply with AML/BSA reporting requirements.",
+      "Account Data to Disaster Recovery Site: Replication must be encrypted and comply with data sovereignty laws."
+    ],
+    "boundary_coverage": {
+      "total_boundaries_defined": 3,
+      "critical_interfaces_identified": 2,
+      "external_dependencies": 3
+    }
+  },
+  "boundary_relationships": [
+    {
+      "parent_boundary": "System Scope",
+      "child_boundary": "Trust Boundaries",
+      "relationship_type": "contains"
+    }
+  ],
+  "boundary_summary": {
+    "total_boundaries": 3,
+    "boundary_types": {
+      "system_scope": 1,
+      "trust": 1,
+      "data_governance": 1
+    },
+    "total_elements": 14,
+    "critical_interfaces": 2,
+    "external_dependencies": 3
+  },
+  "cognitive_style": "balanced",
+  "analysis_metadata": {
+    "agent_type": "system_boundaries",
+    "analysis_id": "4cb0d409-957d-4b47-b8ec-1fc4515e1590",
+    "timestamp": "2025-07-29T04:56:48.194301Z",
+    "version": "1.0"
+  }
+}

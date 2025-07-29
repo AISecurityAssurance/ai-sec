@@ -1,0 +1,438 @@
+{
+  "losses": [
+    {
+      "description": "Loss of human life due to delayed or failed delivery of critical medical supplies during emergencies",
+      "loss_category": "life",
+      "severity_classification": {
+        "magnitude": "catastrophic",
+        "scope": "mission_wide",
+        "duration": "permanent",
+        "reversibility": "impossible",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "real-time medical payload delivery",
+          "autonomous navigation and obstacle avoidance"
+        ],
+        "cascading_effects": [
+          "loss of trust in the system",
+          "increased burden on traditional emergency services"
+        ],
+        "stakeholder_harm": {
+          "patients": {
+            "type": "death",
+            "severity": "catastrophic"
+          }
+        }
+      },
+      "identifier": "L-1"
+    },
+    {
+      "description": "Loss of patient privacy due to unauthorized access or exposure of sensitive medical data",
+      "loss_category": "privacy",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "customer_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "hard"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "telemedicine connectivity for remote diagnostics"
+        ],
+        "cascading_effects": [
+          "loss of public confidence in telemedicine services",
+          "regulatory penalties for HIPAA violations"
+        ],
+        "stakeholder_harm": {
+          "patients": {
+            "type": "privacy violation",
+            "severity": "major"
+          },
+          "healthcare providers": {
+            "type": "reputation damage",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-2"
+    },
+    {
+      "description": "Loss of service availability during a critical operational period, preventing timely response to emergencies",
+      "loss_category": "mission",
+      "severity_classification": {
+        "magnitude": "catastrophic",
+        "scope": "mission_wide",
+        "duration": "short_term",
+        "reversibility": "difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "real-time medical payload delivery",
+          "dynamic fleet coordination and resource allocation"
+        ],
+        "cascading_effects": [
+          "increased fatalities and injuries during emergencies",
+          "overload on alternative emergency response systems"
+        ],
+        "stakeholder_harm": {
+          "patients": {
+            "type": "delayed care",
+            "severity": "catastrophic"
+          }
+        }
+      },
+      "identifier": "L-3"
+    },
+    {
+      "description": "Loss of regulatory compliance resulting in fines, legal penalties, and operational restrictions",
+      "loss_category": "regulatory",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "organization_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "safe and reliable integration with civilian airspace"
+        ],
+        "cascading_effects": [
+          "halted operations due to regulatory injunctions",
+          "inability to expand into new regions"
+        ],
+        "stakeholder_harm": {
+          "operators": {
+            "type": "financial penalties",
+            "severity": "major"
+          },
+          "patients": {
+            "type": "reduced service availability",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-4"
+    },
+    {
+      "description": "Loss of fleet coordination leading to cascading failures across multiple emergency missions",
+      "loss_category": "mission",
+      "severity_classification": {
+        "magnitude": "catastrophic",
+        "scope": "mission_wide",
+        "duration": "medium_term",
+        "reversibility": "difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "dynamic fleet coordination and resource allocation"
+        ],
+        "cascading_effects": [
+          "multiple mission failures",
+          "increased system recovery time"
+        ],
+        "stakeholder_harm": {
+          "patients": {
+            "type": "delayed care",
+            "severity": "catastrophic"
+          }
+        }
+      },
+      "identifier": "L-5"
+    },
+    {
+      "description": "Loss of financial assets due to theft of high-value medical cargo or drones",
+      "loss_category": "financial",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "organization_wide",
+        "duration": "long_term",
+        "reversibility": "difficult",
+        "detection_difficulty": "hard"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "medical payload management",
+          "real-time medical payload delivery"
+        ],
+        "cascading_effects": [
+          "increased operational costs for security enhancements",
+          "damage to stakeholder trust"
+        ],
+        "stakeholder_harm": {
+          "operators": {
+            "type": "financial loss",
+            "severity": "major"
+          },
+          "pharmaceutical suppliers": {
+            "type": "supply chain disruption",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-6"
+    },
+    {
+      "description": "Damage to public reputation due to perception of unsafe or unreliable operations, particularly in populated areas",
+      "loss_category": "reputation",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "market_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "safe and reliable integration with civilian airspace"
+        ],
+        "cascading_effects": [
+          "reduced adoption of the service",
+          "difficulty obtaining stakeholder buy-in"
+        ],
+        "stakeholder_harm": {
+          "operators": {
+            "type": "reputation damage",
+            "severity": "major"
+          },
+          "public": {
+            "type": "loss of trust",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-7"
+    },
+    {
+      "description": "Environmental damage caused by uncontrolled drone crashes or battery leakage during adverse conditions",
+      "loss_category": "environmental",
+      "severity_classification": {
+        "magnitude": "moderate",
+        "scope": "local",
+        "duration": "medium_term",
+        "reversibility": "possible",
+        "detection_difficulty": "easy"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "safe and reliable integration with civilian airspace"
+        ],
+        "cascading_effects": [
+          "negative environmental impact",
+          "increased regulatory scrutiny"
+        ],
+        "stakeholder_harm": {
+          "public": {
+            "type": "environmental harm",
+            "severity": "moderate"
+          }
+        }
+      },
+      "identifier": "L-8"
+    }
+  ],
+  "loss_count": 8,
+  "loss_categories": {
+    "life": 1,
+    "privacy": 1,
+    "mission": 2,
+    "regulatory": 1,
+    "financial": 1,
+    "reputation": 1,
+    "environmental": 1
+  },
+  "dependencies": [
+    {
+      "primary_loss_id": "L-3",
+      "dependent_loss_id": "L-1",
+      "dependency_type": "triggers",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "No delay; loss of service availability directly affects delivery of medical supplies",
+        "persistence": "sustained"
+      },
+      "rationale": "Loss of service availability during critical operations prevents timely delivery of medical supplies, which can lead directly to loss of human life in emergencies.",
+      "id": "82101052-edd4-44d4-9077-335c476384a8"
+    },
+    {
+      "primary_loss_id": "L-5",
+      "dependent_loss_id": "L-3",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "concurrent",
+        "typical_delay": "Occurs simultaneously as coordination issues arise during operations",
+        "persistence": "variable"
+      },
+      "rationale": "Loss of fleet coordination disrupts operational workflows, which can lead to service unavailability during critical periods.",
+      "id": "adfa8b5d-8ddb-4c7e-ab89-5eee8399d592"
+    },
+    {
+      "primary_loss_id": "L-2",
+      "dependent_loss_id": "L-7",
+      "dependency_type": "amplifies",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Public perception impacts emerge after privacy breaches are reported",
+        "persistence": "sustained"
+      },
+      "rationale": "Unauthorized access to sensitive medical data damages public trust and reputation, leading to a negative perception of the system's reliability and safety.",
+      "id": "423f921d-97ad-4528-8130-734f3759696c"
+    },
+    {
+      "primary_loss_id": "L-7",
+      "dependent_loss_id": "L-4",
+      "dependency_type": "amplifies",
+      "dependency_strength": "possible",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Regulatory investigations and penalties often follow reputation damage",
+        "persistence": "variable"
+      },
+      "rationale": "Damage to public reputation can lead to increased scrutiny from regulatory bodies, potentially resulting in fines, legal penalties, or operational restrictions.",
+      "id": "d60d48d7-1f2c-4329-972a-081bf05b1e22"
+    },
+    {
+      "primary_loss_id": "L-6",
+      "dependent_loss_id": "L-3",
+      "dependency_type": "enables",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "Loss of financial assets immediately limits operational capacity",
+        "persistence": "sustained"
+      },
+      "rationale": "The theft of high-value medical cargo or drones reduces available resources, making it difficult to maintain service availability during critical operational periods.",
+      "id": "9626eabf-1c01-47eb-9c52-540ecc16e3f7"
+    },
+    {
+      "primary_loss_id": "L-8",
+      "dependent_loss_id": "L-7",
+      "dependency_type": "amplifies",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Environmental damage impacts public perception after incidents are publicized",
+        "persistence": "temporary"
+      },
+      "rationale": "Environmental damage from drone crashes or battery leakage creates public outrage and damages the organization's reputation, particularly in communities directly affected.",
+      "id": "f71e342a-7652-466f-a6f3-a281606b4031"
+    },
+    {
+      "primary_loss_id": "L-4",
+      "dependent_loss_id": "L-3",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Operational restrictions due to non-compliance take time to manifest but affect service availability",
+        "persistence": "sustained"
+      },
+      "rationale": "Loss of regulatory compliance can result in operational restrictions, which reduce the organization's ability to maintain service availability during emergencies.",
+      "id": "8859d035-c0fd-4da3-9277-bb8e88892933"
+    },
+    {
+      "primary_loss_id": "L-5",
+      "dependent_loss_id": "L-1",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "Coordination issues directly delay delivery of medical supplies",
+        "persistence": "variable"
+      },
+      "rationale": "Loss of fleet coordination disrupts delivery schedules, causing delayed or failed delivery of critical medical supplies, which can result in loss of human life during emergencies.",
+      "id": "00a2948c-1ec0-4aba-ab16-d5c8a8120291"
+    },
+    {
+      "primary_loss_id": "L-8",
+      "dependent_loss_id": "L-4",
+      "dependency_type": "triggers",
+      "dependency_strength": "possible",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Regulatory consequences of environmental damage take time to materialize",
+        "persistence": "variable"
+      },
+      "rationale": "Environmental damage caused by drone crashes or battery leakage may lead to regulatory penalties or operational restrictions due to non-compliance with environmental laws.",
+      "id": "b9c51d7d-78aa-4f06-b7d3-43e5255b1801"
+    }
+  ],
+  "cascade_analysis": {
+    "primary_losses": [
+      "L-2",
+      "L-5",
+      "L-6",
+      "L-8"
+    ],
+    "cascade_chains": [
+      {
+        "chain": [
+          "L-2",
+          "L-7",
+          "L-4",
+          "L-3",
+          "L-1"
+        ],
+        "trigger": "L-2",
+        "terminal_losses": [
+          "L-1"
+        ],
+        "chain_length": 5
+      },
+      {
+        "chain": [
+          "L-5",
+          "L-3",
+          "L-1"
+        ],
+        "trigger": "L-5",
+        "terminal_losses": [
+          "L-1"
+        ],
+        "chain_length": 3
+      },
+      {
+        "chain": [
+          "L-6",
+          "L-3",
+          "L-1"
+        ],
+        "trigger": "L-6",
+        "terminal_losses": [
+          "L-1"
+        ],
+        "chain_length": 3
+      },
+      {
+        "chain": [
+          "L-8",
+          "L-7",
+          "L-4",
+          "L-3",
+          "L-1"
+        ],
+        "trigger": "L-8",
+        "terminal_losses": [
+          "L-1"
+        ],
+        "chain_length": 5
+      }
+    ],
+    "max_cascade_depth": 5
+  },
+  "severity_distribution": {
+    "catastrophic": 3,
+    "major": 4,
+    "moderate": 1,
+    "minor": 0
+  },
+  "cognitive_style": "balanced"
+}

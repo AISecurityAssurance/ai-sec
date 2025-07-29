@@ -1,0 +1,19 @@
+analysis:
+  description: STPA-Sec Step 1 analysis using standard single-agent approach with
+    GPT-4 Turbo
+  name: Medical Drone Fleet Security Analysis - GPT-4 Turbo Standard
+  output_dir: ./analyses/medical-drone-fleet-gpt4
+execution:
+  mode: standard
+input:
+  path: example_systems/medical-drone-fleet/medical-drone-fleet.txt
+  type: file
+model:
+  api_key_env: AZURE_OPENAI_API_KEY
+  base_url: https://ai-sec-openai.openai.azure.com/
+  name: gpt-4o
+  provider: openai
+output:
+  exports:
+  - format: json
+  - format: markdown

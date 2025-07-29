@@ -1,0 +1,473 @@
+{
+  "stakeholders": [
+    {
+      "name": "Individual Emergency Patients",
+      "stakeholder_type": "user",
+      "description": "Patients in critical medical situations relying on the system for rapid delivery of lifesaving medical supplies.",
+      "criticality": "primary",
+      "mission_perspective": {
+        "primary_needs": [
+          "timely medical supply delivery",
+          "accurate telemedicine diagnostics"
+        ],
+        "value_derived": "Improved chances of recovery and survival in emergencies.",
+        "success_criteria": "Rapid and accurate delivery of medical payloads."
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-1",
+          "impact": "catastrophic",
+          "description": "Delayed or failed medical intervention results in loss of life."
+        },
+        {
+          "loss_id": "L-2",
+          "impact": "major",
+          "description": "Unauthorized exposure of their sensitive medical data."
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "low",
+        "interest_level": "high",
+        "engagement_strategy": "keep_informed"
+      }
+    },
+    {
+      "name": "Healthcare Providers",
+      "stakeholder_type": "user",
+      "description": "Doctors, nurses, and paramedics using telemedicine capabilities and receiving critical supplies delivered by drones.",
+      "criticality": "primary",
+      "mission_perspective": {
+        "primary_needs": [
+          "real-time patient monitoring",
+          "delivery of specialized medical equipment"
+        ],
+        "value_derived": "Enhanced ability to manage time-sensitive medical emergencies effectively.",
+        "success_criteria": "Reliable connectivity and accurate delivery."
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-3",
+          "impact": "major",
+          "description": "Loss of service availability disrupts medical workflows."
+        },
+        {
+          "loss_id": "L-5",
+          "impact": "major",
+          "description": "Loss of fleet coordination affects multiple ongoing emergency missions."
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "medium",
+        "interest_level": "high",
+        "engagement_strategy": "manage_closely"
+      }
+    },
+    {
+      "name": "Drone Fleet Operators",
+      "stakeholder_type": "operator",
+      "description": "Personnel responsible for managing, monitoring, and maintaining the drone fleet.",
+      "criticality": "essential",
+      "mission_perspective": {
+        "primary_needs": [
+          "fleet coordination",
+          "airspace deconfliction",
+          "real-time operational oversight"
+        ],
+        "value_derived": "Ensured safe and efficient drone operations.",
+        "success_criteria": "Minimized downtime and optimized fleet utilization."
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-3",
+          "impact": "major",
+          "description": "Service interruptions prevent fleet operations during emergencies."
+        },
+        {
+          "loss_id": "L-5",
+          "impact": "catastrophic",
+          "description": "Cascading failures lead to loss of fleet coordination."
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "high",
+        "interest_level": "medium",
+        "engagement_strategy": "keep_satisfied"
+      }
+    },
+    {
+      "name": "Security Operations Team",
+      "stakeholder_type": "operator",
+      "description": "Team responsible for identifying and mitigating cyber and physical threats to the system.",
+      "criticality": "essential",
+      "mission_perspective": {
+        "primary_needs": [
+          "intrusion detection",
+          "data protection",
+          "incident response"
+        ],
+        "value_derived": "Secure operations and protection of sensitive medical data.",
+        "success_criteria": "Zero unauthorized access and rapid threat resolution."
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-2",
+          "impact": "major",
+          "description": "Unauthorized access to sensitive medical data."
+        },
+        {
+          "loss_id": "L-6",
+          "impact": "moderate",
+          "description": "Theft of high-value medical cargo or drones."
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "high",
+        "interest_level": "high",
+        "engagement_strategy": "manage_closely"
+      }
+    },
+    {
+      "name": "Executive Management",
+      "stakeholder_type": "owner",
+      "description": "Leadership responsible for strategic decisions, funding, and oversight of the system.",
+      "criticality": "important",
+      "mission_perspective": {
+        "primary_needs": [
+          "system reliability",
+          "regulatory compliance",
+          "public trust"
+        ],
+        "value_derived": "Sustainable operations and positive public perception.",
+        "success_criteria": "Compliance with regulations and financial stability."
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-4",
+          "impact": "major",
+          "description": "Loss of regulatory compliance leads to fines and restrictions."
+        },
+        {
+          "loss_id": "L-7",
+          "impact": "moderate",
+          "description": "Damage to reputation due to perceived unsafe operations."
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "very_high",
+        "interest_level": "high",
+        "engagement_strategy": "manage_closely"
+      }
+    },
+    {
+      "name": "FAA (Federal Aviation Administration)",
+      "stakeholder_type": "regulator",
+      "description": "Aviation authority overseeing airspace safety and compliance of autonomous drone operations.",
+      "criticality": "essential",
+      "mission_perspective": {
+        "primary_needs": [
+          "safe airspace integration",
+          "adherence to Part 135 regulations"
+        ],
+        "value_derived": "Ensured safety of civilian airspace.",
+        "success_criteria": "Zero airspace violations and compliance with safety regulations."
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-4",
+          "impact": "major",
+          "description": "Non-compliance results in operational restrictions."
+        },
+        {
+          "loss_id": "L-8",
+          "impact": "moderate",
+          "description": "Environmental damage due to uncontrolled crashes."
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "high",
+        "interest_level": "medium",
+        "engagement_strategy": "keep_satisfied"
+      }
+    },
+    {
+      "name": "Cloud Service Provider",
+      "stakeholder_type": "supplier",
+      "description": "Provider of cloud infrastructure for mission planning and analytics.",
+      "criticality": "important",
+      "mission_perspective": {
+        "primary_needs": [
+          "high availability",
+          "secure data storage"
+        ],
+        "value_derived": "Reliable backend operations and system scalability.",
+        "success_criteria": "99.99% uptime and zero data breaches."
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-3",
+          "impact": "major",
+          "description": "Loss of service availability disrupts emergency response."
+        },
+        {
+          "loss_id": "L-2",
+          "impact": "moderate",
+          "description": "Data breaches compromise sensitive medical information."
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "medium",
+        "interest_level": "medium",
+        "engagement_strategy": "keep_informed"
+      }
+    },
+    {
+      "name": "Local Community",
+      "stakeholder_type": "society",
+      "description": "Residents in urban and rural areas impacted by drone operations.",
+      "criticality": "secondary",
+      "mission_perspective": {
+        "primary_needs": [
+          "safe drone operations",
+          "privacy protection"
+        ],
+        "value_derived": "Improved access to emergency medical services.",
+        "success_criteria": "Minimal disruptions and privacy ensured."
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-7",
+          "impact": "moderate",
+          "description": "Damage to public reputation affects trust in the system."
+        },
+        {
+          "loss_id": "L-8",
+          "impact": "minor",
+          "description": "Environmental damage affects community safety."
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "low",
+        "interest_level": "high",
+        "engagement_strategy": "monitor"
+      }
+    }
+  ],
+  "stakeholder_count": 8,
+  "stakeholder_types": {
+    "user": 2,
+    "operator": 2,
+    "owner": 1,
+    "regulator": 1,
+    "supplier": 1,
+    "society": 1
+  },
+  "adversaries": [
+    {
+      "adversary_class": "nation_state",
+      "profile": {
+        "sophistication": "advanced",
+        "resources": "unlimited",
+        "persistence": "long_term",
+        "primary_interest": "strategic_advantage",
+        "geographic_scope": "global"
+      },
+      "mission_targets": {
+        "interested_in": [
+          "airspace disruption",
+          "exploitation of medical data"
+        ],
+        "value_perception": "strategic_target",
+        "historical_interest": "active_reconnaissance"
+      }
+    },
+    {
+      "adversary_class": "organized_crime",
+      "profile": {
+        "sophistication": "high",
+        "resources": "significant",
+        "persistence": "campaign_based",
+        "primary_interest": "financial_gain",
+        "geographic_scope": "international"
+      },
+      "mission_targets": {
+        "interested_in": [
+          "theft of high-value cargo",
+          "ransomware targeting medical data"
+        ],
+        "value_perception": "high_value_target",
+        "historical_interest": "known_targeting"
+      }
+    },
+    {
+      "adversary_class": "hacktivist",
+      "profile": {
+        "sophistication": "moderate",
+        "resources": "limited",
+        "persistence": "short_term",
+        "primary_interest": "ideological",
+        "geographic_scope": "regional"
+      },
+      "mission_targets": {
+        "interested_in": [
+          "privacy violations",
+          "disruption of operations"
+        ],
+        "value_perception": "symbolic_target",
+        "historical_interest": "periodic_campaigns"
+      }
+    }
+  ],
+  "adversary_count": 3,
+  "stakeholder_matrix": {
+    "high_influence_high_interest": [
+      {
+        "name": "Security Operations Team",
+        "type": "operator",
+        "strategy": "manage_closely"
+      },
+      {
+        "name": "Executive Management",
+        "type": "owner",
+        "strategy": "manage_closely"
+      }
+    ],
+    "high_influence_low_interest": [
+      {
+        "name": "Drone Fleet Operators",
+        "type": "operator",
+        "strategy": "keep_satisfied"
+      },
+      {
+        "name": "FAA (Federal Aviation Administration)",
+        "type": "regulator",
+        "strategy": "keep_satisfied"
+      }
+    ],
+    "low_influence_high_interest": [
+      {
+        "name": "Individual Emergency Patients",
+        "type": "user",
+        "strategy": "keep_informed"
+      },
+      {
+        "name": "Healthcare Providers",
+        "type": "user",
+        "strategy": "manage_closely"
+      },
+      {
+        "name": "Local Community",
+        "type": "society",
+        "strategy": "monitor"
+      }
+    ],
+    "low_influence_low_interest": [
+      {
+        "name": "Cloud Service Provider",
+        "type": "supplier",
+        "strategy": "keep_informed"
+      }
+    ]
+  },
+  "adversary_analysis": {
+    "threat_landscape": {
+      "sophistication_range": "Low to Advanced (full spectrum)",
+      "resource_availability": "Unlimited resources available (nation-state)",
+      "persistence_patterns": [
+        "Long-term campaigns likely"
+      ]
+    },
+    "mission_attractiveness": {
+      "overall_rating": "high",
+      "factors": [
+        "Multiple adversaries see high value",
+        "Historical evidence of targeting"
+      ],
+      "most_interested_adversaries": [
+        "nation_state",
+        "organized_crime"
+      ]
+    },
+    "combined_threat_level": "severe"
+  },
+  "mission_success_criteria": {
+    "success_states": {
+      "user_success": {
+        "description": "Users can reliably achieve their goals through the system",
+        "violated_by_losses": [
+          "L-2",
+          "L-3",
+          "L-5",
+          "L-6"
+        ],
+        "evidence_of_success": "High usage rates, positive feedback, goal achievement metrics"
+      },
+      "operational_success": {
+        "description": "System operates efficiently within defined parameters",
+        "violated_by_losses": [
+          "L-3",
+          "L-5"
+        ],
+        "evidence_of_success": "Stable operations, manageable workload, effective controls"
+      },
+      "regulatory_success": {
+        "description": "System maintains continuous compliance with all regulations",
+        "violated_by_losses": [
+          "L-2",
+          "L-4"
+        ],
+        "evidence_of_success": "Clean audits, no violations, proactive compliance"
+      },
+      "security_success": {
+        "description": "System successfully resists adversary attempts",
+        "violated_by_losses": [
+          "L-1",
+          "L-2",
+          "L-3",
+          "L-4",
+          "L-5",
+          "L-6",
+          "L-7",
+          "L-8"
+        ],
+        "evidence_of_success": "No successful compromises, threats detected and mitigated"
+      }
+    },
+    "success_indicators": {
+      "behavioral_indicators": [
+        "Users actively choose to use the system",
+        "Stakeholders express confidence in the system",
+        "No abnormal user behavior patterns"
+      ],
+      "performance_indicators": [
+        "System meets defined performance targets",
+        "Error rates within acceptable thresholds",
+        "Recovery objectives consistently met"
+      ],
+      "external_indicators": [
+        "Positive stakeholder assessments",
+        "Regulatory approval maintained",
+        "Market position stable or improving"
+      ]
+    }
+  },
+  "critical_relationships": [
+    {
+      "relationship": "User-Operator",
+      "nature": "Service delivery and support",
+      "criticality": "essential",
+      "failure_impact": "Users cannot achieve goals, operators cannot fulfill duties"
+    },
+    {
+      "relationship": "Operator-Regulator",
+      "nature": "Compliance and oversight",
+      "criticality": "required",
+      "failure_impact": "Regulatory violations and enforcement actions"
+    },
+    {
+      "relationship": "Adversary-User",
+      "nature": "Threat and target",
+      "criticality": "hostile",
+      "failure_impact": "Direct harm to users through system compromise"
+    }
+  ]
+}

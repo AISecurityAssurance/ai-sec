@@ -800,6 +800,8 @@ STAKEHOLDER IDENTIFICATION CHECKLIST - You MUST identify AT LEAST 8-10 stakehold
   - Security operations team
   - Support/Help desk staff
   - Data management team
+  - Maintenance technicians (for physical systems)
+  - Control room operators (for critical infrastructure)
   
 □ OWNERS/INVESTORS (1-2 types minimum):
   - Shareholders/Investors
@@ -810,6 +812,8 @@ STAKEHOLDER IDENTIFICATION CHECKLIST - You MUST identify AT LEAST 8-10 stakehold
   - Primary industry regulator
   - Data protection authorities
   - Financial oversight bodies (if applicable)
+  - Safety regulators (FAA for aviation, FDA for medical, etc.)
+  - Environmental protection agencies (if applicable)
   
 □ PARTNERS & SUPPLIERS (2-3 types minimum):
   - Technology vendors/Cloud providers

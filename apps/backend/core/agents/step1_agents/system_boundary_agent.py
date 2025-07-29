@@ -155,7 +155,13 @@ MINIMUM REQUIREMENTS (empty boundaries will be rejected):
 - Responsibility: At least 2 items each for WE OWN, THEY OWN, SHARED (6 total minimum)
 - Data Governance: At least 3 specific data transition scenarios with concrete elements
 
-IMPORTANT: ALL 4 boundary types MUST have sufficient elements. Boundaries without elements will cause the analysis to fail.
+CRITICAL REQUIREMENT: You MUST generate ALL 4 boundary types:
+1. System Scope Boundary (required)
+2. Trust Boundaries (required)  
+3. Responsibility Boundaries (required)
+4. Data Governance Boundaries (required)
+
+Each boundary MUST have the minimum required elements specified above. Missing any boundary type will cause analysis failure.
 
 Generate boundaries in this JSON format:
 {{

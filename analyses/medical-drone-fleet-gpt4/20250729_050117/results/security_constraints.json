@@ -1,0 +1,291 @@
+{
+  "security_constraints": [
+    {
+      "identifier": "SC-1",
+      "name": "Integrity of Navigation Data Constraint",
+      "constraint_statement": "The system shall ensure that navigation data used for autonomous flight is verified for integrity before being utilized by drones.",
+      "rationale": "To prevent drones from operating with corrupted GPS data, which could compromise navigation and mission success.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls, policies, and procedures for data integrity verification",
+      "addresses_hazards": [
+        "H-1"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-8"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-3",
+        "L-8"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-8"
+        ],
+        "capability_degradation": "Loss of accurate navigation and increased risk of mission failure."
+      }
+    },
+    {
+      "identifier": "SC-2",
+      "name": "Encryption of Communication Channels Constraint",
+      "constraint_statement": "The system shall ensure that all sensitive data transmitted between drones, ground control, and healthcare providers is encrypted to maintain confidentiality.",
+      "rationale": "To prevent unauthorized access to sensitive patient data during transmission.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls, policies, and procedures for secure communication protocols",
+      "addresses_hazards": [
+        "H-2"
+      ],
+      "prevents_losses": [
+        "L-2"
+      ],
+      "related_losses": [
+        "L-2",
+        "L-7"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-2"
+        ],
+        "capability_degradation": "Exposure of sensitive patient data, leading to loss of privacy and regulatory violations."
+      }
+    },
+    {
+      "identifier": "SC-3",
+      "name": "Integrity of Sensor Data Constraint",
+      "constraint_statement": "The system shall ensure that sensor data used for obstacle avoidance is validated and cross-checked for consistency.",
+      "rationale": "To prevent drones from failing to avoid obstacles due to corrupted or unreliable sensor data.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls, policies, and redundancy mechanisms for sensor data validation",
+      "addresses_hazards": [
+        "H-3"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-8"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-3",
+        "L-8"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-8"
+        ],
+        "capability_degradation": "Increased risk of collisions and mission failure."
+      }
+    },
+    {
+      "identifier": "SC-4",
+      "name": "Safe Landing Zone Verification Constraint",
+      "constraint_statement": "The system shall verify landing zone suitability using redundant data sources and algorithms before initiating the landing sequence.",
+      "rationale": "To ensure drones can safely land without risks posed by misidentified landing zones.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls and redundancy in landing zone assessment algorithms",
+      "addresses_hazards": [
+        "H-4"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-7"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-3",
+        "L-7",
+        "L-8"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1"
+        ],
+        "capability_degradation": "Unsafe landings lead to mission failure and risk to nearby individuals."
+      }
+    },
+    {
+      "identifier": "SC-5",
+      "name": "Access Control for Fleet Management Systems Constraint",
+      "constraint_statement": "The system shall enforce strong authentication and authorization mechanisms for all access to fleet control systems.",
+      "rationale": "To prevent unauthorized users from altering mission priorities or gaining control of the fleet.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls and access management policies",
+      "addresses_hazards": [
+        "H-5"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-5"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-5",
+        "L-7"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-5"
+        ],
+        "capability_degradation": "Loss of control over fleet operations, leading to cascading mission failures."
+      }
+    },
+    {
+      "identifier": "SC-6",
+      "name": "Power Resilience Constraint",
+      "constraint_statement": "The system shall ensure that drones have sufficient power reserves and backup mechanisms to complete critical operations.",
+      "rationale": "To prevent unexpected power loss during critical missions.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls and redundancy in power systems",
+      "addresses_hazards": [
+        "H-6"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-3",
+        "L-8"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-3",
+        "L-8"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-3"
+        ],
+        "capability_degradation": "Mission failure due to loss of power mid-operation."
+      }
+    },
+    {
+      "identifier": "SC-7",
+      "name": "Chain of Custody Integrity Constraint",
+      "constraint_statement": "The system shall ensure the integrity and traceability of medical payload tracking records throughout the supply chain.",
+      "rationale": "To prevent tampering with medical payload tracking, ensuring accurate chain-of-custody records.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls, policies, and procedures for data integrity",
+      "addresses_hazards": [
+        "H-7"
+      ],
+      "prevents_losses": [
+        "L-6",
+        "L-7"
+      ],
+      "related_losses": [
+        "L-6",
+        "L-7"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-6",
+          "L-7"
+        ],
+        "capability_degradation": "Loss of trust in medical supply tracking, leading to operational and reputational damage."
+      }
+    },
+    {
+      "identifier": "SC-8",
+      "name": "Resilience of Communication Constraint",
+      "constraint_statement": "The system shall ensure communication redundancy to maintain connectivity during critical operations.",
+      "rationale": "To prevent communication network disruptions from disabling drone operations.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls and redundancy in communication systems",
+      "addresses_hazards": [
+        "H-8"
+      ],
+      "prevents_losses": [
+        "L-3",
+        "L-5"
+      ],
+      "related_losses": [
+        "L-3",
+        "L-5"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-3"
+        ],
+        "capability_degradation": "Loss of communication leads to mission failures and cascading coordination issues."
+      }
+    }
+  ],
+  "constraint_coverage": {
+    "total_hazards": 12,
+    "hazards_with_constraints": 8,
+    "total_constraints": 8,
+    "coverage_balance": 0.6666666666666666,
+    "type_distribution": {
+      "preventive": 8,
+      "detective": 0,
+      "corrective": 0,
+      "compensating": 0
+    }
+  },
+  "constraint_hazard_mappings": [
+    {
+      "constraint_id": "SC-1",
+      "hazard_id": "H-1",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-2",
+      "hazard_id": "H-2",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-3",
+      "hazard_id": "H-3",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-4",
+      "hazard_id": "H-4",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-5",
+      "hazard_id": "H-5",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-6",
+      "hazard_id": "H-6",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-7",
+      "hazard_id": "H-7",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-8",
+      "hazard_id": "H-8",
+      "relationship_type": "eliminates"
+    }
+  ],
+  "constraint_count": 8,
+  "constraint_types": {
+    "preventive": 8,
+    "detective": 0,
+    "corrective": 0,
+    "compensating": 0
+  },
+  "cognitive_style": "balanced",
+  "analysis_metadata": {
+    "agent_type": "security_constraints",
+    "analysis_id": "72efb502-7e60-455d-b470-cf798f37c749",
+    "timestamp": "2025-07-29T05:02:51.416286Z",
+    "version": "1.0"
+  }
+}

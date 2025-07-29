@@ -1,0 +1,311 @@
+{
+  "security_constraints": [
+    {
+      "identifier": "SC-1",
+      "name": "Identity Verification for Sensitive Operations",
+      "constraint_statement": "The system shall verify user identity before executing sensitive operations.",
+      "rationale": "To prevent unauthorized access and protect sensitive operations from being executed by unverified users.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls, such as identity verification workflows, and organizational policies for account security.",
+      "addresses_hazards": [
+        "H-1",
+        "H-6",
+        "H-11"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-8"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-5",
+        "L-8"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-8"
+        ],
+        "capability_degradation": "Unauthorized transactions and fraudulent accounts could undermine system credibility and security."
+      }
+    },
+    {
+      "identifier": "SC-2",
+      "name": "Data Confidentiality Constraint",
+      "constraint_statement": "The system shall maintain the confidentiality of customer data during storage, processing, and transmission.",
+      "rationale": "To protect sensitive customer information from being exposed to unauthorized parties.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as secure communication protocols and organizational data protection policies.",
+      "addresses_hazards": [
+        "H-2",
+        "H-8"
+      ],
+      "prevents_losses": [
+        "L-2"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-2",
+        "L-5",
+        "L-8"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-2",
+          "L-5"
+        ],
+        "capability_degradation": "Exposure of customer data would lead to regulatory penalties and damage to customer trust."
+      }
+    },
+    {
+      "identifier": "SC-3",
+      "name": "Data Integrity Verification",
+      "constraint_statement": "The system shall verify the integrity of critical financial data before and after processing operations.",
+      "rationale": "To ensure the accuracy of financial data and prevent tampering during processing or transfer.",
+      "constraint_type": "detective",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as cryptographic checksums and transaction validation mechanisms.",
+      "addresses_hazards": [
+        "H-3",
+        "H-10"
+      ],
+      "prevents_losses": [
+        "L-6"
+      ],
+      "related_losses": [
+        "L-6",
+        "L-1"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-6"
+        ],
+        "capability_degradation": "Compromised data integrity could result in incorrect account balances and financial reporting issues."
+      }
+    },
+    {
+      "identifier": "SC-4",
+      "name": "Resource Availability Monitoring",
+      "constraint_statement": "The system shall monitor and manage resources to ensure sufficient capacity during peak user activity.",
+      "rationale": "To prevent service disruptions and ensure continuous availability during high-demand periods.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as load balancing, autoscaling, and resource monitoring tools.",
+      "addresses_hazards": [
+        "H-4"
+      ],
+      "prevents_losses": [
+        "L-3",
+        "L-7"
+      ],
+      "related_losses": [
+        "L-3",
+        "L-7",
+        "L-8"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-3"
+        ],
+        "capability_degradation": "System outages during peak periods would disrupt critical banking operations and affect customer trust."
+      }
+    },
+    {
+      "identifier": "SC-5",
+      "name": "Payment Transaction Monitoring",
+      "constraint_statement": "The system shall ensure timely processing and monitoring of payment transactions to detect delays or failures.",
+      "rationale": "To prevent payment delays, failed transactions, and customer dissatisfaction.",
+      "constraint_type": "detective",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as transaction status monitoring and alerting mechanisms.",
+      "addresses_hazards": [
+        "H-5"
+      ],
+      "prevents_losses": [
+        "L-3",
+        "L-7"
+      ],
+      "related_losses": [
+        "L-3",
+        "L-7"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-3"
+        ],
+        "capability_degradation": "Delayed or failed payments could disrupt financial operations and damage customer trust."
+      }
+    },
+    {
+      "identifier": "SC-6",
+      "name": "Privileged Access Control",
+      "constraint_statement": "The system shall enforce access control policies to restrict privileged access to critical operations.",
+      "rationale": "To prevent unauthorized access to sensitive system operations and data.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as role-based access control and privilege escalation monitoring.",
+      "addresses_hazards": [
+        "H-6"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-5"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-5",
+        "L-8"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-5"
+        ],
+        "capability_degradation": "Unauthorized privileged access could compromise critical system operations and customer data."
+      }
+    },
+    {
+      "identifier": "SC-7",
+      "name": "Regulatory Audit Logging",
+      "constraint_statement": "The system shall maintain complete and accurate regulatory audit logs for all critical operations.",
+      "rationale": "To ensure compliance with regulatory requirements and facilitate forensic investigations.",
+      "constraint_type": "detective",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as tamper-proof logging systems and log integrity validation.",
+      "addresses_hazards": [
+        "H-7"
+      ],
+      "prevents_losses": [
+        "L-4"
+      ],
+      "related_losses": [
+        "L-4",
+        "L-5"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-4"
+        ],
+        "capability_degradation": "Incomplete audit logs could result in regulatory penalties and hinder incident investigations."
+      }
+    },
+    {
+      "identifier": "SC-8",
+      "name": "Threat Intelligence Updates",
+      "constraint_statement": "The system shall incorporate up-to-date threat intelligence for anomaly detection and prevention mechanisms.",
+      "rationale": "To ensure the system can detect and respond to emerging threats and vulnerabilities.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as real-time threat intelligence feeds and automated update mechanisms.",
+      "addresses_hazards": [
+        "H-12"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-2"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-2",
+        "L-5"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-2"
+        ],
+        "capability_degradation": "Outdated threat intelligence could allow undetected malicious activity, leading to security incidents."
+      }
+    }
+  ],
+  "constraint_coverage": {
+    "total_hazards": 12,
+    "hazards_with_constraints": 11,
+    "total_constraints": 8,
+    "coverage_balance": 0.9166666666666666,
+    "type_distribution": {
+      "preventive": 5,
+      "detective": 3,
+      "corrective": 0,
+      "compensating": 0
+    }
+  },
+  "constraint_hazard_mappings": [
+    {
+      "constraint_id": "SC-1",
+      "hazard_id": "H-1",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-1",
+      "hazard_id": "H-6",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-1",
+      "hazard_id": "H-11",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-2",
+      "hazard_id": "H-2",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-2",
+      "hazard_id": "H-8",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-3",
+      "hazard_id": "H-3",
+      "relationship_type": "detects"
+    },
+    {
+      "constraint_id": "SC-3",
+      "hazard_id": "H-10",
+      "relationship_type": "detects"
+    },
+    {
+      "constraint_id": "SC-4",
+      "hazard_id": "H-4",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-5",
+      "hazard_id": "H-5",
+      "relationship_type": "detects"
+    },
+    {
+      "constraint_id": "SC-6",
+      "hazard_id": "H-6",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-7",
+      "hazard_id": "H-7",
+      "relationship_type": "detects"
+    },
+    {
+      "constraint_id": "SC-8",
+      "hazard_id": "H-12",
+      "relationship_type": "eliminates"
+    }
+  ],
+  "constraint_count": 8,
+  "constraint_types": {
+    "preventive": 5,
+    "detective": 3,
+    "corrective": 0,
+    "compensating": 0
+  },
+  "cognitive_style": "balanced",
+  "analysis_metadata": {
+    "agent_type": "security_constraints",
+    "analysis_id": "4cb0d409-957d-4b47-b8ec-1fc4515e1590",
+    "timestamp": "2025-07-29T04:56:28.263096Z",
+    "version": "1.0"
+  }
+}

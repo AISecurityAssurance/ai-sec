@@ -1,0 +1,426 @@
+{
+  "validation_results": {
+    "mission_clarity": {
+      "status": "pass",
+      "violations": [],
+      "warnings": [],
+      "abstraction_score": 100
+    },
+    "loss_completeness": {
+      "status": "fail",
+      "missing_elements": [
+        {
+          "element": "security_constraints",
+          "impact": "critical",
+          "description": "security_constraints analysis not performed"
+        },
+        {
+          "element": "system_boundaries",
+          "impact": "critical",
+          "description": "system_boundaries analysis not performed"
+        }
+      ],
+      "incomplete_elements": [],
+      "completeness_score": 40
+    },
+    "hazard_coverage": {
+      "status": "pass",
+      "coverage_gaps": [
+        {
+          "type": "missing_stakeholder_types",
+          "items": [
+            "partner"
+          ],
+          "impact": "minor",
+          "description": "Stakeholder types not represented"
+        }
+      ],
+      "coverage_metrics": {
+        "loss_coverage": {
+          "total_losses": 8,
+          "covered_losses": 8,
+          "coverage_percentage": 100.0
+        },
+        "stakeholder_coverage": {
+          "expected_types": 6,
+          "covered_types": 6,
+          "coverage_percentage": 100.0
+        },
+        "hazard_category_coverage": {
+          "expected_categories": 4,
+          "covered_categories": 6,
+          "coverage_percentage": 150.0
+        }
+      },
+      "coverage_score": 116.66666666666667
+    },
+    "stakeholder_coverage": {
+      "status": "pass",
+      "inconsistencies": [],
+      "cross_references": [
+        {
+          "check": "domain_consistency",
+          "status": "verified",
+          "details": "Domain 'healthcare' used consistently"
+        }
+      ],
+      "consistency_score": 100
+    },
+    "security_constraints": {
+      "status": "fail",
+      "missing_constraints": [
+        {
+          "hazard_id": "H-1",
+          "hazard_description": "System operates in a state where drones navigate with corrupted GPS data due to signal interference or spoofing",
+          "impact": "critical",
+          "issue": "No security constraints defined"
+        },
+        {
+          "hazard_id": "H-2",
+          "hazard_description": "System operates in a state where sensitive patient data is transmitted without encryption over insecure communication channels",
+          "impact": "critical",
+          "issue": "No security constraints defined"
+        },
+        {
+          "hazard_id": "H-3",
+          "hazard_description": "System operates in a state where drones fail to avoid obstacles due to corrupted sensor data caused by environmental interference",
+          "impact": "critical",
+          "issue": "No security constraints defined"
+        },
+        {
+          "hazard_id": "H-4",
+          "hazard_description": "System operates in a state where drones are unable to land safely due to misidentified landing zones by computer vision algorithms",
+          "impact": "critical",
+          "issue": "No security constraints defined"
+        },
+        {
+          "hazard_id": "H-5",
+          "hazard_description": "System operates in a state where unauthorized users gain access to fleet control systems and alter mission priorities",
+          "impact": "critical",
+          "issue": "No security constraints defined"
+        },
+        {
+          "hazard_id": "H-6",
+          "hazard_description": "System operates in a state where drones experience unexpected power loss during critical operations",
+          "impact": "critical",
+          "issue": "No security constraints defined"
+        },
+        {
+          "hazard_id": "H-7",
+          "hazard_description": "System operates in a state where medical payload tracking records are tampered with, leading to chain-of-custody violations",
+          "impact": "critical",
+          "issue": "No security constraints defined"
+        },
+        {
+          "hazard_id": "H-8",
+          "hazard_description": "System operates in a state where drones fail to communicate with ground control due to communication network disruptions",
+          "impact": "critical",
+          "issue": "No security constraints defined"
+        },
+        {
+          "hazard_id": "H-9",
+          "hazard_description": "System operates in a state where drones fail to adapt to adverse weather conditions, leading to mission failure",
+          "impact": "critical",
+          "issue": "No security constraints defined"
+        },
+        {
+          "hazard_id": "H-10",
+          "hazard_description": "System operates in a state where drones are hijacked remotely, allowing attackers to redirect or repurpose their missions",
+          "impact": "critical",
+          "issue": "No security constraints defined"
+        },
+        {
+          "hazard_id": "H-11",
+          "hazard_description": "System operates in a state where regulatory compliance records are incomplete or tampered with, leading to legal violations",
+          "impact": "critical",
+          "issue": "No security constraints defined"
+        },
+        {
+          "hazard_id": "H-12",
+          "hazard_description": "System operates in a state where fleet coordination algorithms produce conflicting commands, leading to cascading mission failures",
+          "impact": "critical",
+          "issue": "No security constraints defined"
+        },
+        {
+          "hazard_id": "H-1",
+          "hazard_description": "System operates in a state where drones navigate with corrupted GPS data due to signal interference or spoofing",
+          "impact": "critical",
+          "issue": "Critical hazard needs multiple constraints (currently has 0)"
+        },
+        {
+          "hazard_id": "H-3",
+          "hazard_description": "System operates in a state where drones fail to avoid obstacles due to corrupted sensor data caused by environmental interference",
+          "impact": "critical",
+          "issue": "Critical hazard needs multiple constraints (currently has 0)"
+        },
+        {
+          "hazard_id": "H-6",
+          "hazard_description": "System operates in a state where drones experience unexpected power loss during critical operations",
+          "impact": "critical",
+          "issue": "Critical hazard needs multiple constraints (currently has 0)"
+        },
+        {
+          "hazard_id": "H-7",
+          "hazard_description": "System operates in a state where medical payload tracking records are tampered with, leading to chain-of-custody violations",
+          "impact": "critical",
+          "issue": "Critical hazard needs multiple constraints (currently has 0)"
+        },
+        {
+          "hazard_id": "H-8",
+          "hazard_description": "System operates in a state where drones fail to communicate with ground control due to communication network disruptions",
+          "impact": "critical",
+          "issue": "Critical hazard needs multiple constraints (currently has 0)"
+        },
+        {
+          "hazard_id": "H-9",
+          "hazard_description": "System operates in a state where drones fail to adapt to adverse weather conditions, leading to mission failure",
+          "impact": "critical",
+          "issue": "Critical hazard needs multiple constraints (currently has 0)"
+        },
+        {
+          "hazard_id": "H-12",
+          "hazard_description": "System operates in a state where fleet coordination algorithms produce conflicting commands, leading to cascading mission failures",
+          "impact": "critical",
+          "issue": "Critical hazard needs multiple constraints (currently has 0)"
+        }
+      ],
+      "weak_constraints": [],
+      "constraint_coverage": {
+        "total_hazards": 12,
+        "hazards_with_constraints": 0,
+        "total_constraints": 0,
+        "type_distribution": {
+          "preventive": 0,
+          "detective": 0,
+          "corrective": 0,
+          "compensating": 0
+        },
+        "coverage_balance": 0.0
+      },
+      "constraint_score": 0
+    },
+    "system_boundaries": {
+      "status": "fail",
+      "missing_boundaries": [
+        {
+          "boundary_type": "system_scope",
+          "impact": "major",
+          "description": "Missing system_scope boundary definition"
+        },
+        {
+          "boundary_type": "trust",
+          "impact": "major",
+          "description": "Missing trust boundary definition"
+        },
+        {
+          "boundary_type": "responsibility",
+          "impact": "major",
+          "description": "Missing responsibility boundary definition"
+        },
+        {
+          "boundary_type": "data_governance",
+          "impact": "major",
+          "description": "Missing data_governance boundary definition"
+        }
+      ],
+      "boundary_issues": [],
+      "boundary_metrics": {
+        "defined_boundaries": 0,
+        "essential_coverage": 0.0,
+        "critical_interfaces": 0,
+        "total_elements": 0
+      },
+      "boundary_score": 0
+    }
+  },
+  "quality_metrics": {
+    "abstraction_score": 100,
+    "completeness_score": 40,
+    "consistency_score": 100,
+    "coverage_score": 116.66666666666667,
+    "security_constraints_score": 0,
+    "system_boundaries_score": 0,
+    "overall_score": 65.5,
+    "quality_level": "needs_improvement",
+    "strengths": [
+      "Excellent abstraction level maintenance",
+      "High internal consistency",
+      "Thorough loss and hazard coverage"
+    ],
+    "weaknesses": [
+      "Missing required elements",
+      "Weak or missing security constraints",
+      "Poorly defined system boundaries"
+    ]
+  },
+  "recommendations": [
+    {
+      "priority": "critical",
+      "category": "completeness",
+      "recommendation": "Complete missing analysis elements",
+      "specific_actions": [
+        "Perform security_constraints analysis",
+        "Perform system_boundaries analysis"
+      ]
+    },
+    {
+      "priority": "critical",
+      "category": "security_constraints",
+      "recommendation": "Define security constraints for all hazards",
+      "specific_actions": [
+        "Add constraints for hazard H-1",
+        "Add constraints for hazard H-2",
+        "Add constraints for hazard H-3"
+      ]
+    },
+    {
+      "priority": "high",
+      "category": "system_boundaries",
+      "recommendation": "Define missing system boundaries",
+      "specific_actions": [
+        "Define system_scope boundary",
+        "Define trust boundary",
+        "Define responsibility boundary",
+        "Define data_governance boundary"
+      ]
+    }
+  ],
+  "step2_bridge": {
+    "control_needs": {
+      "integrity_controls": {
+        "need": "Ensure system operates with verified integrity",
+        "addresses_hazards": [
+          "H-1",
+          "H-3",
+          "H-7"
+        ],
+        "criticality": "essential"
+      },
+      "confidentiality_controls": {
+        "need": "Protect information from unauthorized observation",
+        "addresses_hazards": [
+          "H-2",
+          "H-5"
+        ],
+        "criticality": "essential"
+      },
+      "capability_controls": {
+        "need": "Preserve critical system capabilities",
+        "addresses_hazards": [
+          "H-4",
+          "H-10"
+        ],
+        "criticality": "essential"
+      },
+      "availability_controls": {
+        "need": "Maintain service despite disruptions",
+        "addresses_hazards": [
+          "H-6",
+          "H-8"
+        ],
+        "criticality": "essential"
+      }
+    },
+    "implied_boundaries": {
+      "user_system": {
+        "between": [
+          "users",
+          "system"
+        ],
+        "nature": "service_delivery",
+        "criticality": "primary"
+      },
+      "system_regulator": {
+        "between": [
+          "system",
+          "regulators"
+        ],
+        "nature": "compliance_reporting",
+        "criticality": "required"
+      }
+    },
+    "architectural_hints": {
+      "focus": "Detection and response architecture recommended"
+    },
+    "security_constraint_mapping": {
+      "preventive": [],
+      "detective": [],
+      "corrective": [],
+      "compensating": []
+    },
+    "boundary_control_requirements": {},
+    "transition_guidance": [
+      {
+        "step": "Map control needs to control structure",
+        "description": "Each control need requires one or more controllers in Step 2"
+      },
+      {
+        "step": "Define control boundaries",
+        "description": "Implied boundaries become explicit control interfaces"
+      },
+      {
+        "step": "Implement security constraints as control actions",
+        "description": "Transform constraints into specific control actions and feedback loops"
+      },
+      {
+        "step": "Establish boundary control points",
+        "description": "Place controllers at critical boundary crossing points"
+      },
+      {
+        "step": "Allocate losses to controllers",
+        "description": "Each controller must prevent specific losses"
+      },
+      {
+        "step": "Design control channels",
+        "description": "Ensure secure and reliable control command paths"
+      }
+    ]
+  },
+  "executive_summary": {
+    "analysis_scope": {
+      "system": "rapidly deliver time-critical medical supplies and enable remote medical intervention in emergencies",
+      "domain": "healthcare",
+      "criticality": "catastrophic"
+    },
+    "key_findings": {
+      "losses_identified": 8,
+      "hazards_identified": 12,
+      "critical_losses": 3,
+      "adversary_classes": 3,
+      "highest_threat": "moderate",
+      "security_constraints_defined": 0,
+      "hazards_with_constraints": 0,
+      "system_boundaries_defined": 0
+    },
+    "risk_landscape": {
+      "primary_risks": [
+        "3 catastrophic losses possible",
+        "Direct financial exposure identified"
+      ],
+      "threat_level": "severe",
+      "coverage_gaps": 0,
+      "unconstrained_hazards": 12,
+      "missing_critical_boundaries": 3
+    },
+    "quality_assessment": {
+      "overall_quality": "needs_improvement",
+      "quality_score": 65.5,
+      "strengths": [
+        "Excellent abstraction level maintenance",
+        "High internal consistency"
+      ],
+      "improvement_areas": [
+        "Missing required elements",
+        "Weak or missing security constraints"
+      ]
+    },
+    "next_steps": [
+      "Address quality issues before proceeding to Step 2",
+      "Define security constraints for 12 unconstrained hazards",
+      "Define 3 missing critical boundaries",
+      "Review Step 1 to Step 2 bridge for architectural planning"
+    ]
+  },
+  "validation_timestamp": "2025-07-29T05:03:12.811967",
+  "overall_status": "revision_required"
+}

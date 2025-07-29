@@ -127,11 +127,17 @@ For each constraint:
 4. Use "The system shall..." format
 5. Make it verifiable (testable) but not prescriptive
 6. IMPORTANT: Include the "addresses_hazards" field with hazard IDs
-7. Consider:
-   - Preventive constraints (eliminate hazards)
-   - Detective constraints (identify when hazards occur)
-   - Corrective constraints (respond to hazards)
-   - Compensating constraints (reduce impact)
+7. Consider all types of constraints:
+   - Preventive: Eliminate hazards before they manifest
+     Example: "The system shall verify operational parameters before execution"
+   - Detective: Identify when hazards are occurring
+     Example: "The system shall detect anomalous patterns in real-time"
+   - Corrective: Respond to active hazards
+     Example: "The system shall initiate recovery procedures upon failure detection"
+   - Compensating: Reduce impact when hazards occur
+     Example: "The system shall maintain redundancy for critical functions"
+   
+   IMPORTANT: Include a mix of all constraint types, not just preventive!
 
 Generate constraints in this JSON format:
 {{

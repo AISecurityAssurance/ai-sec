@@ -1,0 +1,435 @@
+{
+  "losses": [
+    {
+      "description": "Loss of customer financial assets due to unauthorized transactions",
+      "loss_category": "financial",
+      "severity_classification": {
+        "magnitude": "catastrophic",
+        "scope": "customer_wide",
+        "duration": "variable",
+        "reversibility": "difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Secure access to financial accounts",
+          "Reliable payment and fund transfer processing"
+        ],
+        "cascading_effects": [
+          "Erosion of customer trust",
+          "Increased operational costs for fraud investigation and reimbursement"
+        ],
+        "stakeholder_harm": {
+          "customers": {
+            "type": "financial",
+            "severity": "catastrophic"
+          }
+        }
+      },
+      "identifier": "L-1"
+    },
+    {
+      "description": "Loss of customer data confidentiality due to a data breach",
+      "loss_category": "privacy",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "customer_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "hard"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Secure access to financial accounts"
+        ],
+        "cascading_effects": [
+          "Reputational damage",
+          "Regulatory penalties under GDPR"
+        ],
+        "stakeholder_harm": {
+          "customers": {
+            "type": "privacy",
+            "severity": "major"
+          },
+          "organization": {
+            "type": "reputation",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-2"
+    },
+    {
+      "description": "Loss of service availability during peak financial operations",
+      "loss_category": "mission",
+      "severity_classification": {
+        "magnitude": "catastrophic",
+        "scope": "mission_wide",
+        "duration": "short_term",
+        "reversibility": "possible",
+        "detection_difficulty": "easy"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Reliable payment and fund transfer processing",
+          "Scalable support for high user concurrency"
+        ],
+        "cascading_effects": [
+          "Delayed payments and transfers",
+          "Customer dissatisfaction and potential churn"
+        ],
+        "stakeholder_harm": {
+          "customers": {
+            "type": "mission",
+            "severity": "major"
+          },
+          "organization": {
+            "type": "reputation",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-3"
+    },
+    {
+      "description": "Loss of regulatory compliance resulting in penalties and sanctions",
+      "loss_category": "regulatory",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "enterprise_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Secure access to financial accounts",
+          "Reliable payment and fund transfer processing"
+        ],
+        "cascading_effects": [
+          "Financial penalties",
+          "Mandatory operational changes to meet compliance"
+        ],
+        "stakeholder_harm": {
+          "organization": {
+            "type": "financial",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-4"
+    },
+    {
+      "description": "Damage to organizational reputation due to a highly publicized security incident",
+      "loss_category": "reputation",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "market_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "easy"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Secure access to financial accounts"
+        ],
+        "cascading_effects": [
+          "Customer attrition",
+          "Decline in new customer acquisition"
+        ],
+        "stakeholder_harm": {
+          "organization": {
+            "type": "reputation",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-5"
+    },
+    {
+      "description": "Loss of data integrity affecting financial transactions and account balances",
+      "loss_category": "mission",
+      "severity_classification": {
+        "magnitude": "catastrophic",
+        "scope": "customer_wide",
+        "duration": "medium_term",
+        "reversibility": "difficult",
+        "detection_difficulty": "hard"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Secure access to financial accounts",
+          "Reliable payment and fund transfer processing"
+        ],
+        "cascading_effects": [
+          "Disruption of financial operations",
+          "Increased operational costs for correcting data"
+        ],
+        "stakeholder_harm": {
+          "customers": {
+            "type": "financial",
+            "severity": "major"
+          },
+          "organization": {
+            "type": "reputation",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-6"
+    },
+    {
+      "description": "Loss of critical system capability affecting transaction processing",
+      "loss_category": "mission",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "mission_wide",
+        "duration": "short_term",
+        "reversibility": "possible",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Reliable payment and fund transfer processing"
+        ],
+        "cascading_effects": [
+          "Customer frustration",
+          "Operational inefficiencies"
+        ],
+        "stakeholder_harm": {
+          "customers": {
+            "type": "mission",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-7"
+    },
+    {
+      "description": "Loss of customer trust due to repeated security incidents",
+      "loss_category": "reputation",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "market_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "easy"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Secure access to financial accounts"
+        ],
+        "cascading_effects": [
+          "Reduced customer retention",
+          "Decreased market share"
+        ],
+        "stakeholder_harm": {
+          "organization": {
+            "type": "reputation",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-8"
+    }
+  ],
+  "loss_count": 8,
+  "loss_categories": {
+    "financial": 1,
+    "privacy": 1,
+    "mission": 3,
+    "regulatory": 1,
+    "reputation": 2
+  },
+  "dependencies": [
+    {
+      "primary_loss_id": "L-2",
+      "dependent_loss_id": "L-5",
+      "dependency_type": "triggers",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "None, reputation damage begins as soon as the data breach becomes public",
+        "persistence": "sustained"
+      },
+      "rationale": "A data breach (loss of confidentiality) typically leads to widespread media coverage and loss of customer confidence, which directly damages the organization's reputation.",
+      "id": "2bf33cf1-db74-4f01-9872-eb3d50092af8"
+    },
+    {
+      "primary_loss_id": "L-2",
+      "dependent_loss_id": "L-8",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Time needed for customers to react and lose trust, possibly weeks to months",
+        "persistence": "sustained"
+      },
+      "rationale": "A data breach can erode customer trust, especially if it is part of a pattern of repeated security failures, leading to long-term reputational harm.",
+      "id": "0cf54d72-d1d8-4cd8-a16e-0a5d42f15fe7"
+    },
+    {
+      "primary_loss_id": "L-6",
+      "dependent_loss_id": "L-1",
+      "dependency_type": "triggers",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "None, financial losses occur as soon as integrity is compromised",
+        "persistence": "temporary"
+      },
+      "rationale": "Loss of data integrity (e.g., tampered financial transactions) directly leads to unauthorized or incorrect transactions, causing immediate financial losses to customers.",
+      "id": "2b4f65d1-6e5c-416b-bada-77031ea4f3e7"
+    },
+    {
+      "primary_loss_id": "L-6",
+      "dependent_loss_id": "L-4",
+      "dependency_type": "enables",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Regulatory penalties may take weeks or months to materialize after an incident",
+        "persistence": "sustained"
+      },
+      "rationale": "Loss of data integrity in financial transactions can lead to violations of regulatory requirements for accuracy and reliability, resulting in penalties or sanctions.",
+      "id": "025992c7-761b-4b4b-8990-36bdc3b3b7dc"
+    },
+    {
+      "primary_loss_id": "L-7",
+      "dependent_loss_id": "L-3",
+      "dependency_type": "triggers",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "None, loss of critical system capability directly affects service availability",
+        "persistence": "temporary"
+      },
+      "rationale": "Loss of critical system capability (e.g., transaction processing) immediately impacts the organization\u2019s ability to provide services, especially during peak operational times.",
+      "id": "1a0da20a-bcc6-4578-90a4-0fd2f512eb39"
+    },
+    {
+      "primary_loss_id": "L-7",
+      "dependent_loss_id": "L-4",
+      "dependency_type": "enables",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Regulatory penalties may take weeks or months to occur after disruption",
+        "persistence": "sustained"
+      },
+      "rationale": "Loss of critical system capability can result in non-compliance with regulatory requirements for service uptime and reliability, leading to potential penalties.",
+      "id": "f95be153-3d47-4a0b-a2b1-efff6ef6a947"
+    },
+    {
+      "primary_loss_id": "L-7",
+      "dependent_loss_id": "L-5",
+      "dependency_type": "amplifies",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "concurrent",
+        "typical_delay": "Reputation damage begins during or shortly after service disruptions",
+        "persistence": "sustained"
+      },
+      "rationale": "Loss of critical system capability during peak operations can result in customer dissatisfaction and public criticism, amplifying damage to the organization's reputation.",
+      "id": "a16673e9-bc40-4624-b91f-826606b555f1"
+    },
+    {
+      "primary_loss_id": "L-5",
+      "dependent_loss_id": "L-8",
+      "dependency_type": "enables",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Loss of trust builds over time as reputational damage accumulates",
+        "persistence": "sustained"
+      },
+      "rationale": "Damage to the organization's reputation due to publicized security incidents increases the likelihood of customers losing trust over time, especially if incidents recur.",
+      "id": "4c348513-a73b-4e04-b8f1-47b3dac08382"
+    },
+    {
+      "primary_loss_id": "L-8",
+      "dependent_loss_id": "L-1",
+      "dependency_type": "amplifies",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Financial losses may worsen as customers withdraw or reduce engagement with the organization",
+        "persistence": "variable"
+      },
+      "rationale": "Loss of customer trust can amplify financial losses as customers reduce their transactions or withdraw assets from the organization, further destabilizing operations.",
+      "id": "05ea6f21-e497-4e47-b692-ade62aeee293"
+    },
+    {
+      "primary_loss_id": "L-4",
+      "dependent_loss_id": "L-5",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Reputation damage may follow after regulatory sanctions are publicized",
+        "persistence": "sustained"
+      },
+      "rationale": "Regulatory penalties and sanctions often become public knowledge, which can lead to reputational harm as customers and stakeholders lose confidence in the organization.",
+      "id": "f2f2d919-b7de-4af8-8766-0a9fa37e2653"
+    }
+  ],
+  "cascade_analysis": {
+    "primary_losses": [
+      "L-2",
+      "L-6",
+      "L-7"
+    ],
+    "cascade_chains": [
+      {
+        "chain": [
+          "L-2",
+          "L-5",
+          "L-8",
+          "L-1"
+        ],
+        "trigger": "L-2",
+        "terminal_losses": [
+          "L-1"
+        ],
+        "chain_length": 4
+      },
+      {
+        "chain": [
+          "L-6",
+          "L-1",
+          "L-4",
+          "L-5",
+          "L-8"
+        ],
+        "trigger": "L-6",
+        "terminal_losses": [
+          "L-8"
+        ],
+        "chain_length": 5
+      },
+      {
+        "chain": [
+          "L-7",
+          "L-3",
+          "L-4",
+          "L-5",
+          "L-8",
+          "L-1"
+        ],
+        "trigger": "L-7",
+        "terminal_losses": [
+          "L-1"
+        ],
+        "chain_length": 6
+      }
+    ],
+    "max_cascade_depth": 6
+  },
+  "severity_distribution": {
+    "catastrophic": 3,
+    "major": 5,
+    "moderate": 0,
+    "minor": 0
+  },
+  "cognitive_style": "balanced"
+}

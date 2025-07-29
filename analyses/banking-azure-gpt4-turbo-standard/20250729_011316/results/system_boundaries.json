@@ -1,0 +1,633 @@
+{
+  "system_boundaries": [
+    {
+      "boundary_name": "Banking Platform System Scope",
+      "boundary_type": "system_scope",
+      "description": "Defines the specific components under direct system control, external dependencies, and interfaces.",
+      "definition_criteria": {
+        "criterion1": "System components directly managed and controlled by the digital banking platform",
+        "criterion2": "External systems and technologies relied upon for functionality and regulatory compliance",
+        "criterion3": "Interfaces enabling communication between internal and external systems"
+      },
+      "elements": [
+        {
+          "element_name": "Banking Application Server",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "key": "System is designed to handle high loads and is protected by network firewalls."
+          },
+          "constraints": {
+            "key": "Must comply with PCI-DSS standards for secure data processing."
+          }
+        },
+        {
+          "element_name": "Customer Database",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "key": "Data is encrypted at rest and access is restricted to authorized personnel."
+          },
+          "constraints": {
+            "key": "Must meet GDPR requirements for data privacy and retention policies."
+          }
+        },
+        {
+          "element_name": "API Gateway",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "key": "Gateway enforces authentication and rate-limiting for all API calls."
+          },
+          "constraints": {
+            "key": "Must support OAuth2 for secure API access."
+          }
+        },
+        {
+          "element_name": "Customer Mobile Devices",
+          "element_type": "actor",
+          "position": "outside",
+          "assumptions": {
+            "key": "Devices are operated by customers and may not be fully secured."
+          },
+          "constraints": {
+            "key": "System must operate securely even if the mobile device is compromised."
+          }
+        },
+        {
+          "element_name": "SWIFT Payment Network",
+          "element_type": "component",
+          "position": "outside",
+          "assumptions": {
+            "key": "Network provides secure and reliable international payment processing."
+          },
+          "constraints": {
+            "key": "Integration must comply with SWIFT security protocols."
+          }
+        },
+        {
+          "element_name": "Equifax Credit Bureau API",
+          "element_type": "component",
+          "position": "outside",
+          "assumptions": {
+            "key": "API provides accurate and timely credit data for customer evaluations."
+          },
+          "constraints": {
+            "key": "Integration must comply with credit bureau data-sharing agreements."
+          }
+        },
+        {
+          "element_name": "RESTful API for Mobile App",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "key": "API is secured with TLS and only accessible to authenticated apps."
+          },
+          "constraints": {
+            "key": "Must implement rate limiting and token-based authentication."
+          }
+        },
+        {
+          "element_name": "SFTP Connection to Regulatory Reporting",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "key": "SFTP is the secure method used for transmitting sensitive files to regulators."
+          },
+          "constraints": {
+            "key": "Must comply with SOX and AML/BSA standards for secure reporting."
+          }
+        },
+        {
+          "element_name": "OAuth2 Integration with Identity Provider",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "key": "Identity provider ensures secure authentication for all users."
+          },
+          "constraints": {
+            "key": "Must support multi-factor authentication for all transactions."
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Banking Platform Trust Boundaries",
+      "boundary_type": "trust",
+      "description": "Defines the points where trust changes between system components, external systems, and users.",
+      "definition_criteria": {
+        "criterion1": "Identify where control or trust changes between internal and external systems",
+        "criterion2": "Highlight areas requiring additional security mechanisms"
+      },
+      "elements": [
+        {
+          "element_name": "Between Mobile App and API Gateway",
+          "element_type": "interface",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Mobile app sends encrypted requests to the API gateway."
+          },
+          "constraints": {
+            "key": "API gateway must validate tokens and enforce access control policies."
+          }
+        },
+        {
+          "element_name": "Between Application Server and Payment Processor",
+          "element_type": "interface",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Payment processor ensures accurate and secure transaction processing."
+          },
+          "constraints": {
+            "key": "All communication must use end-to-end encryption."
+          }
+        },
+        {
+          "element_name": "Between Database and Backup Storage",
+          "element_type": "data",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Backups are encrypted before being transferred."
+          },
+          "constraints": {
+            "key": "Backup storage must comply with GDPR and PCI-DSS requirements."
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Banking Platform Responsibility Boundaries",
+      "boundary_type": "responsibility",
+      "description": "Defines distinct areas of responsibility between the platform and external entities.",
+      "definition_criteria": {
+        "criterion1": "Clarify what responsibilities fall under the platform's control",
+        "criterion2": "Identify responsibilities delegated to external parties",
+        "criterion3": "Define shared responsibilities requiring coordination"
+      },
+      "elements": [
+        {
+          "element_name": "Customer Account Data Integrity",
+          "element_type": "component",
+          "position": "interface",
+          "assumptions": {
+            "key": "System ensures data accuracy and consistency."
+          },
+          "constraints": {
+            "key": "Must comply with financial reporting and security standards."
+          }
+        },
+        {
+          "element_name": "Mobile Device Security",
+          "element_type": "component",
+          "position": "interface",
+          "assumptions": {
+            "key": "Customers are responsible for securing their own devices."
+          },
+          "constraints": {
+            "key": "System must function securely even with compromised devices."
+          }
+        },
+        {
+          "element_name": "Transaction Dispute Resolution Process",
+          "element_type": "component",
+          "position": "interface",
+          "assumptions": {
+            "key": "Disputes require collaboration between the bank and payment networks."
+          },
+          "constraints": {
+            "key": "Process must comply with legal and regulatory guidelines."
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Banking Platform Data Governance Boundaries",
+      "boundary_type": "data_governance",
+      "description": "Defines the flow of data across systems and boundaries, including governance and compliance requirements.",
+      "definition_criteria": {
+        "criterion1": "Identify data transitions between internal and external systems",
+        "criterion2": "Specify governance requirements for each transition"
+      },
+      "elements": [
+        {
+          "element_name": "Customer PII Moves from Our Database to Credit Bureau",
+          "element_type": "data",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Credit bureau ensures secure handling of customer PII."
+          },
+          "constraints": {
+            "key": "Data transfer must comply with GDPR and credit bureau agreements."
+          }
+        },
+        {
+          "element_name": "Transaction Data Shared with Regulatory Authority",
+          "element_type": "data",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Regulatory authority securely stores and processes transaction data."
+          },
+          "constraints": {
+            "key": "Data must be anonymized where possible and comply with SOX."
+          }
+        },
+        {
+          "element_name": "Account Data Replicated to Disaster Recovery Site",
+          "element_type": "data",
+          "position": "inside",
+          "assumptions": {
+            "key": "Replication is performed over a secure, encrypted channel."
+          },
+          "constraints": {
+            "key": "Disaster recovery site must comply with the same security standards as the primary site."
+          }
+        }
+      ]
+    }
+  ],
+  "system_boundary": {
+    "boundary_name": "Banking Platform System Scope",
+    "boundary_type": "system_scope",
+    "description": "Defines the specific components under direct system control, external dependencies, and interfaces.",
+    "definition_criteria": {
+      "criterion1": "System components directly managed and controlled by the digital banking platform",
+      "criterion2": "External systems and technologies relied upon for functionality and regulatory compliance",
+      "criterion3": "Interfaces enabling communication between internal and external systems"
+    },
+    "elements": [
+      {
+        "element_name": "Banking Application Server",
+        "element_type": "component",
+        "position": "inside",
+        "assumptions": {
+          "key": "System is designed to handle high loads and is protected by network firewalls."
+        },
+        "constraints": {
+          "key": "Must comply with PCI-DSS standards for secure data processing."
+        }
+      },
+      {
+        "element_name": "Customer Database",
+        "element_type": "component",
+        "position": "inside",
+        "assumptions": {
+          "key": "Data is encrypted at rest and access is restricted to authorized personnel."
+        },
+        "constraints": {
+          "key": "Must meet GDPR requirements for data privacy and retention policies."
+        }
+      },
+      {
+        "element_name": "API Gateway",
+        "element_type": "component",
+        "position": "inside",
+        "assumptions": {
+          "key": "Gateway enforces authentication and rate-limiting for all API calls."
+        },
+        "constraints": {
+          "key": "Must support OAuth2 for secure API access."
+        }
+      },
+      {
+        "element_name": "Customer Mobile Devices",
+        "element_type": "actor",
+        "position": "outside",
+        "assumptions": {
+          "key": "Devices are operated by customers and may not be fully secured."
+        },
+        "constraints": {
+          "key": "System must operate securely even if the mobile device is compromised."
+        }
+      },
+      {
+        "element_name": "SWIFT Payment Network",
+        "element_type": "component",
+        "position": "outside",
+        "assumptions": {
+          "key": "Network provides secure and reliable international payment processing."
+        },
+        "constraints": {
+          "key": "Integration must comply with SWIFT security protocols."
+        }
+      },
+      {
+        "element_name": "Equifax Credit Bureau API",
+        "element_type": "component",
+        "position": "outside",
+        "assumptions": {
+          "key": "API provides accurate and timely credit data for customer evaluations."
+        },
+        "constraints": {
+          "key": "Integration must comply with credit bureau data-sharing agreements."
+        }
+      },
+      {
+        "element_name": "RESTful API for Mobile App",
+        "element_type": "interface",
+        "position": "interface",
+        "assumptions": {
+          "key": "API is secured with TLS and only accessible to authenticated apps."
+        },
+        "constraints": {
+          "key": "Must implement rate limiting and token-based authentication."
+        }
+      },
+      {
+        "element_name": "SFTP Connection to Regulatory Reporting",
+        "element_type": "interface",
+        "position": "interface",
+        "assumptions": {
+          "key": "SFTP is the secure method used for transmitting sensitive files to regulators."
+        },
+        "constraints": {
+          "key": "Must comply with SOX and AML/BSA standards for secure reporting."
+        }
+      },
+      {
+        "element_name": "OAuth2 Integration with Identity Provider",
+        "element_type": "interface",
+        "position": "interface",
+        "assumptions": {
+          "key": "Identity provider ensures secure authentication for all users."
+        },
+        "constraints": {
+          "key": "Must support multi-factor authentication for all transactions."
+        }
+      }
+    ],
+    "primary_system": [
+      "API Gateway",
+      "Banking Application Server",
+      "Customer Database"
+    ],
+    "system_elements": [
+      "API Gateway",
+      "Banking Application Server",
+      "Account Data Replicated to Disaster Recovery Site",
+      "Customer Database"
+    ],
+    "external_entities": [
+      "Customer Mobile Devices",
+      "SWIFT Payment Network",
+      "Equifax Credit Bureau API"
+    ],
+    "interfaces": [
+      {
+        "name": "RESTful API for Mobile App",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "API is secured with TLS and only accessible to authenticated apps."
+        },
+        "constraints": {
+          "key": "Must implement rate limiting and token-based authentication."
+        }
+      },
+      {
+        "name": "SFTP Connection to Regulatory Reporting",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "SFTP is the secure method used for transmitting sensitive files to regulators."
+        },
+        "constraints": {
+          "key": "Must comply with SOX and AML/BSA standards for secure reporting."
+        }
+      },
+      {
+        "name": "OAuth2 Integration with Identity Provider",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "Identity provider ensures secure authentication for all users."
+        },
+        "constraints": {
+          "key": "Must support multi-factor authentication for all transactions."
+        }
+      },
+      {
+        "name": "Customer Account Data Integrity",
+        "boundary_type": "responsibility",
+        "assumptions": {
+          "key": "System ensures data accuracy and consistency."
+        },
+        "constraints": {
+          "key": "Must comply with financial reporting and security standards."
+        }
+      },
+      {
+        "name": "Mobile Device Security",
+        "boundary_type": "responsibility",
+        "assumptions": {
+          "key": "Customers are responsible for securing their own devices."
+        },
+        "constraints": {
+          "key": "System must function securely even with compromised devices."
+        }
+      },
+      {
+        "name": "Transaction Dispute Resolution Process",
+        "boundary_type": "responsibility",
+        "assumptions": {
+          "key": "Disputes require collaboration between the bank and payment networks."
+        },
+        "constraints": {
+          "key": "Process must comply with legal and regulatory guidelines."
+        }
+      }
+    ],
+    "assumptions": [
+      "Banking Application Server: System is designed to handle high loads and is protected by network firewalls.",
+      "Customer Database: Data is encrypted at rest and access is restricted to authorized personnel.",
+      "API Gateway: Gateway enforces authentication and rate-limiting for all API calls.",
+      "Customer Mobile Devices: Devices are operated by customers and may not be fully secured.",
+      "SWIFT Payment Network: Network provides secure and reliable international payment processing.",
+      "Equifax Credit Bureau API: API provides accurate and timely credit data for customer evaluations.",
+      "RESTful API for Mobile App: API is secured with TLS and only accessible to authenticated apps.",
+      "SFTP Connection to Regulatory Reporting: SFTP is the secure method used for transmitting sensitive files to regulators.",
+      "OAuth2 Integration with Identity Provider: Identity provider ensures secure authentication for all users.",
+      "Between Mobile App and API Gateway: Mobile app sends encrypted requests to the API gateway.",
+      "Between Application Server and Payment Processor: Payment processor ensures accurate and secure transaction processing.",
+      "Between Database and Backup Storage: Backups are encrypted before being transferred.",
+      "Customer Account Data Integrity: System ensures data accuracy and consistency.",
+      "Mobile Device Security: Customers are responsible for securing their own devices.",
+      "Transaction Dispute Resolution Process: Disputes require collaboration between the bank and payment networks.",
+      "Customer PII Moves from Our Database to Credit Bureau: Credit bureau ensures secure handling of customer PII.",
+      "Transaction Data Shared with Regulatory Authority: Regulatory authority securely stores and processes transaction data.",
+      "Account Data Replicated to Disaster Recovery Site: Replication is performed over a secure, encrypted channel."
+    ],
+    "exclusions": [
+      "Banking Application Server: Must comply with PCI-DSS standards for secure data processing.",
+      "Customer Database: Must meet GDPR requirements for data privacy and retention policies.",
+      "API Gateway: Must support OAuth2 for secure API access.",
+      "Customer Mobile Devices: System must operate securely even if the mobile device is compromised.",
+      "SWIFT Payment Network: Integration must comply with SWIFT security protocols.",
+      "Equifax Credit Bureau API: Integration must comply with credit bureau data-sharing agreements.",
+      "RESTful API for Mobile App: Must implement rate limiting and token-based authentication.",
+      "SFTP Connection to Regulatory Reporting: Must comply with SOX and AML/BSA standards for secure reporting.",
+      "OAuth2 Integration with Identity Provider: Must support multi-factor authentication for all transactions.",
+      "Between Mobile App and API Gateway: API gateway must validate tokens and enforce access control policies.",
+      "Between Application Server and Payment Processor: All communication must use end-to-end encryption.",
+      "Between Database and Backup Storage: Backup storage must comply with GDPR and PCI-DSS requirements.",
+      "Customer Account Data Integrity: Must comply with financial reporting and security standards.",
+      "Mobile Device Security: System must function securely even with compromised devices.",
+      "Transaction Dispute Resolution Process: Process must comply with legal and regulatory guidelines.",
+      "Customer PII Moves from Our Database to Credit Bureau: Data transfer must comply with GDPR and credit bureau agreements.",
+      "Transaction Data Shared with Regulatory Authority: Data must be anonymized where possible and comply with SOX.",
+      "Account Data Replicated to Disaster Recovery Site: Disaster recovery site must comply with the same security standards as the primary site."
+    ]
+  },
+  "boundary_analysis": {
+    "primary_system": [
+      "API Gateway",
+      "Banking Application Server",
+      "Customer Database"
+    ],
+    "system_elements": [
+      "API Gateway",
+      "Banking Application Server",
+      "Account Data Replicated to Disaster Recovery Site",
+      "Customer Database"
+    ],
+    "external_entities": [
+      "Customer Mobile Devices",
+      "SWIFT Payment Network",
+      "Equifax Credit Bureau API"
+    ],
+    "interfaces": [
+      {
+        "name": "RESTful API for Mobile App",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "API is secured with TLS and only accessible to authenticated apps."
+        },
+        "constraints": {
+          "key": "Must implement rate limiting and token-based authentication."
+        }
+      },
+      {
+        "name": "SFTP Connection to Regulatory Reporting",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "SFTP is the secure method used for transmitting sensitive files to regulators."
+        },
+        "constraints": {
+          "key": "Must comply with SOX and AML/BSA standards for secure reporting."
+        }
+      },
+      {
+        "name": "OAuth2 Integration with Identity Provider",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "Identity provider ensures secure authentication for all users."
+        },
+        "constraints": {
+          "key": "Must support multi-factor authentication for all transactions."
+        }
+      },
+      {
+        "name": "Customer Account Data Integrity",
+        "boundary_type": "responsibility",
+        "assumptions": {
+          "key": "System ensures data accuracy and consistency."
+        },
+        "constraints": {
+          "key": "Must comply with financial reporting and security standards."
+        }
+      },
+      {
+        "name": "Mobile Device Security",
+        "boundary_type": "responsibility",
+        "assumptions": {
+          "key": "Customers are responsible for securing their own devices."
+        },
+        "constraints": {
+          "key": "System must function securely even with compromised devices."
+        }
+      },
+      {
+        "name": "Transaction Dispute Resolution Process",
+        "boundary_type": "responsibility",
+        "assumptions": {
+          "key": "Disputes require collaboration between the bank and payment networks."
+        },
+        "constraints": {
+          "key": "Process must comply with legal and regulatory guidelines."
+        }
+      }
+    ],
+    "assumptions": [
+      "Banking Application Server: System is designed to handle high loads and is protected by network firewalls.",
+      "Customer Database: Data is encrypted at rest and access is restricted to authorized personnel.",
+      "API Gateway: Gateway enforces authentication and rate-limiting for all API calls.",
+      "Customer Mobile Devices: Devices are operated by customers and may not be fully secured.",
+      "SWIFT Payment Network: Network provides secure and reliable international payment processing.",
+      "Equifax Credit Bureau API: API provides accurate and timely credit data for customer evaluations.",
+      "RESTful API for Mobile App: API is secured with TLS and only accessible to authenticated apps.",
+      "SFTP Connection to Regulatory Reporting: SFTP is the secure method used for transmitting sensitive files to regulators.",
+      "OAuth2 Integration with Identity Provider: Identity provider ensures secure authentication for all users.",
+      "Between Mobile App and API Gateway: Mobile app sends encrypted requests to the API gateway.",
+      "Between Application Server and Payment Processor: Payment processor ensures accurate and secure transaction processing.",
+      "Between Database and Backup Storage: Backups are encrypted before being transferred.",
+      "Customer Account Data Integrity: System ensures data accuracy and consistency.",
+      "Mobile Device Security: Customers are responsible for securing their own devices.",
+      "Transaction Dispute Resolution Process: Disputes require collaboration between the bank and payment networks.",
+      "Customer PII Moves from Our Database to Credit Bureau: Credit bureau ensures secure handling of customer PII.",
+      "Transaction Data Shared with Regulatory Authority: Regulatory authority securely stores and processes transaction data.",
+      "Account Data Replicated to Disaster Recovery Site: Replication is performed over a secure, encrypted channel."
+    ],
+    "exclusions": [
+      "Banking Application Server: Must comply with PCI-DSS standards for secure data processing.",
+      "Customer Database: Must meet GDPR requirements for data privacy and retention policies.",
+      "API Gateway: Must support OAuth2 for secure API access.",
+      "Customer Mobile Devices: System must operate securely even if the mobile device is compromised.",
+      "SWIFT Payment Network: Integration must comply with SWIFT security protocols.",
+      "Equifax Credit Bureau API: Integration must comply with credit bureau data-sharing agreements.",
+      "RESTful API for Mobile App: Must implement rate limiting and token-based authentication.",
+      "SFTP Connection to Regulatory Reporting: Must comply with SOX and AML/BSA standards for secure reporting.",
+      "OAuth2 Integration with Identity Provider: Must support multi-factor authentication for all transactions.",
+      "Between Mobile App and API Gateway: API gateway must validate tokens and enforce access control policies.",
+      "Between Application Server and Payment Processor: All communication must use end-to-end encryption.",
+      "Between Database and Backup Storage: Backup storage must comply with GDPR and PCI-DSS requirements.",
+      "Customer Account Data Integrity: Must comply with financial reporting and security standards.",
+      "Mobile Device Security: System must function securely even with compromised devices.",
+      "Transaction Dispute Resolution Process: Process must comply with legal and regulatory guidelines.",
+      "Customer PII Moves from Our Database to Credit Bureau: Data transfer must comply with GDPR and credit bureau agreements.",
+      "Transaction Data Shared with Regulatory Authority: Data must be anonymized where possible and comply with SOX.",
+      "Account Data Replicated to Disaster Recovery Site: Disaster recovery site must comply with the same security standards as the primary site."
+    ],
+    "boundary_coverage": {
+      "total_boundaries_defined": 4,
+      "critical_interfaces_identified": 6,
+      "external_dependencies": 3
+    }
+  },
+  "boundary_relationships": [
+    {
+      "parent_boundary": "Banking Platform System Scope",
+      "child_boundary": "Banking Platform Trust Boundaries",
+      "relationship_type": "contains"
+    },
+    {
+      "parent_boundary": "Banking Platform Responsibility Boundaries",
+      "child_boundary": "Banking Platform Data Governance Boundaries",
+      "relationship_type": "overlaps"
+    }
+  ],
+  "boundary_summary": {
+    "total_boundaries": 4,
+    "boundary_types": {
+      "system_scope": 1,
+      "trust": 1,
+      "responsibility": 1,
+      "data_governance": 1
+    },
+    "total_elements": 18,
+    "critical_interfaces": 6,
+    "external_dependencies": 3
+  },
+  "cognitive_style": "balanced",
+  "analysis_metadata": {
+    "agent_type": "system_boundaries",
+    "analysis_id": "32a8c7e1-dff3-4dba-8405-4426153b0baf",
+    "timestamp": "2025-07-29T01:14:53.493979Z",
+    "version": "1.0"
+  }
+}

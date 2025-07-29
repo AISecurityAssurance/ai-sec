@@ -7,7 +7,6 @@ import json
 from uuid import uuid4
 
 from .base_step1 import BaseStep1Agent, CognitiveStyle
-from core.utils.llm_client import llm_manager
 
 
 class HazardIdentificationAgent(BaseStep1Agent):
@@ -116,10 +115,10 @@ Only include mappings that are meaningful for risk analysis. Avoid tenuous conne
         
         try:
             # Call LLM
-            response = await llm_manager.generate(prompt, temperature=0.7, max_tokens=2500)
+            response = await self.call_llm(prompt)
             
             # Parse JSON response
-            content = response.content.strip()
+            content = response.strip()
             if "```json" in content:
                 content = content.split("```json")[1].split("```")[0].strip()
             elif "```" in content:
@@ -313,13 +312,31 @@ Identified Losses:
 Mission Context:
 {json.dumps(mission_context, indent=2)}
 
-Identify hazardous SYSTEM STATES (not actions or attacks) that could lead to the identified losses. 
+Identify hazardous SYSTEM STATES that could lead to the identified losses.
+
+CRITICAL GUIDANCE FOR HAZARD WORDING:
+✓ CORRECT Hazard Format: "System operates in a state where [dangerous condition exists]"
+✗ WRONG Format: "System operates without [missing control]" or descriptions of attacks/exploits
+
+Examples:
+✓ CORRECT: "System operates with unverified user identities for sensitive transactions"
+✗ WRONG: "System operates without multi-factor authentication"
+
+✓ CORRECT: "System operates with corrupted transaction data"
+✗ WRONG: "System operates without data validation"
+
+✓ CORRECT: "System operates in a state where malicious activity remains undetected"
+✗ WRONG: "System operates without sufficient monitoring"
+
 For each hazard:
-1. Describe the hazardous STATE using language like "System operates in/with/without..."
-2. Categorize as: integrity_compromised, confidentiality_breached, availability_degraded, capability_loss, non_compliance, or mission_degraded
-3. Identify which system property is affected (MUST be one of: transaction_integrity, data_protection, service_availability, regulatory_compliance, operational_capability, mission_effectiveness)
-4. Assess environmental factors (operational conditions, threat conditions)
-5. Describe temporal nature (always present, periodic, conditional)
+1. Describe what dangerous condition EXISTS (not what's missing)
+2. Use positive state language: "with", "in a state where", "while maintaining"
+3. NEVER use negative language: "without", "missing", "lack of", "absence of"
+4. Focus on the dangerous system condition, NOT the control that would prevent it
+5. Categorize as: integrity_compromised, confidentiality_breached, availability_degraded, capability_loss, non_compliance, or mission_degraded
+6. Identify which system property is affected (MUST be one of: transaction_integrity, data_protection, service_availability, regulatory_compliance, operational_capability, mission_effectiveness)
+7. Assess environmental factors (operational conditions, threat conditions)
+8. Describe temporal nature (always present, periodic, conditional)
 
 Provide your response as a JSON array of hazard objects with the following structure:
 [
@@ -350,14 +367,40 @@ Provide your response as a JSON array of hazard objects with the following struc
 IMPORTANT: 
 - Focus on system STATES, not actions or attack methods
 - Use state-based language (operates, exists in, maintains, etc.)
-- Each hazard should clearly relate to one or more identified losses"""
+- Each hazard should clearly relate to one or more identified losses
+
+HAZARD CATEGORY GUIDE - Match hazards to their PRIMARY concern:
+- integrity_compromised: System processes incorrect, tampered, or invalid data
+- confidentiality_breached: System exposes or leaks protected information
+- availability_degraded: System cannot provide expected services when needed
+- capability_loss: System cannot perform a required function (different from availability - function is broken, not just unavailable)
+- non_compliance: System violates regulatory or policy requirements
+- mission_degraded: System cannot achieve its intended purpose effectively
+
+Examples:
+- "System operates with corrupted transaction data" → integrity_compromised
+- "System operates in a state where customer data is exposed" → confidentiality_breached
+- "System operates with insufficient resources to handle requests" → availability_degraded
+- "System operates without ability to detect fraud" → capability_loss
+
+HAZARD IDENTIFICATION CHECKLIST - Aim for 12-15 hazards covering these areas:
+□ Authentication & Authorization (user identity verification, session management)
+□ Data Protection (encryption state, access control, data retention)
+□ System Integrity (transaction accuracy, data consistency, audit trails)
+□ Availability (resource constraints, dependencies, performance degradation)
+□ Compliance (regulatory requirements, audit capabilities, reporting)
+□ Operational Security (segregation of duties, insider threats, privileged access)
+□ External Interfaces (API security, third-party integrations, data exchanges)
+□ Resilience (backup/recovery states, failover capabilities, incident response)
+
+MINIMUM REQUIREMENT: Identify at least 12 hazards for comprehensive coverage. Fewer than 12 hazards will be considered incomplete."""
         
         try:
             # Call LLM
-            response = await llm_manager.generate(prompt, temperature=0.7, max_tokens=2500)
+            response = await self.call_llm(prompt)
             
             # Parse JSON response
-            content = response.content.strip()
+            content = response.strip()
             # Extract JSON from markdown code blocks if present
             if "```json" in content:
                 content = content.split("```json")[1].split("```")[0].strip()
@@ -379,15 +422,20 @@ IMPORTANT:
     
     def validate_abstraction_level(self, content: str) -> bool:
         """Validate hazard maintains system state abstraction"""
-        # Hazards must describe states, not actions
-        action_words = ["attack", "exploit", "injection", "overflow", "bypass"]
         content_lower = content.lower()
         
+        # Hazards must NOT use negative language
+        negative_words = ["without", "missing", "lack of", "absence of", "no ", "not "]
+        if any(word in content_lower for word in negative_words):
+            return False
+        
+        # Hazards must describe states, not actions
+        action_words = ["attack", "exploit", "injection", "overflow", "bypass"]
         if any(word in content_lower for word in action_words):
             return False
         
-        # Must use state language
-        state_indicators = ["operates", "state", "condition", "mode"]
+        # Must use positive state language
+        state_indicators = ["operates", "state", "condition", "mode", "with", "in a state where", "maintains"]
         has_state_language = any(word in content_lower for word in state_indicators)
         
         return has_state_language and not self.is_implementation_detail(content)

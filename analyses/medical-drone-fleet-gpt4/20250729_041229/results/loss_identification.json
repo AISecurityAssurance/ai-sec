@@ -1,0 +1,390 @@
+{
+  "losses": [
+    {
+      "description": "Loss of customer financial assets through unauthorized transactions",
+      "loss_category": "financial",
+      "severity_classification": {
+        "magnitude": "catastrophic",
+        "scope": "customer_wide",
+        "duration": "medium_term",
+        "reversibility": "difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Secure access control for customer accounts",
+          "Reliable transaction processing for payments and transfers"
+        ],
+        "cascading_effects": [
+          "Erosion of customer trust",
+          "Increased regulatory scrutiny"
+        ],
+        "stakeholder_harm": {
+          "customers": {
+            "type": "financial",
+            "severity": "catastrophic"
+          },
+          "bank": {
+            "type": "reputation",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-1"
+    },
+    {
+      "description": "Loss of customer personal and financial data confidentiality due to a data breach",
+      "loss_category": "privacy",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "customer_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "hard"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Secure access control for customer accounts"
+        ],
+        "cascading_effects": [
+          "Reputational damage",
+          "Potential legal and regulatory penalties"
+        ],
+        "stakeholder_harm": {
+          "customers": {
+            "type": "privacy",
+            "severity": "major"
+          },
+          "bank": {
+            "type": "regulatory",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-2"
+    },
+    {
+      "description": "Loss of service availability to customers during critical business operations",
+      "loss_category": "mission",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "customer_wide",
+        "duration": "short_term",
+        "reversibility": "possible",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Reliable transaction processing for payments and transfers"
+        ],
+        "cascading_effects": [
+          "Customer dissatisfaction",
+          "Potential loss of revenue"
+        ],
+        "stakeholder_harm": {
+          "customers": {
+            "type": "mission",
+            "severity": "major"
+          },
+          "bank": {
+            "type": "reputation",
+            "severity": "moderate"
+          }
+        }
+      },
+      "identifier": "L-3"
+    },
+    {
+      "description": "Loss of regulatory compliance resulting in penalties and sanctions",
+      "loss_category": "regulatory",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "enterprise_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Compliance with financial and data protection regulations"
+        ],
+        "cascading_effects": [
+          "Financial penalties",
+          "Operational constraints due to imposed corrective actions"
+        ],
+        "stakeholder_harm": {
+          "bank": {
+            "type": "financial",
+            "severity": "major"
+          },
+          "regulators": {
+            "type": "mission",
+            "severity": "moderate"
+          }
+        }
+      },
+      "identifier": "L-4"
+    },
+    {
+      "description": "Loss of integration with payment processor networks impacting transaction processing",
+      "loss_category": "mission",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "mission_wide",
+        "duration": "short_term",
+        "reversibility": "possible",
+        "detection_difficulty": "easy"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Reliable transaction processing for payments and transfers"
+        ],
+        "cascading_effects": [
+          "Delayed payments",
+          "Customer dissatisfaction"
+        ],
+        "stakeholder_harm": {
+          "customers": {
+            "type": "mission",
+            "severity": "major"
+          },
+          "bank": {
+            "type": "reputation",
+            "severity": "moderate"
+          }
+        }
+      },
+      "identifier": "L-5"
+    },
+    {
+      "description": "Loss of customer trust due to widespread fraudulent activity on the platform",
+      "loss_category": "reputation",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "market_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Secure access control for customer accounts",
+          "Reliable transaction processing for payments and transfers"
+        ],
+        "cascading_effects": [
+          "Decreased customer retention",
+          "Loss of competitive position"
+        ],
+        "stakeholder_harm": {
+          "customers": {
+            "type": "mission",
+            "severity": "major"
+          },
+          "bank": {
+            "type": "reputation",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-6"
+    },
+    {
+      "description": "Loss of financial reporting accuracy leading to misrepresentation of the bank's financial health",
+      "loss_category": "regulatory",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "enterprise_wide",
+        "duration": "medium_term",
+        "reversibility": "difficult",
+        "detection_difficulty": "hard"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Compliance with financial and data protection regulations"
+        ],
+        "cascading_effects": [
+          "Regulatory penalties",
+          "Damage to investor confidence"
+        ],
+        "stakeholder_harm": {
+          "investors": {
+            "type": "financial",
+            "severity": "major"
+          },
+          "bank": {
+            "type": "reputation",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-7"
+    }
+  ],
+  "loss_count": 7,
+  "loss_categories": {
+    "financial": 1,
+    "privacy": 1,
+    "mission": 2,
+    "regulatory": 2,
+    "reputation": 1
+  },
+  "dependencies": [
+    {
+      "primary_loss_id": "L-2",
+      "dependent_loss_id": "L-1",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "Fraudulent transactions can occur almost immediately after sensitive data is breached.",
+        "persistence": "sustained"
+      },
+      "rationale": "Loss of customer personal and financial data confidentiality (L-2) enables attackers to perform unauthorized transactions (L-1), especially if the data includes payment credentials.",
+      "id": "16fe1e99-46ed-428a-9524-7022de208782"
+    },
+    {
+      "primary_loss_id": "L-1",
+      "dependent_loss_id": "L-6",
+      "dependency_type": "triggers",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Customer trust erosion occurs as reports of fraudulent activity become widespread.",
+        "persistence": "sustained"
+      },
+      "rationale": "Unauthorized transactions (L-1) directly harm customers, leading to a loss of trust in the platform (L-6) as affected customers spread awareness of fraudulent activity.",
+      "id": "397a7039-50b5-40ab-b035-213cf52d2bed"
+    },
+    {
+      "primary_loss_id": "L-2",
+      "dependent_loss_id": "L-6",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Trust erosion may occur as customers learn about the data breach and its impact.",
+        "persistence": "sustained"
+      },
+      "rationale": "A data breach (L-2) can lead to a loss of trust (L-6) as customers become concerned about the organization's ability to protect their sensitive information.",
+      "id": "1d895958-e9fc-443e-b0d1-dd9a983c9725"
+    },
+    {
+      "primary_loss_id": "L-3",
+      "dependent_loss_id": "L-6",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Trust is eroded after customers experience service disruptions during critical times.",
+        "persistence": "temporary"
+      },
+      "rationale": "Loss of service availability (L-3) during critical operations inconveniences customers and damages their trust (L-6), especially if the disruption persists.",
+      "id": "03ccb1fc-1ffa-4af4-a6ae-8fc8df755327"
+    },
+    {
+      "primary_loss_id": "L-4",
+      "dependent_loss_id": "L-6",
+      "dependency_type": "amplifies",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Reputational damage compounds as regulatory penalties become public knowledge.",
+        "persistence": "sustained"
+      },
+      "rationale": "Regulatory penalties (L-4) often become public, amplifying the loss of trust (L-6) as customers perceive the organization as non-compliant and negligent.",
+      "id": "8b8aa9d7-15b6-4f13-a5d7-b4706b31613b"
+    },
+    {
+      "primary_loss_id": "L-5",
+      "dependent_loss_id": "L-3",
+      "dependency_type": "triggers",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "Loss of payment processor integration disrupts services immediately.",
+        "persistence": "temporary"
+      },
+      "rationale": "Loss of integration with payment processor networks (L-5) directly causes service unavailability (L-3) as transactions cannot be processed.",
+      "id": "2e52d4bc-d0b7-4fbb-9ca6-0a405538d507"
+    },
+    {
+      "primary_loss_id": "L-7",
+      "dependent_loss_id": "L-4",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Regulatory penalties may be imposed after inaccurate financial reporting is identified.",
+        "persistence": "sustained"
+      },
+      "rationale": "Inaccurate financial reporting (L-7) can lead to regulatory penalties (L-4) if the misrepresentation violates compliance requirements.",
+      "id": "3b7aca0a-2ff7-48e4-a962-54b923616bac"
+    },
+    {
+      "primary_loss_id": "L-7",
+      "dependent_loss_id": "L-6",
+      "dependency_type": "amplifies",
+      "dependency_strength": "possible",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Reputational damage may occur after stakeholders lose confidence in financial reporting.",
+        "persistence": "sustained"
+      },
+      "rationale": "Inaccurate financial reporting (L-7) can amplify reputational damage (L-6) as stakeholders perceive the organization as untrustworthy or mismanaged.",
+      "id": "83a2b7bf-fe51-4299-9f7f-b43d575a586f"
+    }
+  ],
+  "cascade_analysis": {
+    "primary_losses": [
+      "L-2",
+      "L-5",
+      "L-7"
+    ],
+    "cascade_chains": [
+      {
+        "chain": [
+          "L-2",
+          "L-1",
+          "L-6"
+        ],
+        "trigger": "L-2",
+        "terminal_losses": [
+          "L-6"
+        ],
+        "chain_length": 3
+      },
+      {
+        "chain": [
+          "L-5",
+          "L-3",
+          "L-6"
+        ],
+        "trigger": "L-5",
+        "terminal_losses": [
+          "L-6"
+        ],
+        "chain_length": 3
+      },
+      {
+        "chain": [
+          "L-7",
+          "L-4",
+          "L-6"
+        ],
+        "trigger": "L-7",
+        "terminal_losses": [
+          "L-6"
+        ],
+        "chain_length": 3
+      }
+    ],
+    "max_cascade_depth": 3
+  },
+  "severity_distribution": {
+    "catastrophic": 1,
+    "major": 6,
+    "moderate": 0,
+    "minor": 0
+  },
+  "cognitive_style": "balanced"
+}

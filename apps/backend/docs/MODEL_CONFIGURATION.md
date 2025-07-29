@@ -40,6 +40,20 @@ When these are set, the system automatically:
 - Displays "Using Azure OpenAI" in the console
 - Shows the Azure model in the analysis report
 
+### Using Azure OpenAI with the CLI
+
+The `ai-sec` script automatically passes Azure environment variables to the Docker container:
+
+```bash
+# Set Azure credentials
+export AZURE_OPENAI_API_KEY="your-azure-api-key"
+export AZURE_OPENAI_API_BASE="https://your-resource.openai.azure.com/"
+export AZURE_OPENAI_API_MODEL="your-deployment-name"
+
+# Run analysis
+./ai-sec analyze --config configs/azure-gpt4-turbo-standard.yaml
+```
+
 ### Example Azure Config File
 
 ```yaml

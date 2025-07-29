@@ -1,0 +1,394 @@
+{
+  "hazards": [
+    {
+      "description": "System operates with inadequate encryption for data in transit",
+      "hazard_category": "confidentiality_breached",
+      "affected_system_property": "data_protection",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "moderate",
+            "likelihood": "possible"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "During high network traffic periods or system updates",
+        "duration": "intermittent"
+      },
+      "identifier": "H-1"
+    },
+    {
+      "description": "System operates without sufficient capacity to handle peak load",
+      "hazard_category": "availability_degraded",
+      "affected_system_property": "service_availability",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "possible"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "high",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "periodic",
+        "when_present": "End of month and tax season",
+        "duration": "transient"
+      },
+      "identifier": "H-2"
+    },
+    {
+      "description": "System maintains outdated or unpatched software leading to known vulnerabilities",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "transaction_integrity",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "possible"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "moderate"
+          },
+          "moderate": {
+            "impact": "high",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "Consistently across the system lifecycle",
+        "duration": "continuous"
+      },
+      "identifier": "H-3"
+    },
+    {
+      "description": "System operates without compliance to GDPR for all European customer data",
+      "hazard_category": "non_compliance",
+      "affected_system_property": "regulatory_compliance",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "possible"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "high",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "When processing European customer data",
+        "duration": "continuous"
+      },
+      "identifier": "H-4"
+    },
+    {
+      "description": "System operates with inadequate fraud detection mechanisms during transaction processing",
+      "hazard_category": "capability_loss",
+      "affected_system_property": "operational_capability",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "moderate",
+            "likelihood": "possible"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "During all transaction processing",
+        "duration": "continuous"
+      },
+      "identifier": "H-5"
+    }
+  ],
+  "hazard_count": 5,
+  "hazard_categories": {
+    "confidentiality_breached": 1,
+    "availability_degraded": 1,
+    "integrity_compromised": 1,
+    "non_compliance": 1,
+    "capability_loss": 1
+  },
+  "hazard_loss_mappings": [
+    {
+      "hazard_id": "H-1",
+      "loss_id": "L-1",
+      "relationship_strength": "direct",
+      "rationale": "Inadequate encryption for data in transit directly exposes customer financial data to unauthorized access, leading to data theft.",
+      "conditions": [],
+      "id": "4716db66-52db-4083-bb94-8a2f6f578d25"
+    },
+    {
+      "hazard_id": "H-1",
+      "loss_id": "L-4",
+      "relationship_strength": "direct",
+      "rationale": "Inadequate encryption allows attackers to easily intercept and leak sensitive customer information.",
+      "conditions": [],
+      "id": "0431c606-8126-4788-a7ce-b7060ae2bdbb"
+    },
+    {
+      "hazard_id": "H-2",
+      "loss_id": "L-3",
+      "relationship_strength": "direct",
+      "rationale": "Insufficient system capacity to handle peak loads directly leads to system downtime, affecting payment processing.",
+      "conditions": [],
+      "id": "30b2c118-c0ab-4d52-a749-87db0bdc6ed5"
+    },
+    {
+      "hazard_id": "H-3",
+      "loss_id": "L-1",
+      "relationship_strength": "conditional",
+      "rationale": "Maintaining outdated or unpatched software can lead to unauthorized access if the vulnerabilities are exploited.",
+      "conditions": [
+        "Existence of an exploitable vulnerability",
+        "Attackers' awareness of the vulnerability"
+      ],
+      "id": "256a8d78-b66b-407d-873e-ae8285695ba1"
+    },
+    {
+      "hazard_id": "H-3",
+      "loss_id": "L-4",
+      "relationship_strength": "conditional",
+      "rationale": "Outdated or unpatched software may contain vulnerabilities that, if exploited, could lead to leakage of sensitive information.",
+      "conditions": [
+        "Existence of an exploitable vulnerability",
+        "Attackers' knowledge of the vulnerability"
+      ],
+      "id": "896a5ad1-e52c-4e63-8947-b7f24b842f9f"
+    },
+    {
+      "hazard_id": "H-4",
+      "loss_id": "L-5",
+      "relationship_strength": "direct",
+      "rationale": "Operating without GDPR compliance for European customer data directly risks non-compliance penalties.",
+      "conditions": [],
+      "id": "29ffde50-1b69-46f3-a7a9-a12a7eea7c23"
+    },
+    {
+      "hazard_id": "H-5",
+      "loss_id": "L-2",
+      "relationship_strength": "direct",
+      "rationale": "Inadequate fraud detection mechanisms make the system vulnerable to fraudulent transactions, leading to financial loss.",
+      "conditions": [],
+      "id": "c0b1fd5f-3353-4b25-b847-eb008a20a68a"
+    }
+  ],
+  "temporal_analysis": {
+    "always_present": [
+      {
+        "hazard_id": "H-3",
+        "description": "System maintains outdated or unpatched software leading to known vulnerabilities"
+      },
+      {
+        "hazard_id": "H-5",
+        "description": "System operates with inadequate fraud detection mechanisms during transaction processing"
+      }
+    ],
+    "periodic": [
+      {
+        "hazard_id": "H-2",
+        "description": "System operates without sufficient capacity to handle peak load",
+        "when": "End of month and tax season"
+      }
+    ],
+    "conditional": [
+      {
+        "hazard_id": "H-1",
+        "description": "System operates with inadequate encryption for data in transit",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-4",
+        "description": "System operates without compliance to GDPR for all European customer data",
+        "conditions": []
+      }
+    ],
+    "coverage_gaps": [
+      {
+        "gap_type": "temporal",
+        "description": "Periodic hazards create vulnerability windows",
+        "affected_hazards": [
+          "H-2"
+        ]
+      }
+    ]
+  },
+  "environmental_analysis": {
+    "operational_sensitivity": {
+      "H-1": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      },
+      "H-2": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-3": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      },
+      "H-4": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      },
+      "H-5": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      }
+    },
+    "threat_sensitivity": {
+      "H-1": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-2": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-3": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-4": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-5": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      }
+    },
+    "combined_risk_scenarios": [
+      {
+        "scenario": "Multiple high-impact hazards under stress",
+        "hazards": [
+          "H-1",
+          "H-2",
+          "H-3",
+          "H-4",
+          "H-5"
+        ],
+        "risk_level": "extreme"
+      }
+    ]
+  },
+  "coverage_analysis": {
+    "covered_losses": [
+      "L-4",
+      "L-2",
+      "L-5",
+      "L-1",
+      "L-3"
+    ],
+    "uncovered_losses": [],
+    "coverage_percentage": 100.0,
+    "loss_hazard_ratio": {
+      "L-1": 2,
+      "L-2": 1,
+      "L-3": 1,
+      "L-4": 2,
+      "L-5": 1
+    }
+  },
+  "cognitive_style": "balanced"
+}

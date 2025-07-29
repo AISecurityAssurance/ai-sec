@@ -42,7 +42,10 @@ class ModelConfig(BaseSettings):
     max_tokens: int = 4096
     is_enabled: bool = False
 
-    model_config = {"env_prefix": "MODEL_"}
+    model_config = {
+        "env_prefix": "MODEL_",
+        "extra": "ignore"  # Ignore extra environment variables
+    }
 
 
 class DatabaseConfig(BaseSettings):
@@ -60,6 +63,10 @@ class DatabaseConfig(BaseSettings):
     neo4j_uri: str = Field("bolt://localhost:7687", env="NEO4J_URI")
     neo4j_user: str = Field("neo4j", env="NEO4J_USER")
     neo4j_password: str = Field("neo4j_password", env="NEO4J_PASSWORD")
+    
+    model_config = {
+        "extra": "ignore"  # Ignore extra environment variables
+    }
 
     @property
     def postgres_url(self) -> str:
@@ -99,7 +106,7 @@ class Settings(BaseSettings):
     
     # Model Providers
     model_providers: Dict[str, ModelConfig] = Field(default_factory=dict)
-    active_provider: ModelProvider = Field(ModelProvider.ANTHROPIC, env="ACTIVE_PROVIDER")
+    active_provider: Optional[ModelProvider] = Field(None, env="ACTIVE_PROVIDER")
     enable_fallback: bool = Field(False, env="ENABLE_MODEL_FALLBACK")
     fallback_order: List[ModelProvider] = Field(
         [ModelProvider.ANTHROPIC, ModelProvider.OPENAI, ModelProvider.GROQ],
@@ -121,7 +128,8 @@ class Settings(BaseSettings):
         "env_file": ".env",
         "env_file_encoding": "utf-8", 
         "case_sensitive": False,
-        "protected_namespaces": ("settings_",)
+        "protected_namespaces": ("settings_",),
+        "extra": "ignore"  # Ignore extra environment variables
     }
     
     def __init__(self, **kwargs):
@@ -131,19 +139,7 @@ class Settings(BaseSettings):
     
     def _load_model_providers(self):
         """Load model provider configurations from environment variables"""
-        # Anthropic
-        if anthropic_key := os.getenv("ANTHROPIC_API_KEY"):
-            self.model_providers["anthropic"] = ModelConfig(
-                provider=ModelProvider.ANTHROPIC,
-                auth_method=AuthMethod.API_KEY,
-                api_key=anthropic_key,
-                model=os.getenv("ANTHROPIC_MODEL", "claude-3-opus-20240229"),
-                temperature=float(os.getenv("ANTHROPIC_TEMPERATURE", "0.7")),
-                max_tokens=int(os.getenv("ANTHROPIC_MAX_TOKENS", "4096")),
-                is_enabled=True
-            )
-        
-        # Azure OpenAI first (takes precedence)
+        # Azure OpenAI first (takes highest precedence)
         if (azure_key := os.getenv("AZURE_OPENAI_API_KEY")) and (azure_base := os.getenv("AZURE_OPENAI_API_BASE")):
             self.model_providers["openai"] = ModelConfig(
                 provider=ModelProvider.OPENAI,
@@ -155,6 +151,8 @@ class Settings(BaseSettings):
                 max_tokens=int(os.getenv("OPENAI_MAX_TOKENS", "4096")),
                 is_enabled=True
             )
+            # Set active provider to OpenAI when Azure is configured
+            self.active_provider = ModelProvider.OPENAI
         # Standard OpenAI
         elif openai_key := os.getenv("OPENAI_API_KEY"):
             self.model_providers["openai"] = ModelConfig(
@@ -164,6 +162,18 @@ class Settings(BaseSettings):
                 model=os.getenv("OPENAI_MODEL", "gpt-4-turbo-preview"),
                 temperature=float(os.getenv("OPENAI_TEMPERATURE", "0.7")),
                 max_tokens=int(os.getenv("OPENAI_MAX_TOKENS", "4096")),
+                is_enabled=True
+            )
+        
+        # Anthropic
+        if anthropic_key := os.getenv("ANTHROPIC_API_KEY"):
+            self.model_providers["anthropic"] = ModelConfig(
+                provider=ModelProvider.ANTHROPIC,
+                auth_method=AuthMethod.API_KEY,
+                api_key=anthropic_key,
+                model=os.getenv("ANTHROPIC_MODEL", "claude-3-opus-20240229"),
+                temperature=float(os.getenv("ANTHROPIC_TEMPERATURE", "0.7")),
+                max_tokens=int(os.getenv("ANTHROPIC_MAX_TOKENS", "4096")),
                 is_enabled=True
             )
         
@@ -191,8 +201,9 @@ class Settings(BaseSettings):
                 is_enabled=True
             )
         
-        # Ollama
-        if ollama_endpoint := os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434"):
+        # Ollama - only configure if explicitly requested
+        if os.getenv("OLLAMA_ENABLED", "").lower() == "true":
+            ollama_endpoint = os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434")
             self.model_providers["ollama"] = ModelConfig(
                 provider=ModelProvider.OLLAMA,
                 auth_method=AuthMethod.NONE,

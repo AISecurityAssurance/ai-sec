@@ -1,0 +1,183 @@
+{
+  "security_constraints": [
+    {
+      "identifier": "SC-1",
+      "name": "End-to-End Encryption Constraint",
+      "constraint_statement": "The system shall implement end-to-end encryption for all data in transit.",
+      "rationale": "To ensure confidentiality and integrity of data as it travels across networks.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Implementation of industry-standard encryption protocols",
+      "addresses_hazards": [
+        "H-1"
+      ],
+      "prevents_losses": [
+        "L-1"
+      ],
+      "related_losses": [
+        "L-1"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1"
+        ],
+        "capability_degradation": "Potential unauthorized access to sensitive data, leading to breaches and loss of customer trust."
+      }
+    },
+    {
+      "identifier": "SC-2",
+      "name": "Immediate Alerting Constraint",
+      "constraint_statement": "The system shall issue transaction alerts to customers in real-time.",
+      "rationale": "To enable customers to quickly detect and respond to unauthorized transactions.",
+      "constraint_type": "detective",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Real-time monitoring and alerting systems",
+      "addresses_hazards": [
+        "H-2"
+      ],
+      "prevents_losses": [
+        "L-2"
+      ],
+      "related_losses": [
+        "L-2"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-2"
+        ],
+        "capability_degradation": "Delay in fraud detection, resulting in financial losses and decreased customer confidence."
+      }
+    },
+    {
+      "identifier": "SC-3",
+      "name": "Multi-Factor Authentication Constraint",
+      "constraint_statement": "The system shall require multi-factor authentication for access to sensitive functions.",
+      "rationale": "To enhance the security of access to accounts and sensitive operations.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls requiring multiple forms of authentication",
+      "addresses_hazards": [
+        "H-3"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-2"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-2"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-2"
+        ],
+        "capability_degradation": "Increased risk of unauthorized access and fraudulent transactions."
+      }
+    },
+    {
+      "identifier": "SC-4",
+      "name": "Software Maintenance Constraint",
+      "constraint_statement": "The system shall be maintained with up-to-date software, including security patches.",
+      "rationale": "To protect against vulnerabilities in outdated or unpatched software components.",
+      "constraint_type": "corrective",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Regular software updates and patch management processes",
+      "addresses_hazards": [
+        "H-4"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-5"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-5"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-5"
+        ],
+        "capability_degradation": "Vulnerability to exploits and malware, leading to data breaches and compromised systems."
+      }
+    },
+    {
+      "identifier": "SC-5",
+      "name": "Load Management Constraint",
+      "constraint_statement": "The system shall implement measures to prevent overloading of core banking services.",
+      "rationale": "To ensure availability and reliability of banking services under high demand.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Load balancing and scalability solutions",
+      "addresses_hazards": [
+        "H-5"
+      ],
+      "prevents_losses": [
+        "L-3"
+      ],
+      "related_losses": [
+        "L-3"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-3"
+        ],
+        "capability_degradation": "Reduced system availability, leading to inability of customers to access services during peak times."
+      }
+    }
+  ],
+  "constraint_coverage": {
+    "total_hazards": 5,
+    "hazards_with_constraints": 5,
+    "total_constraints": 5,
+    "coverage_balance": 1.0,
+    "type_distribution": {
+      "preventive": 3,
+      "detective": 1,
+      "corrective": 1,
+      "compensating": 0
+    }
+  },
+  "constraint_hazard_mappings": [
+    {
+      "constraint_id": "SC-1",
+      "hazard_id": "H-1",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-2",
+      "hazard_id": "H-2",
+      "relationship_type": "detects"
+    },
+    {
+      "constraint_id": "SC-3",
+      "hazard_id": "H-3",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-4",
+      "hazard_id": "H-4",
+      "relationship_type": "reduces"
+    },
+    {
+      "constraint_id": "SC-5",
+      "hazard_id": "H-5",
+      "relationship_type": "eliminates"
+    }
+  ],
+  "constraint_count": 5,
+  "constraint_types": {
+    "preventive": 3,
+    "detective": 1,
+    "corrective": 1,
+    "compensating": 0
+  },
+  "cognitive_style": "balanced",
+  "analysis_metadata": {
+    "agent_type": "security_constraints",
+    "analysis_id": "133840e9-0338-405a-9100-37b8420cbd56",
+    "timestamp": "2025-07-29T00:42:26.685478Z",
+    "version": "1.0"
+  }
+}

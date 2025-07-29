@@ -16,6 +16,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+from dotenv import load_dotenv
 
 # Configure logging BEFORE importing anything that uses SQLAlchemy
 # Set up basic config first
@@ -41,7 +42,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core.agents.step1_agents import Step1Coordinator
 from core.database import create_database_pool, run_migrations
-from config.settings import settings, ModelProvider, ModelConfig
+from config.settings import settings, ModelProvider, ModelConfig, AuthMethod
 
 console = Console()
 
@@ -50,6 +51,21 @@ class Step1CLI:
     """Command-line interface for STPA-Sec Step 1 analysis"""
     
     def __init__(self):
+        # Load .env file - try multiple locations
+        # In Docker, we're at /app (backend), project root is /
+        # On host, we're at apps/backend, project root is ../..
+        possible_env_paths = [
+            Path('.env'),  # Current directory
+            Path(__file__).parent / '.env',  # Backend directory
+            Path(__file__).parent.parent.parent / '.env',  # Project root (host)
+            Path('/app/.env'),  # Docker mount point
+        ]
+        
+        for env_path in possible_env_paths:
+            if env_path.exists():
+                load_dotenv(env_path)
+                break
+        
         self.console = console
         self.status = None
         self._setup_logging()
@@ -82,6 +98,9 @@ class Step1CLI:
         
         # Set up environment variables for API keys
         self._setup_api_keys(config)
+        
+        # Test model configuration before creating database
+        await self._verify_model_configuration()
         
         # Create analysis database
         db_name, timestamp = await self._create_analysis_database(config)
@@ -232,10 +251,59 @@ class Step1CLI:
         return db_name
     
     def _load_config(self, config_path: str) -> dict:
-        """Load configuration from YAML file"""
+        """Load configuration from YAML file
+        
+        Attempts to load config from:
+        1. Path relative to project root
+        2. Absolute path
+        3. Fails with clear error
+        """
+        path = Path(config_path)
+        
+        # Try as absolute path first
+        if path.is_absolute() and path.exists():
+            config_file = path
+        else:
+            # Try multiple locations for relative paths
+            # In Docker container, example_systems is mounted at /example_systems
+            # On host, it's at project root
+            search_paths = []
+            
+            # If running in Docker (check if /app exists and we're in it)
+            if Path('/app').exists() and str(Path(__file__).absolute()).startswith('/app'):
+                # Docker environment
+                search_paths.extend([
+                    Path('/') / config_path,  # Root of container
+                    Path('/app').parent / config_path,  # Parent of app dir
+                    Path.cwd() / config_path,  # Current directory
+                ])
+            else:
+                # Host environment
+                root_dir = Path(__file__).parent.parent.parent
+                search_paths.extend([
+                    root_dir / config_path,  # Project root
+                    Path.cwd() / config_path,  # Current directory
+                ])
+            
+            # Try each path
+            config_file = None
+            for search_path in search_paths:
+                if search_path.exists():
+                    config_file = search_path
+                    break
+            
+            if not config_file:
+                self.console.print(f"[red]Config file not found: {config_path}[/red]")
+                self.console.print(f"[yellow]Searched in:[/yellow]")
+                for p in search_paths:
+                    self.console.print(f"  - {p}")
+                sys.exit(1)
+        
         try:
-            with open(config_path, 'r') as f:
-                return yaml.safe_load(f)
+            with open(config_file, 'r') as f:
+                config = yaml.safe_load(f)
+                self.console.print(f"[green]Loaded config from: {config_file}[/green]")
+                return config
         except Exception as e:
             self.console.print(f"[red]Error loading config: {e}[/red]")
             sys.exit(1)
@@ -248,53 +316,189 @@ class Step1CLI:
                 self.console.print(f"[red]Missing required config section: {key}[/red]")
                 sys.exit(1)
     
-    def _setup_api_keys(self, config: dict):
-        """Set up API keys from environment variables"""
-        model_config = config.get('model', {})
-        api_key_env = model_config.get('api_key_env')
+    def _resolve_config_value(self, config: dict, key: str) -> Optional[str]:
+        """
+        Resolve a config value that can be direct or from env.
         
-        # Check for Azure OpenAI first
-        if os.getenv('AZURE_OPENAI_API_KEY') and os.getenv('AZURE_OPENAI_API_BASE'):
-            self.console.print("[green]Using Azure OpenAI[/green]")
+        Examples:
+        - If config has 'model': 'gpt-4' → use 'gpt-4'
+        - If config has 'model_env': 'MY_MODEL' → get from env['MY_MODEL']
+        - If neither → return None
+        """
+        # Check for direct value first
+        direct_value = config.get(key)
+        if direct_value:
+            return direct_value
+        
+        # Check for env reference
+        env_key = f"{key}_env"
+        env_var_name = config.get(env_key)
+        if env_var_name:
+            value = os.getenv(env_var_name)
+            if not value:
+                self.console.print(f"[red]Error: Environment variable '{env_var_name}' not found[/red]")
+                self.console.print(f"[yellow]Please set it in your .env file or environment[/yellow]")
+                sys.exit(1)
+            return value
+        
+        return None
+    
+    def _setup_api_keys(self, config: dict):
+        """Set up API keys from configuration with explicit resolution"""
+        model_config = config.get('model', {})
+        
+        # Resolve provider (required)
+        provider = self._resolve_config_value(model_config, 'provider')
+        if not provider:
+            self.console.print("[red]Error: Must specify 'provider' or 'provider_env' in model config[/red]")
+            sys.exit(1)
+        
+        # Resolve API key (required for most providers)
+        api_key = self._resolve_config_value(model_config, 'api_key')
+        
+        # Resolve base URL/endpoint (optional)
+        base_url = self._resolve_config_value(model_config, 'base_url')
+        
+        # Resolve model name (required)
+        model_name = self._resolve_config_value(model_config, 'name')
+        if not model_name:
+            model_name = self._resolve_config_value(model_config, 'model')  # Also check 'model' key
+            if not model_name:
+                self.console.print("[red]Error: Must specify 'name', 'name_env', 'model', or 'model_env' in model config[/red]")
+                sys.exit(1)
+        
+        # Validate required fields based on provider
+        if provider != 'ollama' and not api_key:
+            self.console.print(f"[red]Error: API key required for provider '{provider}'[/red]")
+            self.console.print("[yellow]Please specify 'api_key' or 'api_key_env' in model config[/yellow]")
+            sys.exit(1)
+        
+        # Clear any existing provider config
+        if provider in settings.model_providers:
+            del settings.model_providers[provider]
+        
+        # Configure the provider based on type
+        if provider == 'openai':
+            # Display what we're using
+            self.console.print(f"[green]Using OpenAI provider[/green]")
+            if base_url:
+                self.console.print(f"[dim]  Endpoint: {base_url}[/dim]")
+                if 'azure' in base_url.lower():
+                    self.console.print("[dim]  (Azure OpenAI detected)[/dim]")
+            self.console.print(f"[dim]  Model: {model_name}[/dim]")
+            
             settings.model_providers['openai'] = ModelConfig(
                 provider=ModelProvider.OPENAI,
-                auth_method='api-key',
-                api_key=os.getenv('AZURE_OPENAI_API_KEY'),
-                api_endpoint=os.getenv('AZURE_OPENAI_API_BASE'),
-                model=os.getenv('AZURE_OPENAI_API_MODEL', 'gpt-4-turbo'),
+                auth_method=AuthMethod.API_KEY,
+                api_key=api_key,
+                api_endpoint=base_url,
+                model=model_name,
                 is_enabled=True
             )
             settings.active_provider = ModelProvider.OPENAI
-        elif api_key_env:
-            if api_key_env not in os.environ:
-                self.console.print(f"[red]Environment variable {api_key_env} not set[/red]")
-                self.console.print(f"Please set it with: export {api_key_env}='your-api-key'")
-                sys.exit(1)
             
-            # Configure the model provider in settings
-            provider = model_config.get('provider', 'ollama')
-            if provider == 'openai':
-                settings.model_providers['openai'] = ModelConfig(
-                    provider=ModelProvider.OPENAI,
-                    auth_method='api-key',
-                    api_key=os.environ[api_key_env],
-                    model=model_config.get('name', 'gpt-4-turbo-preview'),
-                    is_enabled=True
-                )
-                settings.active_provider = ModelProvider.OPENAI
-            elif provider == 'ollama':
-                settings.model_providers['ollama'] = ModelConfig(
-                    provider=ModelProvider.OLLAMA,
-                    auth_method='none',
-                    api_endpoint=model_config.get('api_endpoint', 'http://localhost:11434'),
-                    model=model_config.get('name', 'llama2'),
-                    is_enabled=True
-                )
-                settings.active_provider = ModelProvider.OLLAMA
+        elif provider == 'anthropic':
+            self.console.print(f"[green]Using Anthropic provider[/green]")
+            self.console.print(f"[dim]  Model: {model_name}[/dim]")
+            
+            settings.model_providers['anthropic'] = ModelConfig(
+                provider=ModelProvider.ANTHROPIC,
+                auth_method=AuthMethod.API_KEY,
+                api_key=api_key,
+                api_endpoint=base_url,
+                model=model_name,
+                is_enabled=True
+            )
+            settings.active_provider = ModelProvider.ANTHROPIC
+            
+        elif provider == 'groq':
+            self.console.print(f"[green]Using Groq provider[/green]")
+            self.console.print(f"[dim]  Model: {model_name}[/dim]")
+            
+            settings.model_providers['groq'] = ModelConfig(
+                provider=ModelProvider.GROQ,
+                auth_method=AuthMethod.API_KEY,
+                api_key=api_key,
+                api_endpoint=base_url,
+                model=model_name,
+                is_enabled=True
+            )
+            settings.active_provider = ModelProvider.GROQ
+            
+        elif provider == 'ollama':
+            # Ollama uses base_url for endpoint
+            endpoint = base_url or 'http://localhost:11434'
+            self.console.print(f"[green]Using Ollama provider[/green]")
+            self.console.print(f"[dim]  Endpoint: {endpoint}[/dim]")
+            self.console.print(f"[dim]  Model: {model_name}[/dim]")
+            
+            settings.model_providers['ollama'] = ModelConfig(
+                provider=ModelProvider.OLLAMA,
+                auth_method='none',  # Use string value for Ollama
+                api_endpoint=endpoint,
+                model=model_name,
+                is_enabled=True
+            )
+            settings.active_provider = ModelProvider.OLLAMA
+            
+        else:
+            self.console.print(f"[red]Error: Unknown provider '{provider}'[/red]")
+            self.console.print("[yellow]Supported providers: openai, anthropic, groq, ollama[/yellow]")
+            sys.exit(1)
         
-        # Reinitialize llm_manager after setting up API keys
+        # Force reinitialize llm_manager with new settings
         from core.utils.llm_client import llm_manager
+        # Clear existing clients first
+        llm_manager.clients = {}
+        llm_manager._db_checked = False
         llm_manager.reinitialize()
+    
+    async def _verify_model_configuration(self):
+        """Verify that the configured model is available and working"""
+        self.console.print("[yellow]Verifying model configuration...[/yellow]")
+        
+        # Try to get the model client
+        try:
+            from core.model_providers import get_model_client
+            client = get_model_client()
+            
+            # Do a simple test call
+            test_messages = [
+                {"role": "system", "content": "You are a test assistant."},
+                {"role": "user", "content": "Reply with 'OK' if you receive this."}
+            ]
+            
+            response = await client.generate(test_messages, temperature=0.1, max_tokens=10)
+            
+            self.console.print(f"[green]✓ Model configuration verified[/green]")
+            if settings.active_provider:
+                self.console.print(f"[dim]  Provider: {settings.active_provider.value}[/dim]")
+            if hasattr(client, 'model'):
+                self.console.print(f"[dim]  Model: {client.model}[/dim]")
+            if hasattr(client, 'is_azure') and client.is_azure:
+                self.console.print(f"[dim]  Type: Azure OpenAI[/dim]")
+            
+        except Exception as e:
+            self.console.print(f"[red]✗ Model configuration failed[/red]")
+            self.console.print(f"[red]Error: {str(e)}[/red]")
+            
+            # Provide helpful error messages
+            if "401" in str(e):
+                self.console.print("\n[yellow]Authentication failed. Please check:[/yellow]")
+                if settings.active_provider == ModelProvider.OPENAI:
+                    if 'client' in locals() and hasattr(client, 'is_azure') and client.is_azure:
+                        self.console.print("  • AZURE_OPENAI_API_KEY is correct")
+                        self.console.print("  • AZURE_OPENAI_API_BASE is the correct endpoint URL")
+                        self.console.print("  • AZURE_OPENAI_API_MODEL matches your deployment name")
+                    else:
+                        self.console.print("  • OPENAI_API_KEY is valid")
+            elif "No configuration found" in str(e):
+                self.console.print("\n[yellow]No model provider configured. Please set up one of:[/yellow]")
+                self.console.print("  • Azure OpenAI: Set AZURE_OPENAI_API_KEY, AZURE_OPENAI_API_BASE, AZURE_OPENAI_API_MODEL")
+                self.console.print("  • OpenAI: Set OPENAI_API_KEY")
+                self.console.print("  • Ollama: Install and run Ollama locally")
+            
+            sys.exit(1)
     
     async def _create_analysis_database(self, config: dict) -> tuple[str, str]:
         """Create new PostgreSQL database for analysis
@@ -340,19 +544,27 @@ class Step1CLI:
     def _get_model_info(self) -> dict:
         """Get current model configuration info"""
         model_info = {
-            "provider": settings.active_provider.value if settings.active_provider else "unknown",
+            "provider": "unknown",
             "model": "unknown",
             "temperature": 0.7,
             "max_tokens": 4096
         }
         
-        # Get the active model config
-        if settings.active_provider and settings.active_provider in [ModelProvider(p) for p, c in settings.model_providers.items()]:
-            provider_config = settings.model_providers.get(settings.active_provider.value)
-            if provider_config:
-                model_info["model"] = provider_config.model or "default"
-                model_info["temperature"] = provider_config.temperature
-                model_info["max_tokens"] = provider_config.max_tokens
+        # Find the active provider's config
+        active_provider = settings.active_provider
+        if active_provider:
+            model_info["provider"] = active_provider.value
+            
+            # Look for the provider's config
+            for provider_id, config in settings.model_providers.items():
+                if config.provider == active_provider:
+                    model_info["model"] = config.model or "default"
+                    model_info["temperature"] = config.temperature
+                    model_info["max_tokens"] = config.max_tokens
+                    # Add Azure indicator if it's Azure OpenAI
+                    if config.api_endpoint and config.provider == ModelProvider.OPENAI:
+                        model_info["type"] = "Azure OpenAI"
+                    break
         
         return model_info
     
@@ -367,9 +579,51 @@ class Step1CLI:
                 self.console.print("[red]No input file specified[/red]")
                 sys.exit(1)
             
+            # Resolve path (same logic as config)
+            path = Path(file_path)
+            
+            # Try as absolute path first
+            if path.is_absolute() and path.exists():
+                input_file = path
+            else:
+                # Try multiple locations for relative paths
+                search_paths = []
+                
+                # If running in Docker
+                if Path('/app').exists() and str(Path(__file__).absolute()).startswith('/app'):
+                    # Docker environment
+                    search_paths.extend([
+                        Path('/') / file_path,  # Root of container
+                        Path('/app').parent / file_path,  # Parent of app dir
+                        Path.cwd() / file_path,  # Current directory
+                    ])
+                else:
+                    # Host environment
+                    root_dir = Path(__file__).parent.parent.parent
+                    search_paths.extend([
+                        root_dir / file_path,  # Project root
+                        Path.cwd() / file_path,  # Current directory
+                    ])
+                
+                # Try each path
+                input_file = None
+                for search_path in search_paths:
+                    if search_path.exists():
+                        input_file = search_path
+                        break
+                
+                if not input_file:
+                    self.console.print(f"[red]Input file not found: {file_path}[/red]")
+                    self.console.print(f"[yellow]Searched in:[/yellow]")
+                    for p in search_paths:
+                        self.console.print(f"  - {p}")
+                    sys.exit(1)
+            
             try:
-                with open(file_path, 'r') as f:
-                    return f.read()
+                with open(input_file, 'r') as f:
+                    content = f.read()
+                    self.console.print(f"[green]Loaded system description from: {input_file}[/green]")
+                    return content
             except Exception as e:
                 self.console.print(f"[red]Error reading input file: {e}[/red]")
                 sys.exit(1)
@@ -451,6 +705,8 @@ class Step1CLI:
             self.console.print(f"\n[bold cyan]Model Information:[/bold cyan]")
             self.console.print(f"  • Provider: {model_info.get('provider', 'unknown')}")
             self.console.print(f"  • Model: {model_info.get('model', 'unknown')}")
+            if 'type' in model_info:
+                self.console.print(f"  • Type: {model_info['type']}")
             self.console.print(f"  • Execution Mode: {model_info.get('execution_mode', execution_mode)}")
         
         self.console.print(f"\n[bold green]Step 1 STPA-Sec Analysis Results ({execution_mode} mode)[/bold green]\n")
@@ -572,7 +828,14 @@ class Step1CLI:
                     inside = [e for e in boundary['elements'] if e['position'] == 'inside']
                     outside = [e for e in boundary['elements'] if e['position'] == 'outside']
                     interface = [e for e in boundary['elements'] if e['position'] == 'interface']
-                    self.console.print(f"    Elements: {len(inside)} inside, {len(outside)} outside, {len(interface)} at interface")
+                    
+                    # List actual elements, not just counts
+                    if inside:
+                        self.console.print(f"    INSIDE ({len(inside)}): {', '.join([e['element_name'] for e in inside])}")
+                    if outside:
+                        self.console.print(f"    OUTSIDE ({len(outside)}): {', '.join([e['element_name'] for e in outside])}")
+                    if interface:
+                        self.console.print(f"    INTERFACE ({len(interface)}): {', '.join([e['element_name'] for e in interface])}")
         
         # Stakeholders
         if stakeholder_results:
@@ -853,7 +1116,14 @@ class Step1CLI:
                             inside = [e for e in boundary['elements'] if e['position'] == 'inside']
                             outside = [e for e in boundary['elements'] if e['position'] == 'outside']
                             interface = [e for e in boundary['elements'] if e['position'] == 'interface']
-                            f.write(f"  - Elements: {len(inside)} inside, {len(outside)} outside, {len(interface)} at interface\n")
+                            
+                            # List actual elements, not just counts
+                            if inside:
+                                f.write(f"  - **INSIDE ({len(inside)}):** {', '.join([e['element_name'] for e in inside])}\n")
+                            if outside:
+                                f.write(f"  - **OUTSIDE ({len(outside)}):** {', '.join([e['element_name'] for e in outside])}\n")
+                            if interface:
+                                f.write(f"  - **INTERFACE ({len(interface)}):** {', '.join([e['element_name'] for e in interface])}\n")
                     f.write("\n")
                 
                 # Stakeholders

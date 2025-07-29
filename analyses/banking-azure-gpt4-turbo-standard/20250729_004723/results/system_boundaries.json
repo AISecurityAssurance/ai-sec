@@ -1,0 +1,424 @@
+{
+  "system_boundaries": [
+    {
+      "boundary_name": "Banking Platform System Scope",
+      "boundary_type": "system_scope",
+      "description": "Defines the components, functions, and interactions that are within the control of the Digital Banking Platform and those that are external but interact with the system.",
+      "definition_criteria": {
+        "criterion1": "Components and functions directly implemented and managed by the Digital Banking Platform are considered inside the scope.",
+        "criterion2": "External systems or services that the platform depends on but does not control are considered outside the scope.",
+        "criterion3": "Interfaces between internal and external systems are explicitly identified as crossing points."
+      },
+      "elements": [
+        {
+          "element_name": "Customer-facing applications (iOS, Android, Web)",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "key": "Applications are developed and maintained by the platform's development team."
+          },
+          "constraints": {
+            "key": "Must comply with platform security policies and app-store requirements."
+          }
+        },
+        {
+          "element_name": "Core banking system",
+          "element_type": "component",
+          "position": "outside",
+          "assumptions": {
+            "key": "Core banking system is maintained by a third-party or separate internal team."
+          },
+          "constraints": {
+            "key": "API integrations must conform to documented interfaces provided by the core banking system."
+          }
+        },
+        {
+          "element_name": "API Gateways",
+          "element_type": "component",
+          "position": "interface",
+          "assumptions": {
+            "key": "API gateways mediate all communication between internal and external systems."
+          },
+          "constraints": {
+            "key": "Must implement authentication, rate limiting, and monitoring."
+          }
+        },
+        {
+          "element_name": "Third-party payment processors",
+          "element_type": "actor",
+          "position": "outside",
+          "assumptions": {
+            "key": "Payment processors are certified to comply with regulatory and industry standards (e.g., PCI-DSS)."
+          },
+          "constraints": {
+            "key": "Contracts and SLAs define operational availability and security obligations."
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Trust Boundaries",
+      "boundary_type": "trust",
+      "description": "Identifies where trust levels change, such as between internal and external systems, and where additional authentication/authorization or data validation is required.",
+      "definition_criteria": {
+        "criterion1": "Any interaction where trust cannot be assumed requires authentication and authorization.",
+        "criterion2": "All data crossing trust boundaries must be validated according to security policies."
+      },
+      "elements": [
+        {
+          "element_name": "Multi-factor authentication (MFA)",
+          "element_type": "process",
+          "position": "inside",
+          "assumptions": {
+            "key": "MFA is implemented for all customer logins and high-risk transactions."
+          },
+          "constraints": {
+            "key": "Must comply with Strong Customer Authentication (SCA) requirements."
+          }
+        },
+        {
+          "element_name": "Payment processor API interactions",
+          "element_type": "interface",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Payment processors authenticate requests using API keys or OAuth tokens."
+          },
+          "constraints": {
+            "key": "All interactions must use encrypted channels (e.g., HTTPS)."
+          }
+        },
+        {
+          "element_name": "Internal microservices",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "key": "Microservices communicate over a secure internal network."
+          },
+          "constraints": {
+            "key": "Service-to-service authentication must be enforced through tokens or certificates."
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Responsibility Boundaries",
+      "boundary_type": "responsibility",
+      "description": "Defines legal, contractual, and shared responsibilities between the platform and its external dependencies.",
+      "definition_criteria": {
+        "criterion1": "The platform is responsible for internal system design, development, operations, and regulatory compliance.",
+        "criterion2": "Third-party providers are responsible for their respective services as defined in SLAs and contracts.",
+        "criterion3": "Shared responsibilities must be clearly delineated in contracts."
+      },
+      "elements": [
+        {
+          "element_name": "PCI-DSS compliance",
+          "element_type": "process",
+          "position": "inside",
+          "assumptions": {
+            "key": "The platform maintains responsibility for securing cardholder data within its systems."
+          },
+          "constraints": {
+            "key": "Must implement required controls per PCI-DSS standards."
+          }
+        },
+        {
+          "element_name": "Credit bureau services",
+          "element_type": "actor",
+          "position": "outside",
+          "assumptions": {
+            "key": "Credit bureaus are responsible for the accuracy and security of the data they provide."
+          },
+          "constraints": {
+            "key": "Agreements must outline data usage and security expectations."
+          }
+        },
+        {
+          "element_name": "Customer data protection",
+          "element_type": "process",
+          "position": "interface",
+          "assumptions": {
+            "key": "Customers are responsible for keeping their credentials secure."
+          },
+          "constraints": {
+            "key": "The platform must provide secure authentication mechanisms and notify users of suspicious activity."
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Data Governance Boundaries",
+      "boundary_type": "data_governance",
+      "description": "Defines where data ownership, protection, and classification requirements change, including transitions between internal and external systems.",
+      "definition_criteria": {
+        "criterion1": "Data owned by the platform is subject to internal security policies and regulatory requirements.",
+        "criterion2": "Data shared with third parties must be governed by data-sharing agreements.",
+        "criterion3": "Data classification changes occur based on sensitivity (e.g., public, confidential, restricted)."
+      },
+      "elements": [
+        {
+          "element_name": "Customer financial data",
+          "element_type": "data",
+          "position": "inside",
+          "assumptions": {
+            "key": "The platform owns and is responsible for protecting customer financial data."
+          },
+          "constraints": {
+            "key": "Must be encrypted at rest and in transit, and access must be logged."
+          }
+        },
+        {
+          "element_name": "Payment data sent to processors",
+          "element_type": "data",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Payment data is securely transmitted to external payment processors."
+          },
+          "constraints": {
+            "key": "Data must be anonymized or tokenized when possible."
+          }
+        },
+        {
+          "element_name": "Credit bureau data",
+          "element_type": "data",
+          "position": "outside",
+          "assumptions": {
+            "key": "Credit bureau data is owned by the bureau and shared under strict agreements."
+          },
+          "constraints": {
+            "key": "Access must be limited to authorized personnel and use cases."
+          }
+        }
+      ]
+    }
+  ],
+  "system_boundary": {
+    "boundary_name": "Banking Platform System Scope",
+    "boundary_type": "system_scope",
+    "description": "Defines the components, functions, and interactions that are within the control of the Digital Banking Platform and those that are external but interact with the system.",
+    "definition_criteria": {
+      "criterion1": "Components and functions directly implemented and managed by the Digital Banking Platform are considered inside the scope.",
+      "criterion2": "External systems or services that the platform depends on but does not control are considered outside the scope.",
+      "criterion3": "Interfaces between internal and external systems are explicitly identified as crossing points."
+    },
+    "elements": [
+      {
+        "element_name": "Customer-facing applications (iOS, Android, Web)",
+        "element_type": "component",
+        "position": "inside",
+        "assumptions": {
+          "key": "Applications are developed and maintained by the platform's development team."
+        },
+        "constraints": {
+          "key": "Must comply with platform security policies and app-store requirements."
+        }
+      },
+      {
+        "element_name": "Core banking system",
+        "element_type": "component",
+        "position": "outside",
+        "assumptions": {
+          "key": "Core banking system is maintained by a third-party or separate internal team."
+        },
+        "constraints": {
+          "key": "API integrations must conform to documented interfaces provided by the core banking system."
+        }
+      },
+      {
+        "element_name": "API Gateways",
+        "element_type": "component",
+        "position": "interface",
+        "assumptions": {
+          "key": "API gateways mediate all communication between internal and external systems."
+        },
+        "constraints": {
+          "key": "Must implement authentication, rate limiting, and monitoring."
+        }
+      },
+      {
+        "element_name": "Third-party payment processors",
+        "element_type": "actor",
+        "position": "outside",
+        "assumptions": {
+          "key": "Payment processors are certified to comply with regulatory and industry standards (e.g., PCI-DSS)."
+        },
+        "constraints": {
+          "key": "Contracts and SLAs define operational availability and security obligations."
+        }
+      }
+    ],
+    "primary_system": [
+      "Customer-facing applications (iOS, Android, Web)"
+    ],
+    "system_elements": [
+      "Internal microservices",
+      "Customer-facing applications (iOS, Android, Web)",
+      "PCI-DSS compliance",
+      "Multi-factor authentication (MFA)",
+      "Customer financial data"
+    ],
+    "external_entities": [
+      "Core banking system",
+      "Credit bureau data",
+      "Credit bureau services",
+      "Third-party payment processors"
+    ],
+    "interfaces": [
+      {
+        "name": "API Gateways",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "API gateways mediate all communication between internal and external systems."
+        },
+        "constraints": {
+          "key": "Must implement authentication, rate limiting, and monitoring."
+        }
+      },
+      {
+        "name": "Customer data protection",
+        "boundary_type": "responsibility",
+        "assumptions": {
+          "key": "Customers are responsible for keeping their credentials secure."
+        },
+        "constraints": {
+          "key": "The platform must provide secure authentication mechanisms and notify users of suspicious activity."
+        }
+      }
+    ],
+    "assumptions": [
+      "Customer-facing applications (iOS, Android, Web): Applications are developed and maintained by the platform's development team.",
+      "Core banking system: Core banking system is maintained by a third-party or separate internal team.",
+      "API Gateways: API gateways mediate all communication between internal and external systems.",
+      "Third-party payment processors: Payment processors are certified to comply with regulatory and industry standards (e.g., PCI-DSS).",
+      "Multi-factor authentication (MFA): MFA is implemented for all customer logins and high-risk transactions.",
+      "Payment processor API interactions: Payment processors authenticate requests using API keys or OAuth tokens.",
+      "Internal microservices: Microservices communicate over a secure internal network.",
+      "PCI-DSS compliance: The platform maintains responsibility for securing cardholder data within its systems.",
+      "Credit bureau services: Credit bureaus are responsible for the accuracy and security of the data they provide.",
+      "Customer data protection: Customers are responsible for keeping their credentials secure.",
+      "Customer financial data: The platform owns and is responsible for protecting customer financial data.",
+      "Payment data sent to processors: Payment data is securely transmitted to external payment processors.",
+      "Credit bureau data: Credit bureau data is owned by the bureau and shared under strict agreements."
+    ],
+    "exclusions": [
+      "Customer-facing applications (iOS, Android, Web): Must comply with platform security policies and app-store requirements.",
+      "Core banking system: API integrations must conform to documented interfaces provided by the core banking system.",
+      "API Gateways: Must implement authentication, rate limiting, and monitoring.",
+      "Third-party payment processors: Contracts and SLAs define operational availability and security obligations.",
+      "Multi-factor authentication (MFA): Must comply with Strong Customer Authentication (SCA) requirements.",
+      "Payment processor API interactions: All interactions must use encrypted channels (e.g., HTTPS).",
+      "Internal microservices: Service-to-service authentication must be enforced through tokens or certificates.",
+      "PCI-DSS compliance: Must implement required controls per PCI-DSS standards.",
+      "Credit bureau services: Agreements must outline data usage and security expectations.",
+      "Customer data protection: The platform must provide secure authentication mechanisms and notify users of suspicious activity.",
+      "Customer financial data: Must be encrypted at rest and in transit, and access must be logged.",
+      "Payment data sent to processors: Data must be anonymized or tokenized when possible.",
+      "Credit bureau data: Access must be limited to authorized personnel and use cases."
+    ]
+  },
+  "boundary_analysis": {
+    "primary_system": [
+      "Customer-facing applications (iOS, Android, Web)"
+    ],
+    "system_elements": [
+      "Internal microservices",
+      "Customer-facing applications (iOS, Android, Web)",
+      "PCI-DSS compliance",
+      "Multi-factor authentication (MFA)",
+      "Customer financial data"
+    ],
+    "external_entities": [
+      "Core banking system",
+      "Credit bureau data",
+      "Credit bureau services",
+      "Third-party payment processors"
+    ],
+    "interfaces": [
+      {
+        "name": "API Gateways",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "API gateways mediate all communication between internal and external systems."
+        },
+        "constraints": {
+          "key": "Must implement authentication, rate limiting, and monitoring."
+        }
+      },
+      {
+        "name": "Customer data protection",
+        "boundary_type": "responsibility",
+        "assumptions": {
+          "key": "Customers are responsible for keeping their credentials secure."
+        },
+        "constraints": {
+          "key": "The platform must provide secure authentication mechanisms and notify users of suspicious activity."
+        }
+      }
+    ],
+    "assumptions": [
+      "Customer-facing applications (iOS, Android, Web): Applications are developed and maintained by the platform's development team.",
+      "Core banking system: Core banking system is maintained by a third-party or separate internal team.",
+      "API Gateways: API gateways mediate all communication between internal and external systems.",
+      "Third-party payment processors: Payment processors are certified to comply with regulatory and industry standards (e.g., PCI-DSS).",
+      "Multi-factor authentication (MFA): MFA is implemented for all customer logins and high-risk transactions.",
+      "Payment processor API interactions: Payment processors authenticate requests using API keys or OAuth tokens.",
+      "Internal microservices: Microservices communicate over a secure internal network.",
+      "PCI-DSS compliance: The platform maintains responsibility for securing cardholder data within its systems.",
+      "Credit bureau services: Credit bureaus are responsible for the accuracy and security of the data they provide.",
+      "Customer data protection: Customers are responsible for keeping their credentials secure.",
+      "Customer financial data: The platform owns and is responsible for protecting customer financial data.",
+      "Payment data sent to processors: Payment data is securely transmitted to external payment processors.",
+      "Credit bureau data: Credit bureau data is owned by the bureau and shared under strict agreements."
+    ],
+    "exclusions": [
+      "Customer-facing applications (iOS, Android, Web): Must comply with platform security policies and app-store requirements.",
+      "Core banking system: API integrations must conform to documented interfaces provided by the core banking system.",
+      "API Gateways: Must implement authentication, rate limiting, and monitoring.",
+      "Third-party payment processors: Contracts and SLAs define operational availability and security obligations.",
+      "Multi-factor authentication (MFA): Must comply with Strong Customer Authentication (SCA) requirements.",
+      "Payment processor API interactions: All interactions must use encrypted channels (e.g., HTTPS).",
+      "Internal microservices: Service-to-service authentication must be enforced through tokens or certificates.",
+      "PCI-DSS compliance: Must implement required controls per PCI-DSS standards.",
+      "Credit bureau services: Agreements must outline data usage and security expectations.",
+      "Customer data protection: The platform must provide secure authentication mechanisms and notify users of suspicious activity.",
+      "Customer financial data: Must be encrypted at rest and in transit, and access must be logged.",
+      "Payment data sent to processors: Data must be anonymized or tokenized when possible.",
+      "Credit bureau data: Access must be limited to authorized personnel and use cases."
+    ],
+    "boundary_coverage": {
+      "total_boundaries_defined": 4,
+      "critical_interfaces_identified": 2,
+      "external_dependencies": 4
+    }
+  },
+  "boundary_relationships": [
+    {
+      "parent_boundary": "Banking Platform System Scope",
+      "child_boundary": "Trust Boundaries",
+      "relationship_type": "contains"
+    },
+    {
+      "parent_boundary": "Responsibility Boundaries",
+      "child_boundary": "Data Governance Boundaries",
+      "relationship_type": "overlaps"
+    }
+  ],
+  "boundary_summary": {
+    "total_boundaries": 4,
+    "boundary_types": {
+      "system_scope": 1,
+      "trust": 1,
+      "responsibility": 1,
+      "data_governance": 1
+    },
+    "total_elements": 13,
+    "critical_interfaces": 2,
+    "external_dependencies": 4
+  },
+  "cognitive_style": "balanced",
+  "analysis_metadata": {
+    "agent_type": "system_boundaries",
+    "analysis_id": "615a470c-0670-44fa-a2a2-aed78831c74a",
+    "timestamp": "2025-07-29T00:48:57.995169Z",
+    "version": "1.0"
+  }
+}

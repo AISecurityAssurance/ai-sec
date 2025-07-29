@@ -1,0 +1,425 @@
+{
+  "stakeholders": [
+    {
+      "name": "Retail Customers",
+      "stakeholder_type": "user",
+      "description": "Individual users managing their personal finances using the platform.",
+      "criticality": "primary",
+      "mission_perspective": {
+        "primary_needs": [
+          "Secure access to accounts",
+          "Convenient transaction processing",
+          "Privacy of sensitive data"
+        ],
+        "value_derived": "Ability to manage personal finances anywhere, anytime, with confidence in security.",
+        "success_criteria": "Seamless, secure, and reliable access to banking services."
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-1",
+          "impact": "catastrophic",
+          "description": "Financial theft due to unauthorized access to accounts."
+        },
+        {
+          "loss_id": "L-2",
+          "impact": "catastrophic",
+          "description": "Data breach exposing sensitive personal and financial information."
+        },
+        {
+          "loss_id": "L-4",
+          "impact": "major",
+          "description": "Inability to access accounts or complete transactions during outages."
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "medium",
+        "interest_level": "high",
+        "engagement_strategy": "manage_closely"
+      }
+    },
+    {
+      "name": "Business Customers",
+      "stakeholder_type": "user",
+      "description": "Corporate entities managing business accounts and financial operations on the platform.",
+      "criticality": "primary",
+      "mission_perspective": {
+        "primary_needs": [
+          "High transaction limits",
+          "Reliability for business-critical transactions",
+          "Data security and compliance"
+        ],
+        "value_derived": "Efficient, secure financial management tailored for businesses.",
+        "success_criteria": "Guaranteed uptime, secure transaction processing, and regulatory compliance."
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-1",
+          "impact": "catastrophic",
+          "description": "Financial theft impacting operational cash flow."
+        },
+        {
+          "loss_id": "L-4",
+          "impact": "catastrophic",
+          "description": "Service outages disrupting business operations and payroll."
+        },
+        {
+          "loss_id": "L-6",
+          "impact": "major",
+          "description": "Reputation damage affecting trust and customer relationships."
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "high",
+        "interest_level": "high",
+        "engagement_strategy": "manage_closely"
+      }
+    },
+    {
+      "name": "Bank Employees",
+      "stakeholder_type": "operator",
+      "description": "Internal staff such as customer service representatives, compliance officers, and system administrators.",
+      "criticality": "essential",
+      "mission_perspective": {
+        "primary_needs": [
+          "Access to tools for customer support",
+          "Monitoring capabilities for compliance",
+          "System stability for operational efficiency"
+        ],
+        "value_derived": "Ability to efficiently perform job functions and maintain compliance.",
+        "success_criteria": "Operational stability, compliance with regulations, and efficient resolution of customer issues."
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-3",
+          "impact": "major",
+          "description": "Failure to meet regulatory compliance requirements affecting operations."
+        },
+        {
+          "loss_id": "L-4",
+          "impact": "major",
+          "description": "Service outages hindering employees from assisting customers."
+        },
+        {
+          "loss_id": "L-7",
+          "impact": "moderate",
+          "description": "Compromised payment processing leading to increased customer complaints."
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "medium",
+        "interest_level": "high",
+        "engagement_strategy": "manage_closely"
+      }
+    },
+    {
+      "name": "Financial Regulators",
+      "stakeholder_type": "regulator",
+      "description": "Government and industry entities ensuring compliance with financial laws and standards.",
+      "criticality": "essential",
+      "mission_perspective": {
+        "primary_needs": [
+          "Adherence to PCI-DSS, AML/BSA, GDPR, and SOX regulations",
+          "Access to auditing data for oversight"
+        ],
+        "value_derived": "Confidence that the platform operates within the legal and regulatory framework.",
+        "success_criteria": "Full compliance with regulatory standards and timely reporting."
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-3",
+          "impact": "catastrophic",
+          "description": "Non-compliance leading to fines, penalties, or operational restrictions."
+        },
+        {
+          "loss_id": "L-5",
+          "impact": "major",
+          "description": "Incorrect financial reporting affecting regulatory oversight."
+        },
+        {
+          "loss_id": "L-6",
+          "impact": "moderate",
+          "description": "Reputation damage leading to heightened scrutiny."
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "high",
+        "interest_level": "high",
+        "engagement_strategy": "manage_closely"
+      }
+    },
+    {
+      "name": "Third-Party Service Providers",
+      "stakeholder_type": "partner",
+      "description": "Organizations providing critical services such as payment processing, credit reporting, and KYC verification.",
+      "criticality": "important",
+      "mission_perspective": {
+        "primary_needs": [
+          "Reliable integration with the platform",
+          "Secure data exchange",
+          "Operational stability"
+        ],
+        "value_derived": "Revenue generation and operational collaboration with the banking platform.",
+        "success_criteria": "Seamless integration, timely data processing, and secure operations."
+      },
+      "loss_exposure": [
+        {
+          "loss_id": "L-4",
+          "impact": "major",
+          "description": "Service outages impacting their ability to provide services."
+        },
+        {
+          "loss_id": "L-6",
+          "impact": "moderate",
+          "description": "Reputation damage due to association with a compromised system."
+        },
+        {
+          "loss_id": "L-7",
+          "impact": "moderate",
+          "description": "Payment processing failures affecting their revenue streams."
+        }
+      ],
+      "influence_interest": {
+        "influence_level": "medium",
+        "interest_level": "medium",
+        "engagement_strategy": "keep_satisfied"
+      }
+    }
+  ],
+  "stakeholder_count": 5,
+  "stakeholder_types": {
+    "user": 2,
+    "operator": 1,
+    "regulator": 1,
+    "partner": 1
+  },
+  "adversaries": [
+    {
+      "adversary_class": "organized_crime",
+      "profile": {
+        "sophistication": "high",
+        "resources": "significant",
+        "persistence": "campaign_based",
+        "primary_interest": "financial_gain",
+        "geographic_scope": "international"
+      },
+      "mission_targets": {
+        "interested_in": [
+          "Customer accounts",
+          "Payment processing systems",
+          "Sensitive personal data"
+        ],
+        "value_perception": "high_value_target",
+        "historical_interest": "known_targeting"
+      }
+    },
+    {
+      "adversary_class": "nation_state",
+      "profile": {
+        "sophistication": "advanced",
+        "resources": "unlimited",
+        "persistence": "persistent",
+        "primary_interest": "strategic_advantage",
+        "geographic_scope": "global"
+      },
+      "mission_targets": {
+        "interested_in": [
+          "Customer data",
+          "Financial transaction data",
+          "System vulnerabilities"
+        ],
+        "value_perception": "strategic_target",
+        "historical_interest": "active_reconnaissance"
+      }
+    },
+    {
+      "adversary_class": "insider",
+      "profile": {
+        "sophistication": "moderate",
+        "resources": "limited",
+        "persistence": "short_term",
+        "primary_interest": "personal_gain",
+        "geographic_scope": "local"
+      },
+      "mission_targets": {
+        "interested_in": [
+          "Customer accounts",
+          "System administrative tools"
+        ],
+        "value_perception": "target_of_opportunity",
+        "historical_interest": "common_threat"
+      }
+    },
+    {
+      "adversary_class": "hacktivist",
+      "profile": {
+        "sophistication": "moderate",
+        "resources": "limited",
+        "persistence": "campaign_based",
+        "primary_interest": "ideological",
+        "geographic_scope": "regional"
+      },
+      "mission_targets": {
+        "interested_in": [
+          "System availability",
+          "Public-facing applications"
+        ],
+        "value_perception": "symbolic_target",
+        "historical_interest": "periodic_campaigns"
+      }
+    },
+    {
+      "adversary_class": "opportunist",
+      "profile": {
+        "sophistication": "low",
+        "resources": "minimal",
+        "persistence": "opportunistic",
+        "primary_interest": "easy_gains",
+        "geographic_scope": "local"
+      },
+      "mission_targets": {
+        "interested_in": [
+          "Exploitable vulnerabilities",
+          "Customer accounts"
+        ],
+        "value_perception": "target_of_opportunity",
+        "historical_interest": "constant_scanning"
+      }
+    }
+  ],
+  "adversary_count": 5,
+  "stakeholder_matrix": {
+    "high_influence_high_interest": [
+      {
+        "name": "Business Customers",
+        "type": "user",
+        "strategy": "manage_closely"
+      },
+      {
+        "name": "Financial Regulators",
+        "type": "regulator",
+        "strategy": "manage_closely"
+      }
+    ],
+    "high_influence_low_interest": [],
+    "low_influence_high_interest": [
+      {
+        "name": "Retail Customers",
+        "type": "user",
+        "strategy": "manage_closely"
+      },
+      {
+        "name": "Bank Employees",
+        "type": "operator",
+        "strategy": "manage_closely"
+      }
+    ],
+    "low_influence_low_interest": [
+      {
+        "name": "Third-Party Service Providers",
+        "type": "partner",
+        "strategy": "keep_satisfied"
+      }
+    ]
+  },
+  "adversary_analysis": {
+    "threat_landscape": {
+      "sophistication_range": "Low to Advanced (full spectrum)",
+      "resource_availability": "Unlimited resources available (nation-state)",
+      "persistence_patterns": [
+        "Advanced Persistent Threats (APT) expected",
+        "Opportunistic attacks constant"
+      ]
+    },
+    "mission_attractiveness": {
+      "overall_rating": "high",
+      "factors": [
+        "Historical evidence of targeting"
+      ],
+      "most_interested_adversaries": [
+        "organized_crime",
+        "nation_state"
+      ]
+    },
+    "combined_threat_level": "elevated"
+  },
+  "mission_success_criteria": {
+    "success_states": {
+      "user_success": {
+        "description": "Users can reliably achieve their goals through the system",
+        "violated_by_losses": [
+          "L-1",
+          "L-2",
+          "L-4",
+          "L-7"
+        ],
+        "evidence_of_success": "High usage rates, positive feedback, goal achievement metrics"
+      },
+      "operational_success": {
+        "description": "System operates efficiently within defined parameters",
+        "violated_by_losses": [
+          "L-4"
+        ],
+        "evidence_of_success": "Stable operations, manageable workload, effective controls"
+      },
+      "regulatory_success": {
+        "description": "System maintains continuous compliance with all regulations",
+        "violated_by_losses": [
+          "L-2",
+          "L-3",
+          "L-5"
+        ],
+        "evidence_of_success": "Clean audits, no violations, proactive compliance"
+      },
+      "security_success": {
+        "description": "System successfully resists adversary attempts",
+        "violated_by_losses": [
+          "L-1",
+          "L-2",
+          "L-3",
+          "L-4",
+          "L-5",
+          "L-6",
+          "L-7"
+        ],
+        "evidence_of_success": "No successful compromises, threats detected and mitigated"
+      }
+    },
+    "success_indicators": {
+      "behavioral_indicators": [
+        "Users actively choose to use the system",
+        "Stakeholders express confidence in the system",
+        "No abnormal user behavior patterns"
+      ],
+      "performance_indicators": [
+        "System meets defined performance targets",
+        "Error rates within acceptable thresholds",
+        "Recovery objectives consistently met"
+      ],
+      "external_indicators": [
+        "Positive stakeholder assessments",
+        "Regulatory approval maintained",
+        "Market position stable or improving"
+      ]
+    }
+  },
+  "critical_relationships": [
+    {
+      "relationship": "User-Operator",
+      "nature": "Service delivery and support",
+      "criticality": "essential",
+      "failure_impact": "Users cannot achieve goals, operators cannot fulfill duties"
+    },
+    {
+      "relationship": "Operator-Regulator",
+      "nature": "Compliance and oversight",
+      "criticality": "required",
+      "failure_impact": "Regulatory violations and enforcement actions"
+    },
+    {
+      "relationship": "Adversary-User",
+      "nature": "Threat and target",
+      "criticality": "hostile",
+      "failure_impact": "Direct harm to users through system compromise"
+    }
+  ]
+}

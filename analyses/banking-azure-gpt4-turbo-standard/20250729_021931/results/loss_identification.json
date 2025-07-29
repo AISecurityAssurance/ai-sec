@@ -1,0 +1,441 @@
+{
+  "losses": [
+    {
+      "description": "Loss of customer financial assets through unauthorized transactions",
+      "loss_category": "financial",
+      "severity_classification": {
+        "magnitude": "catastrophic",
+        "scope": "customer_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Secure financial transactions"
+        ],
+        "cascading_effects": [
+          "Loss of trust in bank",
+          "Increased regulatory scrutiny"
+        ],
+        "stakeholder_harm": {
+          "Retail customers": {
+            "type": "financial",
+            "severity": "catastrophic"
+          }
+        }
+      },
+      "identifier": "L-1"
+    },
+    {
+      "description": "Loss of customer data confidentiality resulting in exposure of sensitive personal and financial information",
+      "loss_category": "privacy",
+      "severity_classification": {
+        "magnitude": "catastrophic",
+        "scope": "customer_wide",
+        "duration": "long_term",
+        "reversibility": "impossible",
+        "detection_difficulty": "hard"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Secure financial transactions"
+        ],
+        "cascading_effects": [
+          "Reputational damage",
+          "Increased fraud and identity theft"
+        ],
+        "stakeholder_harm": {
+          "Retail customers": {
+            "type": "privacy",
+            "severity": "catastrophic"
+          },
+          "Regulators": {
+            "type": "regulatory",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-2"
+    },
+    {
+      "description": "Loss of service availability to customers during critical business operations",
+      "loss_category": "mission",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "customer_wide",
+        "duration": "short_term",
+        "reversibility": "possible",
+        "detection_difficulty": "easy"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Real-time account management",
+          "Secure financial transactions"
+        ],
+        "cascading_effects": [
+          "Customer dissatisfaction",
+          "Operational disruptions"
+        ],
+        "stakeholder_harm": {
+          "Retail customers": {
+            "type": "mission",
+            "severity": "major"
+          },
+          "Business customers": {
+            "type": "mission",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-3"
+    },
+    {
+      "description": "Loss of regulatory compliance resulting in penalties and sanctions",
+      "loss_category": "regulatory",
+      "severity_classification": {
+        "magnitude": "catastrophic",
+        "scope": "organization_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Regulatory compliance"
+        ],
+        "cascading_effects": [
+          "Financial penalties",
+          "Loss of operating licenses",
+          "Reputational damage"
+        ],
+        "stakeholder_harm": {
+          "Regulators": {
+            "type": "regulatory",
+            "severity": "catastrophic"
+          },
+          "Shareholders": {
+            "type": "financial",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-4"
+    },
+    {
+      "description": "Loss of customer trust due to high-profile security or privacy incidents",
+      "loss_category": "reputation",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "market_wide",
+        "duration": "long_term",
+        "reversibility": "difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Scalable user access"
+        ],
+        "cascading_effects": [
+          "Customer attrition",
+          "Decreased market share"
+        ],
+        "stakeholder_harm": {
+          "Shareholders": {
+            "type": "reputation",
+            "severity": "major"
+          },
+          "Retail customers": {
+            "type": "reputation",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-5"
+    },
+    {
+      "description": "Loss of operational integrity due to compromise of core banking system or third-party dependencies",
+      "loss_category": "mission",
+      "severity_classification": {
+        "magnitude": "catastrophic",
+        "scope": "enterprise_wide",
+        "duration": "medium_term",
+        "reversibility": "difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Integration with external financial services",
+          "Real-time account management"
+        ],
+        "cascading_effects": [
+          "Service disruptions",
+          "Inability to complete transactions"
+        ],
+        "stakeholder_harm": {
+          "Business customers": {
+            "type": "mission",
+            "severity": "catastrophic"
+          },
+          "Bank employees": {
+            "type": "mission",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-6"
+    },
+    {
+      "description": "Loss of customer financial wellbeing due to incorrect or delayed credit decisions",
+      "loss_category": "financial",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "customer_wide",
+        "duration": "medium_term",
+        "reversibility": "difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Credit Services"
+        ],
+        "cascading_effects": [
+          "Customer dissatisfaction",
+          "Increased operational costs for corrections"
+        ],
+        "stakeholder_harm": {
+          "Retail customers": {
+            "type": "financial",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-7"
+    },
+    {
+      "description": "Loss of intellectual property or proprietary algorithms to unauthorized parties",
+      "loss_category": "reputation",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "organization_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "hard"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "Financial Insights"
+        ],
+        "cascading_effects": [
+          "Competitive disadvantage",
+          "Decreased innovation"
+        ],
+        "stakeholder_harm": {
+          "Shareholders": {
+            "type": "reputation",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-8"
+    }
+  ],
+  "loss_count": 8,
+  "loss_categories": {
+    "financial": 2,
+    "privacy": 1,
+    "mission": 2,
+    "regulatory": 1,
+    "reputation": 2
+  },
+  "dependencies": [
+    {
+      "primary_loss_id": "L-1",
+      "dependent_loss_id": "L-2",
+      "dependency_type": "enables",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "none, occurs concurrently with unauthorized transactions",
+        "persistence": "sustained"
+      },
+      "rationale": "Unauthorized transactions often require access to sensitive customer data, which can lead to exposure of this data during the attack.",
+      "id": "39c30463-b2ac-47b3-9e8c-65fb2110ce00"
+    },
+    {
+      "primary_loss_id": "L-1",
+      "dependent_loss_id": "L-5",
+      "dependency_type": "triggers",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "none, reputational damage occurs as soon as the incident becomes public",
+        "persistence": "sustained"
+      },
+      "rationale": "Loss of customer financial assets through unauthorized transactions directly undermines customer trust, especially in high-profile incidents.",
+      "id": "8473ce3b-60cc-465f-a05e-48356be93c62"
+    },
+    {
+      "primary_loss_id": "L-2",
+      "dependent_loss_id": "L-5",
+      "dependency_type": "triggers",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "none, reputational damage begins upon exposure of sensitive data",
+        "persistence": "sustained"
+      },
+      "rationale": "Loss of customer data confidentiality damages the reputation of the organization as customers lose confidence in its ability to protect their sensitive information.",
+      "id": "9b885512-8469-4613-b3d4-40460106278a"
+    },
+    {
+      "primary_loss_id": "L-2",
+      "dependent_loss_id": "L-4",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "depends on the timing of regulatory audits or incident reporting",
+        "persistence": "sustained"
+      },
+      "rationale": "Exposure of sensitive customer data often violates regulatory requirements, leading to penalties and sanctions.",
+      "id": "324be25c-2e4e-4d5c-ade8-d9ed8f198c68"
+    },
+    {
+      "primary_loss_id": "L-3",
+      "dependent_loss_id": "L-5",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "occurs if customers experience prolonged service outages",
+        "persistence": "variable"
+      },
+      "rationale": "Loss of service availability during critical periods can erode customer trust if the downtime leads to significant disruption to their financial activities.",
+      "id": "4c1685e6-1931-4be1-bbde-6abc87c73034"
+    },
+    {
+      "primary_loss_id": "L-4",
+      "dependent_loss_id": "L-5",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "depends on how and when regulatory penalties are disclosed to the public",
+        "persistence": "sustained"
+      },
+      "rationale": "Regulatory penalties and sanctions often become public knowledge, harming the organization\u2019s reputation and eroding customer trust.",
+      "id": "37b05a3c-b736-45db-947f-d6d88b5996ce"
+    },
+    {
+      "primary_loss_id": "L-6",
+      "dependent_loss_id": "L-3",
+      "dependency_type": "triggers",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "none, service unavailability occurs as soon as operational integrity is compromised",
+        "persistence": "sustained"
+      },
+      "rationale": "A compromise of the core banking system or third-party dependencies directly results in loss of service availability.",
+      "id": "386a84ad-2e71-47a5-9c02-fd113f8c4df2"
+    },
+    {
+      "primary_loss_id": "L-6",
+      "dependent_loss_id": "L-7",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "depends on how quickly the operational compromise affects credit decision processes",
+        "persistence": "variable"
+      },
+      "rationale": "Operational integrity issues can lead to incorrect or delayed credit decisions, impacting customer financial wellbeing.",
+      "id": "098ca524-6362-4800-a853-e32620db7956"
+    },
+    {
+      "primary_loss_id": "L-6",
+      "dependent_loss_id": "L-1",
+      "dependency_type": "enables",
+      "dependency_strength": "possible",
+      "time_relationship": {
+        "sequence": "concurrent",
+        "typical_delay": "none, occurs as part of the operational compromise",
+        "persistence": "variable"
+      },
+      "rationale": "A compromise of the core banking system could enable unauthorized transactions, depending on the nature of the attack.",
+      "id": "aa8c5eb6-d16c-45be-bb7b-c9aa78ca2bb0"
+    },
+    {
+      "primary_loss_id": "L-6",
+      "dependent_loss_id": "L-8",
+      "dependency_type": "enables",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "depends on the attacker's ability to extract sensitive intellectual property post-compromise",
+        "persistence": "variable"
+      },
+      "rationale": "Compromise of operational integrity may expose proprietary algorithms or intellectual property to unauthorized parties.",
+      "id": "d3f1679f-9651-417b-8719-814965d483f5"
+    },
+    {
+      "primary_loss_id": "L-7",
+      "dependent_loss_id": "L-5",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "occurs if customers realize financial harm from incorrect or delayed decisions",
+        "persistence": "sustained"
+      },
+      "rationale": "Financial harm caused by incorrect or delayed credit decisions can significantly impact customer trust in the organization.",
+      "id": "bfdb3eb7-fcef-4105-8279-4a0e0894a4a5"
+    },
+    {
+      "primary_loss_id": "L-8",
+      "dependent_loss_id": "L-5",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "depends on when the loss of intellectual property becomes known to customers or the public",
+        "persistence": "variable"
+      },
+      "rationale": "Loss of proprietary algorithms or intellectual property can harm competitive advantage and erode customer trust if it becomes public.",
+      "id": "8866540f-d586-4c60-a940-75e7b65377e9"
+    }
+  ],
+  "cascade_analysis": {
+    "primary_losses": [
+      "L-6"
+    ],
+    "cascade_chains": [
+      {
+        "chain": [
+          "L-6",
+          "L-3",
+          "L-5",
+          "L-7",
+          "L-1",
+          "L-2",
+          "L-4",
+          "L-8"
+        ],
+        "trigger": "L-6",
+        "terminal_losses": [
+          "L-8"
+        ],
+        "chain_length": 8
+      }
+    ],
+    "max_cascade_depth": 8
+  },
+  "severity_distribution": {
+    "catastrophic": 4,
+    "major": 4,
+    "moderate": 0,
+    "minor": 0
+  },
+  "cognitive_style": "balanced"
+}

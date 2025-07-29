@@ -1,0 +1,829 @@
+{
+  "hazards": [
+    {
+      "description": "System operates with unverified user identities for sensitive transactions",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "transaction_integrity",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during attacks bypassing authentication mechanisms",
+        "duration": "intermittent"
+      },
+      "identifier": "H-1"
+    },
+    {
+      "description": "System operates with exposed customer personal and financial data during data exchanges",
+      "hazard_category": "confidentiality_breached",
+      "affected_system_property": "data_protection",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during unencrypted API communication",
+        "duration": "transient"
+      },
+      "identifier": "H-2"
+    },
+    {
+      "description": "System operates in a state where malicious activity remains undetected due to inadequate monitoring",
+      "hazard_category": "capability_loss",
+      "affected_system_property": "operational_capability",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "due to insufficient logging or threat detection systems",
+        "duration": "continuous"
+      },
+      "identifier": "H-3"
+    },
+    {
+      "description": "System operates with corrupted transaction data during payment processing",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "transaction_integrity",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during system errors or fraudulent tampering",
+        "duration": "transient"
+      },
+      "identifier": "H-4"
+    },
+    {
+      "description": "System operates in a state where critical third-party integration services are unavailable",
+      "hazard_category": "availability_degraded",
+      "affected_system_property": "service_availability",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during outages of payment processors or KYC services",
+        "duration": "intermittent"
+      },
+      "identifier": "H-5"
+    },
+    {
+      "description": "System operates with inconsistent account data due to synchronization issues with the core banking system",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "transaction_integrity",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during delays or errors in data replication",
+        "duration": "transient"
+      },
+      "identifier": "H-6"
+    },
+    {
+      "description": "System operates with unpatched vulnerabilities that allow unauthorized data access",
+      "hazard_category": "confidentiality_breached",
+      "affected_system_property": "data_protection",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "moderate"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "difficult"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "due to delayed updates or patching",
+        "duration": "continuous"
+      },
+      "identifier": "H-7"
+    },
+    {
+      "description": "System operates in a state where transactional data logs are incomplete or missing",
+      "hazard_category": "non_compliance",
+      "affected_system_property": "regulatory_compliance",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "due to logging service failures or misconfigurations",
+        "duration": "intermittent"
+      },
+      "identifier": "H-8"
+    },
+    {
+      "description": "System operates with unauthorized changes to business logic in microservices",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "transaction_integrity",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "moderate"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "hard"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "very hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during insider or supply chain attacks",
+        "duration": "transient"
+      },
+      "identifier": "H-9"
+    },
+    {
+      "description": "System operates in a state where resource exhaustion prevents transaction processing",
+      "hazard_category": "availability_degraded",
+      "affected_system_property": "service_availability",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during DDoS attacks or resource mismanagement",
+        "duration": "intermittent"
+      },
+      "identifier": "H-10"
+    },
+    {
+      "description": "System operates in a state where regulatory reporting data is inaccurate due to processing errors",
+      "hazard_category": "non_compliance",
+      "affected_system_property": "regulatory_compliance",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during data ingestion or aggregation issues",
+        "duration": "intermittent"
+      },
+      "identifier": "H-11"
+    },
+    {
+      "description": "System operates with exposed API endpoints that allow unauthorized access to data",
+      "hazard_category": "confidentiality_breached",
+      "affected_system_property": "data_protection",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "due to improper API security controls",
+        "duration": "continuous"
+      },
+      "identifier": "H-12"
+    }
+  ],
+  "hazard_count": 12,
+  "hazard_categories": {
+    "integrity_compromised": 4,
+    "confidentiality_breached": 3,
+    "capability_loss": 1,
+    "availability_degraded": 2,
+    "non_compliance": 2
+  },
+  "hazard_loss_mappings": [
+    {
+      "hazard_id": "H-1",
+      "loss_id": "L-1",
+      "relationship_strength": "conditional",
+      "rationale": "Unverified user identities can lead to unauthorized transactions, resulting in financial asset loss.",
+      "conditions": [
+        "Exploitation by malicious actors",
+        "Sensitive transaction initiated without verification"
+      ],
+      "id": "50787ea3-c9e4-49de-b1ea-c22928cb88c2"
+    },
+    {
+      "hazard_id": "H-2",
+      "loss_id": "L-2",
+      "relationship_strength": "direct",
+      "rationale": "Exposed customer data during exchanges directly compromises confidentiality, leading to a data breach.",
+      "conditions": [],
+      "id": "46f19722-6606-4d5a-81a9-f09f7699bfda"
+    },
+    {
+      "hazard_id": "H-3",
+      "loss_id": "L-6",
+      "relationship_strength": "indirect",
+      "rationale": "Inadequate monitoring allows malicious activity to go undetected, contributing to widespread fraudulent activity and loss of customer trust.",
+      "conditions": [
+        "Presence of active malicious actors",
+        "Fraudulent activity targeting customer accounts"
+      ],
+      "id": "385677d9-861f-4d68-a6d6-3a1691589cdf"
+    },
+    {
+      "hazard_id": "H-4",
+      "loss_id": "L-1",
+      "relationship_strength": "direct",
+      "rationale": "Corrupted transaction data can cause unauthorized transactions or incorrect financial processing, leading to loss of customer assets.",
+      "conditions": [],
+      "id": "717748ec-afb4-46d0-a0f3-210d0a4e11b1"
+    },
+    {
+      "hazard_id": "H-5",
+      "loss_id": "L-3",
+      "relationship_strength": "direct",
+      "rationale": "Unavailable third-party integration services prevent critical operations, leading to loss of service availability for customers.",
+      "conditions": [],
+      "id": "bf77244c-efd1-4240-9711-f1907aaf4b3d"
+    },
+    {
+      "hazard_id": "H-6",
+      "loss_id": "L-1",
+      "relationship_strength": "conditional",
+      "rationale": "Inconsistent account data can lead to errors in transactions, potentially causing financial asset loss.",
+      "conditions": [
+        "Transaction processing depends on synchronized account data"
+      ],
+      "id": "3f1cac1a-3921-484d-9d61-e0f20629613d"
+    },
+    {
+      "hazard_id": "H-7",
+      "loss_id": "L-2",
+      "relationship_strength": "direct",
+      "rationale": "Unpatched vulnerabilities can allow unauthorized data access, directly breaching customer confidentiality.",
+      "conditions": [],
+      "id": "8d9b6296-ce27-4cce-be6d-7f3594f74c65"
+    },
+    {
+      "hazard_id": "H-8",
+      "loss_id": "L-4",
+      "relationship_strength": "direct",
+      "rationale": "Incomplete or missing transactional logs violate regulatory requirements, leading to penalties and sanctions.",
+      "conditions": [],
+      "id": "85cfd74d-34f3-4165-b8cc-384840f91d6e"
+    },
+    {
+      "hazard_id": "H-9",
+      "loss_id": "L-6",
+      "relationship_strength": "conditional",
+      "rationale": "Unauthorized changes to business logic can lead to fraudulent activity, eroding customer trust.",
+      "conditions": [
+        "Malicious actors exploit altered business logic",
+        "Fraudulent transactions occur"
+      ],
+      "id": "a7cce0ed-1659-4cf4-82a9-448ce078b770"
+    },
+    {
+      "hazard_id": "H-10",
+      "loss_id": "L-3",
+      "relationship_strength": "direct",
+      "rationale": "Resource exhaustion prevents transaction processing, directly causing service availability loss for customers.",
+      "conditions": [],
+      "id": "fa732343-3d0d-41d7-86a5-73e0006d98f2"
+    },
+    {
+      "hazard_id": "H-11",
+      "loss_id": "L-7",
+      "relationship_strength": "direct",
+      "rationale": "Inaccurate regulatory reporting data misrepresents financial health, violating compliance and regulatory requirements.",
+      "conditions": [],
+      "id": "263f0a78-3941-4d79-9996-88dc78e910be"
+    },
+    {
+      "hazard_id": "H-12",
+      "loss_id": "L-2",
+      "relationship_strength": "direct",
+      "rationale": "Exposed API endpoints can allow unauthorized access to data, directly leading to a breach of confidentiality.",
+      "conditions": [],
+      "id": "3bb7a5a1-2427-444d-9f2c-01e8aa06ac54"
+    },
+    {
+      "hazard_id": "H-5",
+      "loss_id": "L-5",
+      "relationship_strength": "direct",
+      "rationale": "Unavailable third-party integration services disrupt payment processor networks, directly impacting transaction processing.",
+      "conditions": [],
+      "id": "7fb5fe86-f5b8-4a24-87ee-7b6b3ecb8eef"
+    },
+    {
+      "hazard_id": "H-3",
+      "loss_id": "L-4",
+      "relationship_strength": "indirect",
+      "rationale": "Malicious activity remaining undetected can lead to non-compliance with regulatory requirements if fraud impacts reporting accuracy.",
+      "conditions": [
+        "Malicious activity targets critical regulatory reporting processes"
+      ],
+      "id": "165f6ec8-7505-41f7-8b3e-f5b08b89af49"
+    }
+  ],
+  "temporal_analysis": {
+    "always_present": [
+      {
+        "hazard_id": "H-3",
+        "description": "System operates in a state where malicious activity remains undetected due to inadequate monitoring"
+      },
+      {
+        "hazard_id": "H-7",
+        "description": "System operates with unpatched vulnerabilities that allow unauthorized data access"
+      },
+      {
+        "hazard_id": "H-12",
+        "description": "System operates with exposed API endpoints that allow unauthorized access to data"
+      }
+    ],
+    "periodic": [],
+    "conditional": [
+      {
+        "hazard_id": "H-1",
+        "description": "System operates with unverified user identities for sensitive transactions",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-2",
+        "description": "System operates with exposed customer personal and financial data during data exchanges",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-4",
+        "description": "System operates with corrupted transaction data during payment processing",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-5",
+        "description": "System operates in a state where critical third-party integration services are unavailable",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-6",
+        "description": "System operates with inconsistent account data due to synchronization issues with the core banking system",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-8",
+        "description": "System operates in a state where transactional data logs are incomplete or missing",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-9",
+        "description": "System operates with unauthorized changes to business logic in microservices",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-10",
+        "description": "System operates in a state where resource exhaustion prevents transaction processing",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-11",
+        "description": "System operates in a state where regulatory reporting data is inaccurate due to processing errors",
+        "conditions": []
+      }
+    ],
+    "coverage_gaps": []
+  },
+  "environmental_analysis": {
+    "operational_sensitivity": {
+      "H-1": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      },
+      "H-2": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      },
+      "H-3": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-4": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      },
+      "H-5": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-6": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-7": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      },
+      "H-8": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-9": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      },
+      "H-10": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-11": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-12": {
+        "worst_case_condition": "normal",
+        "impact": "high"
+      }
+    },
+    "threat_sensitivity": {
+      "H-1": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-2": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-3": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-4": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-5": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-6": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-7": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-8": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-9": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-10": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-11": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-12": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      }
+    },
+    "combined_risk_scenarios": [
+      {
+        "scenario": "Multiple high-impact hazards under stress",
+        "hazards": [
+          "H-1",
+          "H-2",
+          "H-3",
+          "H-4",
+          "H-5",
+          "H-6",
+          "H-7",
+          "H-8",
+          "H-9",
+          "H-10",
+          "H-11",
+          "H-12"
+        ],
+        "risk_level": "extreme"
+      }
+    ]
+  },
+  "coverage_analysis": {
+    "covered_losses": [
+      "L-3",
+      "L-6",
+      "L-5",
+      "L-1",
+      "L-2",
+      "L-4",
+      "L-7"
+    ],
+    "uncovered_losses": [],
+    "coverage_percentage": 100.0,
+    "loss_hazard_ratio": {
+      "L-1": 3,
+      "L-2": 3,
+      "L-3": 2,
+      "L-4": 2,
+      "L-5": 1,
+      "L-6": 2,
+      "L-7": 1
+    }
+  },
+  "cognitive_style": "balanced"
+}

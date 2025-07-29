@@ -1,0 +1,262 @@
+{
+  "system_boundaries": [
+    {
+      "boundary_name": "Banking Platform System Scope",
+      "boundary_type": "system_scope",
+      "description": "Defines what components and functions are within the digital banking platform's analysis scope",
+      "definition_criteria": {
+        "ownership": "Directly owned and operated by the bank",
+        "control": "Bank has direct configuration and operational control",
+        "responsibility": "Bank is accountable for security and compliance"
+      },
+      "elements": [
+        {
+          "element_name": "Core Banking Application",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "availability": "99.99% uptime target",
+            "security": "Hardened and monitored"
+          }
+        },
+        {
+          "element_name": "Authentication Service",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "capability": "Supports MFA",
+            "integration": "Native to platform"
+          }
+        },
+        {
+          "element_name": "Transaction Processing Engine",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "throughput": "10K TPS capacity",
+            "consistency": "ACID compliant"
+          }
+        },
+        {
+          "element_name": "Customer Database",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "encryption": "At-rest encryption",
+            "backup": "Real-time replication"
+          }
+        },
+        {
+          "element_name": "API Gateway",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "security": "Rate limiting and authentication",
+            "monitoring": "Full request logging"
+          }
+        },
+        {
+          "element_name": "Customer Mobile Devices",
+          "element_type": "component",
+          "position": "outside",
+          "assumptions": {
+            "security": "Uncontrolled",
+            "connectivity": "Variable"
+          }
+        },
+        {
+          "element_name": "Payment Networks (SWIFT, ACH)",
+          "element_type": "component",
+          "position": "outside",
+          "assumptions": {
+            "availability": "SLA-based",
+            "security": "Industry standard"
+          }
+        },
+        {
+          "element_name": "Cloud Infrastructure",
+          "element_type": "component",
+          "position": "outside",
+          "assumptions": {
+            "compliance": "SOC2 certified",
+            "availability": "Region redundancy"
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Trust Boundaries",
+      "boundary_type": "trust",
+      "description": "Identifies where trust levels change and additional verification is required",
+      "definition_criteria": {
+        "authentication": "Where identity verification occurs",
+        "authorization": "Where access control decisions are made",
+        "data_validation": "Where input validation is critical"
+      },
+      "elements": [
+        {
+          "element_name": "Customer-Platform Interface",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "trust": "Zero trust model",
+            "verification": "Every request authenticated"
+          }
+        },
+        {
+          "element_name": "Platform-Payment Network Interface",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "trust": "Mutual authentication",
+            "protocol": "Industry standard security"
+          }
+        },
+        {
+          "element_name": "Internal Admin Access",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "trust": "Privileged access management",
+            "monitoring": "Full audit trail"
+          }
+        },
+        {
+          "element_name": "Third-party API Access",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "trust": "OAuth 2.0",
+            "scope": "Limited permissions"
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Regulatory Compliance Boundary",
+      "boundary_type": "responsibility",
+      "description": "Defines where regulatory compliance responsibilities begin and end",
+      "definition_criteria": {
+        "data_residency": "Where data must be stored",
+        "audit_requirements": "What must be logged and retained",
+        "reporting_obligations": "What must be reported to regulators"
+      },
+      "elements": [
+        {
+          "element_name": "Customer Financial Data",
+          "element_type": "data",
+          "position": "inside",
+          "assumptions": {
+            "retention": "7 years",
+            "privacy": "PII protection required"
+          }
+        },
+        {
+          "element_name": "Transaction Records",
+          "element_type": "data",
+          "position": "inside",
+          "assumptions": {
+            "immutability": "Tamper-proof storage",
+            "availability": "Regulatory access required"
+          }
+        },
+        {
+          "element_name": "Regulatory Reporting Interface",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "format": "Regulator-specified",
+            "timing": "Daily/monthly requirements"
+          }
+        },
+        {
+          "element_name": "Third-party Processor Data",
+          "element_type": "data",
+          "position": "crossing",
+          "assumptions": {
+            "responsibility": "Shared under agreement",
+            "visibility": "Limited"
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Data Governance Boundary",
+      "boundary_type": "data_governance",
+      "description": "Defines where data ownership and protection requirements change",
+      "definition_criteria": {
+        "ownership": "Who owns the data",
+        "classification": "Sensitivity levels",
+        "protection": "Required security controls"
+      },
+      "elements": [
+        {
+          "element_name": "Customer Personal Data",
+          "element_type": "data",
+          "position": "inside",
+          "assumptions": {
+            "ownership": "Customer owned, bank custodian",
+            "classification": "Highly sensitive"
+          }
+        },
+        {
+          "element_name": "Transaction Metadata",
+          "element_type": "data",
+          "position": "inside",
+          "assumptions": {
+            "ownership": "Bank owned",
+            "classification": "Sensitive"
+          }
+        },
+        {
+          "element_name": "Aggregated Analytics",
+          "element_type": "data",
+          "position": "inside",
+          "assumptions": {
+            "ownership": "Bank owned",
+            "classification": "Internal"
+          }
+        },
+        {
+          "element_name": "Public Marketing Data",
+          "element_type": "data",
+          "position": "crossing",
+          "assumptions": {
+            "ownership": "Bank owned",
+            "classification": "Public"
+          }
+        }
+      ]
+    }
+  ],
+  "boundary_relationships": [
+    {
+      "parent_boundary": "Banking Platform System Scope",
+      "child_boundary": "Trust Boundaries",
+      "relationship_type": "contains"
+    },
+    {
+      "parent_boundary": "Regulatory Compliance Boundary",
+      "child_boundary": "Data Governance Boundary",
+      "relationship_type": "overlaps"
+    }
+  ],
+  "boundary_summary": {
+    "total_boundaries": 4,
+    "boundary_types": {
+      "system_scope": 1,
+      "trust": 1,
+      "responsibility": 1,
+      "data_governance": 1
+    },
+    "critical_interfaces": 8,
+    "external_dependencies": 4
+  },
+  "cognitive_style": "enhanced",
+  "analysis_metadata": {
+    "agent_type": "system_boundaries",
+    "analysis_id": "demo-banking-2024-01",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "version": "1.0"
+  }
+}

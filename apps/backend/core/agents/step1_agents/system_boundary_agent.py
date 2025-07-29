@@ -102,33 +102,60 @@ SYSTEM DESCRIPTION:
 {stakeholder_text}
 
 INSTRUCTIONS:
+
+CRITICAL: You MUST provide SPECIFIC, CONCRETE lists of actual system components, not abstract categories.
+
 Define boundaries from these perspectives:
 
 1. SYSTEM SCOPE BOUNDARY
-   - What components/functions are inside our system (we control)
-   - What is outside (we don't control but depend on)
-   - What interfaces exist between inside and outside
+   INSIDE (we control): List SPECIFIC components like:
+   - "Banking application server"
+   - "Customer database" 
+   - "Transaction processing engine"
+   - "API gateway"
+   
+   OUTSIDE (we depend on): List SPECIFIC external systems like:
+   - "Customer mobile devices"
+   - "SWIFT payment network"
+   - "Equifax credit bureau API"
+   - "AWS cloud infrastructure"
+   
+   INTERFACES: List SPECIFIC connection points like:
+   - "RESTful API for mobile app"
+   - "SFTP connection to regulatory reporting"
+   - "OAuth2 integration with identity provider"
 
 2. TRUST BOUNDARIES
-   - Where trust levels change
-   - Where authentication/authorization is needed
-   - Where data validation is critical
+   List SPECIFIC points where trust changes:
+   - "Between mobile app and API gateway"
+   - "Between application server and payment processor"
+   - "Between database and backup storage"
 
 3. RESPONSIBILITY BOUNDARIES
-   - What we are legally/contractually responsible for
-   - What others are responsible for
-   - Shared responsibilities (clearly defined)
+   List SPECIFIC areas of responsibility:
+   - WE OWN: "Customer account data integrity"
+   - THEY OWN: "Mobile device security"
+   - SHARED: "Transaction dispute resolution process"
 
 4. DATA GOVERNANCE BOUNDARIES
-   - Where data ownership changes
-   - Where data protection requirements change
-   - Where data classification changes
+   List SPECIFIC data transitions:
+   - "Customer PII moves from our database to credit bureau"
+   - "Transaction data shared with regulatory authority"
+   - "Account data replicated to disaster recovery site"
 
-For each boundary, identify:
-- Clear definition criteria
-- Key elements (components, data, actors, interfaces)
-- Position of each element (inside, outside, crossing, interface)
-- Critical assumptions about external elements
+For each boundary, you MUST:
+- List ACTUAL component names, not categories
+- Be SPECIFIC about technologies and systems
+- Name REAL external dependencies
+- Identify CONCRETE interfaces
+
+MINIMUM REQUIREMENTS (empty boundaries will be rejected):
+- System Scope: At least 3 INSIDE components, 3 OUTSIDE systems, 2 INTERFACES
+- Trust Boundaries: At least 3 specific trust transition points with concrete elements
+- Responsibility: At least 2 items each for WE OWN, THEY OWN, SHARED (6 total minimum)
+- Data Governance: At least 3 specific data transition scenarios with concrete elements
+
+IMPORTANT: ALL 4 boundary types MUST have sufficient elements. Boundaries without elements will cause the analysis to fail.
 
 Generate boundaries in this JSON format:
 {{
@@ -182,7 +209,7 @@ Ensure all boundary types are covered and elements are clearly positioned."""
             return []
     
     def _validate_boundary(self, boundary: Dict[str, Any]) -> bool:
-        """Validate a boundary has required fields"""
+        """Validate a boundary has required fields and concrete elements"""
         required_fields = ['boundary_name', 'boundary_type', 'description']
         
         for field in required_fields:
@@ -195,6 +222,48 @@ Ensure all boundary types are covered and elements are clearly positioned."""
                       'control', 'influence']
         if boundary['boundary_type'] not in valid_types:
             self.logger.warning(f"Invalid boundary type: {boundary['boundary_type']}")
+            return False
+        
+        # Validate minimum element requirements
+        elements = boundary.get('elements', [])
+        boundary_type = boundary['boundary_type']
+        
+        if boundary_type == 'system_scope':
+            inside_count = sum(1 for e in elements if e.get('position') == 'inside')
+            outside_count = sum(1 for e in elements if e.get('position') == 'outside')
+            interface_count = sum(1 for e in elements if e.get('position') == 'interface')
+            
+            if inside_count < 3:
+                self.logger.warning(f"System scope boundary needs at least 3 INSIDE elements, found {inside_count}")
+                return False
+            if outside_count < 3:
+                self.logger.warning(f"System scope boundary needs at least 3 OUTSIDE elements, found {outside_count}")
+                return False
+            if interface_count < 2:
+                self.logger.warning(f"System scope boundary needs at least 2 INTERFACE elements, found {interface_count}")
+                return False
+                
+        elif boundary_type == 'trust' and len(elements) < 3:
+            self.logger.warning(f"Trust boundary needs at least 3 elements, found {len(elements)}")
+            return False
+            
+        elif boundary_type == 'responsibility':
+            we_own_count = sum(1 for e in elements if 'WE OWN' in e.get('element_name', ''))
+            they_own_count = sum(1 for e in elements if 'THEY OWN' in e.get('element_name', ''))
+            shared_count = sum(1 for e in elements if 'SHARED' in e.get('element_name', ''))
+            
+            if we_own_count < 2:
+                self.logger.warning(f"Responsibility boundary needs at least 2 WE OWN elements, found {we_own_count}")
+                return False
+            if they_own_count < 2:
+                self.logger.warning(f"Responsibility boundary needs at least 2 THEY OWN elements, found {they_own_count}")
+                return False
+            if shared_count < 2:
+                self.logger.warning(f"Responsibility boundary needs at least 2 SHARED elements, found {shared_count}")
+                return False
+            
+        elif boundary_type == 'data_governance' and len(elements) < 3:
+            self.logger.warning(f"Data governance boundary needs at least 3 elements, found {len(elements)}")
             return False
         
         # Validate elements if present

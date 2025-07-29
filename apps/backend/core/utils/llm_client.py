@@ -484,7 +484,11 @@ class LLMManager:
                 }.get(config.provider)
                 
                 if client_class:
-                    self.clients[config.provider] = client_class(config)
+                    try:
+                        self.clients[config.provider] = client_class(config)
+                    except Exception as client_error:
+                        print(f"Failed to initialize {provider_id} client: {client_error}")
+                        raise
             except Exception as e:
                 print(f"Failed to initialize {provider_id} client from env: {e}")
     
@@ -506,12 +510,6 @@ class LLMManager:
         
         providers = [active_provider] if active_provider else list(self.clients.keys())
         
-        if settings.enable_fallback and active_provider:
-            providers.extend([
-                p for p in settings.fallback_order 
-                if p != active_provider and p in self.clients
-            ])
-        
         last_error = None
         for provider in providers:
             if provider not in self.clients:
@@ -521,7 +519,10 @@ class LLMManager:
                 return await self.clients[provider].generate(prompt, **kwargs)
             except Exception as e:
                 last_error = e
-                print(f"Provider {provider} failed: {e}")
+                if "401" in str(e) or "403" in str(e):
+                    print(f"Authentication failed for {provider}: {e}")
+                else:
+                    print(f"Provider {provider} failed: {e}")
                 continue
         
         # If all providers failed, return mock response

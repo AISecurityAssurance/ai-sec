@@ -66,18 +66,20 @@ services:
       dockerfile: Dockerfile.cli
     container_name: sa_cli
     profiles: ["cli"]
+    env_file:
+      - .env
     environment:
       DATABASE_URL: postgresql+asyncpg://sa_user:sa_password@postgres:5432/security_analyst
       PYTHONPATH: /app
       SECRET_KEY: "dev-secret-key-change-in-production"
       ENVIRONMENT: development
       DEBUG: "true"
-      # Model provider settings - pass through from host
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      DB_HOST: postgres
     volumes:
       - ./apps/backend:/app
       - ./analyses:/analyses  # For saving analysis results
+      - ./example_systems:/example_systems  # For example system descriptions
+      - ./.env:/app/.env  # For environment variables
     depends_on:
       postgres:
         condition: service_healthy

@@ -7,7 +7,6 @@ import json
 from uuid import uuid4
 
 from .base_step1 import BaseStep1Agent, CognitiveStyle
-from core.utils.llm_client import llm_manager
 
 
 class StakeholderAnalystAgent(BaseStep1Agent):
@@ -804,13 +803,38 @@ Identified Losses:
 
 Analyze all stakeholders and adversaries for this system.
 
-IMPORTANT: You must identify AT LEAST 5 different stakeholders. Consider:
-- Different types of users (retail, business, internal)
-- Various operators (administrators, support staff, security team)
-- Different owners/investors (shareholders, board members)
-- Multiple regulators (financial, privacy, industry-specific)
-- Partners and suppliers (technology vendors, service providers)
-- Societal stakeholders (local community, general public)
+STAKEHOLDER IDENTIFICATION CHECKLIST - You MUST identify AT LEAST 8-10 stakeholders covering:
+□ PRIMARY USERS (2-3 types minimum):
+  - Retail customers/Individual users
+  - Business/Corporate users
+  - Internal users (if applicable)
+  
+□ OPERATORS (2-3 types minimum):
+  - System administrators
+  - Security operations team
+  - Support/Help desk staff
+  - Data management team
+  
+□ OWNERS/INVESTORS (1-2 types minimum):
+  - Shareholders/Investors
+  - Board of directors
+  - Executive management
+  
+□ REGULATORS (1-2 types minimum):
+  - Primary industry regulator
+  - Data protection authorities
+  - Financial oversight bodies (if applicable)
+  
+□ PARTNERS & SUPPLIERS (2-3 types minimum):
+  - Technology vendors/Cloud providers
+  - Integration partners
+  - Payment processors (for financial systems)
+  - Data providers/consumers
+  
+□ SOCIETY (1-2 types minimum):
+  - Local community
+  - General public
+  - Consumer advocacy groups
 
 For STAKEHOLDERS (legitimate users of the system), identify:
 1. Name and type (MUST be one of: user, operator, owner, regulator, partner, society, supplier)
@@ -873,23 +897,26 @@ Provide your response as a JSON object with the following structure:
 
 IMPORTANT: 
 1. Consider all types of stakeholders and realistic adversary profiles for this system type.
-2. Identify AT LEAST 5 different stakeholders from various categories to ensure comprehensive coverage.
+2. Identify AT LEAST 8-10 different stakeholders from the checklist above to ensure comprehensive coverage.
 3. Use ONLY these stakeholder types: user, operator, owner, regulator, partner, society, supplier
 4. Do NOT use "beneficiary" or "vendor" as stakeholder types - map them to allowed types (e.g., shareholders → owner, vendors → supplier).
-5. Consider:
-   - Different user groups (e.g., retail customers, business customers, internal users)
-   - Various operators (e.g., system administrators, support staff, security team)
-   - Different owners/investors (e.g., shareholders, board members)
-   - Multiple regulators if applicable (e.g., financial regulators, data protection authorities)
-   - Partners and suppliers who depend on or support the system
-   - Societal stakeholders affected by the system's operation"""
+5. Each stakeholder category in the checklist should be represented.
+6. Be specific with stakeholder names (e.g., "Retail Banking Customers" not just "Users").
+
+MINIMUM REQUIREMENT: Fewer than 8 stakeholders will be considered incomplete. Ensure you have:
+- At least 2-3 different user types
+- At least 2-3 different operator roles
+- At least 1-2 owners/investors
+- At least 1-2 regulators
+- At least 2-3 partners/suppliers
+- At least 1 societal stakeholder"""
         
         try:
             # Call LLM
-            response = await llm_manager.generate(prompt, temperature=0.7, max_tokens=3000)
+            response = await self.call_llm(prompt)
             
             # Parse JSON response
-            content = response.content.strip()
+            content = response.strip()
             # Extract JSON from markdown code blocks if present
             if "```json" in content:
                 content = content.split("```json")[1].split("```")[0].strip()

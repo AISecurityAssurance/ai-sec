@@ -6,7 +6,7 @@ import re
 import json
 
 from .base_step1 import BaseStep1Agent, CognitiveStyle
-from core.utils.llm_client import llm_manager
+# Removed - using base class call_llm method instead
 
 
 class MissionAnalystAgent(BaseStep1Agent):
@@ -144,10 +144,10 @@ IMPORTANT: Maintain mission-level abstraction. Avoid implementation details, tec
         
         try:
             # Call LLM
-            response = await llm_manager.generate(prompt, temperature=0.7, max_tokens=2000)
+            response = await self.call_llm(prompt)
             
             # Parse JSON response
-            content = response.content.strip()
+            content = response.strip()
             # Extract JSON from markdown code blocks if present
             if "```json" in content:
                 content = content.split("```json")[1].split("```")[0].strip()

@@ -105,12 +105,29 @@ IDENTIFIED LOSSES:
 {losses_text}
 
 INSTRUCTIONS:
-1. For each hazard, identify one or more constraints that would address it
-2. Constraints must be at mission level (WHAT not HOW)
-3. Use "The system shall..." format
-4. Each constraint must be verifiable and enforceable
-5. IMPORTANT: Include the "addresses_hazards" field with hazard IDs for each constraint
-6. Consider:
+
+CRITICAL GUIDANCE FOR SECURITY CONSTRAINT WORDING:
+✓ CORRECT Format: State WHAT must be achieved, not HOW
+✗ WRONG Format: Specific technologies, implementations, or mechanisms
+
+Examples:
+✓ CORRECT: "The system shall verify user identity before executing sensitive operations"
+✗ WRONG: "The system shall use multi-factor authentication"
+
+✓ CORRECT: "The system shall maintain confidentiality of customer data"
+✗ WRONG: "The system shall use AES-256 encryption"
+
+✓ CORRECT: "The system shall detect anomalous transaction patterns"
+✗ WRONG: "The system shall use machine learning algorithms for fraud detection"
+
+For each constraint:
+1. State the OBJECTIVE to be achieved (not the implementation)
+2. Be technology-agnostic and abstract
+3. Focus on mission-level requirements
+4. Use "The system shall..." format
+5. Make it verifiable (testable) but not prescriptive
+6. IMPORTANT: Include the "addresses_hazards" field with hazard IDs
+7. Consider:
    - Preventive constraints (eliminate hazards)
    - Detective constraints (identify when hazards occur)
    - Corrective constraints (respond to hazards)

@@ -7,7 +7,6 @@ import json
 from uuid import uuid4
 
 from .base_step1 import BaseStep1Agent, CognitiveStyle
-from core.utils.llm_client import llm_manager
 
 
 class LossIdentificationAgent(BaseStep1Agent):
@@ -111,10 +110,10 @@ Focus on meaningful dependencies that affect risk analysis and mitigation strate
         
         try:
             # Call LLM
-            response = await llm_manager.generate(prompt, temperature=0.7, max_tokens=2000)
+            response = await self.call_llm(prompt)
             
             # Parse JSON response
-            content = response.content.strip()
+            content = response.strip()
             if "```json" in content:
                 content = content.split("```json")[1].split("```")[0].strip()
             elif "```" in content:
@@ -231,11 +230,33 @@ System Description:
 Mission Context:
 {json.dumps(mission_results.get('mission_analyst', {}).get('mission_context', {}), indent=2)}
 
-Identify all potential losses (unacceptable outcomes) for this system. For each loss:
-1. Provide a clear description focusing on the outcome, not the mechanism
-2. Categorize using ONLY these categories: life, injury, financial, environmental, mission, reputation, privacy, regulatory
-3. Assess severity with magnitude (catastrophic/major/moderate/minor), scope, duration, reversibility, and detection difficulty
-4. Identify mission impacts including capability loss, cascading effects, and stakeholder harm
+Identify all potential losses (unacceptable outcomes) for this system. 
+
+CRITICAL GUIDANCE FOR LOSS WORDING:
+✓ CORRECT Loss Format: "Loss of [something valuable]" with brief context about the nature
+✗ WRONG Format: Descriptions of specific attacks or implementation details
+
+Examples:
+✓ GOOD: "Loss of customer financial assets through unauthorized transactions"
+✗ BAD: "Loss due to SQL injection attack"
+
+✓ GOOD: "Loss of service availability to customers during critical business operations"  
+✗ BAD: "System downtime due to DDoS attack"
+
+✓ GOOD: "Loss of regulatory compliance resulting in penalties and sanctions"
+✗ BAD: "Non-compliance because of missing encryption"
+
+CONTEXT GUIDELINES:
+- Include brief context about the NATURE of the loss (not the attack method)
+- Context helps stakeholders understand impact without prescribing solutions
+- Keep focus on the loss itself, with context as clarification
+
+For each loss:
+1. Describe the IMPACT or CONSEQUENCE (what is lost/harmed), NOT the attack scenario or event
+2. Use phrases like "Loss of", "Damage to", "Harm to", "Compromise of"
+3. Categorize using ONLY these categories: life, injury, financial, environmental, mission, reputation, privacy, regulatory
+4. Assess severity with magnitude (catastrophic/major/moderate/minor), scope, duration, reversibility, and detection difficulty
+5. Identify mission impacts including capability loss, cascading effects, and stakeholder harm
 
 Provide your response as a JSON array of loss objects with the following structure:
 [
@@ -265,14 +286,37 @@ Provide your response as a JSON array of loss objects with the following structu
 IMPORTANT: 
 1. Focus on outcomes and consequences, not attack methods or vulnerabilities.
 2. Use ONLY these loss categories: life, injury, financial, environmental, mission, reputation, privacy, regulatory
-3. Do NOT use "security" as a loss category - map security concerns to one of the allowed categories (e.g., financial for theft, privacy for data breaches)."""
+3. Do NOT use "security" as a loss category - map security concerns to one of the allowed categories (e.g., financial for theft, privacy for data breaches).
+
+VALIDATION: Check each loss before including it:
+- Does it describe something valuable being lost/harmed?
+- Could you put "We have experienced..." in front of it and have it make sense?
+- Is it distinct from other losses (not just a subset or more specific version)?
+- Does it describe a loss, NOT a missing control or failure mode?
+
+Examples of validation:
+✓ "Loss of customer financial assets" - Yes, we lost something valuable
+✗ "Loss of encryption" - No, this is a control failing, not a loss
+✗ "Loss of integration with payment processor" - No, this is a failure event, not a loss
+
+REDUNDANCY CHECK:
+- Don't include losses that are just specific versions of broader losses
+- Example: If you have "Loss of data confidentiality", don't also include "Loss of encryption for data"
+- Combine similar losses into single, comprehensive statements
+
+COMPLETENESS REQUIREMENTS:
+□ Identify 5-8 distinct losses minimum
+□ Cover multiple loss categories (financial, privacy, mission, reputation, regulatory)
+□ Consider both direct and indirect losses
+□ Include losses affecting different stakeholder groups
+□ Address both immediate and long-term consequences"""
         
         try:
             # Call LLM
-            response = await llm_manager.generate(prompt, temperature=0.7, max_tokens=2000)
+            response = await self.call_llm(prompt)
             
             # Parse JSON response
-            content = response.content.strip()
+            content = response.strip()
             # Extract JSON from markdown code blocks if present
             if "```json" in content:
                 content = content.split("```json")[1].split("```")[0].strip()

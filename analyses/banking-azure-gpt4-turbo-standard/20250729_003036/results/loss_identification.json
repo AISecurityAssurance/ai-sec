@@ -1,0 +1,422 @@
+{
+  "losses": [
+    {
+      "description": "Unauthorized access to customer accounts resulting in financial theft or fraudulent transactions.",
+      "loss_category": "financial",
+      "severity_classification": {
+        "magnitude": "catastrophic",
+        "scope": "customer_wide",
+        "duration": "variable",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "secure and regulated financial transactions",
+          "efficient customer authentication and authorization processes"
+        ],
+        "cascading_effects": [
+          "loss of customer trust",
+          "regulatory non-compliance penalties"
+        ],
+        "stakeholder_harm": {
+          "retail customers": {
+            "type": "financial",
+            "severity": "catastrophic"
+          },
+          "business customers": {
+            "type": "financial",
+            "severity": "catastrophic"
+          },
+          "regulators": {
+            "type": "regulatory",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-1"
+    },
+    {
+      "description": "Exposure of customer personal data, including PII and financial details, through a data breach.",
+      "loss_category": "privacy",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "customer_wide",
+        "duration": "long_term",
+        "reversibility": "difficult",
+        "detection_difficulty": "hard"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "secure and regulated financial transactions",
+          "real-time access to account and payment data"
+        ],
+        "cascading_effects": [
+          "reputational damage",
+          "legal liabilities",
+          "customer attrition"
+        ],
+        "stakeholder_harm": {
+          "retail customers": {
+            "type": "privacy",
+            "severity": "major"
+          },
+          "business customers": {
+            "type": "privacy",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-2"
+    },
+    {
+      "description": "System downtime or unavailability impacting customer access to online banking services.",
+      "loss_category": "mission",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "mission_wide",
+        "duration": "short_term",
+        "reversibility": "easy",
+        "detection_difficulty": "easy"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "real-time access to account and payment data",
+          "secure and regulated financial transactions"
+        ],
+        "cascading_effects": [
+          "negative customer experience",
+          "loss of business revenue during downtime"
+        ],
+        "stakeholder_harm": {
+          "retail customers": {
+            "type": "mission",
+            "severity": "major"
+          },
+          "business customers": {
+            "type": "mission",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-3"
+    },
+    {
+      "description": "Non-compliance with regulatory requirements leading to legal penalties or operational restrictions.",
+      "loss_category": "regulatory",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "organization_wide",
+        "duration": "medium_term",
+        "reversibility": "difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "secure and regulated financial transactions"
+        ],
+        "cascading_effects": [
+          "financial penalties",
+          "operational disruptions",
+          "loss of market reputation"
+        ],
+        "stakeholder_harm": {
+          "regulators": {
+            "type": "regulatory",
+            "severity": "major"
+          },
+          "shareholders": {
+            "type": "financial",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-4"
+    },
+    {
+      "description": "Fraudulent use of the platform to conduct money laundering or other illegal activities.",
+      "loss_category": "regulatory",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "organization_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "hard"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "secure and regulated financial transactions"
+        ],
+        "cascading_effects": [
+          "regulatory scrutiny",
+          "legal and financial penalties",
+          "reputational harm"
+        ],
+        "stakeholder_harm": {
+          "regulators": {
+            "type": "regulatory",
+            "severity": "major"
+          },
+          "bank employees": {
+            "type": "mission",
+            "severity": "moderate"
+          }
+        }
+      },
+      "identifier": "L-5"
+    },
+    {
+      "description": "Compromise of third-party integrations (e.g., payment processors, credit bureaus) leading to service disruption or data exposure.",
+      "loss_category": "mission",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "mission_wide",
+        "duration": "medium_term",
+        "reversibility": "difficult",
+        "detection_difficulty": "moderate"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "scalable integration with third-party services",
+          "secure and regulated financial transactions"
+        ],
+        "cascading_effects": [
+          "delayed payments",
+          "inaccurate credit decisions",
+          "reputational harm"
+        ],
+        "stakeholder_harm": {
+          "retail customers": {
+            "type": "mission",
+            "severity": "major"
+          },
+          "business customers": {
+            "type": "mission",
+            "severity": "major"
+          }
+        }
+      },
+      "identifier": "L-6"
+    },
+    {
+      "description": "Reputational damage due to media coverage of platform security incidents or service failures.",
+      "loss_category": "reputation",
+      "severity_classification": {
+        "magnitude": "major",
+        "scope": "market_wide",
+        "duration": "long_term",
+        "reversibility": "very_difficult",
+        "detection_difficulty": "easy"
+      },
+      "mission_impact": {
+        "primary_capability_loss": [
+          "secure and regulated financial transactions",
+          "real-time access to account and payment data"
+        ],
+        "cascading_effects": [
+          "customer attrition",
+          "revenue loss",
+          "regulatory scrutiny"
+        ],
+        "stakeholder_harm": {
+          "shareholders": {
+            "type": "financial",
+            "severity": "major"
+          },
+          "retail customers": {
+            "type": "mission",
+            "severity": "moderate"
+          },
+          "business customers": {
+            "type": "mission",
+            "severity": "moderate"
+          }
+        }
+      },
+      "identifier": "L-7"
+    }
+  ],
+  "loss_count": 7,
+  "loss_categories": {
+    "financial": 1,
+    "privacy": 1,
+    "mission": 2,
+    "regulatory": 2,
+    "reputation": 1
+  },
+  "dependencies": [
+    {
+      "primary_loss_id": "L-1",
+      "dependent_loss_id": "L-7",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Days to weeks after financial theft becomes public knowledge",
+        "persistence": "sustained"
+      },
+      "rationale": "Unauthorized access and theft (L-1) could result in reputational damage (L-7) if the incident becomes public knowledge, particularly through media coverage or customer complaints.",
+      "id": "0af964f4-1cdd-4cac-b31d-e807da07e7a6"
+    },
+    {
+      "primary_loss_id": "L-2",
+      "dependent_loss_id": "L-7",
+      "dependency_type": "triggers",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Days to months depending on the scale of the breach",
+        "persistence": "sustained"
+      },
+      "rationale": "Exposure of customer personal data (L-2) would almost certainly lead to reputational damage (L-7) as customers lose trust and the media highlights the breach.",
+      "id": "ff9e8417-0261-4b90-9cce-a53501987eca"
+    },
+    {
+      "primary_loss_id": "L-3",
+      "dependent_loss_id": "L-7",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "Minutes to hours after downtime begins",
+        "persistence": "temporary"
+      },
+      "rationale": "System downtime (L-3) directly impacts customer trust and satisfaction, which can lead to reputational damage (L-7), especially if the downtime is prolonged or frequent.",
+      "id": "8619067a-849c-4530-9b51-dcb2d1341760"
+    },
+    {
+      "primary_loss_id": "L-4",
+      "dependent_loss_id": "L-7",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Weeks to months after regulatory non-compliance is discovered",
+        "persistence": "sustained"
+      },
+      "rationale": "Non-compliance with regulations (L-4) could result in publicized legal penalties or operational restrictions, leading to reputational damage (L-7).",
+      "id": "cf79deb7-70cd-4998-83c7-57bb58121b51"
+    },
+    {
+      "primary_loss_id": "L-5",
+      "dependent_loss_id": "L-4",
+      "dependency_type": "triggers",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "As soon as fraudulent activities are detected by regulatory authorities",
+        "persistence": "sustained"
+      },
+      "rationale": "Fraudulent use of the platform (L-5) directly results in non-compliance with regulatory requirements (L-4) due to the platform\u2019s inability to prevent illegal activities.",
+      "id": "4681382c-1210-4160-986c-023e69d22d9e"
+    },
+    {
+      "primary_loss_id": "L-5",
+      "dependent_loss_id": "L-7",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Weeks to months as fraudulent activities are publicized",
+        "persistence": "sustained"
+      },
+      "rationale": "Fraudulent use of the platform (L-5) can lead to reputational damage (L-7) if the platform is seen as enabling criminal activities, especially after media coverage or regulatory actions.",
+      "id": "bb6c3b5b-5517-409a-a81c-e26815b187c8"
+    },
+    {
+      "primary_loss_id": "L-6",
+      "dependent_loss_id": "L-2",
+      "dependency_type": "enables",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "concurrent",
+        "typical_delay": "Concurrent with the compromise of third-party integrations",
+        "persistence": "sustained"
+      },
+      "rationale": "The compromise of third-party integrations (L-6) can enable the exposure of customer personal data (L-2) if sensitive data flows through these integrations and is accessed during the compromise.",
+      "id": "1c9a2244-62d6-48cf-8a3f-1b25a499b595"
+    },
+    {
+      "primary_loss_id": "L-6",
+      "dependent_loss_id": "L-3",
+      "dependency_type": "triggers",
+      "dependency_strength": "likely",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "Minutes to hours as third-party services fail",
+        "persistence": "temporary"
+      },
+      "rationale": "The compromise of third-party integrations (L-6) can trigger system downtime (L-3) if these integrations are critical to the online banking services.",
+      "id": "e41f3317-4296-40f8-b3cf-1b6091f6cb59"
+    },
+    {
+      "primary_loss_id": "L-2",
+      "dependent_loss_id": "L-4",
+      "dependency_type": "triggers",
+      "dependency_strength": "certain",
+      "time_relationship": {
+        "sequence": "immediate",
+        "typical_delay": "As soon as the data breach is discovered by regulators",
+        "persistence": "sustained"
+      },
+      "rationale": "Exposure of customer personal data (L-2) can lead to regulatory non-compliance (L-4) if the platform fails to meet data protection regulations such as GDPR or CCPA.",
+      "id": "91223dbf-14dc-4202-824d-dc89f8ce6e07"
+    },
+    {
+      "primary_loss_id": "L-1",
+      "dependent_loss_id": "L-5",
+      "dependency_type": "enables",
+      "dependency_strength": "possible",
+      "time_relationship": {
+        "sequence": "delayed",
+        "typical_delay": "Days to weeks as unauthorized access is leveraged for illegal activities",
+        "persistence": "variable"
+      },
+      "rationale": "Unauthorized access to customer accounts (L-1) could enable fraudulent use of the platform (L-5) if attackers use the accounts for money laundering or other illegal activities.",
+      "id": "9974c290-ea50-4799-a17d-24b4442517f2"
+    }
+  ],
+  "cascade_analysis": {
+    "primary_losses": [
+      "L-1",
+      "L-6"
+    ],
+    "cascade_chains": [
+      {
+        "chain": [
+          "L-1",
+          "L-7",
+          "L-5",
+          "L-4"
+        ],
+        "trigger": "L-1",
+        "terminal_losses": [
+          "L-4"
+        ],
+        "chain_length": 4
+      },
+      {
+        "chain": [
+          "L-6",
+          "L-2",
+          "L-7",
+          "L-4",
+          "L-3"
+        ],
+        "trigger": "L-6",
+        "terminal_losses": [
+          "L-3"
+        ],
+        "chain_length": 5
+      }
+    ],
+    "max_cascade_depth": 5
+  },
+  "severity_distribution": {
+    "catastrophic": 1,
+    "major": 6,
+    "moderate": 0,
+    "minor": 0
+  },
+  "cognitive_style": "balanced"
+}

@@ -191,7 +191,7 @@ class Step1Coordinator:
                     "mission_analysis": mission_results,
                     "loss_identification": loss_results,
                     "hazard_identification": hazard_results,
-                    "stakeholder_analyst": stakeholder_results,  # Keep consistent with agent naming
+                    "stakeholder_analysis": stakeholder_results,  # Fixed to match completeness check
                     "security_constraints": security_constraint_results,
                     "system_boundaries": system_boundary_results,
                     "validation": validation_results

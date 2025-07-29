@@ -847,10 +847,8 @@ class Step1CLI:
         hazard_results = analysis_results.get('hazard_identification', {})
         constraint_results = analysis_results.get('security_constraints', {})
         boundary_results = analysis_results.get('system_boundaries', {})
-        # Try both possible keys for stakeholder results
-        stakeholder_results = analysis_results.get('stakeholder_analyst', {})
-        if not stakeholder_results:
-            stakeholder_results = analysis_results.get('stakeholder_analysis', {})
+        # Get stakeholder results
+        stakeholder_results = analysis_results.get('stakeholder_analysis', {})
         
         # Mission Statement
         if mission_results:
@@ -1167,9 +1165,7 @@ class Step1CLI:
                 hazard_results = analysis_results.get('hazard_identification', {})
                 constraint_results = analysis_results.get('security_constraints', {})
                 boundary_results = analysis_results.get('system_boundaries', {})
-                stakeholder_results = analysis_results.get('stakeholder_analyst', {})
-                if not stakeholder_results:
-                    stakeholder_results = analysis_results.get('stakeholder_analysis', {})
+                stakeholder_results = analysis_results.get('stakeholder_analysis', {})
                 
                 # Mission Statement
                 if mission_results:
@@ -1346,9 +1342,7 @@ class Step1CLI:
         hazard_results = analysis_results.get('hazard_identification', {})
         constraint_results = analysis_results.get('security_constraints', {})
         boundary_results = analysis_results.get('system_boundaries', {})
-        stakeholder_results = analysis_results.get('stakeholder_analyst', {})
-        if not stakeholder_results:
-            stakeholder_results = analysis_results.get('stakeholder_analysis', {})
+        stakeholder_results = analysis_results.get('stakeholder_analysis', {})
         
         if loss_results:
             total_findings += loss_results.get('loss_count', 0)
@@ -1388,9 +1382,7 @@ class Step1CLI:
         loss_results = results.get('loss_identification', {})
         hazard_results = results.get('hazard_identification', {})
         constraint_results = results.get('security_constraints', {})
-        stakeholder_results = results.get('stakeholder_analyst', {})
-        if not stakeholder_results:
-            stakeholder_results = results.get('stakeholder_analysis', {})
+        stakeholder_results = results.get('stakeholder_analysis', {})
         
         # Helper to get full descriptions
         hazards = {h['identifier']: h for h in hazard_results.get('hazards', [])}
@@ -1485,8 +1477,7 @@ class Step1CLI:
             'mission_analyst': 'mission_analyst.json',
             'loss_identification': 'loss_identification.json',
             'hazard_identification': 'hazard_identification.json',
-            'stakeholder_analyst': 'stakeholder_analyst.json',
-            'stakeholder_analysis': 'stakeholder_analyst.json',  # Handle both possible keys
+            'stakeholder_analysis': 'stakeholder_analyst.json',  # Keep filename for backward compatibility
             'security_constraints': 'security_constraints.json',
             'system_boundaries': 'system_boundaries.json',
             'validation': 'validation.json'

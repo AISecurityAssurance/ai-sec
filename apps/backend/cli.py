@@ -1477,7 +1477,7 @@ class Step1CLI:
             'mission_analyst': 'mission_analyst.json',
             'loss_identification': 'loss_identification.json',
             'hazard_identification': 'hazard_identification.json',
-            'stakeholder_analysis': 'stakeholder_analyst.json',  # Keep filename for backward compatibility
+            'stakeholder_analysis': 'stakeholder_analysis.json',  # Consistent naming
             'security_constraints': 'security_constraints.json',
             'system_boundaries': 'system_boundaries.json',
             'validation': 'validation.json'

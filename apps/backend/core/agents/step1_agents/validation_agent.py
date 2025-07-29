@@ -35,7 +35,7 @@ class ValidationAgent(BaseStep1Agent):
             'mission_analyst',
             'loss_identification',
             'hazard_identification',
-            'stakeholder_analyst',
+            'stakeholder_analysis',
             'security_constraints',
             'system_boundaries'
         ])
@@ -255,7 +255,7 @@ class ValidationAgent(BaseStep1Agent):
             })
         
         # Check minimum stakeholder count
-        stakeholders = prior_results.get('stakeholder_analyst', {}).get('stakeholders', [])
+        stakeholders = prior_results.get('stakeholder_analysis', {}).get('stakeholders', [])
         if len(stakeholders) < 5:
             validation['incomplete_elements'].append({
                 "element": "stakeholders",
@@ -264,7 +264,7 @@ class ValidationAgent(BaseStep1Agent):
             })
         
         # Check minimum adversary count
-        adversaries = prior_results.get('stakeholder_analyst', {}).get('adversaries', [])
+        adversaries = prior_results.get('stakeholder_analysis', {}).get('adversaries', [])
         if len(adversaries) < 2:
             validation['incomplete_elements'].append({
                 "element": "adversaries",
@@ -309,7 +309,7 @@ class ValidationAgent(BaseStep1Agent):
                 })
         
         # Check loss references in success criteria
-        success_criteria = prior_results.get('stakeholder_analyst', {}).get('mission_success_criteria', {})
+        success_criteria = prior_results.get('stakeholder_analysis', {}).get('mission_success_criteria', {})
         success_states = success_criteria.get('success_states', {})
         
         for state_name, state_def in success_states.items():
@@ -323,7 +323,7 @@ class ValidationAgent(BaseStep1Agent):
                     })
         
         # Check stakeholder loss exposure consistency
-        stakeholders = prior_results.get('stakeholder_analyst', {}).get('stakeholders', [])
+        stakeholders = prior_results.get('stakeholder_analysis', {}).get('stakeholders', [])
         for stakeholder in stakeholders:
             exposure = stakeholder.get('loss_exposure', {})
             # Handle both dict and list formats
@@ -395,7 +395,7 @@ class ValidationAgent(BaseStep1Agent):
         
         # Stakeholder coverage
         stakeholder_types = ['user', 'operator', 'regulator', 'owner', 'partner', 'society']
-        stakeholders = prior_results.get('stakeholder_analyst', {}).get('stakeholders', [])
+        stakeholders = prior_results.get('stakeholder_analysis', {}).get('stakeholders', [])
         covered_types = {s['stakeholder_type'] for s in stakeholders}
         missing_types = set(stakeholder_types) - covered_types
         
@@ -608,7 +608,7 @@ class ValidationAgent(BaseStep1Agent):
                     })
         
         # Check boundary alignment with stakeholders
-        stakeholders = prior_results.get('stakeholder_analyst', {}).get('stakeholders', [])
+        stakeholders = prior_results.get('stakeholder_analysis', {}).get('stakeholders', [])
         external_stakeholders = [s for s in stakeholders if s.get('position', 'external') == 'external']
         
         # Simplified stakeholder boundary alignment check
@@ -931,7 +931,7 @@ class ValidationAgent(BaseStep1Agent):
                 }
         
         # Identify implied boundaries from stakeholder analysis
-        stakeholders = prior_results.get('stakeholder_analyst', {}).get('stakeholders', [])
+        stakeholders = prior_results.get('stakeholder_analysis', {}).get('stakeholders', [])
         
         for stakeholder in stakeholders:
             if stakeholder['stakeholder_type'] == 'user':
@@ -1041,7 +1041,7 @@ class ValidationAgent(BaseStep1Agent):
         # Key findings
         losses = prior_results.get('loss_identification', {}).get('losses', [])
         hazards = prior_results.get('hazard_identification', {}).get('hazards', [])
-        adversaries = prior_results.get('stakeholder_analyst', {}).get('adversaries', [])
+        adversaries = prior_results.get('stakeholder_analysis', {}).get('adversaries', [])
         security_constraints = prior_results.get('hazard_identification', {}).get('security_constraints', {})
         system_boundaries = prior_results.get('mission_analyst', {}).get('mission_context', {}).get('boundaries', {})
         
@@ -1067,7 +1067,7 @@ class ValidationAgent(BaseStep1Agent):
         
         summary['risk_landscape'] = {
             "primary_risks": self._identify_primary_risks(losses, hazards),
-            "threat_level": prior_results.get('stakeholder_analyst', {}).get('adversary_analysis', {}).get('combined_threat_level', 'unknown'),
+            "threat_level": prior_results.get('stakeholder_analysis', {}).get('adversary_analysis', {}).get('combined_threat_level', 'unknown'),
             "coverage_gaps": len(prior_results.get('hazard_identification', {}).get('coverage_analysis', {}).get('uncovered_losses', [])),
             "unconstrained_hazards": len(unconstrained_hazards),
             "missing_critical_boundaries": len(missing_boundaries)

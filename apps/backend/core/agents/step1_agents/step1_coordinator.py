@@ -1090,7 +1090,7 @@ class Step1Coordinator:
                 results['hazard_identification'] = json.load(f)
         
         # Load stakeholder analysis
-        stakeholder_path = results_dir / "stakeholder_analyst.json"
+        stakeholder_path = results_dir / "stakeholder_analysis.json"
         if stakeholder_path.exists():
             with open(stakeholder_path, 'r') as f:
                 results['stakeholder_analysis'] = json.load(f)

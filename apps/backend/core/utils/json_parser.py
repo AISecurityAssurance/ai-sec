@@ -106,6 +106,10 @@ class RobustJSONParser:
         fixed = re.sub(r',\s*}', '}', fixed)
         fixed = re.sub(r',\s*]', ']', fixed)
         
+        # Remove ellipsis (...) which is not valid JSON
+        fixed = re.sub(r',\s*\.\.\.', '', fixed)
+        fixed = re.sub(r'\.\.\.', '', fixed)
+        
         # Fix single quotes (carefully, to avoid breaking apostrophes in text)
         # This is tricky, so we'll be conservative
         if fixed.count("'") > fixed.count('"'):

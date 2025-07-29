@@ -829,14 +829,12 @@ class Step1CLI:
             table.add_column("Input Name", style="cyan")
             table.add_column("Type", style="magenta")
             table.add_column("Summary", style="green")
-            table.add_column("Confidence", style="yellow")
             
             for inp in input_summary['input_registry']:
                 table.add_row(
                     inp['filename'],
                     inp['type'].replace('_', ' ').title(),
-                    inp['summary'],
-                    f"{inp['confidence']:.0%}"
+                    inp['summary']
                 )
             
             self.console.print(table)
@@ -1154,12 +1152,12 @@ class Step1CLI:
                 input_summary = results.get('input_summary')
                 if input_summary and input_summary.get('input_registry'):
                     f.write("## Input Analysis Summary\n\n")
-                    f.write("| Input Name | Type | Summary | Confidence |\n")
-                    f.write("|------------|------|---------|------------|\n")
+                    f.write("| Input Name | Type | Summary |\n")
+                    f.write("|------------|------|---------|\n")
                     
                     for inp in input_summary['input_registry']:
                         f.write(f"| {inp['filename']} | {inp['type'].replace('_', ' ').title()} | "
-                               f"{inp['summary']} | {inp['confidence']:.0%} |\n")
+                               f"{inp['summary']} |\n")
                     f.write("\n")
                 
                 # Extract results sections

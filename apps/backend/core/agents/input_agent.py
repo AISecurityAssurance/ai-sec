@@ -18,10 +18,17 @@ logger = logging.getLogger(__name__)
 
 
 class InputAnalysisResult:
-    """Result from input analysis"""
+    """Result from input analysis
+    
+    Attributes:
+        confidence: Currently disabled. When implemented, should represent:
+                   - For classification: P(correct classification | features)
+                   - For extraction: Completeness of extracted information (0-1)
+                   - Should be based on actual validation, not arbitrary values
+    """
     def __init__(self, input_id: str, source_path: str, input_type: str, 
                  summary: str, content: Any, metadata: Dict[str, Any],
-                 confidence: float = 1.0):
+                 confidence: Optional[float] = None):
         self.input_id = input_id
         self.source_path = source_path
         self.input_type = input_type
@@ -80,7 +87,7 @@ class InputAgent:
                     summary=f"Failed to process: {str(e)}",
                     content=None,
                     metadata={'error': str(e)},
-                    confidence=0.0
+                    confidence=None
                 )
                 error_result.extraction_errors.append(str(e))
                 results.append(error_result)
@@ -135,7 +142,7 @@ class InputAgent:
                 'processing_confidence': processed.confidence,
                 'assumptions': processed.assumptions
             },
-            confidence=classification.get('confidence', processed.confidence)
+            confidence=classification.get('confidence')  # Will be None for now
         )
         
         return result
@@ -153,9 +160,11 @@ class InputAgent:
         content_preview = processed_input.content[:1000] if processed_input.content else ""
         
         # For now, use heuristics. In future, could use LLM
+        # Note: Confidence is currently not meaningful - just indicates
+        # whether we have high/medium/low certainty about the classification
         classification = {
             'category': processed_input.source_type.value,
-            'confidence': 0.8
+            'confidence': None  # Disabled until we have meaningful metrics
         }
         
         # Specific classification based on content
@@ -265,7 +274,6 @@ class InputAgent:
                 'filename': Path(result.source_path).name,
                 'type': result.input_type,
                 'summary': result.summary,
-                'confidence': result.confidence,
                 'relevance': relevance
             }
             summary['input_registry'].append(registry_entry)
@@ -336,7 +344,7 @@ class InputAgent:
             table_data.append({
                 'Input Name': Path(inp.source_path).name,
                 'Type': inp.input_type.replace('_', ' ').title(),
-                'Summary': inp.summary,
-                'Confidence': f"{inp.confidence:.0%}"
+                'Summary': inp.summary
+                # Removed confidence - it was meaningless
             })
         return table_data

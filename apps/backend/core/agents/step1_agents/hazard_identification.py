@@ -314,6 +314,15 @@ Mission Context:
 
 Identify hazardous SYSTEM STATES that could lead to the identified losses.
 
+CONTEXT EXTRACTION:
+Before identifying hazards, extract from the system description:
+1. PRIMARY FUNCTIONS that must be protected
+2. CRITICAL RESOURCES the system depends on  
+3. ENVIRONMENTAL FACTORS that could affect operations
+4. KEY INTERFACES with external systems
+
+Use these extracted elements to guide comprehensive hazard identification.
+
 CRITICAL GUIDANCE FOR HAZARD WORDING:
 ✓ CORRECT Hazard Format: "System operates in a state where [dangerous condition exists]"
 ✗ WRONG Format: "System operates without [missing control]" or descriptions of attacks/exploits
@@ -383,24 +392,37 @@ Examples:
 - "System operates with insufficient resources to handle requests" → availability_degraded
 - "System operates without ability to detect anomalies" → capability_loss
 
-HAZARD IDENTIFICATION CHECKLIST - Aim for 15-20 hazards covering these areas:
-□ Authentication & Authorization (user identity verification, session management)
-□ Data Protection (encryption state, access control, data retention)
-□ System Integrity (data accuracy, data consistency, audit trails)
-□ Availability (resource constraints, dependencies, performance degradation)
-□ Compliance (regulatory requirements, audit capabilities, reporting)
-□ Operational Security (segregation of duties, insider threats, privileged access)
-□ External Interfaces (API security, third-party integrations, data exchanges)
-□ Resilience (backup/recovery states, failover capabilities, incident response)
-□ Physical Safety (if applicable: collision states, mechanical failures, environmental hazards)
-□ Communication Security (signal integrity, jamming resistance, network availability)
+COMPREHENSIVE HAZARD IDENTIFICATION - Aim for 15-20 hazards:
+
+Consider hazards across these UNIVERSAL CATEGORIES:
+□ Data/Information Integrity (corruption, tampering, inaccuracy affecting core functions)
+□ Communication/Connectivity (availability, interception, disruption of critical links)
+□ Resource Availability (power, compute, materials, personnel specific to your system)
+□ Control/Command Authority (unauthorized access, conflicting commands, loss of control)
+□ Environmental Interactions (external conditions affecting system operations)
+□ Integration Points (third-party dependencies, interface failures)
+□ Regulatory/Compliance (documentation, procedures, standards relevant to domain)
+□ Human-System Interactions (operator actions, user behaviors affecting safety/security)
+□ System State Consistency (synchronization, coordination between components)
+□ Asset Protection (physical/digital assets critical to system mission)
+
+IMPORTANT: Map these abstract categories to YOUR SPECIFIC SYSTEM based on its description.
 
 REQUIREMENTS: 
 - MINIMUM: 12 hazards (fewer will be rejected as incomplete)
 - TARGET: 15-20 hazards for comprehensive coverage
 - MAXIMUM: 25 hazards (focus on quality over quantity)
 
-Ensure hazards are diverse, covering different aspects of the system rather than variations of the same issue."""
+SYSTEMATIC HAZARD IDENTIFICATION QUESTIONS:
+1. For each identified loss: What system states could lead to this loss?
+2. For each major component mentioned: What dangerous states could it enter?
+3. For each stakeholder: What system states would compromise their needs?
+4. For each external dependency: What if it fails, misbehaves, or is compromised?
+5. For each interface/boundary: What dangerous states could occur at this crossing?
+6. What states would violate the system's primary mission?
+7. What conditions could cascade to affect multiple losses?
+
+Use these questions to ensure comprehensive coverage without missing critical hazards."""
         
         try:
             # Call LLM

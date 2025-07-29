@@ -139,6 +139,15 @@ For each constraint:
    
    IMPORTANT: Include a mix of all constraint types, not just preventive!
 
+EFFICIENCY GUIDANCE:
+- Look for related hazards that share root causes or similar mitigation approaches
+- Design constraints that can address multiple hazards when appropriate
+- Example: "The system shall validate all external inputs" could address:
+  * Data corruption hazards
+  * Command injection hazards  
+  * Integration failure hazards
+- After creating constraints, review if any could be combined or broadened
+
 Generate constraints in this JSON format:
 {{
   "constraints": [

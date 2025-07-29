@@ -1,0 +1,698 @@
+{
+  "hazards": [
+    {
+      "description": "System operates with unverified user identities performing emergency dispatch prioritization",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "data_integrity",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during system authentication failures",
+        "duration": "intermittent"
+      },
+      "identifier": "H-1"
+    },
+    {
+      "description": "System operates with corrupted flight path data guiding autonomous navigation",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "data_integrity",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during GPS spoofing or sensor tampering incidents",
+        "duration": "continuous"
+      },
+      "identifier": "H-2"
+    },
+    {
+      "description": "System operates in a state where sensitive medical data is transmitted over insecure communication channels",
+      "hazard_category": "confidentiality_breached",
+      "affected_system_property": "data_protection",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "periodic",
+        "when_present": "during network outages or fallback to unencrypted channels",
+        "duration": "intermittent"
+      },
+      "identifier": "H-3"
+    },
+    {
+      "description": "System operates with insufficient fleet resources to respond to simultaneous high-priority emergencies",
+      "hazard_category": "availability_degraded",
+      "affected_system_property": "service_availability",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "low",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "moderate",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during peak demand periods or fleet maintenance downtime",
+        "duration": "intermittent"
+      },
+      "identifier": "H-4"
+    },
+    {
+      "description": "System operates in a state where medical payload integrity is compromised during transportation",
+      "hazard_category": "integrity_compromised",
+      "affected_system_property": "data_integrity",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "low",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "moderate",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during adverse weather conditions or physical tampering",
+        "duration": "continuous"
+      },
+      "identifier": "H-5"
+    },
+    {
+      "description": "System operates in a state where fleet coordination algorithms produce conflicting drone assignments",
+      "hazard_category": "capability_loss",
+      "affected_system_property": "operational_capability",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during high-load mission planning scenarios or software bugs",
+        "duration": "intermittent"
+      },
+      "identifier": "H-6"
+    },
+    {
+      "description": "System operates in a state where airspace safety mechanisms fail to detect potential collisions",
+      "hazard_category": "mission_degraded",
+      "affected_system_property": "mission_effectiveness",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during weather interference or sensor malfunctions",
+        "duration": "continuous"
+      },
+      "identifier": "H-7"
+    },
+    {
+      "description": "System operates in a state where regulatory compliance requirements are violated due to inadequate audit trails",
+      "hazard_category": "non_compliance",
+      "affected_system_property": "regulatory_compliance",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "rare"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "possible"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "always",
+        "when_present": "whenever compliance logs are incomplete",
+        "duration": "continuous"
+      },
+      "identifier": "H-8"
+    },
+    {
+      "description": "System operates in a state where malicious activity remains undetected in telemedicine communications",
+      "hazard_category": "confidentiality_breached",
+      "affected_system_property": "data_protection",
+      "environmental_factors": {
+        "operational_conditions": {
+          "normal": {
+            "impact": "moderate",
+            "likelihood": "possible"
+          },
+          "degraded": {
+            "impact": "high",
+            "likelihood": "likely"
+          },
+          "emergency": {
+            "impact": "high",
+            "likelihood": "likely"
+          }
+        },
+        "threat_conditions": {
+          "benign": {
+            "impact": "minimal",
+            "detection": "easy"
+          },
+          "moderate": {
+            "impact": "moderate",
+            "detection": "moderate"
+          },
+          "severe": {
+            "impact": "high",
+            "detection": "hard"
+          }
+        }
+      },
+      "temporal_nature": {
+        "existence": "conditional",
+        "when_present": "during cyberattack scenarios or system configuration errors",
+        "duration": "intermittent"
+      },
+      "identifier": "H-9"
+    }
+  ],
+  "hazard_count": 9,
+  "hazard_categories": {
+    "integrity_compromised": 3,
+    "confidentiality_breached": 2,
+    "availability_degraded": 1,
+    "capability_loss": 1,
+    "mission_degraded": 1,
+    "non_compliance": 1
+  },
+  "hazard_loss_mappings": [
+    {
+      "hazard_id": "H-1",
+      "loss_id": "L-1",
+      "relationship_strength": "conditional",
+      "rationale": "Unverified user identities could prioritize non-critical emergencies over critical ones, delaying responses and potentially leading to loss of life.",
+      "conditions": [
+        "Unverified users have access to dispatch systems",
+        "Critical emergencies are deprioritized"
+      ],
+      "id": "7256a843-df4b-42f4-ad52-bf7805de745c"
+    },
+    {
+      "hazard_id": "H-1",
+      "loss_id": "L-8",
+      "relationship_strength": "indirect",
+      "rationale": "Compromised dispatch prioritization could result in visible mission failures, harming the system's reputation.",
+      "conditions": [
+        "High-profile mission failures occur",
+        "Public or media attention highlights the incident"
+      ],
+      "id": "989de3c9-63f0-4209-9fd6-b35d4db8c78f"
+    },
+    {
+      "hazard_id": "H-2",
+      "loss_id": "L-7",
+      "relationship_strength": "direct",
+      "rationale": "Corrupted flight path data could guide drones into unsafe trajectories, leading to collisions with other aircraft or drones.",
+      "conditions": [
+        "Flight path corruption goes undetected",
+        "Drones operate in congested airspace"
+      ],
+      "id": "245151a4-5798-44e8-882c-136e04aed4d0"
+    },
+    {
+      "hazard_id": "H-3",
+      "loss_id": "L-3",
+      "relationship_strength": "direct",
+      "rationale": "Transmitting sensitive medical data over insecure channels could directly result in unauthorized access or exposure.",
+      "conditions": [
+        "Adversaries have access to insecure communication channels",
+        "Sensitive data is transmitted"
+      ],
+      "id": "aacec420-4240-4e54-a9bd-38bbb81440d5"
+    },
+    {
+      "hazard_id": "H-3",
+      "loss_id": "L-8",
+      "relationship_strength": "indirect",
+      "rationale": "A breach of sensitive medical data could lead to public scrutiny and reputational damage for the system.",
+      "conditions": [
+        "Data breach becomes widely known",
+        "Stakeholders lose confidence in the system's security"
+      ],
+      "id": "2b60e611-778c-40d2-a10d-4e6207eea6e7"
+    },
+    {
+      "hazard_id": "H-4",
+      "loss_id": "L-1",
+      "relationship_strength": "conditional",
+      "rationale": "Insufficient fleet resources can cause delays or failures in delivering medical supplies during critical emergencies, potentially resulting in loss of life.",
+      "conditions": [
+        "Multiple emergencies occur simultaneously",
+        "Fleet allocation is not optimized"
+      ],
+      "id": "deaf98df-396d-491b-a9db-9d59363bc44c"
+    },
+    {
+      "hazard_id": "H-4",
+      "loss_id": "L-2",
+      "relationship_strength": "direct",
+      "rationale": "A lack of fleet resources can directly compromise system availability during peak emergency periods.",
+      "conditions": [
+        "High demand for drones exceeds available fleet capacity"
+      ],
+      "id": "75728bf0-80c6-4058-b981-5cfcca2679b1"
+    },
+    {
+      "hazard_id": "H-5",
+      "loss_id": "L-6",
+      "relationship_strength": "direct",
+      "rationale": "Compromised medical payload integrity during transportation directly results in the failure to deliver usable medical supplies.",
+      "conditions": [
+        "Payload integrity is not verified during transportation",
+        "Payload is exposed to damaging conditions"
+      ],
+      "id": "ed890d11-ecbd-4085-87e9-5f7104c20bf7"
+    },
+    {
+      "hazard_id": "H-6",
+      "loss_id": "L-5",
+      "relationship_strength": "direct",
+      "rationale": "Conflicting drone assignments can lead to coordination failures, resulting in cascading mission failures during multi-drone operations.",
+      "conditions": [
+        "Multiple drones are required for simultaneous missions",
+        "Conflicting assignments are not resolved"
+      ],
+      "id": "d7b28579-063e-46e4-a307-457dffcc675a"
+    },
+    {
+      "hazard_id": "H-7",
+      "loss_id": "L-7",
+      "relationship_strength": "direct",
+      "rationale": "Failure of airspace safety mechanisms to detect potential collisions directly compromises airspace safety, increasing the risk of collisions.",
+      "conditions": [
+        "Drones operate in shared airspace",
+        "Safety mechanisms are not functioning or misconfigured"
+      ],
+      "id": "ab5b53b0-6871-4767-8351-3a6a1807f1c6"
+    },
+    {
+      "hazard_id": "H-8",
+      "loss_id": "L-4",
+      "relationship_strength": "direct",
+      "rationale": "Failure to maintain adequate audit trails directly violates regulatory compliance requirements, leading to penalties or operational restrictions.",
+      "conditions": [
+        "Audit mechanisms are not implemented or maintained",
+        "Regulators conduct inspections or audits"
+      ],
+      "id": "c97bbac2-1c0d-4b18-829e-07c512a323d7"
+    },
+    {
+      "hazard_id": "H-9",
+      "loss_id": "L-3",
+      "relationship_strength": "direct",
+      "rationale": "Undetected malicious activity in telemedicine communications could result in unauthorized access to sensitive medical data, compromising patient privacy.",
+      "conditions": [
+        "Attackers exploit vulnerabilities in telemedicine communications",
+        "Security monitoring fails to detect the activity"
+      ],
+      "id": "944dd78b-88eb-4f19-a304-c07b6a324b69"
+    },
+    {
+      "hazard_id": "H-9",
+      "loss_id": "L-8",
+      "relationship_strength": "indirect",
+      "rationale": "A breach of telemedicine communications could harm the system's reputation if stakeholders perceive it as insecure.",
+      "conditions": [
+        "Breach becomes public knowledge",
+        "Stakeholders lose trust in the system"
+      ],
+      "id": "3c4fa890-087a-4cf2-855d-6a08c4be1e74"
+    }
+  ],
+  "temporal_analysis": {
+    "always_present": [
+      {
+        "hazard_id": "H-8",
+        "description": "System operates in a state where regulatory compliance requirements are violated due to inadequate audit trails"
+      }
+    ],
+    "periodic": [
+      {
+        "hazard_id": "H-3",
+        "description": "System operates in a state where sensitive medical data is transmitted over insecure communication channels",
+        "when": "during network outages or fallback to unencrypted channels"
+      }
+    ],
+    "conditional": [
+      {
+        "hazard_id": "H-1",
+        "description": "System operates with unverified user identities performing emergency dispatch prioritization",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-2",
+        "description": "System operates with corrupted flight path data guiding autonomous navigation",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-4",
+        "description": "System operates with insufficient fleet resources to respond to simultaneous high-priority emergencies",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-5",
+        "description": "System operates in a state where medical payload integrity is compromised during transportation",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-6",
+        "description": "System operates in a state where fleet coordination algorithms produce conflicting drone assignments",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-7",
+        "description": "System operates in a state where airspace safety mechanisms fail to detect potential collisions",
+        "conditions": []
+      },
+      {
+        "hazard_id": "H-9",
+        "description": "System operates in a state where malicious activity remains undetected in telemedicine communications",
+        "conditions": []
+      }
+    ],
+    "coverage_gaps": [
+      {
+        "gap_type": "temporal",
+        "description": "Periodic hazards create vulnerability windows",
+        "affected_hazards": [
+          "H-3"
+        ]
+      }
+    ]
+  },
+  "environmental_analysis": {
+    "operational_sensitivity": {
+      "H-1": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-2": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-3": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-4": {
+        "worst_case_condition": "emergency",
+        "impact": "high"
+      },
+      "H-5": {
+        "worst_case_condition": "emergency",
+        "impact": "high"
+      },
+      "H-6": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-7": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-8": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      },
+      "H-9": {
+        "worst_case_condition": "degraded",
+        "impact": "high"
+      }
+    },
+    "threat_sensitivity": {
+      "H-1": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-2": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-3": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-4": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-5": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-6": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-7": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-8": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      },
+      "H-9": {
+        "escalation_pattern": "System shows progressive degradation with threat escalation"
+      }
+    },
+    "combined_risk_scenarios": [
+      {
+        "scenario": "Multiple high-impact hazards under stress",
+        "hazards": [
+          "H-1",
+          "H-2",
+          "H-3",
+          "H-4",
+          "H-5",
+          "H-6",
+          "H-7",
+          "H-8",
+          "H-9"
+        ],
+        "risk_level": "extreme"
+      }
+    ]
+  },
+  "coverage_analysis": {
+    "covered_losses": [
+      "L-6",
+      "L-8",
+      "L-7",
+      "L-2",
+      "L-1",
+      "L-5",
+      "L-3",
+      "L-4"
+    ],
+    "uncovered_losses": [],
+    "coverage_percentage": 100.0,
+    "loss_hazard_ratio": {
+      "L-1": 2,
+      "L-2": 1,
+      "L-3": 2,
+      "L-4": 1,
+      "L-5": 1,
+      "L-6": 1,
+      "L-7": 2,
+      "L-8": 3
+    }
+  },
+  "cognitive_style": "balanced"
+}

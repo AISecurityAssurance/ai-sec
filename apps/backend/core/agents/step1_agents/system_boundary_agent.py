@@ -163,6 +163,16 @@ CRITICAL REQUIREMENT: You MUST generate ALL 4 boundary types:
 
 Each boundary MUST have the minimum required elements specified above. Missing any boundary type will cause analysis failure.
 
+ELEMENT LISTING REQUIREMENTS:
+- List ACTUAL components/systems from the system description
+- Be SPECIFIC - use names mentioned in the description
+- Do NOT use generic placeholders
+- If you cannot identify enough elements for a boundary type, explain why in the description
+
+Example element specificity:
+✓ GOOD: "Emergency dispatch system (911)", "Drone fleet management server", "Patient vital signs monitor"
+✗ BAD: "External system", "User device", "Third-party service"
+
 Generate boundaries in this JSON format:
 {{
   "boundaries": [

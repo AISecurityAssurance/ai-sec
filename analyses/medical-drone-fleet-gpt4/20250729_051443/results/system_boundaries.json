@@ -1,0 +1,462 @@
+{
+  "system_boundaries": [
+    {
+      "boundary_name": "System Scope",
+      "boundary_type": "system_scope",
+      "description": "Defines the system components under direct control, external dependencies, and connection interfaces.",
+      "definition_criteria": {
+        "criterion1": "Components INSIDE the system are under direct operational control.",
+        "criterion2": "Components OUTSIDE the system are external dependencies beyond direct control."
+      },
+      "elements": [
+        {
+          "element_name": "Ground Control Station (Primary Command Center)",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "key": "Under direct operational control with redundant backups."
+          },
+          "constraints": {
+            "key": "Must maintain secure and reliable communication with the drone fleet."
+          }
+        },
+        {
+          "element_name": "Fleet Command and Control Software",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "key": "Provides real-time mission planning and fleet coordination."
+          },
+          "constraints": {
+            "key": "Must comply with FAA operational safety guidelines."
+          }
+        },
+        {
+          "element_name": "Drone Edge Computing Units",
+          "element_type": "component",
+          "position": "inside",
+          "assumptions": {
+            "key": "Enables autonomous decision-making onboard drones."
+          },
+          "constraints": {
+            "key": "Must operate in real-time and adapt to environmental changes."
+          }
+        },
+        {
+          "element_name": "Weather Data Service API",
+          "element_type": "component",
+          "position": "outside",
+          "assumptions": {
+            "key": "Provides accurate and timely weather information for drones."
+          },
+          "constraints": {
+            "key": "External dependency with potential latency or availability issues."
+          }
+        },
+        {
+          "element_name": "Cellular/Satellite Communication Networks",
+          "element_type": "component",
+          "position": "outside",
+          "assumptions": {
+            "key": "Enables beyond-line-of-sight command and control."
+          },
+          "constraints": {
+            "key": "Subject to service provider reliability and coverage limitations."
+          }
+        },
+        {
+          "element_name": "Pharmaceutical Supply Chain System",
+          "element_type": "component",
+          "position": "outside",
+          "assumptions": {
+            "key": "Provides medical payloads for drone delivery."
+          },
+          "constraints": {
+            "key": "Must ensure compliance with storage and transportation regulations."
+          }
+        },
+        {
+          "element_name": "RESTful API for Emergency Dispatch Integration",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "key": "Enables integration with 911/112 systems for mission dispatch."
+          },
+          "constraints": {
+            "key": "Must support high availability and secure data exchange."
+          }
+        },
+        {
+          "element_name": "5G Communication Link",
+          "element_type": "interface",
+          "position": "interface",
+          "assumptions": {
+            "key": "Provides high-speed data transfer for telemedicine services."
+          },
+          "constraints": {
+            "key": "Subject to network provider reliability."
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Trust Boundaries",
+      "boundary_type": "trust",
+      "description": "Identifies points where trust transitions occur between system components, actors, or external systems.",
+      "definition_criteria": {
+        "criterion1": "Trust boundaries are defined where responsibility or control over data or actions transitions.",
+        "criterion2": "Specific technical elements are identified at each transition point."
+      },
+      "elements": [
+        {
+          "element_name": "Between Drone Edge Computing and Ground Control Station",
+          "element_type": "interface",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Drone computing is trusted for autonomous decisions."
+          },
+          "constraints": {
+            "key": "Ground station must validate and monitor drone actions."
+          }
+        },
+        {
+          "element_name": "Between Telemedicine Platform and Healthcare Providers",
+          "element_type": "interface",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Healthcare providers are trusted to handle patient data."
+          },
+          "constraints": {
+            "key": "Data must comply with HIPAA requirements."
+          }
+        },
+        {
+          "element_name": "Between Blockchain Chain of Custody System and Pharmaceutical Suppliers",
+          "element_type": "interface",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Pharmaceutical suppliers are trusted to upload accurate data."
+          },
+          "constraints": {
+            "key": "Blockchain entries must be immutable and verifiable."
+          }
+        }
+      ]
+    },
+    {
+      "boundary_name": "Data Governance",
+      "boundary_type": "data_governance",
+      "description": "Tracks data transitions, ownership, and regulatory compliance across the system.",
+      "definition_criteria": {
+        "criterion1": "Data transitions are identified as movement between actors or systems.",
+        "criterion2": "Compliance requirements for data handling are defined."
+      },
+      "elements": [
+        {
+          "element_name": "Patient PII from Telemedicine Platform to Healthcare Provider",
+          "element_type": "data",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Data is encrypted during transit."
+          },
+          "constraints": {
+            "key": "Data must be HIPAA-compliant."
+          }
+        },
+        {
+          "element_name": "Blockchain Records for Medical Payloads",
+          "element_type": "data",
+          "position": "inside",
+          "assumptions": {
+            "key": "Data is immutable after being written to the blockchain."
+          },
+          "constraints": {
+            "key": "Blockchain must be resilient to tampering."
+          }
+        },
+        {
+          "element_name": "Flight Logs from Drone to Cloud Analytics Platform",
+          "element_type": "data",
+          "position": "crossing",
+          "assumptions": {
+            "key": "Data is transmitted securely via encrypted channels."
+          },
+          "constraints": {
+            "key": "Logs must be stored for FAA compliance."
+          }
+        }
+      ]
+    }
+  ],
+  "system_boundary": {
+    "boundary_name": "System Scope",
+    "boundary_type": "system_scope",
+    "description": "Defines the system components under direct control, external dependencies, and connection interfaces.",
+    "definition_criteria": {
+      "criterion1": "Components INSIDE the system are under direct operational control.",
+      "criterion2": "Components OUTSIDE the system are external dependencies beyond direct control."
+    },
+    "elements": [
+      {
+        "element_name": "Ground Control Station (Primary Command Center)",
+        "element_type": "component",
+        "position": "inside",
+        "assumptions": {
+          "key": "Under direct operational control with redundant backups."
+        },
+        "constraints": {
+          "key": "Must maintain secure and reliable communication with the drone fleet."
+        }
+      },
+      {
+        "element_name": "Fleet Command and Control Software",
+        "element_type": "component",
+        "position": "inside",
+        "assumptions": {
+          "key": "Provides real-time mission planning and fleet coordination."
+        },
+        "constraints": {
+          "key": "Must comply with FAA operational safety guidelines."
+        }
+      },
+      {
+        "element_name": "Drone Edge Computing Units",
+        "element_type": "component",
+        "position": "inside",
+        "assumptions": {
+          "key": "Enables autonomous decision-making onboard drones."
+        },
+        "constraints": {
+          "key": "Must operate in real-time and adapt to environmental changes."
+        }
+      },
+      {
+        "element_name": "Weather Data Service API",
+        "element_type": "component",
+        "position": "outside",
+        "assumptions": {
+          "key": "Provides accurate and timely weather information for drones."
+        },
+        "constraints": {
+          "key": "External dependency with potential latency or availability issues."
+        }
+      },
+      {
+        "element_name": "Cellular/Satellite Communication Networks",
+        "element_type": "component",
+        "position": "outside",
+        "assumptions": {
+          "key": "Enables beyond-line-of-sight command and control."
+        },
+        "constraints": {
+          "key": "Subject to service provider reliability and coverage limitations."
+        }
+      },
+      {
+        "element_name": "Pharmaceutical Supply Chain System",
+        "element_type": "component",
+        "position": "outside",
+        "assumptions": {
+          "key": "Provides medical payloads for drone delivery."
+        },
+        "constraints": {
+          "key": "Must ensure compliance with storage and transportation regulations."
+        }
+      },
+      {
+        "element_name": "RESTful API for Emergency Dispatch Integration",
+        "element_type": "interface",
+        "position": "interface",
+        "assumptions": {
+          "key": "Enables integration with 911/112 systems for mission dispatch."
+        },
+        "constraints": {
+          "key": "Must support high availability and secure data exchange."
+        }
+      },
+      {
+        "element_name": "5G Communication Link",
+        "element_type": "interface",
+        "position": "interface",
+        "assumptions": {
+          "key": "Provides high-speed data transfer for telemedicine services."
+        },
+        "constraints": {
+          "key": "Subject to network provider reliability."
+        }
+      }
+    ],
+    "primary_system": [
+      "Fleet Command and Control Software",
+      "Drone Edge Computing Units",
+      "Ground Control Station (Primary Command Center)"
+    ],
+    "system_elements": [
+      "Fleet Command and Control Software",
+      "Drone Edge Computing Units",
+      "Blockchain Records for Medical Payloads",
+      "Ground Control Station (Primary Command Center)"
+    ],
+    "external_entities": [
+      "Cellular/Satellite Communication Networks",
+      "Weather Data Service API",
+      "Pharmaceutical Supply Chain System"
+    ],
+    "interfaces": [
+      {
+        "name": "RESTful API for Emergency Dispatch Integration",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "Enables integration with 911/112 systems for mission dispatch."
+        },
+        "constraints": {
+          "key": "Must support high availability and secure data exchange."
+        }
+      },
+      {
+        "name": "5G Communication Link",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "Provides high-speed data transfer for telemedicine services."
+        },
+        "constraints": {
+          "key": "Subject to network provider reliability."
+        }
+      }
+    ],
+    "assumptions": [
+      "Ground Control Station (Primary Command Center): Under direct operational control with redundant backups.",
+      "Fleet Command and Control Software: Provides real-time mission planning and fleet coordination.",
+      "Drone Edge Computing Units: Enables autonomous decision-making onboard drones.",
+      "Weather Data Service API: Provides accurate and timely weather information for drones.",
+      "Cellular/Satellite Communication Networks: Enables beyond-line-of-sight command and control.",
+      "Pharmaceutical Supply Chain System: Provides medical payloads for drone delivery.",
+      "RESTful API for Emergency Dispatch Integration: Enables integration with 911/112 systems for mission dispatch.",
+      "5G Communication Link: Provides high-speed data transfer for telemedicine services.",
+      "Between Drone Edge Computing and Ground Control Station: Drone computing is trusted for autonomous decisions.",
+      "Between Telemedicine Platform and Healthcare Providers: Healthcare providers are trusted to handle patient data.",
+      "Between Blockchain Chain of Custody System and Pharmaceutical Suppliers: Pharmaceutical suppliers are trusted to upload accurate data.",
+      "Patient PII from Telemedicine Platform to Healthcare Provider: Data is encrypted during transit.",
+      "Blockchain Records for Medical Payloads: Data is immutable after being written to the blockchain.",
+      "Flight Logs from Drone to Cloud Analytics Platform: Data is transmitted securely via encrypted channels."
+    ],
+    "exclusions": [
+      "Ground Control Station (Primary Command Center): Must maintain secure and reliable communication with the drone fleet.",
+      "Fleet Command and Control Software: Must comply with FAA operational safety guidelines.",
+      "Drone Edge Computing Units: Must operate in real-time and adapt to environmental changes.",
+      "Weather Data Service API: External dependency with potential latency or availability issues.",
+      "Cellular/Satellite Communication Networks: Subject to service provider reliability and coverage limitations.",
+      "Pharmaceutical Supply Chain System: Must ensure compliance with storage and transportation regulations.",
+      "RESTful API for Emergency Dispatch Integration: Must support high availability and secure data exchange.",
+      "5G Communication Link: Subject to network provider reliability.",
+      "Between Drone Edge Computing and Ground Control Station: Ground station must validate and monitor drone actions.",
+      "Between Telemedicine Platform and Healthcare Providers: Data must comply with HIPAA requirements.",
+      "Between Blockchain Chain of Custody System and Pharmaceutical Suppliers: Blockchain entries must be immutable and verifiable.",
+      "Patient PII from Telemedicine Platform to Healthcare Provider: Data must be HIPAA-compliant.",
+      "Blockchain Records for Medical Payloads: Blockchain must be resilient to tampering.",
+      "Flight Logs from Drone to Cloud Analytics Platform: Logs must be stored for FAA compliance."
+    ]
+  },
+  "boundary_analysis": {
+    "primary_system": [
+      "Fleet Command and Control Software",
+      "Drone Edge Computing Units",
+      "Ground Control Station (Primary Command Center)"
+    ],
+    "system_elements": [
+      "Fleet Command and Control Software",
+      "Drone Edge Computing Units",
+      "Blockchain Records for Medical Payloads",
+      "Ground Control Station (Primary Command Center)"
+    ],
+    "external_entities": [
+      "Cellular/Satellite Communication Networks",
+      "Weather Data Service API",
+      "Pharmaceutical Supply Chain System"
+    ],
+    "interfaces": [
+      {
+        "name": "RESTful API for Emergency Dispatch Integration",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "Enables integration with 911/112 systems for mission dispatch."
+        },
+        "constraints": {
+          "key": "Must support high availability and secure data exchange."
+        }
+      },
+      {
+        "name": "5G Communication Link",
+        "boundary_type": "system_scope",
+        "assumptions": {
+          "key": "Provides high-speed data transfer for telemedicine services."
+        },
+        "constraints": {
+          "key": "Subject to network provider reliability."
+        }
+      }
+    ],
+    "assumptions": [
+      "Ground Control Station (Primary Command Center): Under direct operational control with redundant backups.",
+      "Fleet Command and Control Software: Provides real-time mission planning and fleet coordination.",
+      "Drone Edge Computing Units: Enables autonomous decision-making onboard drones.",
+      "Weather Data Service API: Provides accurate and timely weather information for drones.",
+      "Cellular/Satellite Communication Networks: Enables beyond-line-of-sight command and control.",
+      "Pharmaceutical Supply Chain System: Provides medical payloads for drone delivery.",
+      "RESTful API for Emergency Dispatch Integration: Enables integration with 911/112 systems for mission dispatch.",
+      "5G Communication Link: Provides high-speed data transfer for telemedicine services.",
+      "Between Drone Edge Computing and Ground Control Station: Drone computing is trusted for autonomous decisions.",
+      "Between Telemedicine Platform and Healthcare Providers: Healthcare providers are trusted to handle patient data.",
+      "Between Blockchain Chain of Custody System and Pharmaceutical Suppliers: Pharmaceutical suppliers are trusted to upload accurate data.",
+      "Patient PII from Telemedicine Platform to Healthcare Provider: Data is encrypted during transit.",
+      "Blockchain Records for Medical Payloads: Data is immutable after being written to the blockchain.",
+      "Flight Logs from Drone to Cloud Analytics Platform: Data is transmitted securely via encrypted channels."
+    ],
+    "exclusions": [
+      "Ground Control Station (Primary Command Center): Must maintain secure and reliable communication with the drone fleet.",
+      "Fleet Command and Control Software: Must comply with FAA operational safety guidelines.",
+      "Drone Edge Computing Units: Must operate in real-time and adapt to environmental changes.",
+      "Weather Data Service API: External dependency with potential latency or availability issues.",
+      "Cellular/Satellite Communication Networks: Subject to service provider reliability and coverage limitations.",
+      "Pharmaceutical Supply Chain System: Must ensure compliance with storage and transportation regulations.",
+      "RESTful API for Emergency Dispatch Integration: Must support high availability and secure data exchange.",
+      "5G Communication Link: Subject to network provider reliability.",
+      "Between Drone Edge Computing and Ground Control Station: Ground station must validate and monitor drone actions.",
+      "Between Telemedicine Platform and Healthcare Providers: Data must comply with HIPAA requirements.",
+      "Between Blockchain Chain of Custody System and Pharmaceutical Suppliers: Blockchain entries must be immutable and verifiable.",
+      "Patient PII from Telemedicine Platform to Healthcare Provider: Data must be HIPAA-compliant.",
+      "Blockchain Records for Medical Payloads: Blockchain must be resilient to tampering.",
+      "Flight Logs from Drone to Cloud Analytics Platform: Logs must be stored for FAA compliance."
+    ],
+    "boundary_coverage": {
+      "total_boundaries_defined": 3,
+      "critical_interfaces_identified": 2,
+      "external_dependencies": 3
+    }
+  },
+  "boundary_relationships": [
+    {
+      "parent_boundary": "System Scope",
+      "child_boundary": "Trust Boundaries",
+      "relationship_type": "contains"
+    }
+  ],
+  "boundary_summary": {
+    "total_boundaries": 3,
+    "boundary_types": {
+      "system_scope": 1,
+      "trust": 1,
+      "data_governance": 1
+    },
+    "total_elements": 14,
+    "critical_interfaces": 2,
+    "external_dependencies": 3
+  },
+  "cognitive_style": "balanced",
+  "analysis_metadata": {
+    "agent_type": "system_boundaries",
+    "analysis_id": "be3c8397-3d96-4e99-b48f-cd95f5139cc5",
+    "timestamp": "2025-07-29T05:16:38.695144Z",
+    "version": "1.0"
+  }
+}

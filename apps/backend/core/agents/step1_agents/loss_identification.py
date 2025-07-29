@@ -309,7 +309,15 @@ COMPLETENESS REQUIREMENTS:
 □ Cover multiple loss categories (financial, privacy, mission, reputation, regulatory)
 □ Consider both direct and indirect losses
 □ Include losses affecting different stakeholder groups
-□ Address both immediate and long-term consequences"""
+□ Address both immediate and long-term consequences
+
+COMPLETENESS VERIFICATION:
+After identifying losses, verify:
+1. Does every major stakeholder have at least one relevant loss?
+2. Are all critical system functions represented in potential losses?
+3. Have you considered losses from system unavailability AND misuse?
+4. Are there losses that could cascade to create other losses?
+5. Do the losses reflect the system's actual mission and purpose?"""
         
         try:
             # Call LLM

@@ -1,0 +1,308 @@
+{
+  "security_constraints": [
+    {
+      "identifier": "SC-1",
+      "name": "User Identity Verification Constraint",
+      "constraint_statement": "The system shall verify user identity before executing emergency dispatch prioritization operations.",
+      "rationale": "Unverified user identities can lead to incorrect prioritization of emergencies, compromising mission success and patient safety.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as identity verification systems, policies enforcing identity validation, and procedures for user authentication audits.",
+      "addresses_hazards": [
+        "H-1"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-2"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-2"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-2"
+        ],
+        "capability_degradation": "Incorrect dispatch prioritization could delay emergency response, leading to loss of life and system availability degradation."
+      }
+    },
+    {
+      "identifier": "SC-2",
+      "name": "Flight Path Integrity Constraint",
+      "constraint_statement": "The system shall validate flight path data for integrity and correctness before executing autonomous navigation.",
+      "rationale": "Corrupted flight path data can cause navigation errors, resulting in mission failure or collisions.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as data validation protocols, policies for flight path verification, and procedures for integrity checks.",
+      "addresses_hazards": [
+        "H-2"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-7"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-7"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-7"
+        ],
+        "capability_degradation": "Navigation errors could result in collisions or failed medical deliveries, affecting mission success and safety."
+      }
+    },
+    {
+      "identifier": "SC-3",
+      "name": "Secure Communication Constraint",
+      "constraint_statement": "The system shall ensure confidentiality and integrity of sensitive medical data transmitted over communication channels.",
+      "rationale": "Insecure communication channels can lead to unauthorized access or tampering with sensitive medical data, compromising patient privacy and mission integrity.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as secure communication protocols, policies enforcing encryption standards, and procedures for data protection audits.",
+      "addresses_hazards": [
+        "H-3"
+      ],
+      "prevents_losses": [
+        "L-3"
+      ],
+      "related_losses": [
+        "L-3",
+        "L-8"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-3"
+        ],
+        "capability_degradation": "Exposure of sensitive medical data could result in privacy violations, regulatory non-compliance, and reputational damage."
+      }
+    },
+    {
+      "identifier": "SC-4",
+      "name": "Fleet Resource Allocation Constraint",
+      "constraint_statement": "The system shall monitor fleet resource availability and prioritize allocation to simultaneous high-priority emergencies.",
+      "rationale": "Insufficient fleet resources during critical emergencies can lead to mission failures and loss of life.",
+      "constraint_type": "compensating",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as dynamic resource allocation algorithms, policies for emergency prioritization, and procedures for real-time resource monitoring.",
+      "addresses_hazards": [
+        "H-4"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-5"
+      ],
+      "related_losses": [
+        "L-1",
+        "L-5"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-5"
+        ],
+        "capability_degradation": "Failure to respond to simultaneous emergencies could result in cascading mission failures and loss of life."
+      }
+    },
+    {
+      "identifier": "SC-5",
+      "name": "Medical Payload Integrity Constraint",
+      "constraint_statement": "The system shall monitor and maintain the integrity of medical payloads during transportation.",
+      "rationale": "Compromised payload integrity can render medical supplies unusable, directly impacting patient outcomes during emergencies.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as integrity monitoring systems, policies for payload handling, and procedures for environmental checks.",
+      "addresses_hazards": [
+        "H-5"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-6"
+      ],
+      "related_losses": [
+        "L-6"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-6"
+        ],
+        "capability_degradation": "Medical supplies could be rendered ineffective, leading to mission failure and loss of life."
+      }
+    },
+    {
+      "identifier": "SC-6",
+      "name": "Fleet Coordination Constraint",
+      "constraint_statement": "The system shall ensure fleet coordination algorithms produce non-conflicting drone assignments during multi-drone operations.",
+      "rationale": "Conflicting assignments can cause operational inefficiencies, delays, and cascading mission failures.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as coordination validation systems, policies for algorithm testing, and procedures for conflict detection.",
+      "addresses_hazards": [
+        "H-6"
+      ],
+      "prevents_losses": [
+        "L-5"
+      ],
+      "related_losses": [
+        "L-5"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-5"
+        ],
+        "capability_degradation": "Cascading mission failures could compromise the fleet's ability to respond effectively to emergencies."
+      }
+    },
+    {
+      "identifier": "SC-7",
+      "name": "Airspace Safety Constraint",
+      "constraint_statement": "The system shall detect potential airspace collisions and initiate avoidance mechanisms in real-time.",
+      "rationale": "Failure to detect collisions can result in catastrophic accidents, compromising safety and mission success.",
+      "constraint_type": "detective",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as collision detection systems, policies for airspace monitoring, and procedures for avoidance mechanism activation.",
+      "addresses_hazards": [
+        "H-7"
+      ],
+      "prevents_losses": [
+        "L-7"
+      ],
+      "related_losses": [
+        "L-7"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-7"
+        ],
+        "capability_degradation": "Collisions could result in loss of drones, mission failures, and safety risks for manned aircraft."
+      }
+    },
+    {
+      "identifier": "SC-8",
+      "name": "Regulatory Compliance Audit Constraint",
+      "constraint_statement": "The system shall maintain adequate audit trails to ensure compliance with regulatory requirements.",
+      "rationale": "Inadequate audit trails can result in regulatory violations, penalties, and operational restrictions.",
+      "constraint_type": "preventive",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as logging mechanisms, policies for audit trail maintenance, and procedures for compliance verification.",
+      "addresses_hazards": [
+        "H-8"
+      ],
+      "prevents_losses": [
+        "L-4"
+      ],
+      "related_losses": [
+        "L-4"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-4"
+        ],
+        "capability_degradation": "Regulatory violations could lead to operational restrictions, fines, and reputational damage."
+      }
+    },
+    {
+      "identifier": "SC-9",
+      "name": "Telemedicine Security Constraint",
+      "constraint_statement": "The system shall detect and respond to malicious activity in telemedicine communications.",
+      "rationale": "Undetected malicious activity can compromise patient safety, privacy, and mission integrity.",
+      "constraint_type": "detective",
+      "enforcement_level": "mandatory",
+      "enforcement_mechanism": "Technical controls such as anomaly detection systems, policies for communication security, and procedures for threat response.",
+      "addresses_hazards": [
+        "H-9"
+      ],
+      "prevents_losses": [
+        "L-1",
+        "L-3"
+      ],
+      "related_losses": [
+        "L-3",
+        "L-8"
+      ],
+      "mission_impact_if_violated": {
+        "losses_enabled": [
+          "L-1",
+          "L-3"
+        ],
+        "capability_degradation": "Compromised telemedicine communications could impact patient outcomes and violate privacy regulations."
+      }
+    }
+  ],
+  "constraint_coverage": {
+    "total_hazards": 9,
+    "hazards_with_constraints": 9,
+    "total_constraints": 9,
+    "coverage_balance": 1.0,
+    "type_distribution": {
+      "preventive": 6,
+      "detective": 2,
+      "corrective": 0,
+      "compensating": 1
+    }
+  },
+  "constraint_hazard_mappings": [
+    {
+      "constraint_id": "SC-1",
+      "hazard_id": "H-1",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-2",
+      "hazard_id": "H-2",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-3",
+      "hazard_id": "H-3",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-4",
+      "hazard_id": "H-4",
+      "relationship_type": "transfers"
+    },
+    {
+      "constraint_id": "SC-5",
+      "hazard_id": "H-5",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-6",
+      "hazard_id": "H-6",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-7",
+      "hazard_id": "H-7",
+      "relationship_type": "detects"
+    },
+    {
+      "constraint_id": "SC-8",
+      "hazard_id": "H-8",
+      "relationship_type": "eliminates"
+    },
+    {
+      "constraint_id": "SC-9",
+      "hazard_id": "H-9",
+      "relationship_type": "detects"
+    }
+  ],
+  "constraint_count": 9,
+  "constraint_types": {
+    "preventive": 6,
+    "detective": 2,
+    "corrective": 0,
+    "compensating": 1
+  },
+  "cognitive_style": "balanced",
+  "analysis_metadata": {
+    "agent_type": "security_constraints",
+    "analysis_id": "be3c8397-3d96-4e99-b48f-cd95f5139cc5",
+    "timestamp": "2025-07-29T05:16:20.125602Z",
+    "version": "1.0"
+  }
+}

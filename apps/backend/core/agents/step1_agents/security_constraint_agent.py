@@ -117,7 +117,7 @@ Examples:
 ✓ CORRECT: "The system shall maintain confidentiality of customer data"
 ✗ WRONG: "The system shall use AES-256 encryption"
 
-✓ CORRECT: "The system shall detect anomalous transaction patterns"
+✓ CORRECT: "The system shall detect anomalous operational patterns"
 ✗ WRONG: "The system shall use machine learning algorithms for fraud detection"
 
 For each constraint:

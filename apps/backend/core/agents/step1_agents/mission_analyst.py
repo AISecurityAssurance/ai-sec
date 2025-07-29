@@ -88,7 +88,7 @@ Analyze the system's mission and provide:
 
 3. Operational Constraints:
    - Regulatory frameworks and compliance requirements
-   - Business constraints (SLAs, transaction volumes)
+   - Business constraints (SLAs, operational volumes)
    - Organizational constraints (risk appetite, maturity)
 
 4. Environmental Assumptions:
@@ -123,7 +123,7 @@ Provide your response as a JSON object with the following structure:
     }},
     "business": {{
       "availability_requirement": "SLA percentage",
-      "transaction_volume": "volume description",
+      "operational_volume": "volume description",
       "legacy_integration": "required|optional|none"
     }},
     "organizational": {{

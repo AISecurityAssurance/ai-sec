@@ -237,10 +237,10 @@ CRITICAL GUIDANCE FOR LOSS WORDING:
 ✗ WRONG Format: Descriptions of specific attacks or implementation details
 
 Examples:
-✓ GOOD: "Loss of customer financial assets through unauthorized transactions"
+✓ GOOD: "Loss of critical system capability affecting primary mission"
 ✗ BAD: "Loss due to SQL injection attack"
 
-✓ GOOD: "Loss of service availability to customers during critical business operations"  
+✓ GOOD: "Loss of service availability during essential operations"  
 ✗ BAD: "System downtime due to DDoS attack"
 
 ✓ GOOD: "Loss of regulatory compliance resulting in penalties and sanctions"
@@ -295,9 +295,9 @@ VALIDATION: Check each loss before including it:
 - Does it describe a loss, NOT a missing control or failure mode?
 
 Examples of validation:
-✓ "Loss of customer financial assets" - Yes, we lost something valuable
+✓ "Loss of critical data integrity" - Yes, we lost something valuable
 ✗ "Loss of encryption" - No, this is a control failing, not a loss
-✗ "Loss of integration with payment processor" - No, this is a failure event, not a loss
+✗ "Loss of integration with external service" - No, this is a failure event, not a loss
 
 REDUNDANCY CHECK:
 - Don't include losses that are just specific versions of broader losses

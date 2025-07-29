@@ -319,10 +319,10 @@ CRITICAL GUIDANCE FOR HAZARD WORDING:
 ✗ WRONG Format: "System operates without [missing control]" or descriptions of attacks/exploits
 
 Examples:
-✓ CORRECT: "System operates with unverified user identities for sensitive transactions"
+✓ CORRECT: "System operates with unverified user identities for sensitive operations"
 ✗ WRONG: "System operates without multi-factor authentication"
 
-✓ CORRECT: "System operates with corrupted transaction data"
+✓ CORRECT: "System operates with corrupted operational data"
 ✗ WRONG: "System operates without data validation"
 
 ✓ CORRECT: "System operates in a state where malicious activity remains undetected"
@@ -334,7 +334,7 @@ For each hazard:
 3. NEVER use negative language: "without", "missing", "lack of", "absence of"
 4. Focus on the dangerous system condition, NOT the control that would prevent it
 5. Categorize as: integrity_compromised, confidentiality_breached, availability_degraded, capability_loss, non_compliance, or mission_degraded
-6. Identify which system property is affected (MUST be one of: transaction_integrity, data_protection, service_availability, regulatory_compliance, operational_capability, mission_effectiveness)
+6. Identify which system property is affected (MUST be one of: data_integrity, data_protection, service_availability, regulatory_compliance, operational_capability, mission_effectiveness)
 7. Assess environmental factors (operational conditions, threat conditions)
 8. Describe temporal nature (always present, periodic, conditional)
 
@@ -378,15 +378,15 @@ HAZARD CATEGORY GUIDE - Match hazards to their PRIMARY concern:
 - mission_degraded: System cannot achieve its intended purpose effectively
 
 Examples:
-- "System operates with corrupted transaction data" → integrity_compromised
-- "System operates in a state where customer data is exposed" → confidentiality_breached
+- "System operates with corrupted critical data" → integrity_compromised
+- "System operates in a state where sensitive data is exposed" → confidentiality_breached
 - "System operates with insufficient resources to handle requests" → availability_degraded
-- "System operates without ability to detect fraud" → capability_loss
+- "System operates without ability to detect anomalies" → capability_loss
 
 HAZARD IDENTIFICATION CHECKLIST - Aim for 12-15 hazards covering these areas:
 □ Authentication & Authorization (user identity verification, session management)
 □ Data Protection (encryption state, access control, data retention)
-□ System Integrity (transaction accuracy, data consistency, audit trails)
+□ System Integrity (data accuracy, data consistency, audit trails)
 □ Availability (resource constraints, dependencies, performance degradation)
 □ Compliance (regulatory requirements, audit capabilities, reporting)
 □ Operational Security (segregation of duties, insider threats, privileged access)

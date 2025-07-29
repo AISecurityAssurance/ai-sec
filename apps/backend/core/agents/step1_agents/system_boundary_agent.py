@@ -109,16 +109,16 @@ Define boundaries from these perspectives:
 
 1. SYSTEM SCOPE BOUNDARY
    INSIDE (we control): List SPECIFIC components like:
-   - "Banking application server"
-   - "Customer database" 
-   - "Transaction processing engine"
+   - "Core application server"
+   - "Primary database" 
+   - "Processing engine"
    - "API gateway"
    
    OUTSIDE (we depend on): List SPECIFIC external systems like:
-   - "Customer mobile devices"
-   - "SWIFT payment network"
-   - "Equifax credit bureau API"
-   - "AWS cloud infrastructure"
+   - "User devices"
+   - "External service networks"
+   - "Third-party APIs"
+   - "Cloud infrastructure"
    
    INTERFACES: List SPECIFIC connection points like:
    - "RESTful API for mobile app"
@@ -127,8 +127,8 @@ Define boundaries from these perspectives:
 
 2. TRUST BOUNDARIES
    List SPECIFIC points where trust changes:
-   - "Between mobile app and API gateway"
-   - "Between application server and payment processor"
+   - "Between client app and API gateway"
+   - "Between application server and external services"
    - "Between database and backup storage"
 
 3. RESPONSIBILITY BOUNDARIES
@@ -161,7 +161,7 @@ Generate boundaries in this JSON format:
 {{
   "boundaries": [
     {{
-      "boundary_name": "Banking Platform System Scope",
+      "boundary_name": "System Scope",
       "boundary_type": "system_scope|trust|responsibility|data_governance",
       "description": "Clear description of what this boundary represents",
       "definition_criteria": {{

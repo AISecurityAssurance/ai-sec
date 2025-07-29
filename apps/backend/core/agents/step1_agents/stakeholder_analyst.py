@@ -94,23 +94,9 @@ class StakeholderAnalystAgent(BaseStep1Agent):
                     "criticality": "primary"
                 })
         
-        # Domain-specific users
-        domain = mission_context.get('domain', '')
-        if domain == 'financial_services':
-            if "retail" in desc_lower:
-                stakeholders.append({
-                    "name": "Retail Banking Customers",
-                    "stakeholder_type": "user",
-                    "description": "Individual customers with personal accounts",
-                    "criticality": "primary"
-                })
-            if "business" in desc_lower or "corporate" in desc_lower:
-                stakeholders.append({
-                    "name": "Business Banking Customers",
-                    "stakeholder_type": "user",
-                    "description": "Corporate customers with business accounts",
-                    "criticality": "primary"
-                })
+        # Domain-specific users based on system description
+        # Note: Domain-specific identification should be based on 
+        # actual system description content, not hardcoded domains
         
         return stakeholders
     
@@ -403,40 +389,40 @@ class StakeholderAnalystAgent(BaseStep1Agent):
         domain = mission_context.get('domain', '')
         criticality = mission_context.get('criticality', '')
         
-        # Common adversary types based on domain and criticality
-        if domain == 'financial_services' or 'financial' in description.lower():
-            adversaries.extend([
-                {
-                    "adversary_class": "organized_crime",
-                    "profile": {
-                        "sophistication": "high",
-                        "resources": "significant",
-                        "persistence": "long_term",
-                        "primary_interest": "financial_gain",
-                        "geographic_scope": "global"
-                    },
-                    "mission_targets": {
-                        "interested_in": ["customer_assets", "transaction_capability", "customer_data"],
-                        "value_perception": "high_value_target",
-                        "historical_interest": "known_targeting"
-                    }
+        # Common adversary types based on system value and exposure
+        if any(term in description.lower() for term in ['valuable', 'critical', 'sensitive', 'high-value']):
+            adversaries.append({
+                "adversary_class": "organized_crime",
+                "profile": {
+                    "sophistication": "high",
+                    "resources": "significant",
+                    "persistence": "long_term",
+                    "primary_interest": "financial_gain",
+                    "geographic_scope": "global"
                 },
-                {
-                    "adversary_class": "insider",
-                    "profile": {
-                        "sophistication": "moderate",
-                        "resources": "limited",
-                        "persistence": "opportunistic",
-                        "primary_interest": "personal_gain",
-                        "geographic_scope": "local"
-                    },
-                    "mission_targets": {
-                        "interested_in": ["privileged_access", "sensitive_data", "financial_systems"],
-                        "value_perception": "target_of_opportunity",
-                        "historical_interest": "common_threat"
-                    }
+                "mission_targets": {
+                    "interested_in": ["valuable_assets", "operational_capability", "sensitive_data"],
+                    "value_perception": "high_value_target",
+                    "historical_interest": "known_targeting"
                 }
-            ])
+            })
+        
+        # Insider threats are relevant to most systems
+        adversaries.append({
+            "adversary_class": "insider",
+            "profile": {
+                "sophistication": "moderate",
+                "resources": "limited",
+                "persistence": "opportunistic",
+                "primary_interest": "personal_gain",
+                "geographic_scope": "local"
+            },
+            "mission_targets": {
+                "interested_in": ["privileged_access", "sensitive_data", "system_capabilities"],
+                "value_perception": "target_of_opportunity",
+                "historical_interest": "common_threat"
+            }
+        })
         
         # Nation-state for critical systems
         if criticality == 'mission_critical':
@@ -456,8 +442,8 @@ class StakeholderAnalystAgent(BaseStep1Agent):
                 }
             })
         
-        # Hacktivists for high-profile systems
-        if 'public' in description.lower() or domain in ['financial_services', 'energy']:
+        # Hacktivists for high-profile or public-facing systems
+        if any(term in description.lower() for term in ['public', 'high-profile', 'visible', 'consumer']):
             adversaries.append({
                 "adversary_class": "hacktivist",
                 "profile": {
@@ -901,7 +887,7 @@ IMPORTANT:
 3. Use ONLY these stakeholder types: user, operator, owner, regulator, partner, society, supplier
 4. Do NOT use "beneficiary" or "vendor" as stakeholder types - map them to allowed types (e.g., shareholders → owner, vendors → supplier).
 5. Each stakeholder category in the checklist should be represented.
-6. Be specific with stakeholder names (e.g., "Retail Banking Customers" not just "Users").
+6. Be specific with stakeholder names based on the system (e.g., "Individual System Users" not just "Users").
 
 MINIMUM REQUIREMENT: Fewer than 8 stakeholders will be considered incomplete. Ensure you have:
 - At least 2-3 different user types

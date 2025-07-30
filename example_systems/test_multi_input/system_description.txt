@@ -1,0 +1,26 @@
+Banking System Overview
+
+Our online banking platform provides secure financial services to millions of customers worldwide. The system enables customers to:
+
+- View account balances and transaction history
+- Transfer funds between accounts
+- Pay bills electronically
+- Deposit checks via mobile app
+- Manage investment portfolios
+- Apply for loans and credit cards
+
+The platform integrates with multiple backend systems including:
+- Core banking system for account management
+- Payment processing networks for transactions
+- Credit bureaus for loan decisions
+- Investment trading platforms
+- Mobile banking applications
+
+Security is paramount, with features including:
+- Multi-factor authentication
+- End-to-end encryption for all transactions
+- Fraud detection using machine learning
+- Real-time transaction monitoring
+- Secure API gateways for third-party integrations
+
+The system must maintain 99.9% uptime and process thousands of transactions per second while ensuring data integrity and regulatory compliance.

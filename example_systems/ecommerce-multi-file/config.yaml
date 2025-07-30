@@ -1,0 +1,23 @@
+analysis:
+  description: STPA-Sec Step 1 analysis using standard single-agent approach with
+    GPT-4 Turbo
+  name: AWS SD Wan 
+  output_dir: ./analyses/ecommerce-multi-file
+execution:
+  mode: standard
+input:
+  inputs:
+    - path: after-the-overhaul.webp.pdf
+    - path: before-the-overhaul.webp.pdf
+    - path: painpoints-ecommerce-multi-file.pdf
+model:
+  api_key_env: AZURE_OPENAI_API_KEY
+  name: gpt-4o
+  provider: openai
+  base_url: https://ai-sec-openai.openai.azure.com/ 
+output:
+  exports:
+  - format: json
+  - format: markdown
+
+

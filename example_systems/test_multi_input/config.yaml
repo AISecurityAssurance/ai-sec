@@ -1,0 +1,17 @@
+# Multi-file input test configuration
+analysis:
+  name: Multi-Input Test Analysis
+  output_dir: analyses
+
+model:
+  provider: openai
+  api_key_env: AZURE_OPENAI_API_KEY
+  base_url_env: AZURE_OPENAI_API_BASE
+  name_env: AZURE_OPENAI_API_MODEL
+
+# Multiple input files configuration
+input:
+  inputs:
+    - path: system_description.txt
+    - path: architecture_diagram.txt
+    - path: requirements.pdf

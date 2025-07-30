@@ -15,7 +15,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from dotenv import load_dotenv
 
 # Configure logging BEFORE importing anything that uses SQLAlchemy
@@ -87,12 +87,13 @@ class Step1CLI:
         # Add to root logger
         logging.getLogger().addHandler(file_handler)
         
-    async def analyze(self, config_path: str, enhanced: bool = False):
+    async def analyze(self, config_path: str, enhanced: bool = False, input_files: List[str] = None):
         """Run Step 1 analysis based on configuration file
         
         Args:
             config_path: Path to configuration file
             enhanced: Whether to use enhanced mode with multiple agents
+            input_files: Optional list of input files (overrides config)
         """
         
         # Load configuration
@@ -113,8 +114,8 @@ class Step1CLI:
         # Store timestamp for consistent file naming
         self._timestamp = timestamp
         
-        # Read system description
-        system_description = self._read_system_description(config)
+        # Read system description (only if not using multi-file inputs)
+        system_description = ""
         
         # Create progress callback for coordinator
         self.current_phase = "Initializing..."
@@ -146,32 +147,19 @@ class Step1CLI:
                 # Store config file path for resolving relative paths
                 self._config_file_path = config_path
                 
-                # Resolve input path relative to config file location
-                input_path = Path(config['input']['path'])
-                if not input_path.is_absolute():
-                    # Find the actual config file location that was loaded
-                    config_file_path = self._resolve_config_path(config_path)
-                    config_dir = config_file_path.parent
-                    
-                    # Special handling for paths in config
-                    # If the path starts with 'example_systems/', it's relative to project root
-                    if str(input_path).startswith('example_systems/'):
-                        # In Docker, example_systems is mounted at /example_systems
-                        if Path('/app').exists() and str(Path(__file__).absolute()).startswith('/app'):
-                            input_path = Path('/') / input_path
-                        else:
-                            # On host, use project root
-                            project_root = Path(__file__).parent.parent.parent
-                            input_path = project_root / input_path
-                    else:
-                        # Otherwise, it's relative to config file
-                        input_path = config_dir / input_path
-                
-                # Create input configs for Input Agent
-                input_configs = [{
-                    'path': str(input_path),
-                    'type': config['input'].get('type', 'file')
-                }]
+                # Handle input files from CLI or config
+                if input_files:
+                    # Use files from command line
+                    input_configs = []
+                    for file_path in input_files:
+                        resolved_path = self._resolve_input_path(file_path, config_path)
+                        input_configs.append({
+                            'path': str(resolved_path),
+                            'type': 'file'  # Auto-detect type
+                        })
+                else:
+                    # Use files from config
+                    input_configs = self._get_input_configs_from_config(config, config_path)
                 
                 # Run analysis with Input Agent
                 results = await coordinator.perform_analysis(
@@ -614,6 +602,114 @@ class Step1CLI:
             await sys_conn.close()
         
         return db_name, timestamp
+    
+    def _resolve_input_path(self, input_path: str, config_path: str) -> Path:
+        """Resolve input file path relative to config file location
+        
+        Args:
+            input_path: The input file path (relative or absolute)
+            config_path: The config file path to use as reference
+            
+        Returns:
+            Resolved absolute path to the input file
+        """
+        path = Path(input_path)
+        
+        # If it's already absolute and exists, return it
+        if path.is_absolute() and path.exists():
+            return path
+        
+        # Get the config file's directory
+        config_file = self._resolve_config_path(config_path)
+        config_dir = config_file.parent
+        
+        # Try paths relative to config file first
+        relative_to_config = config_dir / input_path
+        if relative_to_config.exists():
+            return relative_to_config.resolve()
+        
+        # Try the same search paths as we use for config files
+        if Path('/app').exists() and str(Path(__file__).absolute()).startswith('/app'):
+            # Docker environment
+            search_paths = [
+                Path('/') / input_path,
+                Path('/app').parent / input_path,
+                Path.cwd() / input_path,
+            ]
+        else:
+            # Host environment
+            root_dir = Path(__file__).parent.parent.parent
+            search_paths = [
+                root_dir / input_path,
+                Path.cwd() / input_path,
+            ]
+        
+        for search_path in search_paths:
+            if search_path.exists():
+                return search_path
+        
+        # If not found, raise an error
+        self.console.print(f"[red]Input file not found: {input_path}[/red]")
+        self.console.print(f"[yellow]Searched relative to config: {relative_to_config}[/yellow]")
+        self.console.print(f"[yellow]Also searched in:[/yellow]")
+        for p in search_paths:
+            self.console.print(f"  - {p}")
+        sys.exit(1)
+    
+    def _get_input_configs_from_config(self, config: dict, config_path: str) -> List[Dict[str, Any]]:
+        """Extract input configurations from config file
+        
+        Args:
+            config: The parsed configuration dictionary
+            config_path: The config file path for resolving relative paths
+            
+        Returns:
+            List of input configurations with resolved paths
+        """
+        input_configs = []
+        input_section = config.get('input', {})
+        
+        # Check if we have a single input (backward compatibility)
+        if 'path' in input_section:
+            # Single input file
+            resolved_path = self._resolve_input_path(input_section['path'], config_path)
+            input_configs.append({
+                'path': str(resolved_path),
+                'type': input_section.get('type', 'file')
+            })
+        
+        # Check for multiple inputs
+        elif 'inputs' in input_section:
+            # Multiple input files
+            for input_item in input_section['inputs']:
+                if isinstance(input_item, str):
+                    # Simple string path
+                    resolved_path = self._resolve_input_path(input_item, config_path)
+                    input_configs.append({
+                        'path': str(resolved_path),
+                        'type': 'file'
+                    })
+                elif isinstance(input_item, dict):
+                    # Dict with path and optional type
+                    resolved_path = self._resolve_input_path(input_item['path'], config_path)
+                    input_configs.append({
+                        'path': str(resolved_path),
+                        'type': input_item.get('type', 'file')
+                    })
+        
+        # If no inputs found and we have the old format, fall back to it
+        if not input_configs and 'type' in input_section:
+            # This maintains backward compatibility with the old format
+            system_desc = self._read_system_description(config)
+            # Create a temporary file or use the existing path
+            if 'path' in input_section:
+                input_configs.append({
+                    'path': input_section['path'],
+                    'type': 'text',
+                    'content': system_desc  # Pass content directly
+                })
+        
+        return input_configs
     
     def _get_model_info(self) -> dict:
         """Get current model configuration info"""
@@ -1509,6 +1605,7 @@ async def main():
     # Analyze command
     analyze_parser = subparsers.add_parser('analyze', help='Run Step 1 analysis')
     analyze_parser.add_argument('--config', required=True, help='Configuration file path')
+    analyze_parser.add_argument('--input', nargs='+', help='Input files to analyze (overrides config file)')
     analyze_parser.add_argument('--enhanced', action='store_true', help='Use enhanced mode with multiple agents per phase')
     
     # Demo command
@@ -1529,7 +1626,7 @@ async def main():
     cli = Step1CLI()
     
     if args.command == 'analyze':
-        await cli.analyze(args.config, enhanced=args.enhanced)
+        await cli.analyze(args.config, enhanced=args.enhanced, input_files=getattr(args, 'input', None))
     elif args.command == 'demo':
         await cli.demo(args.name)
     elif args.command == 'export':

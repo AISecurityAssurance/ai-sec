@@ -87,8 +87,13 @@ class Step1CLI:
         # Add to root logger
         logging.getLogger().addHandler(file_handler)
         
-    async def analyze(self, config_path: str):
-        """Run Step 1 analysis based on configuration file"""
+    async def analyze(self, config_path: str, enhanced: bool = False):
+        """Run Step 1 analysis based on configuration file
+        
+        Args:
+            config_path: Path to configuration file
+            enhanced: Whether to use enhanced mode with multiple agents
+        """
         
         # Load configuration
         config = self._load_config(config_path)
@@ -130,7 +135,8 @@ class Step1CLI:
                 db_conn = await asyncpg.connect(db_url)
                 
                 # Create coordinator with execution mode
-                execution_mode = config.get('execution', {}).get('mode', 'standard')
+                # CLI flag overrides config file setting
+                execution_mode = 'enhanced' if enhanced else config.get('execution', {}).get('mode', 'standard')
                 coordinator = Step1Coordinator(
                     db_connection=db_conn,
                     execution_mode=execution_mode,
@@ -1503,6 +1509,7 @@ async def main():
     # Analyze command
     analyze_parser = subparsers.add_parser('analyze', help='Run Step 1 analysis')
     analyze_parser.add_argument('--config', required=True, help='Configuration file path')
+    analyze_parser.add_argument('--enhanced', action='store_true', help='Use enhanced mode with multiple agents per phase')
     
     # Demo command
     demo_parser = subparsers.add_parser('demo', help='Load pre-packaged demo analysis')
@@ -1522,7 +1529,7 @@ async def main():
     cli = Step1CLI()
     
     if args.command == 'analyze':
-        await cli.analyze(args.config)
+        await cli.analyze(args.config, enhanced=args.enhanced)
     elif args.command == 'demo':
         await cli.demo(args.name)
     elif args.command == 'export':

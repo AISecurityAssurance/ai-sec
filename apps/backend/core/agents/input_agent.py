@@ -298,6 +298,7 @@ class InputAgent:
             registry_entry = {
                 'input_id': result.input_id,
                 'filename': Path(result.source_path).name,
+                'path': result.source_path,
                 'type': result.input_type,
                 'summary': result.summary,
                 'relevance': relevance
@@ -312,10 +313,25 @@ class InputAgent:
             return
             
         try:
-            await self.db_connection.execute("""
-                INSERT INTO input_analysis (analysis_id, summary, created_at)
-                VALUES ($1, $2, $3)
-            """, self.analysis_id, json.dumps(summary), datetime.now())
+            # Store each input result individually
+            for input_entry in summary.get('input_registry', []):
+                await self.db_connection.execute("""
+                    INSERT INTO input_analysis 
+                    (analysis_id, input_name, input_type, input_path, summary, metadata, created_at)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7)
+                """, 
+                    self.analysis_id, 
+                    input_entry['filename'],
+                    input_entry['type'],
+                    input_entry.get('path', input_entry['filename']),
+                    input_entry['summary'],
+                    json.dumps({
+                        'input_id': input_entry['input_id'],
+                        'relevance': input_entry['relevance'],
+                        'summary_data': summary
+                    }),
+                    datetime.now()
+                )
         except Exception as e:
             self.logger.error(f"Failed to store input analysis: {e}")
     

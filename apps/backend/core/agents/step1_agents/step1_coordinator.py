@@ -363,11 +363,19 @@ class Step1Coordinator:
         """Synthesize loss identification results from multiple cognitive styles"""
         all_losses = []
         loss_map = {}
+        all_dependencies = []
+        dependency_map = {}
+        
+        # First, merge all the standard fields from the first result
+        base_result = results[0]["results"] if results else {}
         
         for style_result in results:
             style = style_result["cognitive_style"]
-            losses = style_result["results"].get("losses", [])
+            result_data = style_result["results"]
+            losses = result_data.get("losses", [])
+            dependencies = result_data.get("dependencies", [])
             
+            # Process losses
             for loss in losses:
                 # Create unique key for deduplication
                 key = f"{loss['loss_category']}:{loss['description'][:50]}"
@@ -381,24 +389,45 @@ class Step1Coordinator:
                 else:
                     loss_map[key]["found_by_styles"].append(style)
                     loss_map[key]["confidence"] = "very_high"
+            
+            # Process dependencies
+            for dep in dependencies:
+                dep_key = f"{dep.get('from_loss_id', '')}_{dep.get('to_loss_id', '')}"
+                if dep_key not in dependency_map:
+                    dependency_map[dep_key] = {
+                        **dep,
+                        "found_by_styles": [style]
+                    }
+                else:
+                    dependency_map[dep_key]["found_by_styles"].append(style)
         
         # Convert back to list with new identifiers
         all_losses = list(loss_map.values())
         for i, loss in enumerate(all_losses):
             loss["identifier"] = f"L-{i+1}"
         
-        return {
+        all_dependencies = list(dependency_map.values())
+        
+        # Build synthesized result with all expected fields
+        synthesized = {
             "losses": all_losses,
             "loss_count": len(all_losses),
+            "dependencies": all_dependencies,
+            "loss_categories": base_result.get("loss_categories", {}),
+            "cascade_analysis": base_result.get("cascade_analysis", {}),
+            "severity_distribution": base_result.get("severity_distribution", {}),
             "synthesis_metadata": {
                 "total_unique_losses": len(all_losses),
                 "consensus_losses": len([l for l in all_losses if len(l["found_by_styles"]) > 1]),
+                "total_dependencies": len(all_dependencies),
                 "style_contributions": {
                     style: len([l for l in all_losses if style in l["found_by_styles"]])
                     for style in set(sum([l["found_by_styles"] for l in all_losses], []))
                 }
             }
         }
+        
+        return synthesized
     
     def _synthesize_hazard_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Synthesize hazard identification results from multiple cognitive styles"""

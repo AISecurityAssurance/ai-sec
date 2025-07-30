@@ -182,12 +182,13 @@ class BaseStep1Agent(ABC):
         if self.db_connection:
             await self.db_connection.execute("""
                 INSERT INTO agent_results
-                (id, analysis_id, agent_type, results, created_at)
-                VALUES ($1, $2, $3, $4, $5)
+                (id, analysis_id, agent_type, cognitive_style, results, created_at)
+                VALUES ($1, $2, $3, $4, $5, $6)
             """,
                 str(uuid4()),
                 self.analysis_id,
                 self.get_agent_type(),
+                self.cognitive_style.value,
                 json.dumps(results),
                 datetime.now()
             )

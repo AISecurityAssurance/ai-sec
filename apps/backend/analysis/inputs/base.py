@@ -55,12 +55,16 @@ class InputProcessor:
         from .text import TextProcessor
         from .image import ImageProcessor
         from .composite import CompositeProcessor
+        from .pdf import PDFProcessor
         
         self.processors = {
             InputType.TEXT: TextProcessor(),
             InputType.IMAGE: ImageProcessor(),
             InputType.COMPOSITE: CompositeProcessor()
         }
+        
+        # Add PDF processor
+        self.pdf_processor = PDFProcessor()
     
     def detect_type(self, input_spec: Union[str, Dict[str, Any]]) -> InputType:
         """Detect input type from path or specification"""
@@ -89,6 +93,10 @@ class InputProcessor:
             if ext in ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.svg', '.webp']:
                 return InputType.IMAGE
             
+            # PDF files
+            if mime_type == 'application/pdf' or ext == '.pdf':
+                return InputType.TEXT  # PDFs are processed as text
+            
             # Text files
             if mime_type and mime_type.startswith('text/'):
                 return InputType.TEXT
@@ -103,6 +111,18 @@ class InputProcessor:
     
     def process(self, input_spec: Union[str, Dict[str, Any]], **kwargs) -> ProcessedInput:
         """Process input regardless of type"""
+        # Extract path from spec
+        if isinstance(input_spec, dict):
+            input_path = input_spec.get('path', input_spec)
+        else:
+            input_path = input_spec
+        
+        path = Path(input_path)
+        
+        # Check if it's a PDF first
+        if path.suffix.lower() == '.pdf':
+            return self.pdf_processor.process(input_path, **kwargs)
+        
         input_type = self.detect_type(input_spec)
         
         # For directories, use composite processor
@@ -120,12 +140,6 @@ class InputProcessor:
         processor = self.processors.get(input_type)
         if not processor:
             raise ValueError(f"No processor available for input type: {input_type}")
-        
-        # Extract path from spec
-        if isinstance(input_spec, dict):
-            input_path = input_spec.get('path', input_spec)
-        else:
-            input_path = input_spec
         
         return processor.process(input_path, **kwargs)
     

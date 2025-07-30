@@ -61,9 +61,9 @@ class Step1Coordinator:
                 "default": [CognitiveStyle.BALANCED],
                 "loss_identification": [CognitiveStyle.INTUITIVE, CognitiveStyle.TECHNICAL],
                 "hazard_identification": [CognitiveStyle.TECHNICAL, CognitiveStyle.SYSTEMATIC],
-                "stakeholder_analyst": [CognitiveStyle.INTUITIVE, CognitiveStyle.ANALYTICAL],
+                "stakeholder_analyst": [CognitiveStyle.INTUITIVE, CognitiveStyle.SYSTEMATIC],
                 "security_constraints": [CognitiveStyle.TECHNICAL, CognitiveStyle.CREATIVE],
-                "system_boundaries": [CognitiveStyle.SYSTEMATIC, CognitiveStyle.ANALYTICAL]
+                "system_boundaries": [CognitiveStyle.SYSTEMATIC, CognitiveStyle.TECHNICAL]
             },
             "dream_team": {
                 "default": [

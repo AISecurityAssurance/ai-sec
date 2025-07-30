@@ -6,6 +6,7 @@ import json
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 from .base_step1 import BaseStep1Agent, CognitiveStyle
+from ...utils.json_parser import RobustJSONParser
 
 
 class SecurityConstraintAgent(BaseStep1Agent):
@@ -275,23 +276,9 @@ DO NOT generate constraints without the "addresses_hazards" field - they will be
         }
     
     def _extract_json(self, text: str) -> Dict:
-        """Extract JSON from LLM response"""
-        # Try to find JSON in the response
-        import re
-        
-        # Look for JSON between ```json and ``` or just {...}
-        json_match = re.search(r'```json\s*(.*?)\s*```', text, re.DOTALL)
-        if json_match:
-            json_str = json_match.group(1)
-        else:
-            # Try to find raw JSON
-            json_match = re.search(r'\{.*\}', text, re.DOTALL)
-            if json_match:
-                json_str = json_match.group(0)
-            else:
-                raise ValueError("No JSON found in response")
-        
-        return json.loads(json_str)
+        """Extract JSON from LLM response using robust parser"""
+        parser = RobustJSONParser()
+        return parser.parse(text)
     
     def _generate_constraint_coverage(self, constraints: List[Dict], hazards: List[Dict], losses: List[Dict]) -> Dict[str, Any]:
         """Generate constraint coverage analysis"""

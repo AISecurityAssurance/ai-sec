@@ -128,11 +128,24 @@ class InputAgent:
         # Extract structured information based on type
         extracted_info = await self._extract_information(processed, classification)
         
+        # Determine display type based on actual file format
+        display_type = classification['type']
+        metadata = processed.metadata or {}
+        if metadata.get('extraction_method') and 'PDF' in metadata.get('extraction_method', ''):
+            display_type = 'PDF Document'
+        elif metadata.get('filename', '').lower().endswith('.pdf'):
+            display_type = 'PDF Document'
+        elif display_type == 'general_text':
+            display_type = 'Text Document'
+        else:
+            # Capitalize and format nicely
+            display_type = display_type.replace('_', ' ').title()
+        
         # Create result
         result = InputAnalysisResult(
             input_id=str(uuid4()),
             source_path=path,
-            input_type=classification['type'],
+            input_type=display_type,
             summary=summary,
             content=processed.content,
             metadata={
@@ -200,15 +213,28 @@ class InputAgent:
         input_type = classification.get('type', 'unknown')
         filename = processed_input.metadata.get('filename', 'unnamed')
         
+        # Check if this is a PDF
+        metadata = processed_input.metadata or {}
+        extraction_method = metadata.get('extraction_method', '')
+        
+        # Create format prefix
+        format_prefix = ""
+        if 'PDF' in extraction_method or filename.lower().endswith('.pdf'):
+            page_count = metadata.get('page_count', 0)
+            if page_count > 1:
+                format_prefix = f"Multi-page PDF ({page_count} pages) - "
+            else:
+                format_prefix = "PDF document - "
+        
         # Type-specific summaries
         if input_type == 'system_description':
-            return f"System description document detailing architecture and components"
+            return f"{format_prefix}System description document detailing architecture and components"
         elif input_type == 'architecture_diagram':
-            return f"Architecture diagram showing system structure and relationships"
+            return f"{format_prefix}Architecture diagram showing system structure and relationships"
         elif input_type == 'requirements_document':
-            return f"Requirements document specifying system constraints and needs"
+            return f"{format_prefix}Requirements document specifying system constraints and needs"
         else:
-            return f"{input_type.replace('_', ' ').title()} file for analysis"
+            return f"{format_prefix}{input_type.replace('_', ' ').title()} file for analysis"
     
     async def _extract_information(self, processed_input, classification: Dict[str, Any]) -> Dict[str, Any]:
         """

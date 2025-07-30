@@ -6,6 +6,7 @@ import json
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 from .base_step1 import BaseStep1Agent, CognitiveStyle
+from ...utils.json_parser import RobustJSONParser
 
 
 class SystemBoundaryAgent(BaseStep1Agent):
@@ -132,10 +133,10 @@ Define boundaries from these perspectives:
    - "Between database and backup storage"
 
 3. RESPONSIBILITY BOUNDARIES
-   List SPECIFIC areas of responsibility:
-   - WE OWN: "Customer account data integrity"
-   - THEY OWN: "Mobile device security"
-   - SHARED: "Transaction dispute resolution process"
+   List SPECIFIC areas of responsibility (IMPORTANT: element_name MUST start with "WE OWN:", "THEY OWN:", or "SHARED:"):
+   - WE OWN: "Customer account data integrity" → element_name: "WE OWN: Customer account data integrity"
+   - THEY OWN: "Mobile device security" → element_name: "THEY OWN: Mobile device security"
+   - SHARED: "Transaction dispute resolution process" → element_name: "SHARED: Transaction dispute resolution process"
 
 4. DATA GOVERNANCE BOUNDARIES
    List SPECIFIC data transitions:
@@ -356,22 +357,9 @@ Ensure all boundary types are covered and elements are clearly positioned."""
         }
     
     def _extract_json(self, text: str) -> Dict:
-        """Extract JSON from LLM response"""
-        import re
-        
-        # Look for JSON between ```json and ``` or just {...}
-        json_match = re.search(r'```json\s*(.*?)\s*```', text, re.DOTALL)
-        if json_match:
-            json_str = json_match.group(1)
-        else:
-            # Try to find raw JSON
-            json_match = re.search(r'\{.*\}', text, re.DOTALL)
-            if json_match:
-                json_str = json_match.group(0)
-            else:
-                raise ValueError("No JSON found in response")
-        
-        return json.loads(json_str)
+        """Extract JSON from LLM response using robust parser"""
+        parser = RobustJSONParser()
+        return parser.parse(text)
     
     def _generate_boundary_analysis(self, boundaries: List[Dict], relationships: List[Dict], summary: Dict) -> Dict[str, Any]:
         """Generate comprehensive boundary analysis"""

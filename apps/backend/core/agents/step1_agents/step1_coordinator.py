@@ -698,11 +698,30 @@ class Step1Coordinator:
         if not system_boundary and base_result.get("system_boundary"):
             system_boundary = base_result["system_boundary"]
         
+        # Ensure system_boundary has all required fields from boundary_analysis
+        boundary_analysis = base_result.get("boundary_analysis", {})
+        if system_boundary:
+            system_boundary["primary_system"] = boundary_analysis.get("primary_system", [])
+            system_boundary["system_elements"] = boundary_analysis.get("system_elements", [])
+            system_boundary["external_entities"] = boundary_analysis.get("external_entities", [])
+            system_boundary["interfaces"] = boundary_analysis.get("interfaces", [])
+            system_boundary["assumptions"] = boundary_analysis.get("assumptions", [])
+            system_boundary["exclusions"] = boundary_analysis.get("exclusions", [])
+        
+        # Generate comprehensive boundary analysis from all boundaries
+        boundary_analysis = self._generate_boundary_analysis_from_synthesis(all_boundaries)
+        
+        # Update system_boundary with analysis fields if it exists
+        if system_boundary:
+            for field in ["primary_system", "system_elements", "external_entities", "interfaces", "assumptions", "exclusions"]:
+                if field not in system_boundary or not system_boundary[field]:
+                    system_boundary[field] = boundary_analysis.get(field, [])
+        
         return {
             "system_boundaries": all_boundaries,
             "system_boundary": system_boundary,
             "boundary_count": len(all_boundaries),
-            "boundary_analysis": base_result.get("boundary_analysis", {}),
+            "boundary_analysis": boundary_analysis,
             "synthesis_metadata": {
                 "total_unique_boundaries": len(all_boundaries),
                 "consensus_boundaries": len([b for b in all_boundaries if len(b["found_by_styles"]) > 1]),
@@ -711,6 +730,55 @@ class Step1Coordinator:
                     style: len([b for b in all_boundaries if style in b["found_by_styles"]])
                     for style in set(sum([b["found_by_styles"] for b in all_boundaries], []))
                 }
+            }
+        }
+    
+    def _generate_boundary_analysis_from_synthesis(self, boundaries: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Generate boundary analysis from synthesized boundaries"""
+        primary_system = set()
+        system_elements = set()
+        external_entities = set()
+        interfaces = []
+        assumptions = []
+        exclusions = []
+        
+        for boundary in boundaries:
+            for element in boundary.get('elements', []):
+                name = element.get('element_name', '')
+                position = element.get('position', '')
+                
+                if position == 'inside':
+                    if boundary.get('boundary_type') == 'system_scope':
+                        primary_system.add(name)
+                    system_elements.add(name)
+                elif position == 'outside':
+                    external_entities.add(name)
+                elif position == 'interface':
+                    interfaces.append({
+                        'name': name,
+                        'type': element.get('element_type', 'unknown'),
+                        'description': element.get('description', '')
+                    })
+                
+                if 'assumptions' in element:
+                    for key, value in element['assumptions'].items():
+                        assumptions.append(f"{name}: {value}")
+                if 'constraints' in element:
+                    for key, value in element['constraints'].items():
+                        exclusions.append(f"{name}: {value}")
+        
+        return {
+            "primary_system": list(primary_system),
+            "system_elements": list(system_elements),
+            "external_entities": list(external_entities),
+            "interfaces": interfaces,
+            "assumptions": assumptions,
+            "exclusions": exclusions,
+            "boundary_coverage": {
+                "inside_count": len(system_elements),
+                "outside_count": len(external_entities),
+                "interface_count": len(interfaces),
+                "total_elements": len(system_elements) + len(external_entities) + len(interfaces)
             }
         }
     

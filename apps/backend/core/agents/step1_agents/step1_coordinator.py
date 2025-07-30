@@ -51,15 +51,28 @@ class Step1Coordinator:
         self.execution_mode = execution_mode
         
         # Define cognitive styles for each execution mode
+        # Standard mode uses single balanced style for all phases
+        # Enhanced mode uses phase-specific styles for richer analysis
         self.cognitive_styles_by_mode = {
-            "standard": [CognitiveStyle.BALANCED],
-            "enhanced": [CognitiveStyle.INTUITIVE, CognitiveStyle.TECHNICAL],
-            "dream_team": [
-                CognitiveStyle.INTUITIVE,
-                CognitiveStyle.TECHNICAL,
-                CognitiveStyle.CREATIVE,
-                CognitiveStyle.SYSTEMATIC
-            ]
+            "standard": {
+                "default": [CognitiveStyle.BALANCED]
+            },
+            "enhanced": {
+                "default": [CognitiveStyle.BALANCED],
+                "loss_identification": [CognitiveStyle.INTUITIVE, CognitiveStyle.TECHNICAL],
+                "hazard_identification": [CognitiveStyle.TECHNICAL, CognitiveStyle.SYSTEMATIC],
+                "stakeholder_analyst": [CognitiveStyle.INTUITIVE, CognitiveStyle.ANALYTICAL],
+                "security_constraints": [CognitiveStyle.TECHNICAL, CognitiveStyle.CREATIVE],
+                "system_boundaries": [CognitiveStyle.SYSTEMATIC, CognitiveStyle.ANALYTICAL]
+            },
+            "dream_team": {
+                "default": [
+                    CognitiveStyle.INTUITIVE,
+                    CognitiveStyle.TECHNICAL,
+                    CognitiveStyle.CREATIVE,
+                    CognitiveStyle.SYSTEMATIC
+                ]
+            }
         }
         
     async def perform_analysis(self, system_description: str, 
@@ -298,10 +311,18 @@ class Step1Coordinator:
         Returns:
             Synthesized results from all cognitive styles
         """
-        cognitive_styles = self.cognitive_styles_by_mode.get(self.execution_mode, [CognitiveStyle.BALANCED])
+        # Get cognitive styles for this execution mode and agent type
+        mode_config = self.cognitive_styles_by_mode.get(self.execution_mode, {"default": [CognitiveStyle.BALANCED]})
+        
+        # Get agent type to look up phase-specific styles
+        temp_agent = agent_class(self.analysis_id, self.db_connection)
+        agent_type = temp_agent.get_agent_type()
+        
+        # Use phase-specific styles if available, otherwise use default
+        cognitive_styles = mode_config.get(agent_type, mode_config.get("default", [CognitiveStyle.BALANCED]))
         
         if len(cognitive_styles) == 1:
-            # Standard mode - single agent
+            # Standard mode or single style - single agent
             agent = agent_class(self.analysis_id, self.db_connection, cognitive_styles[0])
             return await agent.analyze(context)
         
@@ -431,23 +452,266 @@ class Step1Coordinator:
     
     def _synthesize_hazard_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Synthesize hazard identification results from multiple cognitive styles"""
-        # Similar to loss synthesis but for hazards
-        return results[0]["results"]  # Placeholder
+        hazard_map = {}
+        hazard_loss_mappings = []
+        mapping_map = {}
+        
+        # Get base structure from first result
+        base_result = results[0]["results"] if results else {}
+        
+        for style_result in results:
+            style = style_result["cognitive_style"]
+            result_data = style_result["results"]
+            hazards = result_data.get("hazards", [])
+            mappings = result_data.get("hazard_loss_mappings", [])
+            
+            # Process hazards
+            for hazard in hazards:
+                # Create unique key for deduplication
+                key = f"{hazard.get('hazard_category', '')}:{hazard.get('description', '')[:50]}"
+                
+                if key not in hazard_map:
+                    hazard_map[key] = {
+                        **hazard,
+                        "found_by_styles": [style],
+                        "confidence": "high" if len(results) > 1 else "medium"
+                    }
+                else:
+                    hazard_map[key]["found_by_styles"].append(style)
+                    hazard_map[key]["confidence"] = "very_high"
+            
+            # Process mappings
+            for mapping in mappings:
+                map_key = f"{mapping.get('hazard_id', '')}_{mapping.get('loss_id', '')}"
+                if map_key not in mapping_map:
+                    mapping_map[map_key] = {
+                        **mapping,
+                        "found_by_styles": [style]
+                    }
+                else:
+                    mapping_map[map_key]["found_by_styles"].append(style)
+        
+        # Convert to lists with new identifiers
+        all_hazards = list(hazard_map.values())
+        for i, hazard in enumerate(all_hazards):
+            hazard["identifier"] = f"H-{i+1}"
+        
+        all_mappings = list(mapping_map.values())
+        
+        return {
+            "hazards": all_hazards,
+            "hazard_count": len(all_hazards),
+            "hazard_loss_mappings": all_mappings,
+            "hazard_categories": base_result.get("hazard_categories", {}),
+            "temporal_analysis": base_result.get("temporal_analysis", {}),
+            "synthesis_metadata": {
+                "total_unique_hazards": len(all_hazards),
+                "consensus_hazards": len([h for h in all_hazards if len(h["found_by_styles"]) > 1]),
+                "total_mappings": len(all_mappings),
+                "style_contributions": {
+                    style: len([h for h in all_hazards if style in h["found_by_styles"]])
+                    for style in set(sum([h["found_by_styles"] for h in all_hazards], []))
+                }
+            }
+        }
     
     def _synthesize_stakeholder_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Synthesize stakeholder analysis results from multiple cognitive styles"""
-        # Similar synthesis logic
-        return results[0]["results"]  # Placeholder
+        stakeholder_map = {}
+        adversary_map = {}
+        
+        # Get base structure from first result
+        base_result = results[0]["results"] if results else {}
+        
+        for style_result in results:
+            style = style_result["cognitive_style"]
+            result_data = style_result["results"]
+            stakeholders = result_data.get("stakeholders", [])
+            adversaries = result_data.get("adversaries", [])
+            
+            # Process stakeholders
+            for stakeholder in stakeholders:
+                # Create unique key
+                key = f"{stakeholder.get('stakeholder_type', '')}:{stakeholder.get('name', '')}"
+                
+                if key not in stakeholder_map:
+                    stakeholder_map[key] = {
+                        **stakeholder,
+                        "found_by_styles": [style]
+                    }
+                else:
+                    stakeholder_map[key]["found_by_styles"].append(style)
+                    # Merge any additional attributes found by different styles
+                    if "primary_needs" in stakeholder:
+                        existing_needs = stakeholder_map[key].get("primary_needs", [])
+                        new_needs = stakeholder.get("primary_needs", [])
+                        stakeholder_map[key]["primary_needs"] = list(set(existing_needs + new_needs))
+            
+            # Process adversaries
+            for adversary in adversaries:
+                key = f"{adversary.get('adversary_type', '')}:{adversary.get('sophistication', '')}"
+                
+                if key not in adversary_map:
+                    adversary_map[key] = {
+                        **adversary,
+                        "found_by_styles": [style]
+                    }
+                else:
+                    adversary_map[key]["found_by_styles"].append(style)
+        
+        # Convert to lists
+        all_stakeholders = list(stakeholder_map.values())
+        all_adversaries = list(adversary_map.values())
+        
+        return {
+            "stakeholders": all_stakeholders,
+            "stakeholder_count": len(all_stakeholders),
+            "adversaries": all_adversaries,
+            "adversary_count": len(all_adversaries),
+            "stakeholder_categories": base_result.get("stakeholder_categories", {}),
+            "influence_analysis": base_result.get("influence_analysis", {}),
+            "synthesis_metadata": {
+                "total_unique_stakeholders": len(all_stakeholders),
+                "consensus_stakeholders": len([s for s in all_stakeholders if len(s["found_by_styles"]) > 1]),
+                "total_adversaries": len(all_adversaries),
+                "style_contributions": {
+                    style: len([s for s in all_stakeholders if style in s["found_by_styles"]])
+                    for style in set(sum([s["found_by_styles"] for s in all_stakeholders], []))
+                }
+            }
+        }
     
     def _synthesize_security_constraint_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Synthesize security constraint results from multiple cognitive styles"""
-        # Similar to loss synthesis but for security constraints
-        return results[0]["results"]  # Placeholder
+        constraint_map = {}
+        mapping_map = {}
+        
+        # Get base structure from first result
+        base_result = results[0]["results"] if results else {}
+        
+        for style_result in results:
+            style = style_result["cognitive_style"]
+            result_data = style_result["results"]
+            constraints = result_data.get("security_constraints", [])
+            mappings = result_data.get("constraint_hazard_mappings", [])
+            
+            # Process constraints
+            for constraint in constraints:
+                # Create unique key
+                key = f"{constraint.get('constraint_type', '')}:{constraint.get('constraint_statement', '')[:50]}"
+                
+                if key not in constraint_map:
+                    constraint_map[key] = {
+                        **constraint,
+                        "found_by_styles": [style]
+                    }
+                else:
+                    constraint_map[key]["found_by_styles"].append(style)
+                    # If multiple styles propose same constraint, elevate importance
+                    if constraint_map[key].get("enforcement_level") == "recommended":
+                        constraint_map[key]["enforcement_level"] = "mandatory"
+            
+            # Process mappings
+            for mapping in mappings:
+                map_key = f"{mapping.get('constraint_id', '')}_{mapping.get('hazard_id', '')}"
+                if map_key not in mapping_map:
+                    mapping_map[map_key] = {
+                        **mapping,
+                        "found_by_styles": [style]
+                    }
+                else:
+                    mapping_map[map_key]["found_by_styles"].append(style)
+        
+        # Convert to lists with new identifiers
+        all_constraints = list(constraint_map.values())
+        for i, constraint in enumerate(all_constraints):
+            constraint["identifier"] = f"SC-{i+1}"
+        
+        all_mappings = list(mapping_map.values())
+        
+        return {
+            "security_constraints": all_constraints,
+            "constraint_count": len(all_constraints),
+            "constraint_hazard_mappings": all_mappings,
+            "constraint_types": base_result.get("constraint_types", {}),
+            "enforcement_analysis": base_result.get("enforcement_analysis", {}),
+            "synthesis_metadata": {
+                "total_unique_constraints": len(all_constraints),
+                "consensus_constraints": len([c for c in all_constraints if len(c["found_by_styles"]) > 1]),
+                "elevated_constraints": len([c for c in all_constraints if c.get("enforcement_level") == "mandatory" and len(c["found_by_styles"]) > 1]),
+                "style_contributions": {
+                    style: len([c for c in all_constraints if style in c["found_by_styles"]])
+                    for style in set(sum([c["found_by_styles"] for c in all_constraints], []))
+                }
+            }
+        }
     
     def _synthesize_system_boundary_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Synthesize system boundary results from multiple cognitive styles"""
-        # Similar synthesis logic for system boundaries
-        return results[0]["results"]  # Placeholder
+        boundary_map = {}
+        
+        # Get base structure from first result
+        base_result = results[0]["results"] if results else {}
+        
+        for style_result in results:
+            style = style_result["cognitive_style"]
+            result_data = style_result["results"]
+            boundaries = result_data.get("system_boundaries", [])
+            
+            # Process boundaries
+            for boundary in boundaries:
+                # Create unique key
+                key = f"{boundary.get('boundary_type', '')}:{boundary.get('boundary_name', '')}"
+                
+                if key not in boundary_map:
+                    boundary_map[key] = {
+                        **boundary,
+                        "found_by_styles": [style],
+                        "elements": boundary.get("elements", [])
+                    }
+                else:
+                    boundary_map[key]["found_by_styles"].append(style)
+                    # Merge elements from different perspectives
+                    existing_elements = boundary_map[key].get("elements", [])
+                    new_elements = boundary.get("elements", [])
+                    
+                    # Deduplicate elements by creating a map
+                    element_map = {}
+                    for elem in existing_elements + new_elements:
+                        elem_key = f"{elem.get('element_name', '')}_{elem.get('position', '')}"
+                        if elem_key not in element_map:
+                            element_map[elem_key] = elem
+                        else:
+                            # Merge attributes if same element found by multiple styles
+                            if "found_by_styles" not in element_map[elem_key]:
+                                element_map[elem_key]["found_by_styles"] = []
+                            element_map[elem_key]["found_by_styles"].append(style)
+                    
+                    boundary_map[key]["elements"] = list(element_map.values())
+        
+        # Convert to list and ensure primary boundary exists
+        all_boundaries = list(boundary_map.values())
+        
+        # Find or create system boundary (required)
+        system_boundary = next((b for b in all_boundaries if b.get("boundary_type") == "system_scope"), None)
+        if not system_boundary and base_result.get("system_boundary"):
+            system_boundary = base_result["system_boundary"]
+        
+        return {
+            "system_boundaries": all_boundaries,
+            "system_boundary": system_boundary,
+            "boundary_count": len(all_boundaries),
+            "boundary_analysis": base_result.get("boundary_analysis", {}),
+            "synthesis_metadata": {
+                "total_unique_boundaries": len(all_boundaries),
+                "consensus_boundaries": len([b for b in all_boundaries if len(b["found_by_styles"]) > 1]),
+                "boundary_types_found": list(set(b.get("boundary_type") for b in all_boundaries)),
+                "style_contributions": {
+                    style: len([b for b in all_boundaries if style in b["found_by_styles"]])
+                    for style in set(sum([b["found_by_styles"] for b in all_boundaries], []))
+                }
+            }
+        }
     
     async def _create_analysis_record(self, name: str, description: str):
         """Create initial analysis record if it doesn't exist"""

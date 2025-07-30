@@ -634,6 +634,7 @@ class Step1Coordinator:
             "constraint_count": len(all_constraints),
             "constraint_hazard_mappings": all_mappings,
             "constraint_types": base_result.get("constraint_types", {}),
+            "constraint_coverage": base_result.get("constraint_coverage", {}),
             "enforcement_analysis": base_result.get("enforcement_analysis", {}),
             "synthesis_metadata": {
                 "total_unique_constraints": len(all_constraints),

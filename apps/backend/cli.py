@@ -121,8 +121,19 @@ class Step1CLI:
             # For Step 2+, skip Step 1 execution
             if step > 1:
                 self.console.print(f"[cyan]Running Step {step} with existing Step 1 data[/cyan]")
-                # TODO: Implement Step 2 execution here
-                self.console.print("[yellow]Step 2 implementation coming soon![/yellow]")
+                
+                # Get Step 1 analysis ID from database
+                step1_analysis_id = await self._get_latest_step1_analysis_id(db_name)
+                if not step1_analysis_id:
+                    self.console.print("[red]No Step 1 analysis found in database![/red]")
+                    return None
+                    
+                # Run Step 2 analysis
+                if step == 2:
+                    await self._run_step2_analysis(db_name, step1_analysis_id, config, enhanced)
+                else:
+                    self.console.print(f"[yellow]Step {step} implementation coming soon![/yellow]")
+                    
                 return db_name
         else:
             # Create analysis database
@@ -1679,6 +1690,131 @@ class Step1CLI:
                     saved_files.append(file_path)
         
         return saved_files
+        
+    async def _get_latest_step1_analysis_id(self, db_name: str) -> Optional[str]:
+        """Get the latest Step 1 analysis ID from database."""
+        try:
+            db_host = os.getenv('DB_HOST', 'postgres')
+            db_url = f"postgresql://sa_user:sa_password@{db_host}:5432/{db_name}"
+            conn = await asyncpg.connect(db_url)
+            
+            try:
+                # Get the most recent Step 1 analysis
+                row = await conn.fetchrow(
+                    "SELECT id FROM step1_analyses ORDER BY created_at DESC LIMIT 1"
+                )
+                return row['id'] if row else None
+            finally:
+                await conn.close()
+                
+        except Exception as e:
+            self.console.print(f"[red]Error getting Step 1 analysis: {str(e)}[/red]")
+            return None
+            
+    async def _run_step2_analysis(self, db_name: str, step1_analysis_id: str, config: dict, enhanced: bool):
+        """Run Step 2 control structure analysis."""
+        from core.agents.step2_agents import Step2Coordinator
+        from core.database import DatabaseService
+        
+        # Create progress callback
+        self.current_phase = "Initializing Step 2..."
+        
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            TimeElapsedColumn(),
+            console=self.console
+        ) as progress:
+            task = progress.add_task(f"Running Step 2 Analysis - {self.current_phase}", total=None)
+            
+            try:
+                # Connect to database
+                db_host = os.getenv('DB_HOST', 'postgres')
+                db_url = f"postgresql://sa_user:sa_password@{db_host}:5432/{db_name}"
+                db_conn = await asyncpg.connect(db_url)
+                
+                # Create database service
+                db_service = DatabaseService(db_conn)
+                
+                # Create model provider based on config
+                model_provider = self._create_model_provider(config)
+                
+                # Create Step 2 coordinator
+                coordinator = Step2Coordinator(model_provider, db_service)
+                
+                # Update progress
+                progress.update(task, description="Running Step 2 Analysis - Identifying control structure...")
+                
+                # Run Step 2 analysis
+                execution_mode = 'enhanced' if enhanced else 'standard'
+                results = await coordinator.coordinate(
+                    step1_analysis_id=step1_analysis_id,
+                    execution_mode=execution_mode
+                )
+                
+                # Close database connection
+                await db_conn.close()
+                
+                # Display results
+                self._display_step2_results(results)
+                
+                # Save Step 2 results
+                await self._save_step2_results(config, results, db_name)
+                
+            except Exception as e:
+                self.console.print(f"[red]Step 2 analysis failed: {str(e)}[/red]")
+                import traceback
+                traceback.print_exc()
+                
+    def _display_step2_results(self, results: dict):
+        """Display Step 2 analysis results."""
+        self.console.print("\n[bold green]✓ Step 2 Analysis Complete![/bold green]\n")
+        
+        # Display synthesis summary
+        synthesis = results.get('synthesis', {})
+        
+        if synthesis.get('control_structure_summary'):
+            self.console.print("[bold cyan]Control Structure Summary:[/bold cyan]")
+            self.console.print(synthesis['control_structure_summary'])
+            
+        # Display key controllers
+        if synthesis.get('key_controllers'):
+            self.console.print("\n[bold cyan]Key Controllers:[/bold cyan]")
+            for controller in synthesis['key_controllers']:
+                self.console.print(f"  • {controller['name']} ({controller['identifier']})")
+                for control in controller.get('controls', []):
+                    self.console.print(f"    - Controls: {control}")
+                    
+        # Display execution time
+        exec_time = results.get('execution_time_ms', 0)
+        self.console.print(f"\n[dim]Execution time: {exec_time/1000:.1f}s[/dim]")
+        
+    async def _save_step2_results(self, config: dict, results: dict, db_name: str):
+        """Save Step 2 results to artifacts."""
+        # Create timestamp-based directory
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        output_dir = Path('artifacts') / f'step2_{db_name}_{timestamp}'
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Save Step 2 results
+        results_file = output_dir / 'step2-results.json'
+        with open(results_file, 'w') as f:
+            json.dump(results, f, indent=2, default=str)
+            
+        self.console.print(f"\n[green]Step 2 results saved to: {output_dir}[/green]")
+        
+    def _create_model_provider(self, config: dict):
+        """Create model provider based on configuration."""
+        from core.model_providers import create_model_provider
+        
+        model_config = config.get('model', {})
+        return create_model_provider(
+            provider_type=model_config.get('provider', 'openai'),
+            api_key=model_config.get('api_key', os.getenv('OPENAI_API_KEY')),
+            model_name=model_config.get('name', 'gpt-4'),
+            temperature=model_config.get('temperature', 0.7),
+            max_tokens=model_config.get('max_tokens', 4096)
+        )
 
 
 async def main():

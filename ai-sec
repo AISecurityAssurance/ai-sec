@@ -46,6 +46,12 @@ case "$1" in
         docker compose run --rm cli python cli.py analyze "${@:2}"
         ;;
         
+    "list")
+        echo -e "${GREEN}Listing available analysis databases...${NC}"
+        ensure_services
+        docker compose run --rm cli python cli.py list
+        ;;
+        
     "test")
         echo -e "${GREEN}Running Step 1 setup test...${NC}"
         ensure_services
@@ -99,6 +105,7 @@ case "$1" in
         echo "Commands:"
         echo "  demo              Load and explore pre-packaged demo analysis"
         echo "  analyze           Run Step 1 STPA-Sec analysis"
+        echo "  list              List available analysis databases"
         echo "  test              Test system setup and connectivity"
         echo "  shell             Open interactive shell in container"
         echo "  web               Start full web interface"

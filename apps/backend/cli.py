@@ -1271,6 +1271,7 @@ class Step1CLI:
             from rich.table import Table
             table = Table(title="Available Analysis Databases")
             table.add_column("Database Name", style="cyan")
+            table.add_column("Analysis Name", style="magenta")
             table.add_column("Size", style="green")
             table.add_column("Created", style="yellow")
             
@@ -1284,7 +1285,23 @@ class Step1CLI:
                 except:
                     created = "Unknown"
                 
-                table.add_row(db_name, size, created)
+                # Try to get analysis name from the database
+                analysis_name = "Unknown"
+                try:
+                    analysis_conn = await asyncpg.connect(
+                        f"postgresql://sa_user:sa_password@{db_host}:5432/{db_name}"
+                    )
+                    name_row = await analysis_conn.fetchrow(
+                        "SELECT name FROM step1_analyses ORDER BY created_at DESC LIMIT 1"
+                    )
+                    if name_row:
+                        analysis_name = name_row['name']
+                    await analysis_conn.close()
+                except:
+                    # If we can't connect or query fails, just show Unknown
+                    pass
+                
+                table.add_row(db_name, analysis_name, size, created)
             
             self.console.print(table)
             self.console.print(f"\n[dim]To use an existing database:[/dim]")

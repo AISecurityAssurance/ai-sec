@@ -1831,6 +1831,13 @@ class Step1CLI:
                 if not has_metadata:
                     migrations_to_run.append("017_step2_fixes.sql")
                     
+                # Check if system_components has identifier column
+                has_identifier = await db_conn.fetchval(
+                    "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'system_components' AND column_name = 'identifier')"
+                )
+                if not has_identifier:
+                    migrations_to_run.append("018_step2_identifier_fix.sql")
+                    
             # Run necessary migrations
             for migration_file in migrations_to_run:
                 migration_path = Path(__file__).parent / "migrations" / migration_file

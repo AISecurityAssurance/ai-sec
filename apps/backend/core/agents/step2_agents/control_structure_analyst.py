@@ -64,7 +64,7 @@ class ControlStructureAnalystAgent(BaseStep2Agent):
 Focus on natural control relationships and decision-making flows.
 Think about WHO makes decisions and WHO carries them out.
 Consider both formal and informal control structures.""",
-            CognitiveStyle.ANALYTICAL: """
+            CognitiveStyle.SYSTEMATIC: """
 Systematically decompose the system into control layers.
 Identify precise control interfaces and protocols.
 Map exact command/response patterns.""",

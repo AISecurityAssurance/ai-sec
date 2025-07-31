@@ -62,14 +62,14 @@ class Step2Coordinator:
             'standard': {
                 'control_structure_analyst': [CognitiveStyle.BALANCED],
                 'control_action_mapping': [CognitiveStyle.SYSTEMATIC],
-                'state_context_analysis': [CognitiveStyle.ANALYTICAL],
+                'state_context_analysis': [CognitiveStyle.SYSTEMATIC],
                 'feedback_mechanism': [CognitiveStyle.TECHNICAL],
                 'trust_boundary': [CognitiveStyle.SYSTEMATIC]
             },
             'enhanced': {
                 'control_structure_analyst': [CognitiveStyle.INTUITIVE, CognitiveStyle.SYSTEMATIC],
                 'control_action_mapping': [CognitiveStyle.TECHNICAL, CognitiveStyle.SYSTEMATIC],
-                'state_context_analysis': [CognitiveStyle.ANALYTICAL, CognitiveStyle.CREATIVE],
+                'state_context_analysis': [CognitiveStyle.SYSTEMATIC, CognitiveStyle.CREATIVE],
                 'feedback_mechanism': [CognitiveStyle.TECHNICAL, CognitiveStyle.INTUITIVE],
                 'trust_boundary': [CognitiveStyle.SYSTEMATIC, CognitiveStyle.CREATIVE]
             }

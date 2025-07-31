@@ -9,7 +9,28 @@ import logging
 import asyncpg
 
 from core.agents.step1_agents.base_step1 import CognitiveStyle
-from core.models.schemas import AgentResult
+from typing import Dict, Any, Optional
+from dataclasses import dataclass
+
+
+@dataclass
+class AgentResult:
+    """Result from a Step 2 agent"""
+    agent_type: str
+    success: bool
+    data: Dict[str, Any]
+    execution_time_ms: int
+    metadata: Optional[Dict[str, Any]] = None
+    
+    def dict(self):
+        """Convert to dictionary for storage"""
+        return {
+            'agent_type': self.agent_type,
+            'success': self.success,
+            'data': self.data,
+            'execution_time_ms': self.execution_time_ms,
+            'metadata': self.metadata or {}
+        }
 
 
 class BaseStep2Agent(ABC):

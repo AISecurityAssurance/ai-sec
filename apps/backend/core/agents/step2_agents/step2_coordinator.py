@@ -8,7 +8,7 @@ from datetime import datetime
 import asyncio
 
 from core.agents.step1_agents.base_step1 import CognitiveStyle
-from core.models.schemas import AgentResult
+from .base_step2 import AgentResult
 import asyncpg
 import logging
 # from core.validation import Step2Validator  # TODO: Create validation module

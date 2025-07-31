@@ -1818,19 +1818,32 @@ class Step1CLI:
                 "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'step2_analyses')"
             )
             
+            migrations_to_run = []
+            
             if not exists:
-                self.console.print("[yellow]Step 2 tables not found. Running migration...[/yellow]")
-                
-                # Run Step 2 migration
-                migration_path = Path(__file__).parent / "migrations" / "016_step2_control_structure.sql"
+                self.console.print("[yellow]Step 2 tables not found. Running migrations...[/yellow]")
+                migrations_to_run.extend(["016_step2_control_structure.sql", "017_step2_fixes.sql"])
+            else:
+                # Check if we need the fixes migration
+                has_metadata = await db_conn.fetchval(
+                    "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'step2_analyses' AND column_name = 'metadata')"
+                )
+                if not has_metadata:
+                    migrations_to_run.append("017_step2_fixes.sql")
+                    
+            # Run necessary migrations
+            for migration_file in migrations_to_run:
+                migration_path = Path(__file__).parent / "migrations" / migration_file
                 if migration_path.exists():
+                    self.console.print(f"Running migration: {migration_file}")
                     with open(migration_path, 'r') as f:
                         sql = f.read()
                         await db_conn.execute(sql)
-                    self.console.print("[green]✓ Step 2 tables created successfully[/green]")
                 else:
                     self.console.print(f"[red]Migration file not found: {migration_path}[/red]")
-                    raise FileNotFoundError(f"Migration file not found: {migration_path}")
+                    
+            if migrations_to_run:
+                self.console.print("[green]✓ Step 2 migrations completed successfully[/green]")
                     
         except Exception as e:
             self.console.print(f"[red]Error checking/creating Step 2 tables: {str(e)}[/red]")

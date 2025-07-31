@@ -13,6 +13,7 @@ CREATE TABLE step2_analyses (
     name VARCHAR NOT NULL,
     description TEXT,
     execution_mode VARCHAR DEFAULT 'standard',
+    metadata JSONB,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );

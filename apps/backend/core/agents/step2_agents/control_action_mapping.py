@@ -7,9 +7,8 @@ import json
 import uuid
 from datetime import datetime
 
-from .base_step2 import BaseStep2Agent
+from .base_step2 import BaseStep2Agent, AgentResult
 from core.agents.step1_agents.base_step1 import CognitiveStyle
-from core.models.schemas import AgentResult
 from core.utils.json_parser import parse_llm_json
 
 

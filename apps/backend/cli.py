@@ -1801,16 +1801,11 @@ class Step1CLI:
         
     def _create_model_provider(self, config: dict):
         """Create model provider based on configuration."""
-        from core.model_providers import create_model_provider
+        from core.model_providers import get_model_client
         
-        model_config = config.get('model', {})
-        return create_model_provider(
-            provider_type=model_config.get('provider', 'openai'),
-            api_key=model_config.get('api_key', os.getenv('OPENAI_API_KEY')),
-            model_name=model_config.get('name', 'gpt-4'),
-            temperature=model_config.get('temperature', 0.7),
-            max_tokens=model_config.get('max_tokens', 4096)
-        )
+        # The model is already configured via _setup_api_keys
+        # Just return the client
+        return get_model_client()
 
 
 async def main():

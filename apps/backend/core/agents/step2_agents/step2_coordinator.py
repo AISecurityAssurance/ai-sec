@@ -3,12 +3,14 @@ Step 2 Coordinator for STPA-Sec Control Structure Analysis
 """
 from typing import Dict, Any, List, Optional
 import uuid
+import json
 from datetime import datetime
 import asyncio
 
-from core.agents.base_coordinator import BaseCoordinator
-from core.types import CognitiveStyle, AgentResult
-from core.database import DatabaseService
+from core.agents.step1_agents.base_step1 import CognitiveStyle
+from core.models.schemas import AgentResult
+import asyncpg
+import logging
 # from core.validation import Step2Validator  # TODO: Create validation module
 
 from .control_structure_analyst import ControlStructureAnalystAgent
@@ -18,15 +20,16 @@ from .feedback_mechanism import FeedbackMechanismAgent
 from .trust_boundary import TrustBoundaryAgent
 
 
-class Step2Coordinator(BaseCoordinator):
+class Step2Coordinator:
     """
     Coordinates Step 2 STPA-Sec analysis agents.
     Focuses on control structure identification and analysis.
     """
     
-    def __init__(self, model_provider, db_service: DatabaseService):
-        super().__init__(model_provider)
-        self.db_service = db_service
+    def __init__(self, model_provider, db_connection: asyncpg.Connection):
+        self.model_provider = model_provider
+        self.db_connection = db_connection
+        self.logger = logging.getLogger(self.__class__.__name__)
         # self.validator = Step2Validator()  # TODO: Add validation
         
         # Define execution phases for Step 2
@@ -133,26 +136,24 @@ class Step2Coordinator(BaseCoordinator):
     async def _create_step2_analysis(self, step1_analysis_id: str, execution_mode: str) -> str:
         """Create Step 2 analysis record."""
         # Get Step 1 analysis info
-        step1_info = await self.db_service.fetch_one(
-            "SELECT name, description FROM step1_analyses WHERE id = %s",
-            (step1_analysis_id,)
+        step1_info = await self.db_connection.fetchrow(
+            "SELECT name, description FROM step1_analyses WHERE id = $1",
+            step1_analysis_id
         )
         
         analysis_id = str(uuid.uuid4())
         
-        await self.db_service.execute(
+        await self.db_connection.execute(
             """
             INSERT INTO step2_analyses 
             (id, step1_analysis_id, name, description, execution_mode)
-            VALUES (%s, %s, %s, %s, %s)
+            VALUES ($1, $2, $3, $4, $5)
             """,
-            (
-                analysis_id,
-                step1_analysis_id,
-                f"{step1_info['name']} - Step 2",
-                f"Control structure analysis for {step1_info['description']}",
-                execution_mode
-            )
+            analysis_id,
+            step1_analysis_id,
+            f"{step1_info['name']} - Step 2",
+            f"Control structure analysis for {step1_info['description']}",
+            execution_mode
         )
         
         return analysis_id
@@ -244,7 +245,7 @@ class Step2Coordinator(BaseCoordinator):
         if not agent_class:
             raise ValueError(f"Unknown agent: {agent_name}")
             
-        return agent_class(self.model_provider, self.db_service, cognitive_style)
+        return agent_class(self.model_provider, self.db_connection, cognitive_style)
         
     def _synthesize_cognitive_styles(self, agent_name: str, results: Dict[str, AgentResult]) -> AgentResult:
         """Synthesize results from multiple cognitive styles."""
@@ -351,29 +352,27 @@ class Step2Coordinator(BaseCoordinator):
         
     async def _store_agent_result(self, analysis_id: str, result: AgentResult) -> None:
         """Store individual agent result."""
-        await self.db_service.execute(
+        await self.db_connection.execute(
             """
             INSERT INTO step2_agent_results 
             (id, analysis_id, agent_type, results, execution_time_ms)
-            VALUES (%s, %s, %s, %s, %s)
+            VALUES ($1, $2, $3, $4, $5)
             """,
-            (
-                str(uuid.uuid4()),
-                analysis_id,
-                result.agent_type,
-                result.dict(),
-                result.execution_time_ms
-            )
+            str(uuid.uuid4()),
+            analysis_id,
+            result.agent_type,
+            json.dumps(result.dict()),
+            result.execution_time_ms
         )
         
     async def _store_final_results(self, analysis_id: str, synthesis: Dict[str, Any]) -> None:
         """Store final synthesis results."""
-        await self.db_service.execute(
+        await self.db_connection.execute(
             """
             UPDATE step2_analyses 
-            SET metadata = jsonb_build_object('synthesis', %s::jsonb),
+            SET metadata = jsonb_build_object('synthesis', $1::jsonb),
                 updated_at = NOW()
-            WHERE id = %s
+            WHERE id = $2
             """,
-            (synthesis, analysis_id)
+            json.dumps(synthesis), analysis_id
         )

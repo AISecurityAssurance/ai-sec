@@ -1714,7 +1714,6 @@ class Step1CLI:
     async def _run_step2_analysis(self, db_name: str, step1_analysis_id: str, config: dict, enhanced: bool):
         """Run Step 2 control structure analysis."""
         from core.agents.step2_agents import Step2Coordinator
-        from core.database import DatabaseService
         
         # Create progress callback
         self.current_phase = "Initializing Step 2..."
@@ -1733,14 +1732,11 @@ class Step1CLI:
                 db_url = f"postgresql://sa_user:sa_password@{db_host}:5432/{db_name}"
                 db_conn = await asyncpg.connect(db_url)
                 
-                # Create database service
-                db_service = DatabaseService(db_conn)
-                
                 # Create model provider based on config
                 model_provider = self._create_model_provider(config)
                 
                 # Create Step 2 coordinator
-                coordinator = Step2Coordinator(model_provider, db_service)
+                coordinator = Step2Coordinator(model_provider, db_conn)
                 
                 # Update progress
                 progress.update(task, description="Running Step 2 Analysis - Identifying control structure...")

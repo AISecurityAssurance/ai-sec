@@ -8,8 +8,9 @@ import uuid
 from datetime import datetime
 
 from .base_step2 import BaseStep2Agent
-from core.types import CognitiveStyle, AgentResult
-from core.utils import clean_json_string
+from core.agents.step1_agents.base_step1 import CognitiveStyle
+from core.models.schemas import AgentResult
+from core.utils.json_parser import parse_llm_json
 
 
 class ControlStructureAnalystAgent(BaseStep2Agent):
@@ -173,9 +174,8 @@ Identify potential control gaps or conflicts.
     def _parse_control_structure(self, response: str, step1_results: Dict[str, Any]) -> Dict[str, Any]:
         """Parse LLM response into structured components."""
         try:
-            # Clean and parse JSON
-            cleaned = clean_json_string(response)
-            data = json.loads(cleaned)
+            # Parse JSON response
+            data = parse_llm_json(response, self.logger)
             
             # Add metadata and validation
             components = {
@@ -297,80 +297,74 @@ Identify potential control gaps or conflicts.
         """Store components in database."""
         # Store controllers
         for controller in components['controllers']:
-            await self.db_service.execute(
+            await self.db_connection.execute(
                 """
                 INSERT INTO system_components 
                 (id, analysis_id, identifier, name, component_type, description, 
                  abstraction_level, source, metadata)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 """,
-                (
-                    str(uuid.uuid4()),
-                    step2_analysis_id,
-                    controller['identifier'],
-                    controller['name'],
-                    'controller',
-                    controller.get('description', ''),
-                    controller.get('abstraction_level', 'service'),
-                    controller.get('source', 'inferred'),
-                    json.dumps({
-                        'authority_level': controller.get('authority_level'),
-                        'controls': controller.get('controls', []),
-                        'stakeholder_link': controller.get('stakeholder_link'),
-                        'trust_level': controller.get('trust_level')
-                    })
-                )
+                str(uuid.uuid4()),
+                step2_analysis_id,
+                controller['identifier'],
+                controller['name'],
+                'controller',
+                controller.get('description', ''),
+                controller.get('abstraction_level', 'service'),
+                controller.get('source', 'inferred'),
+                json.dumps({
+                    'authority_level': controller.get('authority_level'),
+                    'controls': controller.get('controls', []),
+                    'stakeholder_link': controller.get('stakeholder_link'),
+                    'trust_level': controller.get('trust_level')
+                })
             )
             
         # Store controlled processes
         for process in components['controlled_processes']:
-            await self.db_service.execute(
+            await self.db_connection.execute(
                 """
                 INSERT INTO system_components 
                 (id, analysis_id, identifier, name, component_type, description, 
                  abstraction_level, source, metadata)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 """,
-                (
-                    str(uuid.uuid4()),
-                    step2_analysis_id,
-                    process['identifier'],
-                    process['name'],
-                    'controlled_process',
-                    process.get('description', ''),
-                    process.get('abstraction_level', 'service'),
-                    'system_description',
-                    json.dumps({
-                        'criticality': process.get('criticality'),
-                        'controlled_by': process.get('controlled_by', [])
-                    })
-                )
+                str(uuid.uuid4()),
+                step2_analysis_id,
+                process['identifier'],
+                process['name'],
+                'controlled_process',
+                process.get('description', ''),
+                process.get('abstraction_level', 'service'),
+                'system_description',
+                json.dumps({
+                    'criticality': process.get('criticality'),
+                    'controlled_by': process.get('controlled_by', [])
+                })
             )
             
         # Store dual-role components
         for dual in components['dual_role_components']:
-            await self.db_service.execute(
+            await self.db_connection.execute(
                 """
                 INSERT INTO system_components 
                 (id, analysis_id, identifier, name, component_type, description, 
                  abstraction_level, source, metadata)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 """,
-                (
-                    str(uuid.uuid4()),
-                    step2_analysis_id,
-                    dual['identifier'],
-                    dual['name'],
-                    'both',
-                    dual.get('description', ''),
-                    dual.get('abstraction_level', 'service'),
-                    'inferred',
-                    json.dumps({
-                        'controls': dual.get('controls', []),
-                        'controlled_by': dual.get('controlled_by', []),
-                        'rationale': dual.get('rationale', '')
-                    })
-                )
+                str(uuid.uuid4()),
+                step2_analysis_id,
+                dual['identifier'],
+                dual['name'],
+                'both',
+                dual.get('description', ''),
+                dual.get('abstraction_level', 'service'),
+                'inferred',
+                json.dumps({
+                    'controls': dual.get('controls', []),
+                    'controlled_by': dual.get('controlled_by', []),
+                    'rationale': dual.get('rationale', '')
+                })
             )
             
         # Store hierarchy relationships
@@ -380,28 +374,26 @@ Identify potential control gaps or conflicts.
             child_id = await self._get_component_id(step2_analysis_id, rel['child'])
             
             if parent_id and child_id:
-                await self.db_service.execute(
+                await self.db_connection.execute(
                     """
                     INSERT INTO control_hierarchies 
                     (id, analysis_id, parent_component_id, child_component_id, 
                      relationship_type, description)
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    VALUES ($1, $2, $3, $4, $5, $6)
                     """,
-                    (
-                        str(uuid.uuid4()),
-                        step2_analysis_id,
-                        parent_id,
-                        child_id,
-                        rel.get('relationship_type', 'supervises'),
-                        rel.get('description', '')
-                    )
+                    str(uuid.uuid4()),
+                    step2_analysis_id,
+                    parent_id,
+                    child_id,
+                    rel.get('relationship_type', 'supervises'),
+                    rel.get('description', '')
                 )
                 
     async def _get_component_id(self, analysis_id: str, identifier: str) -> Optional[str]:
         """Get component ID by identifier."""
-        result = await self.db_service.fetch_one(
-            "SELECT id FROM system_components WHERE analysis_id = %s AND identifier = %s",
-            (analysis_id, identifier)
+        result = await self.db_connection.fetchrow(
+            "SELECT id FROM system_components WHERE analysis_id = $1 AND identifier = $2",
+            analysis_id, identifier
         )
         return result['id'] if result else None
         

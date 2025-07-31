@@ -29,10 +29,16 @@ class ControlStructureAnalystAgent(BaseStep2Agent):
         prompt = self._build_control_structure_prompt(step1_results)
         
         # Get LLM response
-        response = await self.model_provider.get_completion(prompt)
+        messages = [
+            {"role": "system", "content": "You are an expert systems security analyst specializing in STPA-Sec control structure analysis."},
+            {"role": "user", "content": prompt}
+        ]
+        
+        response = await self.model_provider.generate(messages, temperature=0.7, max_tokens=4000)
+        response_text = response.content
         
         # Parse response
-        components = self._parse_control_structure(response, step1_results)
+        components = self._parse_control_structure(response_text, step1_results)
         
         # Store in database
         await self._store_components(step2_analysis_id, components)

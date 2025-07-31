@@ -1,0 +1,31 @@
+{
+  "analysis_id": "a4711d95-6e5a-4a69-96e9-6c294533f341",
+  "step1_analysis_id": "5982e974-c1d7-4c25-9c46-098dbed7eb22",
+  "execution_mode": "standard",
+  "phase_results": {
+    "control_structure": {
+      "control_structure_analyst_balanced_error": "column \"identifier\" does not exist"
+    },
+    "control_actions": {
+      "control_action_mapping": "AgentResult(agent_type='control_action_mapping', success=True, data={'control_actions': [], 'summary': 'Control action mapping not yet implemented'}, execution_time_ms=0, metadata={'cognitive_style': 'systematic'})"
+    },
+    "state_context": {
+      "state_context_analysis": "AgentResult(agent_type='state_context_analysis', success=True, data={'state_contexts': [], 'operational_modes': [], 'summary': 'State context analysis not yet implemented'}, execution_time_ms=0, metadata={'cognitive_style': 'systematic'})"
+    },
+    "feedback_trust": {
+      "feedback_mechanism": "AgentResult(agent_type='feedback_mechanism', success=True, data={'feedback_mechanisms': [], 'process_models': [], 'summary': 'Feedback mechanism analysis not yet implemented'}, execution_time_ms=0, metadata={'cognitive_style': 'technical'})",
+      "trust_boundary": "AgentResult(agent_type='trust_boundary', success=True, data={'trust_boundaries': [], 'security_implications': [], 'summary': 'Trust boundary analysis not yet implemented'}, execution_time_ms=0, metadata={'cognitive_style': 'systematic'})"
+    }
+  },
+  "synthesis": {
+    "control_structure_summary": "",
+    "key_controllers": [],
+    "critical_control_actions": [],
+    "trust_boundaries": [],
+    "feedback_loops": [],
+    "state_contexts": [],
+    "security_concerns": []
+  },
+  "execution_time_ms": 6,
+  "timestamp": "2025-07-31T04:32:50.589038"
+}

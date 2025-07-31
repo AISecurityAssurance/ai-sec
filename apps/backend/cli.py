@@ -87,13 +87,16 @@ class Step1CLI:
         # Add to root logger
         logging.getLogger().addHandler(file_handler)
         
-    async def analyze(self, config_path: str, enhanced: bool = False, input_files: List[str] = None):
+    async def analyze(self, config_path: str, enhanced: bool = False, input_files: List[str] = None, 
+                      use_database: str = None, step: int = 1):
         """Run Step 1 analysis based on configuration file
         
         Args:
             config_path: Path to configuration file
             enhanced: Whether to use enhanced mode with multiple agents
             input_files: Optional list of input files (overrides config)
+            use_database: Existing database name to use (for Step 2+ testing)
+            step: Which step to run (default: 1)
         """
         
         # Load configuration
@@ -108,8 +111,22 @@ class Step1CLI:
         # Test model configuration before creating database
         await self._verify_model_configuration()
         
-        # Create analysis database
-        db_name, timestamp = await self._create_analysis_database(config)
+        # Use existing database or create new one
+        if use_database:
+            # Use existing database for Step 2+ testing
+            db_name = use_database
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            self.console.print(f"[green]Using existing database: {db_name}[/green]")
+            
+            # For Step 2+, skip Step 1 execution
+            if step > 1:
+                self.console.print(f"[cyan]Running Step {step} with existing Step 1 data[/cyan]")
+                # TODO: Implement Step 2 execution here
+                self.console.print("[yellow]Step 2 implementation coming soon![/yellow]")
+                return db_name
+        else:
+            # Create analysis database
+            db_name, timestamp = await self._create_analysis_database(config)
         
         # Store timestamp for consistent file naming
         self._timestamp = timestamp
@@ -1228,6 +1245,56 @@ class Step1CLI:
         except Exception as e:
             self.console.print(f"[yellow]Warning: Database export failed: {e}[/yellow]")
     
+    async def list_databases(self):
+        """List available analysis databases"""
+        db_host = os.getenv('DB_HOST', 'postgres')
+        
+        try:
+            # Connect to postgres database to list all databases
+            conn = await asyncpg.connect(
+                f"postgresql://sa_user:sa_password@{db_host}:5432/postgres"
+            )
+            
+            # Query for STPA analysis databases
+            rows = await conn.fetch("""
+                SELECT datname, pg_database_size(datname) as size
+                FROM pg_database 
+                WHERE datname LIKE 'stpa_analysis_%'
+                ORDER BY datname DESC
+            """)
+            
+            if not rows:
+                self.console.print("[yellow]No analysis databases found.[/yellow]")
+                return
+            
+            # Display results in a table
+            from rich.table import Table
+            table = Table(title="Available Analysis Databases")
+            table.add_column("Database Name", style="cyan")
+            table.add_column("Size", style="green")
+            table.add_column("Created", style="yellow")
+            
+            for row in rows:
+                db_name = row['datname']
+                size = f"{row['size'] / 1024 / 1024:.1f} MB"
+                # Extract timestamp from database name
+                timestamp_str = db_name.replace('stpa_analysis_', '')
+                try:
+                    created = datetime.strptime(timestamp_str, '%Y%m%d_%H%M%S').strftime('%Y-%m-%d %H:%M:%S')
+                except:
+                    created = "Unknown"
+                
+                table.add_row(db_name, size, created)
+            
+            self.console.print(table)
+            self.console.print(f"\n[dim]To use an existing database:[/dim]")
+            self.console.print("[cyan]./ai-sec analyze --config <config> --use-database <database_name> --step 2[/cyan]")
+            
+            await conn.close()
+            
+        except Exception as e:
+            self.console.print(f"[red]Error listing databases: {e}[/red]")
+    
     async def _generate_markdown_report(self, config: dict, results: dict, output_dir: Path) -> Optional[Path]:
         """Generate markdown report from analysis results"""
         try:
@@ -1607,6 +1674,8 @@ async def main():
     analyze_parser.add_argument('--config', required=True, help='Configuration file path')
     analyze_parser.add_argument('--input', nargs='+', help='Input files to analyze (overrides config file)')
     analyze_parser.add_argument('--enhanced', action='store_true', help='Use enhanced mode with multiple agents per phase')
+    analyze_parser.add_argument('--use-database', help='Use existing database (for testing Step 2+)')
+    analyze_parser.add_argument('--step', type=int, default=1, help='Which step to run (default: 1)')
     
     # Demo command
     demo_parser = subparsers.add_parser('demo', help='Load pre-packaged demo analysis')
@@ -1617,6 +1686,9 @@ async def main():
     export_parser.add_argument('--analysis-id', required=True, help='Analysis database name')
     export_parser.add_argument('--format', choices=['json', 'csv', 'markdown'], default='json')
     
+    # List command - list available databases
+    list_parser = subparsers.add_parser('list', help='List available analysis databases')
+    
     args = parser.parse_args()
     
     if not args.command:
@@ -1626,12 +1698,20 @@ async def main():
     cli = Step1CLI()
     
     if args.command == 'analyze':
-        await cli.analyze(args.config, enhanced=args.enhanced, input_files=getattr(args, 'input', None))
+        await cli.analyze(
+            args.config, 
+            enhanced=args.enhanced, 
+            input_files=getattr(args, 'input', None),
+            use_database=getattr(args, 'use_database', None),
+            step=getattr(args, 'step', 1)
+        )
     elif args.command == 'demo':
         await cli.demo(args.name)
     elif args.command == 'export':
         # TODO: Implement export functionality
         console.print("[yellow]Export functionality coming soon![/yellow]")
+    elif args.command == 'list':
+        await cli.list_databases()
 
 
 if __name__ == "__main__":

@@ -1732,6 +1732,9 @@ class Step1CLI:
                 db_url = f"postgresql://sa_user:sa_password@{db_host}:5432/{db_name}"
                 db_conn = await asyncpg.connect(db_url)
                 
+                # Run Step 2 migration if needed
+                await self._ensure_step2_tables(db_conn)
+                
                 # Create model provider based on config
                 model_provider = self._create_model_provider(config)
                 
@@ -1806,6 +1809,32 @@ class Step1CLI:
         # The model is already configured via _setup_api_keys
         # Just return the client
         return get_model_client()
+        
+    async def _ensure_step2_tables(self, db_conn: asyncpg.Connection):
+        """Ensure Step 2 tables exist by running migration if needed."""
+        try:
+            # Check if step2_analyses table exists
+            exists = await db_conn.fetchval(
+                "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'step2_analyses')"
+            )
+            
+            if not exists:
+                self.console.print("[yellow]Step 2 tables not found. Running migration...[/yellow]")
+                
+                # Run Step 2 migration
+                migration_path = Path(__file__).parent / "migrations" / "016_step2_control_structure.sql"
+                if migration_path.exists():
+                    with open(migration_path, 'r') as f:
+                        sql = f.read()
+                        await db_conn.execute(sql)
+                    self.console.print("[green]✓ Step 2 tables created successfully[/green]")
+                else:
+                    self.console.print(f"[red]Migration file not found: {migration_path}[/red]")
+                    raise FileNotFoundError(f"Migration file not found: {migration_path}")
+                    
+        except Exception as e:
+            self.console.print(f"[red]Error checking/creating Step 2 tables: {str(e)}[/red]")
+            raise
 
 
 async def main():

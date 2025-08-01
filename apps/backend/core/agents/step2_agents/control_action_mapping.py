@@ -1,7 +1,3 @@
-"""
-Control Action Mapping Agent for Step 2 STPA-Sec
-Maps control actions between controllers and controlled processes.
-"""
 from typing import Dict, Any, List, Optional
 import json
 import uuid
@@ -32,16 +28,17 @@ class ControlActionMappingAgent(BaseStep2Agent):
         # Build prompt
         prompt = self._build_control_action_prompt(step1_results, control_structure)
         
-        # Get LLM response
+        # Get LLM response with retry logic
         messages = [
-            {"role": "system", "content": "You are an expert systems security analyst specializing in control action identification and mapping."},
+            {"role": "system", "content": "You are an expert systems security analyst who MUST respond with raw JSON only. Do NOT use markdown formatting, code blocks, or backticks. Start your response directly with { and end with }. No ```json tags. You specialize in control action identification and mapping."},
             {"role": "user", "content": prompt}
         ]
         
-        response = await self.model_provider.generate(messages, temperature=0.7, max_tokens=4000)
+        # Use the new retry method from base class
+        response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
         
         # Parse response
-        control_actions = self._parse_control_actions(response.content, control_structure)
+        control_actions = self._parse_control_actions(response_text, control_structure)
         
         # Store in database
         await self._store_control_actions(step2_analysis_id, control_actions)
@@ -95,7 +92,10 @@ class ControlActionMappingAgent(BaseStep2Agent):
 ## Identified Control Structure
 
 ### Controllers:
-"""
+
+CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks or use backticks.
+Start your response with {{ and end with }}.
+Ensure all string values properly escape newlines and quotes."""
         for controller in control_structure['controllers']:
             prompt += f"- {controller['identifier']}: {controller['name']}\n"
             
@@ -183,14 +183,17 @@ Provide your response in the following JSON format:
 
 Focus on security-critical control actions.
 Consider both intended and potential misuse cases.
-"""
+
+CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks or use backticks.
+Start your response with {{ and end with }}.
+Ensure all string values properly escape newlines and quotes."""
         
         return prompt
         
     def _parse_control_actions(self, response: str, control_structure: Dict[str, Any]) -> Dict[str, Any]:
         """Parse LLM response into control actions."""
         try:
-            data = parse_llm_json(response, self.logger)
+            data = parse_llm_json(response)
             
             # Build lookup maps
             controller_map = {c['identifier']: c['id'] for c in control_structure['controllers']}

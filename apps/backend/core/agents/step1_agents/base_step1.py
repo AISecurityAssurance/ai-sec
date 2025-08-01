@@ -17,6 +17,7 @@ from core.agents.base import BaseAnalysisAgent
 from core.models.schemas import AgentContext, AgentResult
 from core.model_providers import get_model_client, ModelResponse
 from core.utils.json_parser import parse_llm_json
+from core.utils.prompt_saver import get_prompt_saver
 from enum import Enum
 
 
@@ -224,6 +225,22 @@ class BaseStep1Agent(ABC):
         try:
             client = get_model_client()
             response = await client.generate(messages, temperature=0.7)
+            
+            # Save to PromptSaver if enabled
+            prompt_saver = get_prompt_saver()
+            if prompt_saver:
+                prompt_saver.save_prompt_response(
+                    agent_name=self.__class__.__name__.lower().replace('agent', ''),
+                    cognitive_style=self.cognitive_style.value,
+                    prompt=prompt,
+                    response=response.content,
+                    step=1,
+                    metadata={
+                        'temperature': 0.7,
+                        'has_system_prompt': system_prompt is not None
+                    }
+                )
+            
             return response.content
         except Exception as e:
             raise RuntimeError(f"LLM call failed: {str(e)}") from e

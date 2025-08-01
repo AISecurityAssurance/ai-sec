@@ -1,7 +1,3 @@
-"""
-State Context Analysis Agent for Step 2 STPA-Sec
-Analyzes when control actions are valid/invalid based on system state.
-"""
 from typing import Dict, Any, List, Optional
 import json
 import uuid
@@ -31,16 +27,16 @@ class StateContextAnalysisAgent(BaseStep2Agent):
         # Build prompt
         prompt = self._build_state_context_prompt(step1_results, control_actions)
         
-        # Get LLM response
+        # Get LLM response with retry logic
         messages = [
-            {"role": "system", "content": "You are an expert systems security analyst specializing in state-dependent control analysis."},
+            {"role": "system", "content": "You are an expert systems security analyst who MUST respond with raw JSON only. Do NOT use markdown formatting, code blocks, or backticks. Start your response directly with { and end with }. No ```json tags. You specialize in state-dependent control analysis."},
             {"role": "user", "content": prompt}
         ]
         
-        response = await self.model_provider.generate(messages, temperature=0.7, max_tokens=4000)
+        response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
         
         # Parse response
-        state_data = self._parse_state_contexts(response.content, control_actions)
+        state_data = self._parse_state_contexts(response_text, control_actions)
         
         # Store in database
         await self._store_state_contexts(step2_analysis_id, state_data)
@@ -91,7 +87,10 @@ class StateContextAnalysisAgent(BaseStep2Agent):
         prompt = f"""{base_prompt}
 
 ## Control Actions to Analyze
-"""
+
+CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks or use backticks.
+Start your response with {{ and end with }}.
+Ensure all string values properly escape newlines and quotes."""
         for action in control_actions:
             prompt += f"\n### {action['identifier']}: {action['action_name']}\n"
             prompt += f"- From: {action['controller_name']}\n"
@@ -151,7 +150,7 @@ Provide your response in the following JSON format:
 {{
     "enhanced_contexts": [
         {{
-            "control_action_id": "{action['identifier']}",
+            "control_action_id": "CA-X",
             "safe_states": [
                 {{
                     "state_name": "State description",
@@ -188,7 +187,7 @@ Provide your response in the following JSON format:
             "description": "What this mode represents",
             "entry_conditions": ["How to enter this mode"],
             "exit_conditions": ["How to leave this mode"],
-            "valid_control_actions": ["{action['identifier']}", ...],
+            "valid_control_actions": ["CA-X", "CA-Y", "..."],
             "restricted_actions": ["Actions not allowed"],
             "security_implications": "Security impact of this mode"
         }}
@@ -206,14 +205,17 @@ Provide your response in the following JSON format:
 Focus on security-critical state dependencies.
 Identify states where control could be compromised.
 Consider attacker manipulation of system state.
-"""
+
+CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks or use backticks.
+Start your response with {{ and end with }}.
+Ensure all string values properly escape newlines and quotes."""
         
         return prompt
         
     def _parse_state_contexts(self, response: str, control_actions: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Parse LLM response into state contexts."""
         try:
-            data = parse_llm_json(response, self.logger)
+            data = parse_llm_json(response)
             
             # Build action lookup map
             action_map = {a['identifier']: a['id'] for a in control_actions}

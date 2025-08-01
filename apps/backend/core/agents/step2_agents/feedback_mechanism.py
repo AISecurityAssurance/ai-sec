@@ -1,7 +1,3 @@
-"""
-Feedback Mechanism Agent for Step 2 STPA-Sec
-Identifies feedback loops from controlled processes to controllers.
-"""
 from typing import Dict, Any, List, Optional
 import json
 import uuid
@@ -32,16 +28,16 @@ class FeedbackMechanismAgent(BaseStep2Agent):
         # Build prompt
         prompt = self._build_feedback_prompt(step1_results, control_structure, control_actions)
         
-        # Get LLM response
+        # Get LLM response with retry logic
         messages = [
-            {"role": "system", "content": "You are an expert systems security analyst specializing in feedback mechanisms and observability."},
+            {"role": "system", "content": "You are an expert systems security analyst who MUST respond with raw JSON only. Do NOT use markdown formatting, code blocks, or backticks. Start your response directly with { and end with }. No ```json tags. You specialize in feedback mechanisms and observability."},
             {"role": "user", "content": prompt}
         ]
         
-        response = await self.model_provider.generate(messages, temperature=0.7, max_tokens=4000)
+        response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
         
         # Parse response
-        feedback_data = self._parse_feedback_mechanisms(response.content, control_structure)
+        feedback_data = self._parse_feedback_mechanisms(response_text, control_structure)
         
         # Store in database
         await self._store_feedback_mechanisms(step2_analysis_id, feedback_data)
@@ -105,7 +101,10 @@ class FeedbackMechanismAgent(BaseStep2Agent):
 ## Control Structure
 
 ### Controllers:
-"""
+
+CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks or use backticks.
+Start your response with {{ and end with }}.
+Ensure all string values properly escape newlines and quotes."""
         for controller in control_structure['controllers']:
             prompt += f"- {controller['identifier']}: {controller['name']}\n"
             
@@ -212,14 +211,17 @@ Provide your response in the following JSON format:
 Focus on security-critical feedback.
 Identify missing feedback that could lead to unsafe control.
 Consider how attackers might manipulate or block feedback.
-"""
+
+CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks or use backticks.
+Start your response with {{ and end with }}.
+Ensure all string values properly escape newlines and quotes."""
         
         return prompt
         
     def _parse_feedback_mechanisms(self, response: str, control_structure: Dict[str, Any]) -> Dict[str, Any]:
         """Parse LLM response into feedback mechanisms."""
         try:
-            data = parse_llm_json(response, self.logger)
+            data = parse_llm_json(response)
             
             # Build lookup maps
             component_map = {c['identifier']: c['id'] for c in control_structure['components']}

@@ -43,6 +43,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from core.agents.step1_agents import Step1Coordinator
 from core.database import create_database_pool, run_migrations
 from config.settings import settings, ModelProvider, ModelConfig, AuthMethod
+from core.utils.prompt_saver import init_prompt_saver, get_prompt_saver
 
 console = Console()
 
@@ -69,11 +70,29 @@ class Step1CLI:
         self.console = console
         self.status = None
         self._setup_logging()
+        
+    def _get_db_connection_params(self) -> Dict[str, str]:
+        """Get database connection parameters from environment"""
+        return {
+            'host': os.getenv('DB_HOST', 'postgres'),
+            'port': os.getenv('DB_PORT', '5432'),
+            'user': os.getenv('POSTGRES_USER', 'sa_user'),
+            'password': os.getenv('POSTGRES_PASSWORD', 'sa_password'),
+            'database': os.getenv('POSTGRES_DB', 'postgres')
+        }
+    
+    def _get_db_url(self, database: str = None) -> str:
+        """Get database connection URL"""
+        params = self._get_db_connection_params()
+        db_name = database or params['database']
+        return f"postgresql://{params['user']}:{params['password']}@{params['host']}:{params['port']}/{db_name}"
     
     def _setup_logging(self):
         """Set up logging to save all logs to a file"""
         # Create logs directory if it doesn't exist
-        log_dir = Path("logs")
+        # Use project root to ensure consistent location
+        project_root = Path(__file__).parent.parent.parent
+        log_dir = project_root / "logs"
         log_dir.mkdir(exist_ok=True)
         
         # Store log filename for later
@@ -88,7 +107,7 @@ class Step1CLI:
         logging.getLogger().addHandler(file_handler)
         
     async def analyze(self, config_path: str, enhanced: bool = False, input_files: List[str] = None, 
-                      use_database: str = None, step: int = 1):
+                      use_database: str = None, save_prompts: bool = False, step: int = 1):
         """Run Step 1 analysis based on configuration file
         
         Args:
@@ -128,6 +147,9 @@ class Step1CLI:
                     self.console.print("[red]No Step 1 analysis found in database![/red]")
                     return None
                     
+                # Store save_prompts flag for Step 2
+                self._save_prompts = save_prompts
+                
                 # Run Step 2 analysis
                 if step == 2:
                     await self._run_step2_analysis(db_name, step1_analysis_id, config, enhanced)
@@ -141,6 +163,8 @@ class Step1CLI:
         
         # Store timestamp for consistent file naming
         self._timestamp = timestamp
+        # Store save_prompts flag
+        self._save_prompts = save_prompts
         
         # Read system description (only if not using multi-file inputs)
         system_description = ""
@@ -159,8 +183,7 @@ class Step1CLI:
             
             try:
                 # Connect to database
-                db_host = os.getenv('DB_HOST', 'postgres')
-                db_url = f"postgresql://sa_user:sa_password@{db_host}:5432/{db_name}"
+                db_url = self._get_db_url(db_name)
                 db_conn = await asyncpg.connect(db_url)
                 
                 # Create coordinator with execution mode
@@ -265,8 +288,7 @@ class Step1CLI:
             
             try:
                 # Connect to database
-                db_host = os.getenv('DB_HOST', 'postgres')
-                db_url = f"postgresql://sa_user:sa_password@{db_host}:5432/{db_name}"
+                db_url = self._get_db_url(db_name)
                 db_conn = await asyncpg.connect(db_url)
                 
                 # Create coordinator
@@ -428,6 +450,14 @@ class Step1CLI:
             if not value:
                 self.console.print(f"[red]Error: Environment variable '{env_var_name}' not found[/red]")
                 self.console.print(f"[yellow]Please set it in your .env file or environment[/yellow]")
+                
+                # Special handling for Azure OpenAI
+                if env_var_name == "AZURE_OPENAI_API_KEY":
+                    self.console.print("[dim]Step 2 requires API access to run LLM agents for control structure analysis.[/dim]")
+                    self.console.print("[dim]You can set the environment variable with:[/dim]")
+                    self.console.print(f"[cyan]export {env_var_name}=your-api-key-here[/cyan]")
+                    self.console.print("[dim]Or add it to your .env file[/dim]")
+                
                 sys.exit(1)
             return value
         
@@ -602,9 +632,8 @@ class Step1CLI:
         
         # Create database
         # Use environment variable or default to Docker service name
-        db_host = os.getenv('DB_HOST', 'postgres')
         sys_conn = await asyncpg.connect(
-            f"postgresql://sa_user:sa_password@{db_host}:5432/postgres"
+            self._get_db_url('postgres')
         )
         
         try:
@@ -614,7 +643,7 @@ class Step1CLI:
             # Run migrations
             await sys_conn.close()
             db_conn = await asyncpg.connect(
-                f"postgresql://sa_user:sa_password@{db_host}:5432/{db_name}"
+                self._get_db_url(db_name)
             )
             
             # Run migrations (simplified for demo)
@@ -889,12 +918,17 @@ class Step1CLI:
             if not base_dir.is_absolute():
                 base_dir = project_root / base_dir
         else:
-            # Default to analysis directory at root level
-            base_dir = project_root / 'analysis'
+            # Default to analyses directory at root level
+            base_dir = project_root / 'analyses'
         
         # Create timestamped subdirectory
         output_dir = base_dir / timestamp
         output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Initialize PromptSaver if save_prompts is enabled
+        if hasattr(self, '_save_prompts') and self._save_prompts:
+            init_prompt_saver(output_dir, enabled=True)
+            self.console.print(f"[dim]PromptSaver initialized in: {output_dir}/prompts[/dim]")
         
         # Save configuration (without secrets)
         config_copy = config.copy()
@@ -934,6 +968,13 @@ class Step1CLI:
                 import shutil
                 shutil.copy2(log_source, log_dest)
                 self._saved_files.append(log_dest)
+        
+        # Create prompt index if PromptSaver is enabled
+        prompt_saver = get_prompt_saver()
+        if prompt_saver:
+            index_file = prompt_saver.create_index()
+            if index_file:
+                self._saved_files.append(index_file)
     
     def _display_results_summary(self, results: dict, execution_mode: str):
         """Display detailed analysis results like the demo"""
@@ -1210,9 +1251,25 @@ class Step1CLI:
         """Display information about saved output files"""
         if hasattr(self, '_output_dir') and hasattr(self, '_saved_files'):
             self.console.print("\n[bold]Analysis Output:[/bold]")
-            self.console.print(f"Results saved to: {self._output_dir}")
+            
+            # Get project root for relative path display
+            project_root = Path(__file__).parent.parent.parent
+            
+            # Try to show relative path from project root, otherwise show full path
+            try:
+                display_path = self._output_dir.relative_to(project_root)
+                display_path = f"./{display_path}"
+            except ValueError:
+                display_path = self._output_dir
+                
+            self.console.print(f"Results saved to: {display_path}")
+            
             for file_path in self._saved_files:
-                relative_path = file_path.relative_to(Path.cwd()) if file_path.is_relative_to(Path.cwd()) else file_path
+                try:
+                    relative_path = file_path.relative_to(project_root)
+                    relative_path = f"./{relative_path}"
+                except ValueError:
+                    relative_path = file_path
                 self.console.print(f"  • {relative_path}")
     
     
@@ -1263,7 +1320,7 @@ class Step1CLI:
         try:
             # Connect to postgres database to list all databases
             conn = await asyncpg.connect(
-                f"postgresql://sa_user:sa_password@{db_host}:5432/postgres"
+                self._get_db_url('postgres')
             )
             
             # Query for STPA analysis databases
@@ -1300,7 +1357,7 @@ class Step1CLI:
                 analysis_name = "Unknown"
                 try:
                     analysis_conn = await asyncpg.connect(
-                        f"postgresql://sa_user:sa_password@{db_host}:5432/{db_name}"
+                        self._get_db_url(db_name)
                     )
                     name_row = await analysis_conn.fetchrow(
                         "SELECT name FROM step1_analyses ORDER BY created_at DESC LIMIT 1"
@@ -1694,8 +1751,7 @@ class Step1CLI:
     async def _get_latest_step1_analysis_id(self, db_name: str) -> Optional[str]:
         """Get the latest Step 1 analysis ID from database."""
         try:
-            db_host = os.getenv('DB_HOST', 'postgres')
-            db_url = f"postgresql://sa_user:sa_password@{db_host}:5432/{db_name}"
+            db_url = self._get_db_url(db_name)
             conn = await asyncpg.connect(db_url)
             
             try:
@@ -1728,8 +1784,7 @@ class Step1CLI:
             
             try:
                 # Connect to database
-                db_host = os.getenv('DB_HOST', 'postgres')
-                db_url = f"postgresql://sa_user:sa_password@{db_host}:5432/{db_name}"
+                db_url = self._get_db_url(db_name)
                 db_conn = await asyncpg.connect(db_url)
                 
                 # Run Step 2 migration if needed
@@ -1738,8 +1793,28 @@ class Step1CLI:
                 # Create model provider based on config
                 model_provider = self._create_model_provider(config)
                 
-                # Create Step 2 coordinator
-                coordinator = Step2Coordinator(model_provider, db_conn)
+                # Determine output directory for Step 2
+                project_root = Path(__file__).parent.parent.parent
+                original_timestamp = db_name.replace('stpa_analysis_', '')
+                
+                if 'output_dir' in config['analysis']:
+                    base_dir = Path(config['analysis']['output_dir'])
+                    if not base_dir.is_absolute():
+                        base_dir = project_root / base_dir
+                else:
+                    base_dir = project_root / 'analyses'
+                
+                step1_dir = base_dir / original_timestamp
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                output_dir = step1_dir / f'step2_{timestamp}'
+                
+                # Initialize PromptSaver if save_prompts is enabled
+                if hasattr(self, '_save_prompts') and self._save_prompts:
+                    init_prompt_saver(output_dir, enabled=True)
+                    self.console.print(f"[dim]PromptSaver initialized in: {output_dir}/prompts[/dim]")
+                
+                # Create Step 2 coordinator with output directory
+                coordinator = Step2Coordinator(model_provider, db_conn, output_dir=output_dir)
                 
                 # Update progress
                 progress.update(task, description="Running Step 2 Analysis - Identifying control structure...")
@@ -1755,52 +1830,846 @@ class Step1CLI:
                 await db_conn.close()
                 
                 # Display results
+                self.console.print("[dim]Displaying Step 2 results...[/dim]")
                 self._display_step2_results(results)
                 
                 # Save Step 2 results
-                await self._save_step2_results(config, results, db_name)
+                self.console.print("[dim]Saving Step 2 results...[/dim]")
+                await self._save_step2_results(config, results, db_name, output_dir)
+                
+                # Display output files like Step 1 does
+                self._display_output_files()
+                
+                # Create prompt index if PromptSaver is enabled
+                prompt_saver = get_prompt_saver()
+                if prompt_saver:
+                    index_file = prompt_saver.create_index()
+                    if index_file:
+                        self.console.print(f"[dim]Prompt index created: {index_file}[/dim]")
                 
             except Exception as e:
                 self.console.print(f"[red]Step 2 analysis failed: {str(e)}[/red]")
                 import traceback
                 traceback.print_exc()
                 
+    def _extract_agent_result_data(self, value: Any) -> Optional[Dict[str, Any]]:
+        """Extract data from AgentResult string or dict representation."""
+        if isinstance(value, dict) and value.get('success'):
+            return value.get('data', {})
+        elif isinstance(value, str) and "AgentResult(" in value:
+            try:
+                # Find the data= section
+                data_start = value.find("data=")
+                if data_start == -1:
+                    return None
+                
+                # Find the end by looking for ", execution_time_ms="
+                exec_time_start = value.find(", execution_time_ms=", data_start)
+                if exec_time_start == -1:
+                    return None
+                
+                # Extract the data portion
+                data_portion = value[data_start + 5:exec_time_start]
+                
+                # Use ast.literal_eval to safely evaluate the Python literal
+                import ast
+                return ast.literal_eval(data_portion)
+            except Exception as e:
+                self.logger.error(f"Error extracting AgentResult data: {e}")
+                return None
+        return None
+    
     def _display_step2_results(self, results: dict):
-        """Display Step 2 analysis results."""
-        self.console.print("\n[bold green]✓ Step 2 Analysis Complete![/bold green]\n")
+        """Display Step 2 analysis results in a format consistent with Step 1."""
+        from rich.table import Table
+        from rich.panel import Panel
         
-        # Display synthesis summary
+        # Get phase results and synthesis
+        phase_results = results.get('phase_results', {})
         synthesis = results.get('synthesis', {})
         
-        if synthesis.get('control_structure_summary'):
-            self.console.print("[bold cyan]Control Structure Summary:[/bold cyan]")
-            self.console.print(synthesis['control_structure_summary'])
-            
-        # Display key controllers
+        if not phase_results and not synthesis:
+            self.console.print("[yellow]No results found in Step 2 output[/yellow]")
+            return
+        
+        # Display header panel
+        panel = Panel(
+            "[bold green]✓ Step 2: Control Structure Analysis Complete[/bold green]\n\n"
+            f"Execution Time: {results.get('execution_time_ms', 0)/1000:.1f}s\n"
+            f"Execution Mode: {results.get('execution_mode', 'standard')}",
+            title="STPA-Sec Step 2",
+            expand=False
+        )
+        self.console.print(panel)
+        
+        # 1. Key Controllers (similar to how Step 1 shows key hazards)
         if synthesis.get('key_controllers'):
-            self.console.print("\n[bold cyan]Key Controllers:[/bold cyan]")
-            for controller in synthesis['key_controllers']:
-                self.console.print(f"  • {controller['name']} ({controller['identifier']})")
-                for control in controller.get('controls', []):
-                    self.console.print(f"    - Controls: {control}")
+            self.console.print("\n[bold]Key Controllers:[/bold]")
+            for ctrl in synthesis['key_controllers'][:5]:
+                self.console.print(f"  • [cyan]{ctrl['identifier']}[/cyan]: {ctrl['name']}")
+                if ctrl.get('controls'):
+                    self.console.print(f"    Controls: {', '.join(ctrl['controls'])}")
+        
+        # 2. Critical Control Actions
+        if synthesis.get('critical_control_actions'):
+            self.console.print("\n[bold]Critical Control Actions:[/bold]")
+            for action in synthesis['critical_control_actions'][:5]:
+                self.console.print(f"  • [cyan]{action['identifier']}[/cyan]: {action['name']}")
+                self.console.print(f"    Type: {action['type']}, From: {action['from']} → To: {action['to']}")
+        
+        # 3. Summary Table (matching Step 1 style)
+        table = Table(title="Control Structure Analysis Summary", show_header=True)
+        table.add_column("Component", style="cyan", width=30)
+        table.add_column("Count", justify="right", style="green")
+        
+        # Extract counts from synthesis data which already has the aggregated results
+        controller_count = len(synthesis.get('key_controllers', []))
+        
+        # Count controlled processes from synthesis
+        process_count = 0
+        all_controllers = synthesis.get('key_controllers', [])
+        for ctrl in all_controllers:
+            process_count += len(ctrl.get('controls', []))
+        
+        # Count actions and feedback from synthesis
+        action_count = len(synthesis.get('critical_control_actions', []))
+        feedback_count = len(synthesis.get('key_feedback_mechanisms', []))
+        boundary_count = len(synthesis.get('trust_boundaries', []))
+        
+        # Add rows to summary table
+        table.add_row("Controllers Identified", str(controller_count))
+        table.add_row("Controlled Processes", str(process_count))
+        table.add_row("Control Actions", str(action_count))
+        table.add_row("Feedback Mechanisms", str(feedback_count))
+        table.add_row("Trust Boundaries", str(boundary_count))
+        table.add_row("Process Models", str(len(synthesis.get('process_models', []))))
+        table.add_row("Control Algorithms", str(len(synthesis.get('control_algorithms', []))))
+        table.add_row("Inadequate Control Scenarios", str(len(synthesis.get('inadequate_control_scenarios', []))))
+        table.add_row("Security Concerns", str(len(synthesis.get('security_concerns', []))))
+        
+        self.console.print("\n")
+        self.console.print(table)
+        
+        # 4. Security Concerns (if any)
+        if synthesis.get('security_concerns'):
+            self.console.print("\n[bold]Key Security Concerns:[/bold]")
+            for concern in synthesis['security_concerns'][:3]:
+                if isinstance(concern, dict):
+                    self.console.print(f"  • {concern.get('type', 'N/A')} ({concern.get('mode', 'N/A')})")
+                    self.console.print(f"    {concern.get('implications', 'N/A')}")
+                else:
+                    self.console.print(f"  • {concern}")
+        
+        # 5. Trust Boundary Warning (if applicable)
+        if boundary_count == 0:
+            self.console.print("\n[yellow]⚠️  Warning: No trust boundaries identified[/yellow]")
+            self.console.print("[dim]This may indicate a need for further analysis or prompt tuning[/dim]")
+        
+        # 6. Critical Inadequate Control Scenarios (if any)
+        if synthesis.get('inadequate_control_scenarios'):
+            self.console.print("\n[bold]Critical Inadequate Control Scenarios:[/bold]")
+            for scenario in synthesis['inadequate_control_scenarios'][:3]:
+                self.console.print(f"  • [red]{scenario['identifier']}[/red]: {scenario['name']}")
+                self.console.print(f"    Type: {scenario['type']}, Severity: {scenario['severity']}, Likelihood: {scenario['likelihood']}")
+        
+        # 7. Validation Results (if available)
+        validation = results.get('validation')
+        if validation:
+            self._display_step2_validation(validation)
                     
+    def _display_control_actions(self, actions: List[Dict[str, Any]]):
+        """Display control actions in a table."""
+        from rich.table import Table
+        
+        table = Table(title="Control Actions")
+        table.add_column("ID", style="cyan")
+        table.add_column("Name", style="green")
+        table.add_column("Type", style="yellow")
+        table.add_column("Authority", style="red")
+        table.add_column("From → To")
+        
+        for action in actions[:10]:  # Limit to 10
+            from_to = f"{action.get('controller_id', 'N/A')} → {action.get('controlled_process_id', 'N/A')}"
+            table.add_row(
+                action.get('identifier', 'N/A'),
+                action.get('action_name', 'N/A'),
+                action.get('action_type', 'N/A'),
+                action.get('authority_level', 'N/A'),
+                from_to
+            )
+        
+        self.console.print(table)
+        if len(actions) > 10:
+            self.console.print(f"[dim]... and {len(actions) - 10} more control actions[/dim]")
+        self.console.print()
+    
+    def _display_feedback_mechanisms(self, feedbacks: List[Dict[str, Any]]):
+        """Display feedback mechanisms in a table."""
+        from rich.table import Table
+        
+        table = Table(title="Feedback Mechanisms")
+        table.add_column("ID", style="cyan")
+        table.add_column("Name", style="green")
+        table.add_column("Type", style="yellow")
+        table.add_column("From → To")
+        
+        for fb in feedbacks[:10]:  # Limit to 10
+            from_to = f"{fb.get('source_process_id', 'N/A')} → {fb.get('target_controller_id', 'N/A')}"
+            table.add_row(
+                fb.get('identifier', 'N/A'),
+                fb.get('feedback_name', 'N/A'),
+                fb.get('information_type', 'N/A'),
+                from_to
+            )
+        
+        self.console.print(table)
+        if len(feedbacks) > 10:
+            self.console.print(f"[dim]... and {len(feedbacks) - 10} more feedback mechanisms[/dim]")
+        self.console.print()
+    
+    def _display_trust_boundaries(self, boundaries: List[Dict[str, Any]]):
+        """Display trust boundaries in a table."""
+        from rich.table import Table
+        
+        if not boundaries:
+            self.console.print("[yellow]No trust boundaries identified[/yellow]")
+            return
+        
+        table = Table(title="Trust Boundaries")
+        table.add_column("ID", style="cyan")
+        table.add_column("Name", style="green")
+        table.add_column("Type", style="yellow")
+        table.add_column("Between")
+        
+        for tb in boundaries[:10]:  # Limit to 10
+            between = f"{tb.get('component_a_id', 'N/A')} ↔ {tb.get('component_b_id', 'N/A')}"
+            table.add_row(
+                tb.get('identifier', 'N/A'),
+                tb.get('boundary_name', 'N/A'),
+                tb.get('boundary_type', 'N/A'),
+                between
+            )
+        
+        self.console.print(table)
+        if len(boundaries) > 10:
+            self.console.print(f"[dim]... and {len(boundaries) - 10} more trust boundaries[/dim]")
+        self.console.print()
+    
+    def _display_control_structure_components(self, components: Dict[str, Any]):
+        """Display control structure components in tables."""
+        from rich.table import Table
+        from rich.tree import Tree
+        from rich.panel import Panel
+        
+        # Controllers Table
+        if components.get('controllers'):
+            table = Table(title="Controllers (Decision Makers)")
+            table.add_column("ID", style="cyan")
+            table.add_column("Name", style="green")
+            table.add_column("Authority", style="yellow")
+            table.add_column("Description")
+            
+            for ctrl in components['controllers']:
+                table.add_row(
+                    ctrl.get('identifier', 'N/A'),
+                    ctrl.get('name', 'N/A'),
+                    ctrl.get('authority_level', 'N/A'),
+                    ctrl.get('description', '')[:60] + "..." if len(ctrl.get('description', '')) > 60 else ctrl.get('description', '')
+                )
+            self.console.print(table)
+            self.console.print()
+                    
+        # Controlled Processes Table
+        if components.get('controlled_processes'):
+            table = Table(title="Controlled Processes")
+            table.add_column("ID", style="cyan")
+            table.add_column("Name", style="green")
+            table.add_column("Criticality", style="red")
+            table.add_column("Description")
+            
+            for proc in components['controlled_processes']:
+                table.add_row(
+                    proc.get('identifier', 'N/A'),
+                    proc.get('name', 'N/A'),
+                    proc.get('criticality', 'N/A'),
+                    proc.get('description', '')[:60] + "..." if len(proc.get('description', '')) > 60 else proc.get('description', '')
+                )
+            self.console.print(table)
+            self.console.print()
+        
+        # Control Hierarchy Tree
+        if components.get('control_hierarchy'):
+            tree = Tree("Control Hierarchy")
+            # Build hierarchy (simplified for now)
+            for rel in components['control_hierarchy']:
+                tree.add(f"{rel.get('parent', 'N/A')} → {rel.get('child', 'N/A')}")
+            self.console.print(Panel(tree, title="Control Relationships", border_style="blue"))
+            self.console.print()
+        
+        # 2. Control Actions
+        control_actions = phase_results.get('control_actions', {})
+        if control_actions:
+            for key, value in control_actions.items():
+                data = self._extract_agent_result_data(value)
+                if data:
+                    # Handle nested structure - control_actions might contain control_actions
+                    actions = data.get('control_actions', {})
+                    if isinstance(actions, dict):
+                        actions = actions.get('control_actions', [])
+                    if actions:
+                        table = Table(title="Control Actions (Commands)")
+                        table.add_column("ID", style="cyan")
+                        table.add_column("Action", style="green")
+                        table.add_column("From → To", style="yellow")
+                        table.add_column("Type")
+                        table.add_column("Authority")
+                        
+                        for action in actions[:10]:  # Show first 10
+                            # Try to get names from the action or use IDs
+                            from_name = action.get('controller_name') or action.get('controller_id', 'N/A')
+                            to_name = action.get('process_name') or action.get('controlled_process_id', 'N/A')
+                            
+                            table.add_row(
+                                action.get('identifier', 'N/A'),
+                                action.get('action_name', 'N/A'),
+                                f"{from_name} → {to_name}",
+                                action.get('action_type', 'N/A'),
+                                action.get('authority_level', 'N/A')
+                            )
+                        if len(actions) > 10:
+                            table.add_row("...", f"({len(actions) - 10} more)", "...", "...", "...")
+                        self.console.print(table)
+                        self.console.print()
+                    break
+        
+        # 3. Feedback Mechanisms
+        feedback_trust = phase_results.get('feedback_trust', {})
+        if feedback_trust:
+            # Feedback mechanisms
+            for key, value in feedback_trust.items():
+                if 'feedback' in key:
+                    data = self._extract_agent_result_data(value)
+                    if data:
+                        feedbacks = data.get('feedback_mechanisms', [])
+                        if feedbacks:
+                            table = Table(title="Feedback Mechanisms (Information Flows)")
+                            table.add_column("ID", style="cyan")
+                            table.add_column("Feedback", style="green")
+                            table.add_column("From → To", style="yellow")
+                            table.add_column("Type")
+                            
+                            for fb in feedbacks[:10]:
+                                # Try to get names or use IDs
+                                from_name = fb.get('source_name') or fb.get('source_process_id', 'N/A')
+                                to_name = fb.get('target_name') or fb.get('target_controller_id', 'N/A')
+                                
+                                table.add_row(
+                                    fb.get('identifier', 'N/A'),
+                                    fb.get('feedback_name', 'N/A'),
+                                    f"{from_name} → {to_name}",
+                                    fb.get('information_type', 'N/A')
+                                )
+                            if len(feedbacks) > 10:
+                                table.add_row("...", f"({len(feedbacks) - 10} more)", "...", "...")
+                            self.console.print(table)
+                            self.console.print()
+                        break
+            
+            # Trust boundaries
+            for key, value in feedback_trust.items():
+                if 'trust' in key:
+                    data = self._extract_agent_result_data(value)
+                    if data:
+                        boundaries = data.get('trust_boundaries', [])
+                        if boundaries:
+                            table = Table(title="Trust Boundaries")
+                            table.add_column("ID", style="cyan")
+                            table.add_column("Boundary", style="green")
+                            table.add_column("Between", style="yellow")
+                            table.add_column("Type")
+                            
+                            for tb in boundaries[:10]:
+                                # Try to get names or use IDs
+                                comp_a = tb.get('component_a_name') or tb.get('component_a_id', 'N/A')
+                                comp_b = tb.get('component_b_name') or tb.get('component_b_id', 'N/A')
+                                
+                                table.add_row(
+                                    tb.get('identifier', 'N/A'),
+                                    tb.get('boundary_name', 'N/A'),
+                                    f"{comp_a} ↔ {comp_b}",
+                                    tb.get('boundary_type', 'N/A')
+                                )
+                            if len(boundaries) > 10:
+                                table.add_row("...", f"({len(boundaries) - 10} more)", "...", "...")
+                        self.console.print(table)
+                        self.console.print()
+                    break
+        
+        # 4. State Context and Operational Modes
+        state_context = phase_results.get('state_context', {})
+        if state_context:
+            for key, value in state_context.items():
+                data = self._extract_agent_result_data(value)
+                if data:
+                    modes = data.get('operational_modes', [])
+                    if modes:
+                        self.console.print("[bold cyan]Operational Modes:[/bold cyan]")
+                        for mode in modes[:5]:  # Show first 5
+                            self.console.print(f"  • [green]{mode.get('mode_name', 'N/A')}[/green]: {mode.get('description', 'N/A')}")
+                        if len(modes) > 5:
+                            self.console.print(f"  • [dim]... and {len(modes) - 5} more modes[/dim]")
+                        self.console.print()
+                    
+                    # Also show critical unsafe states if available
+                    contexts = data.get('state_contexts', [])
+                    critical_states = 0
+                    for ctx in contexts:
+                        unsafe = ctx.get('unsafe_states', [])
+                        critical_states += len([s for s in unsafe if s.get('severity') == 'critical'])
+                    
+                    if critical_states > 0:
+                        self.console.print(f"[bold red]Critical Unsafe States:[/bold red] {critical_states} identified")
+                        self.console.print()
+                    break
+        
+        # 5. Summary Statistics
+        # Use a simpler approach - count from the synthesis which is already properly populated
+        synthesis = results.get('synthesis', {})
+        
+        # For display purposes, we'll count unique identifiers from the synthesis
+        # and also do a simple count of identifier patterns in phase_results
+        ctrl_count = 0
+        action_count = 0
+        fb_count = 0  
+        tb_count = 0
+        
+        # Count from phase_results using simpler pattern matching
+        import re
+        phase_str = str(phase_results)
+        
+        # Count all CTRL- patterns
+        ctrl_count = len(set(re.findall(r'CTRL-\d+', phase_str)))
+        
+        # Count all CA- patterns
+        action_count = len(set(re.findall(r'CA-\d+', phase_str)))
+        
+        # Count all FB- patterns
+        fb_count = len(set(re.findall(r'FB-\d+', phase_str)))
+        
+        # Count all TB- patterns
+        tb_count = len(set(re.findall(r'TB-\d+', phase_str)))
+        
+        self.console.print("[bold cyan]Analysis Summary:[/bold cyan]")
+        self.console.print(f"  • Controllers identified: {ctrl_count}")
+        self.console.print(f"  • Control actions mapped: {action_count}")
+        self.console.print(f"  • Feedback mechanisms: {fb_count}")
+        self.console.print(f"  • Trust boundaries: {tb_count}")
+        
+        # Also show synthesis counts if available
+        synthesis = results.get('synthesis', {})
+        if synthesis:
+            key_ctrl = len(synthesis.get('key_controllers', []))
+            critical_actions = len(synthesis.get('critical_control_actions', []))
+            if key_ctrl > 0 or critical_actions > 0:
+                self.console.print(f"\n[dim]Key findings:[/dim]")
+                self.console.print(f"  • High-authority controllers: {key_ctrl}")
+                self.console.print(f"  • Mandatory control actions: {critical_actions}")
+        self.console.print()
+        
         # Display execution time
         exec_time = results.get('execution_time_ms', 0)
         self.console.print(f"\n[dim]Execution time: {exec_time/1000:.1f}s[/dim]")
+    
+    def _display_step2_validation(self, validation: Dict[str, Any]):
+        """Display Step 2 validation results."""
+        from rich.table import Table
+        from rich.panel import Panel
         
-    async def _save_step2_results(self, config: dict, results: dict, db_name: str):
+        if validation['is_complete']:
+            self.console.print("\n[green]✓ Control Structure Validation: PASSED[/green]")
+        else:
+            self.console.print("\n[red]✗ Control Structure Validation: FAILED[/red]")
+        
+        # Show summary
+        summary = validation['summary']
+        if summary['total_issues'] > 0:
+            # Create issues table
+            table = Table(title="Validation Issues", show_header=True)
+            table.add_column("Severity", style="bold", width=10)
+            table.add_column("Category", style="cyan", width=20)
+            table.add_column("Message", style="white")
+            table.add_column("Component", style="yellow")
+            
+            # Sort issues by severity
+            issues = validation['issues']
+            severity_order = {'error': 0, 'warning': 1, 'info': 2}
+            sorted_issues = sorted(issues, key=lambda x: severity_order.get(x['severity'], 99))
+            
+            # Display up to 50 most important issues
+            display_limit = 50
+            for issue in sorted_issues[:display_limit]:
+                severity = issue['severity']
+                if severity == 'error':
+                    severity_style = "[red]ERROR[/red]"
+                elif severity == 'warning':
+                    severity_style = "[yellow]WARN[/yellow]"
+                else:
+                    severity_style = "[blue]INFO[/blue]"
+                
+                table.add_row(
+                    severity_style,
+                    issue['category'],
+                    issue['message'],
+                    issue.get('component_id', '-')
+                )
+            
+            self.console.print("\n")
+            self.console.print(table)
+            
+            if len(issues) > display_limit:
+                # Save full validation report
+                if hasattr(self, '_output_dir') and self._output_dir:
+                    validation_file = self._output_dir / 'validation-issues-full.json'
+                    with open(validation_file, 'w') as f:
+                        json.dump({
+                            'total_issues': len(issues),
+                            'summary': summary,
+                            'issues': issues
+                        }, f, indent=2)
+                    
+                    self.console.print(f"\n[yellow]Total validation issues: {len(issues)}[/yellow]")
+                    self.console.print(f"[yellow]Full validation report saved to:[/yellow]")
+                    self.console.print(f"[cyan]{validation_file}[/cyan]")
+                    self.console.print("[dim]View with: cat <filename>[/dim]")
+                else:
+                    self.console.print(f"\n[dim]Total: {len(issues)} issues (showing first {display_limit})[/dim]")
+            
+            # Show summary counts
+            self.console.print(f"\n[bold]Validation Summary:[/bold]")
+            self.console.print(f"  • Errors: {summary['errors']} [red](must fix)[/red]")
+            self.console.print(f"  • Warnings: {summary['warnings']} [yellow](should fix)[/yellow]")
+            self.console.print(f"  • Info: {summary['info']} [blue](suggestions)[/blue]")
+        
+    async def _save_step2_results(self, config: dict, results: dict, db_name: str, output_dir: Path):
         """Save Step 2 results to artifacts."""
-        # Create timestamp-based directory
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        output_dir = Path('artifacts') / f'step2_{db_name}_{timestamp}'
+        # Create output directory if it doesn't exist
         output_dir.mkdir(parents=True, exist_ok=True)
         
-        # Save Step 2 results
+        # Store output info for display
+        self._output_dir = output_dir
+        self._saved_files = []
+        
+        # Save Step 2 results JSON
         results_file = output_dir / 'step2-results.json'
         with open(results_file, 'w') as f:
             json.dump(results, f, indent=2, default=str)
+        self._saved_files.append(results_file)
+        
+        # Create markdown report
+        markdown_file = output_dir / 'step2-analysis.md'
+        with open(markdown_file, 'w') as f:
+            f.write(self._generate_step2_markdown(results, config))
+        self._saved_files.append(markdown_file)
+        
+        # Create control structure diagram data
+        diagram_file = output_dir / 'control-structure-diagram.json'
+        diagram_data = self._generate_control_structure_diagram(results)
+        with open(diagram_file, 'w') as f:
+            json.dump(diagram_data, f, indent=2)
+        self._saved_files.append(diagram_file)
+        
+        # Generate visual diagrams
+        from core.visualization import ControlStructureDiagramGenerator
+        diagram_generator = ControlStructureDiagramGenerator()
+        synthesis = results.get('synthesis', {})
+        if synthesis:
+            diagram_files = diagram_generator.save_diagrams(synthesis, output_dir)
+            self._saved_files.extend(diagram_files)
+        
+        # Save synthesis report if available
+        if results.get('synthesis'):
+            synthesis_file = output_dir / 'step2-analysis-synthesis.json'
+            with open(synthesis_file, 'w') as f:
+                json.dump(results['synthesis'], f, indent=2, default=str)
+            self._saved_files.append(synthesis_file)
+        
+        # Copy log file if available
+        if hasattr(self, 'log_filename'):
+            log_source = Path("logs") / self.log_filename
+            if log_source.exists():
+                log_dest = output_dir / "step2-analysis.log"
+                import shutil
+                shutil.copy2(log_source, log_dest)
+                self._saved_files.append(log_dest)
+    
+    def _generate_step2_markdown(self, results: dict, config: dict) -> str:
+        """Generate markdown report for Step 2 results."""
+        md = []
+        md.append("# STPA-Sec Step 2: Control Structure Analysis\n")
+        md.append(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        md.append(f"**System:** {config.get('analysis', {}).get('name', 'Unknown')}\n")
+        
+        # Get phase results
+        phase_results = results.get('phase_results', {})
+        
+        # 1. Control Structure Components
+        md.append("\n## 1. Control Structure Components\n")
+        
+        control_structure = phase_results.get('control_structure', {})
+        for key, value in control_structure.items():
+            data = self._extract_agent_result_data(value)
+            if data:
+                components = data.get('components', {})
+                
+                # Controllers
+                controllers = components.get('controllers', [])
+                if controllers:
+                    md.append("\n### Controllers (Decision Makers)\n")
+                    md.append("| ID | Name | Authority Level | Description |")
+                    md.append("|---|---|---|---|")
+                    for ctrl in controllers:
+                        desc = ctrl.get('description', '')[:100] + "..." if len(ctrl.get('description', '')) > 100 else ctrl.get('description', '')
+                        md.append(f"| {ctrl.get('identifier', 'N/A')} | {ctrl.get('name', 'N/A')} | {ctrl.get('authority_level', 'N/A')} | {desc} |")
+                
+                # Controlled Processes
+                processes = components.get('controlled_processes', [])
+                if processes:
+                    md.append("\n### Controlled Processes\n")
+                    md.append("| ID | Name | Criticality | Description |")
+                    md.append("|---|---|---|---|")
+                    for proc in processes:
+                        desc = proc.get('description', '')[:100] + "..." if len(proc.get('description', '')) > 100 else proc.get('description', '')
+                        md.append(f"| {proc.get('identifier', 'N/A')} | {proc.get('name', 'N/A')} | {proc.get('criticality', 'N/A')} | {desc} |")
+                
+                # Hierarchy
+                hierarchy = components.get('control_hierarchy', [])
+                if hierarchy:
+                    md.append("\n### Control Hierarchy\n")
+                    for rel in hierarchy:
+                        md.append(f"- {rel.get('parent', 'N/A')} → {rel.get('child', 'N/A')} ({rel.get('relationship_type', 'controls')})")
+                
+                break
+        
+        # 2. Control Actions
+        md.append("\n## 2. Control Actions\n")
+        
+        control_actions = phase_results.get('control_actions', {})
+        for key, value in control_actions.items():
+            data = self._extract_agent_result_data(value)
+            if data:
+                actions = data.get('control_actions', {})
+                if isinstance(actions, dict):
+                    actions = actions.get('control_actions', [])
+                if actions:
+                    md.append("| ID | Action | From → To | Type | Description |")
+                    md.append("|---|---|---|---|---|")
+                    for action in actions[:20]:  # Limit to 20
+                        desc = action.get('action_description', '')[:80] + "..." if len(action.get('action_description', '')) > 80 else action.get('action_description', '')
+                        md.append(f"| {action.get('identifier', 'N/A')} | {action.get('action_name', 'N/A')} | {action.get('controller_id', 'N/A')} → {action.get('controlled_process_id', 'N/A')} | {action.get('action_type', 'N/A')} | {desc} |")
+                    if len(actions) > 20:
+                        md.append(f"\n*... and {len(actions) - 20} more control actions*")
+                break
+        
+        # 3. Feedback Mechanisms
+        md.append("\n## 3. Feedback Mechanisms\n")
+        
+        feedback_trust = phase_results.get('feedback_trust', {})
+        for key, value in feedback_trust.items():
+            if 'feedback' in key:
+                data = self._extract_agent_result_data(value)
+                if data:
+                    feedbacks = data.get('feedback_mechanisms', [])
+                    if feedbacks:
+                        md.append("| ID | Feedback | From → To | Type | Content |")
+                        md.append("|---|---|---|---|---|")
+                        for fb in feedbacks[:20]:
+                            content = fb.get('information_content', '')[:80] + "..." if len(fb.get('information_content', '')) > 80 else fb.get('information_content', '')
+                            md.append(f"| {fb.get('identifier', 'N/A')} | {fb.get('feedback_name', 'N/A')} | {fb.get('source_process_id', 'N/A')} → {fb.get('target_controller_id', 'N/A')} | {fb.get('information_type', 'N/A')} | {content} |")
+                        if len(feedbacks) > 20:
+                            md.append(f"\n*... and {len(feedbacks) - 20} more feedback mechanisms*")
+                    break
+        
+        # 4. Trust Boundaries
+        md.append("\n## 4. Trust Boundaries\n")
+        
+        for key, value in feedback_trust.items():
+            if 'trust' in key:
+                data = self._extract_agent_result_data(value)
+                if data:
+                    boundaries = data.get('trust_boundaries', [])
+                    if boundaries:
+                        md.append("| ID | Boundary | Between | Type | Auth Method |")
+                        md.append("|---|---|---|---|---|")
+                        for tb in boundaries[:20]:
+                            md.append(f"| {tb.get('identifier', 'N/A')} | {tb.get('boundary_name', 'N/A')} | {tb.get('component_a_id', 'N/A')} ↔ {tb.get('component_b_id', 'N/A')} | {tb.get('boundary_type', 'N/A')} | {tb.get('authentication_method', 'N/A')} |")
+                        if len(boundaries) > 20:
+                            md.append(f"\n*... and {len(boundaries) - 20} more trust boundaries*")
+                    break
+        
+        # 5. Operational Modes
+        md.append("\n## 5. Operational Modes and State Context\n")
+        
+        state_context = phase_results.get('state_context', {})
+        for key, value in state_context.items():
+            data = self._extract_agent_result_data(value)
+            if data:
+                modes = data.get('operational_modes', [])
+                if modes:
+                    for mode in modes:
+                        md.append(f"\n### {mode.get('mode_name', 'N/A')}")
+                        md.append(f"**Description:** {mode.get('description', 'N/A')}")
+                        if mode.get('entry_conditions'):
+                            md.append(f"**Entry Conditions:** {mode.get('entry_conditions')}")
+                        if mode.get('exit_conditions'):
+                            md.append(f"**Exit Conditions:** {mode.get('exit_conditions')}")
+                break
+        
+        # 6. Security Concerns
+        synthesis = results.get('synthesis', {})
+        if synthesis.get('security_concerns'):
+            md.append("\n## 6. Key Security Concerns\n")
+            for concern in synthesis['security_concerns']:
+                if isinstance(concern, dict):
+                    md.append(f"- **{concern.get('type', 'N/A')}** ({concern.get('mode', 'N/A')}): {concern.get('implications', 'N/A')}")
+                    if concern.get('restricted_actions'):
+                        md.append(f"  - Restricted Actions: {', '.join(concern.get('restricted_actions', []))}")
+                else:
+                    md.append(f"- {concern}")
+        
+        # 7. Process Models and Control Algorithms
+        process_models = phase_results.get('process_models', {})
+        if process_models:
+            md.append("\n## 7. Process Models and Control Algorithms\n")
             
-        self.console.print(f"\n[green]Step 2 results saved to: {output_dir}[/green]")
+            for key, value in process_models.items():
+                data = self._extract_agent_result_data(value)
+                if data:
+                    # Process Models
+                    models = data.get('process_models', [])
+                    if models:
+                        md.append("\n### Process Models\n")
+                        md.append("| ID | Controller | Process | Staleness Risk | State Variables |")
+                        md.append("|---|---|---|---|---|")
+                        for model in models[:10]:
+                            var_count = len(model.get('state_variables', []))
+                            md.append(f"| {model.get('identifier', 'N/A')} | {model.get('controller_id', 'N/A')} | {model.get('process_id', 'N/A')} | {model.get('staleness_risk', 'N/A')} | {var_count} variables |")
+                        if len(models) > 10:
+                            md.append(f"\n*... and {len(models) - 10} more process models*")
+                    
+                    # Control Algorithms
+                    algorithms = data.get('control_algorithms', [])
+                    if algorithms:
+                        md.append("\n### Control Algorithms\n")
+                        md.append("| ID | Name | Controller | Constraints | Decision Logic |")
+                        md.append("|---|---|---|---|---|")
+                        for alg in algorithms[:10]:
+                            constraints_count = len(alg.get('constraints', []))
+                            logic = alg.get('decision_logic', '')[:80] + "..." if len(alg.get('decision_logic', '')) > 80 else alg.get('decision_logic', '')
+                            md.append(f"| {alg.get('identifier', 'N/A')} | {alg.get('name', 'N/A')} | {alg.get('controller_id', 'N/A')} | {constraints_count} constraints | {logic} |")
+                        if len(algorithms) > 10:
+                            md.append(f"\n*... and {len(algorithms) - 10} more control algorithms*")
+                    
+                    # Inadequate Control Scenarios
+                    scenarios = data.get('inadequate_control_scenarios', [])
+                    if scenarios:
+                        md.append("\n### Inadequate Control Scenarios\n")
+                        md.append("| ID | Name | Type | Severity | Likelihood |")
+                        md.append("|---|---|---|---|---|")
+                        for scenario in scenarios[:15]:
+                            md.append(f"| {scenario.get('identifier', 'N/A')} | {scenario.get('name', 'N/A')} | {scenario.get('type', 'N/A')} | {scenario.get('severity', 'N/A')} | {scenario.get('likelihood', 'N/A')} |")
+                        if len(scenarios) > 15:
+                            md.append(f"\n*... and {len(scenarios) - 15} more scenarios*")
+                    break
+        
+        # Summary
+        md.append("\n## Analysis Summary\n")
+        md.append(f"- **Execution Time:** {results.get('execution_time_ms', 0)/1000:.1f}s")
+        md.append(f"- **Analysis Mode:** {results.get('execution_mode', 'standard')}")
+        
+        return '\n'.join(md)
+    
+    def _generate_control_structure_diagram(self, results: dict) -> dict:
+        """Generate control structure diagram data for visualization."""
+        diagram = {
+            "nodes": [],
+            "edges": [],
+            "metadata": {
+                "generated": datetime.now().isoformat(),
+                "analysis_id": results.get('analysis_id', '')
+            }
+        }
+        
+        # Extract components from successful results
+        phase_results = results.get('phase_results', {})
+        control_structure = phase_results.get('control_structure', {})
+        
+        # Process control structure
+        for key, value in control_structure.items():
+            if isinstance(value, dict) and value.get('success'):
+                components = value.get('data', {}).get('components', {})
+                
+                # Add controllers as nodes
+                for ctrl in components.get('controllers', []):
+                    diagram["nodes"].append({
+                        "id": ctrl.get('identifier', ''),
+                        "name": ctrl.get('name', ''),
+                        "type": "controller",
+                        "authority_level": ctrl.get('authority_level', ''),
+                        "description": ctrl.get('description', '')
+                    })
+                
+                # Add controlled processes as nodes
+                for proc in components.get('controlled_processes', []):
+                    diagram["nodes"].append({
+                        "id": proc.get('identifier', ''),
+                        "name": proc.get('name', ''),
+                        "type": "controlled_process",
+                        "criticality": proc.get('criticality', ''),
+                        "description": proc.get('description', '')
+                    })
+                
+                # Add hierarchy as edges
+                for rel in components.get('control_hierarchy', []):
+                    diagram["edges"].append({
+                        "from": rel.get('parent_id', ''),
+                        "to": rel.get('child_id', ''),
+                        "type": "hierarchy",
+                        "relationship": rel.get('relationship_type', 'controls')
+                    })
+                
+                break
+        
+        # Add control actions as edges
+        control_actions = phase_results.get('control_actions', {})
+        for key, value in control_actions.items():
+            if isinstance(value, dict) and value.get('success'):
+                actions = value.get('data', {}).get('control_actions', [])
+                for action in actions:
+                    diagram["edges"].append({
+                        "from": action.get('controller_id', ''),
+                        "to": action.get('process_id', ''),
+                        "type": "control_action",
+                        "label": action.get('action_name', ''),
+                        "action_type": action.get('action_type', '')
+                    })
+                break
+        
+        # Add feedback as edges
+        feedback_trust = phase_results.get('feedback_trust', {})
+        for key, value in feedback_trust.items():
+            if 'feedback' in key and isinstance(value, dict) and value.get('success'):
+                feedbacks = value.get('data', {}).get('feedback_mechanisms', [])
+                for fb in feedbacks:
+                    diagram["edges"].append({
+                        "from": fb.get('source_id', ''),
+                        "to": fb.get('target_id', ''),
+                        "type": "feedback",
+                        "label": fb.get('feedback_name', ''),
+                        "info_type": fb.get('information_type', '')
+                    })
+                break
+        
+        return diagram
         
     def _create_model_provider(self, config: dict):
         """Create model provider based on configuration."""
@@ -1832,11 +2701,33 @@ class Step1CLI:
                     migrations_to_run.append("017_step2_fixes.sql")
                     
                 # Check if system_components has identifier column
-                has_identifier = await db_conn.fetchval(
-                    "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'system_components' AND column_name = 'identifier')"
-                )
-                if not has_identifier:
-                    migrations_to_run.append("018_step2_identifier_fix.sql")
+                has_identifier = False
+                components_table_exists = False
+                try:
+                    # Check if table exists first
+                    components_table_exists = await db_conn.fetchval(
+                        "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'system_components')"
+                    )
+                    if components_table_exists:
+                        # Try a simple query to see if identifier column exists
+                        await db_conn.fetchval("SELECT identifier FROM system_components LIMIT 1")
+                        has_identifier = True
+                except Exception as e:
+                    if "column" in str(e) and "identifier" in str(e):
+                        # Column doesn't exist
+                        has_identifier = False
+                        
+                if not has_identifier and components_table_exists:
+                    # Table exists but missing identifier column - try to add it first
+                    self.console.print("[yellow]Identifier column missing. Attempting to add it...[/yellow]")
+                    migrations_to_run.append("020_step2_ensure_identifier.sql")
+            
+            # Check for process_models table
+            process_models_exists = await db_conn.fetchval(
+                "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'process_models')"
+            )
+            if not process_models_exists:
+                migrations_to_run.append("021_process_models.sql")
                     
             # Run necessary migrations
             for migration_file in migrations_to_run:
@@ -1851,6 +2742,13 @@ class Step1CLI:
                     
             if migrations_to_run:
                 self.console.print("[green]✓ Step 2 migrations completed successfully[/green]")
+                
+            # Diagnostic: Check what columns exist in system_components
+            if exists:
+                columns = await db_conn.fetch(
+                    "SELECT column_name FROM information_schema.columns WHERE table_name = 'system_components' ORDER BY ordinal_position"
+                )
+                self.console.print(f"[dim]system_components columns: {[col['column_name'] for col in columns]}[/dim]")
                     
         except Exception as e:
             self.console.print(f"[red]Error checking/creating Step 2 tables: {str(e)}[/red]")
@@ -1869,6 +2767,7 @@ async def main():
     analyze_parser.add_argument('--enhanced', action='store_true', help='Use enhanced mode with multiple agents per phase')
     analyze_parser.add_argument('--use-database', help='Use existing database (for testing Step 2+)')
     analyze_parser.add_argument('--step', type=int, default=1, help='Which step to run (default: 1)')
+    analyze_parser.add_argument('--save-prompts', action='store_true', help='Save all LLM prompts and responses for debugging')
     
     # Demo command
     demo_parser = subparsers.add_parser('demo', help='Load pre-packaged demo analysis')
@@ -1896,6 +2795,7 @@ async def main():
             enhanced=args.enhanced, 
             input_files=getattr(args, 'input', None),
             use_database=getattr(args, 'use_database', None),
+            save_prompts=getattr(args, 'save_prompts', False),
             step=getattr(args, 'step', 1)
         )
     elif args.command == 'demo':

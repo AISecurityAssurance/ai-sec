@@ -1,7 +1,3 @@
-"""
-Trust Boundary Agent for Step 2 STPA-Sec
-Identifies trust boundaries and security perimeters between components.
-"""
 from typing import Dict, Any, List, Optional
 import json
 import uuid
@@ -34,16 +30,16 @@ class TrustBoundaryAgent(BaseStep2Agent):
         prompt = self._build_trust_boundary_prompt(step1_results, control_structure, 
                                                   control_actions, feedback_mechanisms)
         
-        # Get LLM response
+        # Get LLM response with retry logic
         messages = [
-            {"role": "system", "content": "You are an expert systems security analyst specializing in trust boundaries and security perimeters."},
+            {"role": "system", "content": "You are an expert systems security analyst specializing in trust boundaries and security perimeters. You MUST respond with raw JSON only. Do NOT use markdown formatting, code blocks, or backticks. Start your response directly with { and end with }. No ```json tags."},
             {"role": "user", "content": prompt}
         ]
         
-        response = await self.model_provider.generate(messages, temperature=0.7, max_tokens=4000)
+        response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
         
         # Parse response
-        trust_data = self._parse_trust_boundaries(response.content, control_structure)
+        trust_data = self._parse_trust_boundaries(response_text, control_structure)
         
         # Store in database
         await self._store_trust_boundaries(step2_analysis_id, trust_data)
@@ -123,7 +119,10 @@ class TrustBoundaryAgent(BaseStep2Agent):
         prompt = f"""{base_prompt}
 
 ## Control Structure Components
-"""
+
+CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks or use backticks.
+Start your response with {{ and end with }}.
+Ensure all string values properly escape newlines and quotes."""
         for component in control_structure['components']:
             prompt += f"- {component['identifier']}: {component['name']} ({component['component_type']})\n"
             
@@ -231,14 +230,17 @@ Provide your response in the following JSON format:
 Focus on security-critical trust boundaries.
 Identify where trust assumptions might be violated.
 Consider insider threats and compromised components.
-"""
+
+CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks or use backticks.
+Start your response with {{ and end with }}.
+Ensure all string values properly escape newlines and quotes."""
         
         return prompt
         
     def _parse_trust_boundaries(self, response: str, control_structure: Dict[str, Any]) -> Dict[str, Any]:
         """Parse LLM response into trust boundaries."""
         try:
-            data = parse_llm_json(response, self.logger)
+            data = parse_llm_json(response)
             
             # Build lookup map
             component_map = {c['identifier']: c['id'] for c in control_structure['components']}

@@ -8,6 +8,7 @@ import uuid
 from datetime import datetime
 
 from .base_step2 import BaseStep2Agent, AgentResult
+from .db_compat import Step2DBCompat
 from core.agents.step1_agents.base_step1 import CognitiveStyle
 from core.utils.json_parser import parse_llm_json
 
@@ -28,14 +29,14 @@ class ControlStructureAnalystAgent(BaseStep2Agent):
         # Build prompt for control structure identification
         prompt = self._build_control_structure_prompt(step1_results)
         
-        # Get LLM response
+        # Get LLM response with retry logic
         messages = [
-            {"role": "system", "content": "You are an expert systems security analyst specializing in STPA-Sec control structure analysis."},
+            {"role": "system", "content": "You are an expert systems security analyst specializing in STPA-Sec control structure analysis. You MUST respond with raw JSON only. Do NOT use markdown formatting, code blocks, or backticks. Start your response directly with { and end with }. No ```json tags."},
             {"role": "user", "content": prompt}
         ]
         
-        response = await self.model_provider.generate(messages, temperature=0.7, max_tokens=4000)
-        response_text = response.content
+        # Use the new retry method from base class
+        response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
         
         # Parse response
         components = self._parse_control_structure(response_text, step1_results)
@@ -172,6 +173,10 @@ Provide your response in the following JSON format:
 Focus on security-relevant control relationships.
 Ensure all critical functions have associated controllers.
 Identify potential control gaps or conflicts.
+
+CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks or use backticks.
+Start your response with {{ and end with }}.
+Ensure all string values properly escape newlines and quotes.
 """
         
         return prompt
@@ -180,7 +185,7 @@ Identify potential control gaps or conflicts.
         """Parse LLM response into structured components."""
         try:
             # Parse JSON response
-            data = parse_llm_json(response, self.logger)
+            data = parse_llm_json(response)
             
             # Add metadata and validation
             components = {
@@ -300,77 +305,74 @@ Identify potential control gaps or conflicts.
                     
     async def _store_components(self, step2_analysis_id: str, components: Dict[str, Any]) -> None:
         """Store components in database."""
+        # Create compatibility layer
+        db_compat = Step2DBCompat(self.db_connection)
+        
         # Store controllers
         for controller in components['controllers']:
-            await self.db_connection.execute(
-                """
-                INSERT INTO system_components 
-                (id, analysis_id, identifier, name, component_type, description, 
-                 abstraction_level, source, metadata)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-                """,
-                str(uuid.uuid4()),
-                step2_analysis_id,
-                controller['identifier'],
-                controller['name'],
-                'controller',
-                controller.get('description', ''),
-                controller.get('abstraction_level', 'service'),
-                controller.get('source', 'inferred'),
-                json.dumps({
-                    'authority_level': controller.get('authority_level'),
-                    'controls': controller.get('controls', []),
-                    'stakeholder_link': controller.get('stakeholder_link'),
-                    'trust_level': controller.get('trust_level')
-                })
-            )
+            try:
+                await db_compat.insert_component(
+                    component_id=str(uuid.uuid4()),
+                    analysis_id=step2_analysis_id,
+                    identifier=controller['identifier'],
+                    name=controller['name'],
+                    component_type='controller',
+                    description=controller.get('description', ''),
+                    abstraction_level=controller.get('abstraction_level', 'service'),
+                    source=controller.get('source', 'inferred'),
+                    metadata={
+                        'authority_level': controller.get('authority_level'),
+                        'controls': controller.get('controls', []),
+                        'stakeholder_link': controller.get('stakeholder_link'),
+                        'trust_level': controller.get('trust_level')
+                    }
+                )
+            except Exception as e:
+                self.logger.error(f"Error storing controller {controller['name']}: {e}")
+                raise
             
         # Store controlled processes
         for process in components['controlled_processes']:
-            await self.db_connection.execute(
-                """
-                INSERT INTO system_components 
-                (id, analysis_id, identifier, name, component_type, description, 
-                 abstraction_level, source, metadata)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-                """,
-                str(uuid.uuid4()),
-                step2_analysis_id,
-                process['identifier'],
-                process['name'],
-                'controlled_process',
-                process.get('description', ''),
-                process.get('abstraction_level', 'service'),
-                'system_description',
-                json.dumps({
-                    'criticality': process.get('criticality'),
-                    'controlled_by': process.get('controlled_by', [])
-                })
-            )
+            try:
+                await db_compat.insert_component(
+                    component_id=str(uuid.uuid4()),
+                    analysis_id=step2_analysis_id,
+                    identifier=process['identifier'],
+                    name=process['name'],
+                    component_type='controlled_process',
+                    description=process.get('description', ''),
+                    abstraction_level=process.get('abstraction_level', 'service'),
+                    source='system_description',
+                    metadata={
+                        'criticality': process.get('criticality'),
+                        'controlled_by': process.get('controlled_by', [])
+                    }
+                )
+            except Exception as e:
+                self.logger.error(f"Error storing process {process['name']}: {e}")
+                raise
             
         # Store dual-role components
         for dual in components['dual_role_components']:
-            await self.db_connection.execute(
-                """
-                INSERT INTO system_components 
-                (id, analysis_id, identifier, name, component_type, description, 
-                 abstraction_level, source, metadata)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-                """,
-                str(uuid.uuid4()),
-                step2_analysis_id,
-                dual['identifier'],
-                dual['name'],
-                'both',
-                dual.get('description', ''),
-                dual.get('abstraction_level', 'service'),
-                'inferred',
-                json.dumps({
-                    'controls': dual.get('controls', []),
-                    'controlled_by': dual.get('controlled_by', []),
-                    'rationale': dual.get('rationale', '')
-                })
-            )
+            try:
+                await db_compat.insert_component(
+                    component_id=str(uuid.uuid4()),
+                    analysis_id=step2_analysis_id,
+                    identifier=dual['identifier'],
+                    name=dual['name'],
+                    component_type='both',
+                    description=dual.get('description', ''),
+                    abstraction_level=dual.get('abstraction_level', 'service'),
+                    source='inferred',
+                    metadata={
+                        'controls': dual.get('controls', []),
+                        'controlled_by': dual.get('controlled_by', []),
+                        'rationale': dual.get('rationale', '')
+                    }
+                )
+            except Exception as e:
+                self.logger.error(f"Error storing dual component {dual['name']}: {e}")
+                raise
             
         # Store hierarchy relationships
         for rel in components['control_hierarchy']:
@@ -385,6 +387,10 @@ Identify potential control gaps or conflicts.
                     (id, analysis_id, parent_component_id, child_component_id, 
                      relationship_type, description)
                     VALUES ($1, $2, $3, $4, $5, $6)
+                    ON CONFLICT (parent_component_id, child_component_id) 
+                    DO UPDATE SET
+                        relationship_type = EXCLUDED.relationship_type,
+                        description = EXCLUDED.description
                     """,
                     str(uuid.uuid4()),
                     step2_analysis_id,

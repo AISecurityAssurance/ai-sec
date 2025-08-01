@@ -246,8 +246,13 @@ class Step1CLI:
     async def demo(self, demo_name: str = "banking-analysis"):
         """Load and display pre-packaged demo analysis"""
         
-        # Find demo directory
-        demo_path = Path(__file__).parent / "demo" / demo_name
+        # Find demo directory - check root level first, then backend
+        project_root = Path(__file__).parent.parent.parent
+        demo_path = project_root / "demo" / demo_name
+        
+        if not demo_path.exists():
+            # Fallback to backend demo directory for backward compatibility
+            demo_path = Path(__file__).parent / "demo" / demo_name
         
         if not demo_path.exists():
             self.console.print(f"[red]Demo '{demo_name}' not found at {demo_path}[/red]")

@@ -1,5 +1,8 @@
 # Analysis outputs
 analyses/
+# Old artifact locations (should use root-level analyses/ instead)
+apps/backend/artifacts/
+apps/backend/debug/
 
 # Dependencies
 node_modules/

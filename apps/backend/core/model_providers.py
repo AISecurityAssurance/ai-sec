@@ -417,8 +417,8 @@ class MockModelClient(BaseModelClient):
     
     def __init__(self):
         super().__init__()
-        # Mock client simulates no structured output support for testing fallback
-        self.supports_structured_output = False
+        # Mock client always returns valid JSON
+        self.supports_structured_output = True
     
     def _generate_mock_json_response(self, user_message: str) -> str:
         """Generate a mock JSON response based on the prompt context."""

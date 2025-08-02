@@ -7,6 +7,7 @@ from .base_step2 import BaseStep2Agent, AgentResult
 from .component_registry import ComponentRegistry
 from core.agents.step1_agents.base_step1 import CognitiveStyle
 from core.utils.json_parser import parse_llm_json
+from .schemas import TRUST_BOUNDARY_SCHEMA
 
 
 class TrustBoundaryAgent(BaseStep2Agent):
@@ -41,10 +42,23 @@ class TrustBoundaryAgent(BaseStep2Agent):
             {"role": "user", "content": prompt}
         ]
         
-        response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
-        
-        # Parse response and validate against registry
-        trust_data = self._parse_trust_boundaries(response_text, control_structure, registry)
+        # Try structured output first, fall back to regular if needed
+        try:
+            # Use structured output for guaranteed valid JSON
+            structured_response = await self.query_llm_structured(
+                messages, 
+                TRUST_BOUNDARY_SCHEMA,
+                temperature=0.3,  # Lower temperature for structured output
+                max_tokens=4000
+            )
+            # Parse response and validate against registry
+            trust_data = self._parse_trust_boundaries(structured_response, control_structure, registry)
+        except Exception as e:
+            self.logger.warning(f"Structured output failed: {e}. Using regular generation.")
+            # Fall back to regular generation with retry
+            response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
+            # Parse response and validate against registry
+            trust_data = self._parse_trust_boundaries(response_text, control_structure, registry)
         
         # Store in database
         await self._store_trust_boundaries(step2_analysis_id, trust_data)
@@ -216,9 +230,11 @@ Consider both design and implementation."""
         
         prompt += f"""
 
-## Task: Identify Trust Boundaries
+## Task: Identify Trust Boundaries (Step 2 - Descriptive Focus)
 
 {style_prompt}
+
+Remember: This is Step 2 - describe existing trust mechanisms, not analyze vulnerabilities.
 
 For each trust boundary, identify:
 
@@ -226,14 +242,15 @@ For each trust boundary, identify:
    - Unique identifier (TB-X)
    - Components on each side
    - Type of boundary
-   - Trust relationship
-   - Security mechanisms
+   - Trust relationship direction
+   - Existing security mechanisms
 
-2. **Security Implications**: Impact of trust boundaries
-   - Attack surface exposed
-   - Authentication requirements
-   - Data protection needs
-   - Potential vulnerabilities
+2. **Trust Mechanisms**: How trust is currently implemented
+   - Authentication protocols in use
+   - Authorization schemes deployed
+   - Data protection mechanisms active
+   - Trust assumptions built into the design
+   - Verification methods employed
 
 Provide your response in the following JSON format:
 {{
@@ -253,32 +270,24 @@ Provide your response in the following JSON format:
                 "integrity": "Integrity protection needs",
                 "confidentiality": "Confidentiality requirements"
             }},
-            "security_controls": ["List of security controls at boundary"]
+            "security_controls": ["List of existing security controls at boundary"],
+            "trust_assumptions": ["Assumptions about trust built into the design"],
+            "verification_methods": ["How trust is verified or validated"]
         }}
     ],
-    "security_implications": [
-        {{
-            "boundary_id": "TB-X",
-            "attack_surface": "What attacks are possible",
-            "vulnerabilities": ["Potential weaknesses"],
-            "mitigations": ["Recommended controls"],
-            "residual_risk": "Risk after mitigations"
-        }}
-    ],
-    "trust_violations": [
-        {{
-            "description": "Potential trust violation scenario",
-            "impact": "Security impact",
-            "likelihood": "high/medium/low",
-            "detection": "How to detect this violation"
-        }}
-    ],
+    "trust_mechanisms": {{
+        "authentication_protocols": ["List of authentication methods in use"],
+        "authorization_schemes": ["How access control is implemented"],
+        "data_protection": ["Encryption, integrity checks, etc."],
+        "trust_establishment": ["How trust relationships are established"],
+        "trust_maintenance": ["How trust is maintained over time"]
+    }},
     "analysis_notes": "Key insights about trust boundaries"
 }}
 
-Focus on security-critical trust boundaries.
-Identify where trust assumptions might be violated.
-Consider insider threats and compromised components.
+Focus on describing existing trust mechanisms.
+Document how trust is currently implemented in the system.
+Save vulnerability analysis for Step 3.
 
 CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks or use backticks.
 Start your response with {{ and end with }}.
@@ -286,10 +295,14 @@ Ensure all string values properly escape newlines and quotes."""
         
         return prompt
         
-    def _parse_trust_boundaries(self, response: str, control_structure: Dict[str, Any], registry: ComponentRegistry) -> Dict[str, Any]:
+    def _parse_trust_boundaries(self, response: Any, control_structure: Dict[str, Any], registry: ComponentRegistry) -> Dict[str, Any]:
         """Parse LLM response into trust boundaries."""
         try:
-            data = parse_llm_json(response)
+            # Handle both string and dict responses (dict from structured output)
+            if isinstance(response, dict):
+                data = response
+            else:
+                data = parse_llm_json(response)
             
             # Build lookup map
             component_map = {c['identifier']: c['id'] for c in control_structure['components']}

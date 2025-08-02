@@ -14,6 +14,7 @@ from uuid import uuid4
 
 from core.utils.json_parser import parse_llm_json
 from .base_step2 import BaseStep2Agent, CognitiveStyle, AgentResult
+from .schemas import CONTROL_CONTEXT_SCHEMA
 
 
 class ControlContextAnalystAgent(BaseStep2Agent):
@@ -50,11 +51,28 @@ class ControlContextAnalystAgent(BaseStep2Agent):
             prompt = self._build_prompt(control_structure, control_actions)
             
             # Query LLM with retry logic
-            messages = [{"role": "user", "content": prompt}]
-            response = await self.query_llm_with_retry(messages)
+            messages = [
+                {"role": "system", "content": "You are a control systems expert analyzing control contexts. Respond with valid JSON only, no markdown formatting."},
+                {"role": "user", "content": prompt}
+            ]
             
-            # Parse response
-            control_contexts = self._parse_control_contexts(response, control_actions)
+            # Try structured output first, fall back to regular if needed
+            try:
+                # Use structured output for guaranteed valid JSON
+                structured_response = await self.query_llm_structured(
+                    messages, 
+                    CONTROL_CONTEXT_SCHEMA,
+                    temperature=0.3,  # Lower temperature for structured output
+                    max_tokens=4000
+                )
+                # Parse response
+                control_contexts = self._parse_control_contexts(structured_response, control_actions)
+            except Exception as e:
+                self.logger.warning(f"Structured output failed: {e}. Using regular generation.")
+                # Fall back to regular generation with retry
+                response = await self.query_llm_with_retry(messages)
+                # Parse response
+                control_contexts = self._parse_control_contexts(response, control_actions)
             
             # Save to database
             await self._save_control_contexts(control_contexts)
@@ -154,13 +172,21 @@ For each control action, describe:
    - Environmental factors considered
    - Execution frequency/timing
 
-2. **Operational Modes**: System operating states
+2. **Controller Process Models**: The controller's internal model of system state
+   - What the controller believes about controlled process states
+   - Key assumptions about process behavior
+   - Information sources that update these beliefs
+   - Potential mismatches between model and reality
+   - State variables tracked by the controller
+   - How stale information is handled
+
+3. **Operational Modes**: System operating states
    - Mode definitions and purposes
    - Available control actions per mode
    - Mode transition triggers
    - Mode-specific behaviors
 
-3. **Decision Process**: The controller's decision-making process
+4. **Decision Process**: The controller's decision-making process
    - Information sources used
    - Processing algorithms or rules
    - Priority schemes
@@ -186,6 +212,14 @@ Provide your response in the following JSON format:
                 "decision_criteria": "How decision is made",
                 "priority": "high/medium/low",
                 "conflict_resolution": "How conflicts with other actions are resolved"
+            }},
+            "process_model": {{
+                "state_beliefs": ["What controller believes about process state"],
+                "key_assumptions": ["Core assumptions about process behavior"],
+                "update_sources": ["Information sources that update beliefs"],
+                "tracked_variables": ["State variables monitored"],
+                "staleness_handling": "How outdated information is handled",
+                "model_reality_gaps": ["Potential mismatches between model and reality"]
             }},
             "applicable_modes": ["Mode names where this action is available"]
         }}
@@ -221,10 +255,14 @@ Start your response with {{ and end with }}.
         
         return prompt
     
-    def _parse_control_contexts(self, response: str, control_actions: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _parse_control_contexts(self, response: Any, control_actions: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Parse LLM response into control contexts."""
         try:
-            data = parse_llm_json(response)
+            # Handle both string and dict responses (dict from structured output)
+            if isinstance(response, dict):
+                data = response
+            else:
+                data = parse_llm_json(response)
             
             # Build action lookup map - ensure each action is a dict
             action_map = {}
@@ -281,22 +319,26 @@ Start your response with {{ and end with }}.
         
         # Save operational modes
         for mode in control_contexts.get('operational_modes', []):
+            # Store active_controllers in metadata since column doesn't exist
+            metadata = {
+                'active_controllers': mode.get('active_controllers', [])
+            }
+            
             await self.db_connection.execute("""
                 INSERT INTO operational_modes
                 (id, analysis_id, mode_name, description, entry_conditions,
-                 exit_conditions, active_controllers, available_actions,
-                 mode_constraints, created_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                 exit_conditions, available_control_actions, restricted_actions, 
+                 created_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             """,
                 str(uuid4()),
                 self.step2_analysis_id,
                 mode['mode_name'],
                 mode['description'],
-                mode.get('entry_conditions', []),
-                mode.get('exit_conditions', []),
-                mode.get('active_controllers', []),
+                json.dumps(mode.get('entry_conditions', [])),  # JSONB field
+                json.dumps(mode.get('exit_conditions', [])),    # JSONB field
                 mode.get('available_actions', []),
-                mode.get('mode_constraints', []),
+                mode.get('mode_constraints', []),  # Use as restricted_actions
                 datetime.now()
             )
     

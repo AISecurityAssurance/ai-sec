@@ -230,6 +230,22 @@ class BaseStep2Agent(ABC):
         prompt = f"""
 # STPA-Sec Step 2: Control Structure Analysis
 
+## Important: Consistency Requirements
+Use consistent terminology across all analysis:
+- Component identifiers: Use CTRL-X for controllers, PROC-Y for processes, DUAL-Z for dual-role
+- Action types: command/configuration/permission/monitoring
+- Timing descriptors: continuous/periodic/event-driven/on-demand
+- Trust levels: high/medium/low
+- Abstraction levels: system/subsystem/component
+
+## Abstraction Level Guidance
+Maintain appropriate abstraction for security analysis:
+- Focus on security-relevant control actions
+- Omit implementation details unless security-critical
+- Group related low-level actions into logical controls
+- Emphasize control relationships that affect security properties
+- Abstract away non-security operational details
+
 ## System Context from Step 1
 
 **System**: {step1_results['system_name']}
@@ -444,5 +460,6 @@ class BaseStep2Agent(ABC):
         except Exception as e:
             # If structured output fails, fall back to regular query with retry
             self.logger.warning(f"Structured output failed: {e}. Falling back to regular generation.")
+            self.logger.debug(f"Structured output error details: {type(e).__name__}: {str(e)}")
             response = await self.query_llm_with_retry(messages, max_retries=3, temperature=temperature, max_tokens=max_tokens)
             return parse_llm_json(response)

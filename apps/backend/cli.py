@@ -133,8 +133,9 @@ class Step1CLI:
         # Set up environment variables for API keys
         self._setup_api_keys(config)
         
-        # Test model configuration before creating database
-        await self._verify_model_configuration()
+        # Test model configuration before creating database (skip for mock)
+        if os.getenv("USE_MOCK_PROVIDER", "").lower() != "true":
+            await self._verify_model_configuration()
         
         # Use existing database or create new one
         if use_database:
@@ -489,6 +490,10 @@ class Step1CLI:
         if env_var_name:
             value = os.getenv(env_var_name)
             if not value:
+                # Skip API key check if using mock provider
+                if os.getenv("USE_MOCK_PROVIDER", "").lower() == "true" and "API_KEY" in env_var_name:
+                    return "mock-key"  # Return a dummy value for mock provider
+                    
                 self.console.print(f"[red]Error: Environment variable '{env_var_name}' not found[/red]")
                 self.console.print(f"[yellow]Please set it in your .env file or environment[/yellow]")
                 
@@ -537,6 +542,12 @@ class Step1CLI:
         # Clear any existing provider config
         if provider in settings.model_providers:
             del settings.model_providers[provider]
+        
+        # Check if we're using mock provider
+        if os.getenv("USE_MOCK_PROVIDER", "").lower() == "true":
+            self.console.print(f"[green]Using Mock provider for testing[/green]")
+            # Mock provider is already configured in settings
+            return
         
         # Configure the provider based on type
         if provider == 'openai':
@@ -2066,35 +2077,16 @@ class Step1CLI:
         table.add_row("Trust Boundaries", str(boundary_count))
         table.add_row("Process Models", str(len(synthesis.get('process_models', []))))
         table.add_row("Control Algorithms", str(len(synthesis.get('control_algorithms', []))))
-        table.add_row("Inadequate Control Scenarios", str(len(synthesis.get('inadequate_control_scenarios', []))))
-        table.add_row("Security Concerns", str(len(synthesis.get('security_concerns', []))))
         
         self.console.print("\n")
         self.console.print(table)
         
-        # 4. Security Concerns (if any)
-        if synthesis.get('security_concerns'):
-            self.console.print("\n[bold]Key Security Concerns:[/bold]")
-            for concern in synthesis['security_concerns'][:3]:
-                if isinstance(concern, dict):
-                    self.console.print(f"  • {concern.get('type', 'N/A')} ({concern.get('mode', 'N/A')})")
-                    self.console.print(f"    {concern.get('implications', 'N/A')}")
-                else:
-                    self.console.print(f"  • {concern}")
-        
-        # 5. Trust Boundary Warning (if applicable)
+        # 4. Trust Boundary Warning (if applicable)
         if boundary_count == 0:
             self.console.print("\n[yellow]⚠️  Warning: No trust boundaries identified[/yellow]")
             self.console.print("[dim]This may indicate a need for further analysis or prompt tuning[/dim]")
         
-        # 6. Critical Inadequate Control Scenarios (if any)
-        if synthesis.get('inadequate_control_scenarios'):
-            self.console.print("\n[bold]Critical Inadequate Control Scenarios:[/bold]")
-            for scenario in synthesis['inadequate_control_scenarios'][:3]:
-                self.console.print(f"  • [red]{scenario['identifier']}[/red]: {scenario['name']}")
-                self.console.print(f"    Type: {scenario['type']}, Severity: {scenario['severity']}, Likelihood: {scenario['likelihood']}")
-        
-        # 7. Validation Results (if available)
+        # 5. Validation Results (if available)
         validation = results.get('validation')
         if validation:
             self._display_step2_validation(validation)
@@ -2646,19 +2638,7 @@ class Step1CLI:
                             md.append(f"**Exit Conditions:** {mode.get('exit_conditions')}")
                 break
         
-        # 6. Security Concerns
-        synthesis = results.get('synthesis', {})
-        if synthesis.get('security_concerns'):
-            md.append("\n## 6. Key Security Concerns\n")
-            for concern in synthesis['security_concerns']:
-                if isinstance(concern, dict):
-                    md.append(f"- **{concern.get('type', 'N/A')}** ({concern.get('mode', 'N/A')}): {concern.get('implications', 'N/A')}")
-                    if concern.get('restricted_actions'):
-                        md.append(f"  - Restricted Actions: {', '.join(concern.get('restricted_actions', []))}")
-                else:
-                    md.append(f"- {concern}")
-        
-        # 7. Process Models and Control Algorithms
+        # 6. Process Models and Control Algorithms
         process_models = phase_results.get('process_models', {})
         if process_models:
             md.append("\n## 7. Process Models and Control Algorithms\n")
@@ -2691,16 +2671,7 @@ class Step1CLI:
                         if len(algorithms) > 10:
                             md.append(f"\n*... and {len(algorithms) - 10} more control algorithms*")
                     
-                    # Inadequate Control Scenarios
-                    scenarios = data.get('inadequate_control_scenarios', [])
-                    if scenarios:
-                        md.append("\n### Inadequate Control Scenarios\n")
-                        md.append("| ID | Name | Type | Severity | Likelihood |")
-                        md.append("|---|---|---|---|---|")
-                        for scenario in scenarios[:15]:
-                            md.append(f"| {scenario.get('identifier', 'N/A')} | {scenario.get('name', 'N/A')} | {scenario.get('type', 'N/A')} | {scenario.get('severity', 'N/A')} | {scenario.get('likelihood', 'N/A')} |")
-                        if len(scenarios) > 15:
-                            md.append(f"\n*... and {len(scenarios) - 15} more scenarios*")
+                    # Note: Inadequate Control Scenarios are part of Step 3 analysis, not Step 2
                     break
         
         # Summary
@@ -2883,6 +2854,18 @@ class Step1CLI:
                     migrations_to_run.append("025_fix_foreign_key_types.sql")
             except Exception:
                 # input_analysis table might not exist, that's OK
+                pass
+                
+            # Check if process_models has model_name as NOT NULL
+            try:
+                model_name_nullable = await db_conn.fetchval(
+                    "SELECT is_nullable FROM information_schema.columns WHERE table_name = 'process_models' AND column_name = 'model_name'"
+                )
+                if model_name_nullable == 'NO':
+                    # Still has NOT NULL constraint, needs fixing
+                    migrations_to_run.append("026_process_models_cleanup.sql")
+            except Exception:
+                # Column might not exist, that's OK
                 pass
                     
             # Run necessary migrations

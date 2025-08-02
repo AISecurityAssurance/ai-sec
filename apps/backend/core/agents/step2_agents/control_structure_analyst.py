@@ -129,6 +129,10 @@ For this system, identify:
    - What they control
    - Their authority level
    - Source (from stakeholders, system description, or inferred)
+   - **Hierarchical control level**:
+     * System Level: Strategic control decisions
+     * Subsystem Level: Coordination between components  
+     * Component Level: Direct operational control
 
 2. **Controlled Processes**: Components that execute actions
    - Name and unique identifier (PROC-X)  
@@ -146,6 +150,7 @@ For this system, identify:
    - Which controllers supervise other controllers
    - Delegation patterns
    - Coordination requirements
+   - Ensure each controller is assigned its appropriate hierarchical level
 
 Provide your response in the following JSON format:
 {{
@@ -156,6 +161,7 @@ Provide your response in the following JSON format:
             "description": "What this controller does",
             "controls": ["List of what it controls"],
             "authority_level": "high/medium/low",
+            "hierarchical_level": "system/subsystem/component",
             "source": "stakeholder_analysis/system_description/inferred",
             "abstraction_level": "service/subsystem/component"
         }}

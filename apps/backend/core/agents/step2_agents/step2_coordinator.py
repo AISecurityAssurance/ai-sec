@@ -400,8 +400,7 @@ class Step2Coordinator:
             'trust_boundaries': [],
             'feedback_loops': [],
             'control_contexts': [],
-            'operational_modes': [],
-            'security_concerns': []
+            'operational_modes': []
         }
         
         # Extract control structure
@@ -479,16 +478,6 @@ class Step2Coordinator:
                 # Add operational modes
                 modes = result.data.get('operational_modes', [])
                 synthesis['operational_modes'] = modes
-                
-                # Add mode-based security concerns
-                for mode in modes:
-                    if mode.get('mode_constraints'):
-                        synthesis['security_concerns'].append({
-                            'type': 'operational_mode_constraints',
-                            'mode': mode['mode_name'],
-                            'constraints': mode['mode_constraints'],
-                            'implications': mode.get('security_implications', '')
-                        })
         
         # Add key feedback mechanisms to synthesis
         synthesis['key_feedback_mechanisms'] = synthesis.pop('feedback_loops', [])

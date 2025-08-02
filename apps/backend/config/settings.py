@@ -214,6 +214,20 @@ class Settings(BaseSettings):
                 max_tokens=int(os.getenv("OLLAMA_MAX_TOKENS", "4096")),
                 is_enabled=True
             )
+            
+        # Mock provider - for testing without real API calls
+        if os.getenv("USE_MOCK_PROVIDER", "").lower() == "true":
+            self.model_providers["mock"] = ModelConfig(
+                provider=ModelProvider.MOCK,
+                auth_method=AuthMethod.NONE,
+                api_key="mock-key",
+                model="mock-model",
+                temperature=0.0,
+                max_tokens=4096,
+                is_enabled=True
+            )
+            # Override active provider to use mock
+            self.active_provider = ModelProvider.MOCK
     
     def _ensure_directories(self):
         """Ensure required directories exist"""

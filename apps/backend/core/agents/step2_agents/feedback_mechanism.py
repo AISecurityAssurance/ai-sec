@@ -7,6 +7,7 @@ from .base_step2 import BaseStep2Agent, AgentResult
 from .component_registry import ComponentRegistry
 from core.agents.step1_agents.base_step1 import CognitiveStyle
 from core.utils.json_parser import parse_llm_json
+from .schemas import FEEDBACK_MECHANISM_SCHEMA
 
 
 class FeedbackMechanismAgent(BaseStep2Agent):
@@ -39,10 +40,23 @@ class FeedbackMechanismAgent(BaseStep2Agent):
             {"role": "user", "content": prompt}
         ]
         
-        response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
-        
-        # Parse response and validate against registry
-        feedback_data = self._parse_feedback_mechanisms(response_text, control_structure, registry)
+        # Try structured output first, fall back to regular if needed
+        try:
+            # Use structured output for guaranteed valid JSON
+            structured_response = await self.query_llm_structured(
+                messages, 
+                FEEDBACK_MECHANISM_SCHEMA,
+                temperature=0.3,  # Lower temperature for structured output
+                max_tokens=4000
+            )
+            # Parse response and validate against registry
+            feedback_data = self._parse_feedback_mechanisms(structured_response, control_structure, registry)
+        except Exception as e:
+            self.logger.warning(f"Structured output failed: {e}. Using regular generation.")
+            # Fall back to regular generation with retry
+            response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
+            # Parse response
+            feedback_data = self._parse_feedback_mechanisms(response_text, control_structure, registry)
         
         # Store in database
         await self._store_feedback_mechanisms(step2_analysis_id, feedback_data)
@@ -200,6 +214,15 @@ For each feedback path, identify:
    - Update sources and frequency
    - Assumptions and potential mismatches
 
+3. **Feedback Adequacy Analysis**: Assess feedback completeness
+   - For each control action:
+     * Is there feedback to confirm action execution?
+     * Is there feedback to observe action effects?
+     * What critical state information is NOT observable?
+     * Time delays between action and feedback
+   - Identify control actions lacking adequate feedback
+   - Note blind spots where controllers lack visibility
+
 Provide your response in the following JSON format:
 {{
     "feedback_mechanisms": [
@@ -235,6 +258,16 @@ Provide your response in the following JSON format:
             "potential_mismatches": ["Ways model might diverge from reality"]
         }}
     ],
+    "feedback_adequacy": [
+        {{
+            "control_action_id": "CA-X",
+            "has_execution_feedback": true/false,
+            "has_effect_feedback": true/false,
+            "unobservable_states": ["Critical states not visible to controller"],
+            "feedback_delay": "Time between action and feedback",
+            "adequacy_assessment": "sufficient/partial/insufficient"
+        }}
+    ],
     "feedback_gaps": [
         {{
             "description": "Missing feedback that should exist",
@@ -255,10 +288,14 @@ Ensure all string values properly escape newlines and quotes."""
         
         return prompt
         
-    def _parse_feedback_mechanisms(self, response: str, control_structure: Dict[str, Any], registry: ComponentRegistry) -> Dict[str, Any]:
+    def _parse_feedback_mechanisms(self, response: Any, control_structure: Dict[str, Any], registry: ComponentRegistry) -> Dict[str, Any]:
         """Parse LLM response into feedback mechanisms."""
         try:
-            data = parse_llm_json(response)
+            # Handle both string and dict responses (dict from structured output)
+            if isinstance(response, dict):
+                data = response
+            else:
+                data = parse_llm_json(response)
             
             # Build lookup maps
             component_map = {c['identifier']: c['id'] for c in control_structure['components']}

@@ -12,6 +12,7 @@ from .base_step2 import BaseStep2Agent, AgentResult
 from .component_registry import ComponentRegistry
 from core.agents.step1_agents.base_step1 import CognitiveStyle
 from core.utils.json_parser import parse_llm_json
+from .schemas import PROCESS_MODEL_SCHEMA
 
 
 class ProcessModelAnalystAgent(BaseStep2Agent):
@@ -36,11 +37,29 @@ class ProcessModelAnalystAgent(BaseStep2Agent):
             # Build prompt with registry context
             prompt = self._build_process_model_prompt(control_structure, control_actions, registry)
             
-            # Query LLM with retry
-            response = await self.query_llm_with_retry(prompt)
+            # Prepare messages for LLM
+            messages = [
+                {"role": "system", "content": "You are a process model analyst performing STPA-Sec Step 2 analysis. Respond with valid JSON only, no markdown formatting."},
+                {"role": "user", "content": prompt}
+            ]
             
-            # Parse response and validate against registry
-            process_models = self._parse_process_models(response, registry)
+            # Try structured output first, fall back to regular if needed
+            try:
+                # Use structured output for guaranteed valid JSON
+                structured_response = await self.query_llm_structured(
+                    messages, 
+                    PROCESS_MODEL_SCHEMA,
+                    temperature=0.3,  # Lower temperature for structured output
+                    max_tokens=4000
+                )
+                # Parse response and validate against registry
+                process_models = self._parse_process_models(structured_response, registry)
+            except Exception as e:
+                self.logger.warning(f"Structured output failed: {e}. Using regular generation.")
+                # Fall back to regular generation with retry
+                response = await self.query_llm_with_retry(messages)
+                # Parse response and validate against registry
+                process_models = self._parse_process_models(response, registry)
             
             # Store in database
             await self._store_process_models(step2_analysis_id, process_models)
@@ -187,10 +206,14 @@ Remember: This is Step 2 - focus on understanding HOW control works, not on iden
         
         return prompt
     
-    def _parse_process_models(self, response: str, registry: ComponentRegistry) -> Dict[str, Any]:
+    def _parse_process_models(self, response: Any, registry: ComponentRegistry) -> Dict[str, Any]:
         """Parse LLM response into structured process models."""
         try:
-            data = parse_llm_json(response)
+            # Handle both string and dict responses (dict from structured output)
+            if isinstance(response, dict):
+                data = response
+            else:
+                data = parse_llm_json(response)
             
             # Validate and enhance
             models = data.get('models', [])

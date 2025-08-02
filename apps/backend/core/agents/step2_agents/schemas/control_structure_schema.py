@@ -18,12 +18,13 @@ CONTROL_STRUCTURE_SCHEMA = {
                             "type": {"type": "string", "enum": ["human", "automated", "cyber-physical", "organizational"]},
                             "description": {"type": "string"},
                             "authority_level": {"type": "string", "enum": ["low", "medium", "high"]},
+                            "hierarchical_level": {"type": "string", "enum": ["system", "subsystem", "component"]},
                             "controls": {
                                 "type": "array",
                                 "items": {"type": "string"}
                             }
                         },
-                        "required": ["identifier", "name", "type", "description", "authority_level", "controls"]
+                        "required": ["identifier", "name", "type", "description", "authority_level", "hierarchical_level", "controls"]
                     }
                 },
                 "controlled_processes": {

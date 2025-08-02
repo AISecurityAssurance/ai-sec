@@ -7,6 +7,7 @@ from .base_step2 import BaseStep2Agent, AgentResult
 from .component_registry import ComponentRegistry
 from core.agents.step1_agents.base_step1 import CognitiveStyle
 from core.utils.json_parser import parse_llm_json
+from .schemas import CONTROL_ACTION_SCHEMA
 
 
 class ControlActionMappingAgent(BaseStep2Agent):
@@ -49,11 +50,23 @@ class ControlActionMappingAgent(BaseStep2Agent):
             {"role": "user", "content": prompt}
         ]
         
-        # Use the new retry method from base class
-        response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
-        
-        # Parse response and validate against registry
-        control_actions = self._parse_control_actions(response_text, control_structure, registry)
+        # Try structured output first, fall back to regular if needed
+        try:
+            # Use structured output for guaranteed valid JSON
+            structured_response = await self.query_llm_structured(
+                messages, 
+                CONTROL_ACTION_SCHEMA,
+                temperature=0.3,  # Lower temperature for structured output
+                max_tokens=4000
+            )
+            # Parse response and validate against registry
+            control_actions = self._parse_control_actions(structured_response, control_structure, registry)
+        except Exception as e:
+            self.logger.warning(f"Structured output failed: {e}. Using regular generation.")
+            # Fall back to regular generation with retry
+            response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
+            # Parse response and validate against registry
+            control_actions = self._parse_control_actions(response_text, control_structure, registry)
         
         # Store in database
         await self._store_control_actions(step2_analysis_id, control_actions)
@@ -172,6 +185,12 @@ For each control relationship, identify:
    - Preconditions
    - Expected outcomes
 
+3. **Control Action Completeness**: Ensure comprehensive coverage
+   - Every controller must have at least one outgoing control action
+   - Every controlled process must receive at least one control action
+   - Identify any "orphan" components without control relationships
+   - Note any controllers that only receive but don't send control
+
 Provide your response in the following JSON format:
 {{
     "control_actions": [
@@ -199,6 +218,12 @@ Provide your response in the following JSON format:
             "postconditions": ["What should be true after action"]
         }}
     ],
+    "completeness_check": {{
+        "controllers_without_actions": ["List of controller IDs with no outgoing actions"],
+        "processes_without_control": ["List of process IDs with no incoming control"],
+        "orphan_components": ["Components with no control relationships"],
+        "coverage_assessment": "Summary of completeness"
+    }},
     "analysis_notes": "Key insights about control actions"
 }}
 
@@ -211,10 +236,14 @@ Ensure all string values properly escape newlines and quotes."""
         
         return prompt
         
-    def _parse_control_actions(self, response: str, control_structure: Dict[str, Any], registry: ComponentRegistry) -> Dict[str, Any]:
+    def _parse_control_actions(self, response: Any, control_structure: Dict[str, Any], registry: ComponentRegistry) -> Dict[str, Any]:
         """Parse LLM response into control actions."""
         try:
-            data = parse_llm_json(response)
+            # Handle both string and dict responses (dict from structured output)
+            if isinstance(response, dict):
+                data = response
+            else:
+                data = parse_llm_json(response)
             
             # Build lookup maps
             controller_map = {c['identifier']: c['id'] for c in control_structure['controllers']}

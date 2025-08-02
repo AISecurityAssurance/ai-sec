@@ -1,0 +1,16 @@
+analysis:
+  description: STPA-Sec Step 1 analysis using mock provider for testing
+  name: demo-banking 
+  output_dir: ./analyses/demo
+execution:
+  mode: standard
+input:
+  path: example_systems/demo-banking/system-description.txt
+  type: file
+model:
+  name: mock
+  provider: mock
+output:
+  exports:
+  - format: json
+  - format: markdown

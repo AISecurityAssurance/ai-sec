@@ -430,28 +430,60 @@ class MockModelClient(BaseModelClient):
                             "type": "human",
                             "description": "Primary system admin",
                             "authority_level": "high",
-                            "hierarchical_level": "system"
+                            "hierarchical_level": "system",
+                            "controls": ["System configuration", "Access control"]
                         }
                     ],
                     "controlled_processes": [
                         {
                             "identifier": "PROC-1",
                             "name": "System Configuration",
-                            "type": "configuration",
+                            "type": "computational",
                             "description": "System settings management",
-                            "criticality": "high"
+                            "criticality": "high",
+                            "capabilities": ["Store configuration", "Apply settings"]
                         },
                         {
                             "identifier": "PROC-2",
                             "name": "Access Control",
-                            "type": "security",
+                            "type": "computational",
                             "description": "User access management",
-                            "criticality": "critical"
+                            "criticality": "high",
+                            "capabilities": ["Authenticate users", "Authorize actions"]
                         }
-                    ],
-                    "control_hierarchy": []
+                    ]
                 },
-                "summary": "Basic control structure"
+                "relationships": [
+                    {
+                        "controller_id": "CTRL-1",
+                        "process_id": "PROC-1",
+                        "relationship_type": "controls",
+                        "strength": "strong"
+                    },
+                    {
+                        "controller_id": "CTRL-1",
+                        "process_id": "PROC-2",
+                        "relationship_type": "configures",
+                        "strength": "strong"
+                    }
+                ],
+                "hierarchy": {
+                    "levels": [
+                        {
+                            "level": 1,
+                            "name": "System Level",
+                            "description": "Top level system control",
+                            "component_ids": ["CTRL-1"]
+                        },
+                        {
+                            "level": 2,
+                            "name": "Process Level",
+                            "description": "Controlled processes",
+                            "component_ids": ["PROC-1", "PROC-2"]
+                        }
+                    ]
+                },
+                "summary": "Basic control structure with admin controlling configuration and access"
             })
         elif "control action" in user_message.lower():
             return json.dumps({

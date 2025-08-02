@@ -419,71 +419,45 @@ class MockModelClient(BaseModelClient):
         """Generate a mock JSON response based on the prompt context."""
         import json
         
+        # Log the type of request for debugging
+        logger = logging.getLogger("MockModelClient")
+        logger.debug(f"Mock request type detection for message length: {len(user_message)}")
+        
         # Check for Step 2 agent contexts
         if "control structure" in user_message.lower():
             return json.dumps({
-                "components": {
-                    "controllers": [
-                        {
-                            "identifier": "CTRL-1",
-                            "name": "System Administrator",
-                            "type": "human",
-                            "description": "Primary system admin",
-                            "authority_level": "high",
-                            "hierarchical_level": "system",
-                            "controls": ["System configuration", "Access control"]
-                        }
-                    ],
-                    "controlled_processes": [
-                        {
-                            "identifier": "PROC-1",
-                            "name": "System Configuration",
-                            "type": "computational",
-                            "description": "System settings management",
-                            "criticality": "high",
-                            "capabilities": ["Store configuration", "Apply settings"]
-                        },
-                        {
-                            "identifier": "PROC-2",
-                            "name": "Access Control",
-                            "type": "computational",
-                            "description": "User access management",
-                            "criticality": "high",
-                            "capabilities": ["Authenticate users", "Authorize actions"]
-                        }
-                    ]
-                },
-                "relationships": [
+                "controllers": [
                     {
-                        "controller_id": "CTRL-1",
-                        "process_id": "PROC-1",
-                        "relationship_type": "controls",
-                        "strength": "strong"
-                    },
-                    {
-                        "controller_id": "CTRL-1",
-                        "process_id": "PROC-2",
-                        "relationship_type": "configures",
-                        "strength": "strong"
+                        "identifier": "CTRL-1",
+                        "name": "System Administrator",
+                        "type": "human",
+                        "description": "Primary system admin",
+                        "authority_level": "high",
+                        "hierarchical_level": "system",
+                        "controls": ["System configuration", "Access control"]
                     }
                 ],
-                "hierarchy": {
-                    "levels": [
-                        {
-                            "level": 1,
-                            "name": "System Level",
-                            "description": "Top level system control",
-                            "component_ids": ["CTRL-1"]
-                        },
-                        {
-                            "level": 2,
-                            "name": "Process Level",
-                            "description": "Controlled processes",
-                            "component_ids": ["PROC-1", "PROC-2"]
-                        }
-                    ]
-                },
-                "summary": "Basic control structure with admin controlling configuration and access"
+                "controlled_processes": [
+                    {
+                        "identifier": "PROC-1",
+                        "name": "System Configuration",
+                        "type": "computational",
+                        "description": "System settings management",
+                        "criticality": "high",
+                        "capabilities": ["Store configuration", "Apply settings"]
+                    },
+                    {
+                        "identifier": "PROC-2",
+                        "name": "Access Control",
+                        "type": "computational",
+                        "description": "User access management",
+                        "criticality": "high",
+                        "capabilities": ["Authenticate users", "Authorize actions"]
+                    }
+                ],
+                "dual_role_components": [],
+                "control_hierarchy": [],
+                "analysis_notes": "Basic mock control structure for testing"
             })
         elif "control action" in user_message.lower():
             return json.dumps({
@@ -593,6 +567,31 @@ class MockModelClient(BaseModelClient):
                     }
                 ],
                 "mode_transitions": []
+            })
+        elif ("quality" in user_message.lower() and "assess" in user_message.lower()) or \
+             ("methodology" in user_message.lower() and "expert" in user_message.lower()):
+            # Quality assessment response for expert agent
+            return json.dumps({
+                "quality_level": "acceptable",
+                "overall_score": 8.0,
+                "methodology_compliance": {
+                    "control_structure_identified": True,
+                    "hierarchical_levels_clear": True,
+                    "all_components_typed": True,
+                    "relationships_mapped": True
+                },
+                "issues": [],
+                "recommendations": [],
+                "strengths": ["Clear structure", "Good coverage"],
+                "weaknesses": []
+            })
+        elif "refinement" in user_message.lower() and "guidance" in user_message.lower():
+            # Refinement guidance response
+            return json.dumps({
+                "priority_fixes": [],
+                "specific_requirements": [],
+                "avoid_patterns": [],
+                "example_corrections": []
             })
         else:
             # Default response

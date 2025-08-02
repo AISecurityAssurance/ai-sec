@@ -435,12 +435,86 @@ Use these questions to ensure comprehensive coverage without missing critical ha
             if not isinstance(hazards, list):
                 raise ValueError("Response must be a JSON array")
             
+            # Validate and fix system properties
+            for hazard in hazards:
+                if 'affected_system_property' in hazard:
+                    hazard['affected_system_property'] = self._map_to_valid_system_property(hazard['affected_system_property'])
+            
             return hazards
             
         except Exception as e:
             await self.log_activity(f"LLM hazard identification failed: {e}", {"error": str(e)})
             # Re-raise the exception - analysis should fail if LLM fails
             raise
+    
+    def _map_to_valid_system_property(self, property_value: str) -> str:
+        """Map LLM-provided system property to valid constraint values"""
+        property_lower = property_value.lower()
+        
+        # Mapping of common variations to valid values
+        property_map = {
+            # Data integrity variations
+            'data_integrity': 'data_integrity',
+            'integrity': 'data_integrity',
+            'data integrity': 'data_integrity',
+            'transaction_integrity': 'data_integrity',
+            'transaction integrity': 'data_integrity',
+            
+            # Data protection variations
+            'data_protection': 'data_protection',
+            'data protection': 'data_protection',
+            'confidentiality': 'data_protection',
+            'privacy': 'data_protection',
+            'data_privacy': 'data_protection',
+            'data privacy': 'data_protection',
+            
+            # Service availability variations
+            'service_availability': 'service_availability',
+            'service availability': 'service_availability',
+            'availability': 'service_availability',
+            'service_uptime': 'service_availability',
+            'uptime': 'service_availability',
+            
+            # Regulatory compliance variations
+            'regulatory_compliance': 'regulatory_compliance',
+            'regulatory compliance': 'regulatory_compliance',
+            'compliance': 'regulatory_compliance',
+            'regulation': 'regulatory_compliance',
+            
+            # Operational capability variations
+            'operational_capability': 'operational_capability',
+            'operational capability': 'operational_capability',
+            'capability': 'operational_capability',
+            'functionality': 'operational_capability',
+            'operations': 'operational_capability',
+            
+            # Mission effectiveness variations
+            'mission_effectiveness': 'mission_effectiveness',
+            'mission effectiveness': 'mission_effectiveness',
+            'mission': 'mission_effectiveness',
+            'effectiveness': 'mission_effectiveness',
+            
+            # Additional mappings for common LLM responses
+            'identity_and_access_management': 'data_protection',
+            'identity and access management': 'data_protection',
+            'identity management': 'data_protection',
+            'access_control': 'data_protection',
+            'access control': 'data_protection',
+            'authentication': 'data_protection',
+            'authorization': 'data_protection',
+            'iam': 'data_protection',
+            
+            'performance': 'operational_capability',
+            'reliability': 'service_availability',
+            'security': 'data_protection',
+            'safety': 'operational_capability',
+            'financial': 'data_integrity',
+            'financial_integrity': 'data_integrity',
+            'financial integrity': 'data_integrity'
+        }
+        
+        # Return mapped value or default to operational_capability if not found
+        return property_map.get(property_lower, 'operational_capability')
     
     def validate_abstraction_level(self, content: str) -> bool:
         """Validate hazard maintains system state abstraction"""

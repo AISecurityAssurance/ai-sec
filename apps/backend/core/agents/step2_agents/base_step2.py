@@ -13,6 +13,7 @@ from core.agents.step1_agents.base_step1 import CognitiveStyle
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
 from core.utils.prompt_saver import get_prompt_saver
+from core.utils.json_parser import parse_llm_json
 
 
 @dataclass
@@ -394,3 +395,54 @@ class BaseStep2Agent(ABC):
                     raise
                 
         raise Exception(f"Failed after {max_retries} attempts. Last error: {last_error}")
+    
+    async def query_llm_structured(self, 
+                                  messages: List[Dict[str, str]], 
+                                  response_schema: Dict[str, Any],
+                                  temperature: float = 0.3,
+                                  max_tokens: int = 4000) -> Dict[str, Any]:
+        """Query LLM with structured output for guaranteed valid JSON."""
+        
+        try:
+            # Try structured output first
+            response = await self.model_provider.generate_structured(
+                messages=messages,
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": f"{self.__class__.__name__.lower()}_response",
+                        "schema": response_schema,
+                        "strict": True
+                    }
+                },
+                temperature=temperature,  # Lower for structured output
+                max_tokens=max_tokens
+            )
+            
+            # Save to PromptSaver if enabled
+            prompt_saver = get_prompt_saver()
+            if prompt_saver:
+                prompt = messages[-1]["content"] if messages else ""
+                prompt_saver.save_prompt_response(
+                    agent_name=self.__class__.__name__.lower().replace('agent', ''),
+                    cognitive_style=self.cognitive_style.value,
+                    prompt=prompt,
+                    response=json.dumps(response.content, indent=2) if isinstance(response.content, dict) else response.content,
+                    step=2,
+                    metadata={
+                        'temperature': temperature,
+                        'max_tokens': max_tokens,
+                        'mode': 'structured_output'
+                    }
+                )
+            
+            # Return already parsed JSON (or parse if string)
+            if isinstance(response.content, str):
+                return json.loads(response.content)
+            return response.content
+            
+        except Exception as e:
+            # If structured output fails, fall back to regular query with retry
+            self.logger.warning(f"Structured output failed: {e}. Falling back to regular generation.")
+            response = await self.query_llm_with_retry(messages, max_retries=3, temperature=temperature, max_tokens=max_tokens)
+            return parse_llm_json(response)

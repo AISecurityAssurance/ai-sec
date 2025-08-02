@@ -29,6 +29,15 @@ class BaseModelClient(ABC):
                       max_tokens: Optional[int] = None) -> ModelResponse:
         """Generate a response from the model"""
         pass
+    
+    async def generate_structured(self, messages: List[Dict[str, str]], 
+                                 response_format: Dict[str, Any],
+                                 temperature: float = 0.7,
+                                 max_tokens: Optional[int] = None) -> ModelResponse:
+        """Generate a structured response from the model with JSON schema validation"""
+        # Default implementation falls back to regular generation
+        # Subclasses can override to use native structured output support
+        return await self.generate(messages, temperature, max_tokens)
 
 
 class OpenAIClient(BaseModelClient):
@@ -61,7 +70,8 @@ class OpenAIClient(BaseModelClient):
                 "Content-Type": "application/json"
             }
             # Azure expects the deployment name, not the model name in the URL
-            url = f"{self.base_url}/openai/deployments/{self.model}/chat/completions?api-version=2024-02-01"
+            # Use newer API version that supports structured outputs
+            url = f"{self.base_url}/openai/deployments/{self.model}/chat/completions?api-version=2024-10-21"
         else:
             # Standard OpenAI
             headers = {
@@ -99,6 +109,72 @@ class OpenAIClient(BaseModelClient):
                 usage=result.get("usage"),
                 raw_response=result
             )
+    
+    async def generate_structured(self, messages: List[Dict[str, str]], 
+                                 response_format: Dict[str, Any],
+                                 temperature: float = 0.7,
+                                 max_tokens: Optional[int] = None) -> ModelResponse:
+        """Generate structured response using OpenAI's structured output feature"""
+        
+        if self.is_azure:
+            headers = {
+                "api-key": self.api_key,
+                "Content-Type": "application/json"
+            }
+            # Use API version that supports structured outputs
+            url = f"{self.base_url}/openai/deployments/{self.model}/chat/completions?api-version=2024-10-21"
+        else:
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            url = f"{self.base_url}/chat/completions"
+        
+        data = {
+            "messages": messages,
+            "temperature": temperature,
+            "response_format": response_format
+        }
+        
+        if not self.is_azure:
+            data["model"] = self.model
+        
+        if max_tokens:
+            data["max_tokens"] = max_tokens
+            
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(
+                    url,
+                    headers=headers,
+                    json=data,
+                    timeout=120.0
+                )
+                response.raise_for_status()
+                
+                result = response.json()
+                
+                # Parse the structured content
+                content = result["choices"][0]["message"]["content"]
+                
+                # If content is a string, try to parse as JSON
+                if isinstance(content, str):
+                    try:
+                        content = json.loads(content)
+                    except json.JSONDecodeError:
+                        pass  # Keep as string if not valid JSON
+                
+                return ModelResponse(
+                    content=content,
+                    model=result["model"],
+                    usage=result.get("usage"),
+                    raw_response=result
+                )
+            except httpx.HTTPStatusError as e:
+                # If structured output not supported, fall back to regular generation
+                if e.response.status_code == 400 and "response_format" in str(e.response.text):
+                    return await self.generate(messages, temperature, max_tokens)
+                raise
 
 
 class OllamaClient(BaseModelClient):

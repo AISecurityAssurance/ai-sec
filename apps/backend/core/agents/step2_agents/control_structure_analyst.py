@@ -12,6 +12,7 @@ from .db_compat import Step2DBCompat
 from .component_registry import ComponentRegistry
 from core.agents.step1_agents.base_step1 import CognitiveStyle
 from core.utils.json_parser import parse_llm_json
+from .schemas import CONTROL_STRUCTURE_SCHEMA
 
 
 class ControlStructureAnalystAgent(BaseStep2Agent):
@@ -41,11 +42,21 @@ class ControlStructureAnalystAgent(BaseStep2Agent):
             {"role": "user", "content": prompt}
         ]
         
-        # Use the new retry method from base class
-        response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
-        
-        # Parse response
-        components = self._parse_control_structure(response_text, step1_results)
+        # Try structured output first, fall back to regular if needed
+        try:
+            # Use structured output for guaranteed valid JSON
+            components = await self.query_llm_structured(
+                messages, 
+                CONTROL_STRUCTURE_SCHEMA,
+                temperature=0.3,  # Lower temperature for structured output
+                max_tokens=4000
+            )
+        except Exception as e:
+            self.logger.warning(f"Structured output failed: {e}. Using regular generation.")
+            # Fall back to regular generation with retry
+            response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
+            # Parse response
+            components = self._parse_control_structure(response_text, step1_results)
         
         # Store in database and register in component registry
         await self._store_components(step2_analysis_id, components, registry)

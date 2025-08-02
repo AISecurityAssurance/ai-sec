@@ -50,7 +50,8 @@ class PromptSaver:
         prompt: str,
         response: str,
         step: int = 1,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
+        human_readable_name: Optional[str] = None
     ) -> Optional[Dict[str, Path]]:
         """
         Save a prompt and response pair.
@@ -62,6 +63,7 @@ class PromptSaver:
             response: The response received from the LLM
             step: STPA step number (1 or 2)
             metadata: Optional metadata about the prompt/response
+            human_readable_name: Optional human-readable name for the files
             
         Returns:
             Dictionary with paths to saved files, or None if saving is disabled
@@ -69,15 +71,41 @@ class PromptSaver:
         if not self.enabled:
             return None
             
+        # Map agent names to human-readable analysis names
+        agent_to_readable = {
+            # Step 1 agents
+            'loss_identification': 'losses',
+            'mission_analyst': 'mission',
+            'stakeholder_analyst': 'stakeholders',
+            'hazard_identification': 'hazards', 
+            'security_constraint_agent': 'constraints',
+            'system_boundary_agent': 'boundaries',
+            'system_description': 'system_description',
+            # Step 2 agents  
+            'control_structure_analyst': 'controllers',
+            'control_action_mapping': 'control_actions',
+            'control_context_analyst': 'control_contexts',
+            'feedback_mechanism': 'feedback',
+            'trust_boundary': 'trust_boundaries',
+            'process_model_analyst': 'process_models'
+        }
+        
+        # Use provided name or map from agent name
+        readable_name = human_readable_name or agent_to_readable.get(agent_name, agent_name)
+        
         # Generate unique key and increment counter
         key = f"step{step}_{agent_name}_{cognitive_style}"
         self.counter[key] = self.counter.get(key, 0) + 1
         sequence = str(self.counter[key]).zfill(3)
         
-        # Create filenames
-        base_name = f"{key}_{sequence}"
+        # Create human-readable filenames
+        # Include cognitive style only if not balanced (the default)
+        style_suffix = f"_{cognitive_style}" if cognitive_style != "balanced" else ""
+        base_name = f"step{step}_{readable_name}{style_suffix}_{sequence}"
+        
+        # Save with both human-readable and technical names
         prompt_file = self.prompts_dir / f"{base_name}_prompt.txt"
-        response_file = self.prompts_dir / f"{base_name}_response.txt"
+        response_file = self.prompts_dir / f"{base_name}_response.txt" 
         metadata_file = self.prompts_dir / f"{base_name}_metadata.json"
         
         # Save prompt
@@ -91,6 +119,8 @@ class PromptSaver:
         # Save metadata
         full_metadata = {
             'agent_name': agent_name,
+            'agent_class': agent_name,  # Technical agent class name
+            'readable_name': readable_name,  # Human-readable name
             'cognitive_style': cognitive_style,
             'step': step,
             'sequence': self.counter[key],

@@ -44,6 +44,7 @@ from core.agents.step1_agents import Step1Coordinator
 from core.database import create_database_pool, run_migrations
 from config.settings import settings, ModelProvider, ModelConfig, AuthMethod
 from core.utils.prompt_saver import init_prompt_saver, get_prompt_saver
+from core.utils.output_display import OutputDisplay
 
 console = Console()
 
@@ -70,6 +71,9 @@ class Step1CLI:
         self.console = console
         self.status = None
         self._setup_logging()
+        
+        # Track session state for ExpertAgent mode inference
+        self._step1_completed_in_session = False
         
     def _get_db_connection_params(self) -> Dict[str, str]:
         """Get database connection parameters from environment"""
@@ -107,7 +111,8 @@ class Step1CLI:
         logging.getLogger().addHandler(file_handler)
         
     async def analyze(self, config_path: str, enhanced: bool = False, input_files: List[str] = None, 
-                      use_database: str = None, save_prompts: bool = False, step: int = 1):
+                      use_database: str = None, save_prompts: bool = False, step: int = 1,
+                      max_refinements: int = 5):
         """Run Step 1 analysis based on configuration file
         
         Args:
@@ -116,6 +121,7 @@ class Step1CLI:
             input_files: Optional list of input files (overrides config)
             use_database: Existing database name to use (for Step 2+ testing)
             step: Which step to run (default: 1)
+            max_refinements: Maximum refinement iterations for quality control
         """
         
         # Load configuration
@@ -152,7 +158,8 @@ class Step1CLI:
                 
                 # Run Step 2 analysis
                 if step == 2:
-                    await self._run_step2_analysis(db_name, step1_analysis_id, config, enhanced)
+                    await self._run_step2_analysis(db_name, step1_analysis_id, config, enhanced,
+                                                 max_refinements)
                 else:
                     self.console.print(f"[yellow]Step {step} implementation coming soon![/yellow]")
                     
@@ -186,13 +193,17 @@ class Step1CLI:
                 db_url = self._get_db_url(db_name)
                 db_conn = await asyncpg.connect(db_url)
                 
+                # Create model provider based on config
+                model_provider = self._create_model_provider(config)
+                
                 # Create coordinator with execution mode
                 # CLI flag overrides config file setting
                 execution_mode = 'enhanced' if enhanced else config.get('execution', {}).get('mode', 'standard')
                 coordinator = Step1Coordinator(
                     db_connection=db_conn,
                     execution_mode=execution_mode,
-                    db_name=db_name
+                    db_name=db_name,
+                    model_provider=model_provider
                 )
                 
                 # Store config file path for resolving relative paths
@@ -218,6 +229,9 @@ class Step1CLI:
                     analysis_name=config['analysis']['name'],
                     input_configs=input_configs
                 )
+                
+                # Mark that Step 1 completed in this session (for ExpertAgent mode inference)
+                self._step1_completed_in_session = True
                 
                 # Add model information to results
                 model_info = self._get_model_info()
@@ -296,11 +310,12 @@ class Step1CLI:
                 db_url = self._get_db_url(db_name)
                 db_conn = await asyncpg.connect(db_url)
                 
-                # Create coordinator
+                # Create coordinator (demo doesn't need model provider)
                 coordinator = Step1Coordinator(
                     db_connection=db_conn,
                     execution_mode="enhanced",  # Demo uses enhanced mode
-                    db_name=db_name
+                    db_name=db_name,
+                    model_provider=None  # Demo doesn't run agents
                 )
                 
                 # Load existing analysis
@@ -458,7 +473,7 @@ class Step1CLI:
                 
                 # Special handling for Azure OpenAI
                 if env_var_name == "AZURE_OPENAI_API_KEY":
-                    self.console.print("[dim]Step 2 requires API access to run LLM agents for control structure analysis.[/dim]")
+                    self.console.print("[dim]STPA-Sec analysis requires API access to run LLM agents.[/dim]")
                     self.console.print("[dim]You can set the environment variable with:[/dim]")
                     self.console.print(f"[cyan]export {env_var_name}=your-api-key-here[/cyan]")
                     self.console.print("[dim]Or add it to your .env file[/dim]")
@@ -493,7 +508,7 @@ class Step1CLI:
                 sys.exit(1)
         
         # Validate required fields based on provider
-        if provider != 'ollama' and not api_key:
+        if provider not in ['ollama', 'mock'] and not api_key:
             self.console.print(f"[red]Error: API key required for provider '{provider}'[/red]")
             self.console.print("[yellow]Please specify 'api_key' or 'api_key_env' in model config[/yellow]")
             sys.exit(1)
@@ -559,16 +574,30 @@ class Step1CLI:
             
             settings.model_providers['ollama'] = ModelConfig(
                 provider=ModelProvider.OLLAMA,
-                auth_method='none',  # Use string value for Ollama
+                auth_method=AuthMethod.NONE,  # No auth needed for Ollama
                 api_endpoint=endpoint,
                 model=model_name,
                 is_enabled=True
             )
             settings.active_provider = ModelProvider.OLLAMA
             
+        elif provider == 'mock':
+            # Mock provider for testing
+            self.console.print(f"[green]Using Mock provider (testing mode)[/green]")
+            self.console.print(f"[dim]  Model: {model_name}[/dim]")
+            self.console.print(f"[yellow]  ⚠️  Mock responses - not real LLM output[/yellow]")
+            
+            settings.model_providers['mock'] = ModelConfig(
+                provider=ModelProvider.MOCK,
+                auth_method=AuthMethod.NONE,  # No auth needed
+                model=model_name,
+                is_enabled=True
+            )
+            settings.active_provider = ModelProvider.MOCK
+            
         else:
             self.console.print(f"[red]Error: Unknown provider '{provider}'[/red]")
-            self.console.print("[yellow]Supported providers: openai, anthropic, groq, ollama[/yellow]")
+            self.console.print("[yellow]Supported providers: openai, anthropic, groq, ollama, mock[/yellow]")
             sys.exit(1)
         
         # Force reinitialize llm_manager with new settings
@@ -974,12 +1003,11 @@ class Step1CLI:
                 shutil.copy2(log_source, log_dest)
                 self._saved_files.append(log_dest)
         
-        # Create prompt index if PromptSaver is enabled
+        # Create prompt index if PromptSaver is enabled but don't add to saved_files
+        # since we'll handle prompts separately in the display
         prompt_saver = get_prompt_saver()
         if prompt_saver:
-            index_file = prompt_saver.create_index()
-            if index_file:
-                self._saved_files.append(index_file)
+            prompt_saver.create_index()
     
     def _display_results_summary(self, results: dict, execution_mode: str):
         """Display detailed analysis results like the demo"""
@@ -1257,25 +1285,33 @@ class Step1CLI:
         if hasattr(self, '_output_dir') and hasattr(self, '_saved_files'):
             self.console.print("\n[bold]Analysis Output:[/bold]")
             
-            # Get project root for relative path display
-            project_root = Path(__file__).parent.parent.parent
+            # Use OutputDisplay for consistent formatting
+            output_display = OutputDisplay(self.console)
             
-            # Try to show relative path from project root, otherwise show full path
-            try:
-                display_path = self._output_dir.relative_to(project_root)
-                display_path = f"./{display_path}"
-            except ValueError:
-                display_path = self._output_dir
-                
-            self.console.print(f"Results saved to: {display_path}")
+            # Add main results section
+            output_display.add_section(
+                title="Results saved to",
+                base_path=self._output_dir,
+                files=self._saved_files,
+                is_secondary=False
+            )
             
-            for file_path in self._saved_files:
-                try:
-                    relative_path = file_path.relative_to(project_root)
-                    relative_path = f"./{relative_path}"
-                except ValueError:
-                    relative_path = file_path
-                self.console.print(f"  • {relative_path}")
+            # Check for prompts directory
+            prompt_saver = get_prompt_saver()
+            if prompt_saver:
+                prompts_dir = self._output_dir / "prompts"
+                if prompts_dir.exists():
+                    prompt_files = list(prompts_dir.glob("*.json"))
+                    if prompt_files:
+                        output_display.add_section(
+                            title="Prompts saved to",
+                            base_path=prompts_dir,
+                            files=prompt_files[:5],  # Show first 5 prompt files
+                            is_secondary=True
+                        )
+            
+            # Display all sections
+            output_display.display()
     
     
     async def _export_database(self, db_name: str, output_dir: Path):
@@ -1772,9 +1808,11 @@ class Step1CLI:
             self.console.print(f"[red]Error getting Step 1 analysis: {str(e)}[/red]")
             return None
             
-    async def _run_step2_analysis(self, db_name: str, step1_analysis_id: str, config: dict, enhanced: bool):
-        """Run Step 2 control structure analysis."""
+    async def _run_step2_analysis(self, db_name: str, step1_analysis_id: str, config: dict, enhanced: bool,
+                                 max_refinements: int = 5):
+        """Run Step 2 control structure analysis with ExpertAgent supervision."""
         from core.agents.step2_agents import Step2Coordinator
+        from pathlib import Path
         
         # Create progress callback
         self.current_phase = "Initializing Step 2..."
@@ -1821,14 +1859,45 @@ class Step1CLI:
                 # Create Step 2 coordinator with output directory
                 coordinator = Step2Coordinator(model_provider, db_conn, output_dir=output_dir)
                 
+                # Always wrap with ExpertAgent supervision
+                from core.agents.expert_integration import create_expert_supervised_coordinator
+                from core.agents.expert_agent import OperatingMode
+                
+                # Infer operating mode based on how the user is running the analysis
+                if hasattr(self, '_step1_completed_in_session') and self._step1_completed_in_session:
+                    # User ran Step 1 and then Step 2 in the same session - human in loop
+                    expert_mode = OperatingMode.HUMAN_IN_LOOP
+                    mode_desc = "Human-in-the-loop (sequential steps)"
+                else:
+                    # User is running Step 2 with existing database - likely automated
+                    expert_mode = OperatingMode.HUMAN_AFTER_LOOP
+                    mode_desc = "Human-after-the-loop (batch analysis)"
+                
+                # Create knowledge directory path at project root for easy user access
+                # Go up from backend/cli.py to project root
+                project_root = Path(__file__).parent.parent.parent
+                knowledge_dir = project_root / "expert_knowledge"
+                
+                # Create supervised coordinator
+                coordinator = create_expert_supervised_coordinator(
+                    base_coordinator=coordinator,
+                    model_provider=model_provider,
+                    knowledge_dir=knowledge_dir,
+                    operating_mode=expert_mode
+                )
+                
+                self.console.print(f"[green]Quality control enabled[/green] - Max refinements: {max_refinements}")
+                
                 # Update progress
                 progress.update(task, description="Running Step 2 Analysis - Identifying control structure...")
                 
-                # Run Step 2 analysis
+                # Run Step 2 analysis with supervision
                 execution_mode = 'enhanced' if enhanced else 'standard'
-                results = await coordinator.coordinate(
+                
+                results = await coordinator.coordinate_with_supervision(
                     step1_analysis_id=step1_analysis_id,
-                    execution_mode=execution_mode
+                    execution_mode=execution_mode,
+                    max_refinements=max_refinements
                 )
                 
                 # Close database connection
@@ -1842,15 +1911,42 @@ class Step1CLI:
                 self.console.print("[dim]Saving Step 2 results...[/dim]")
                 await self._save_step2_results(config, results, db_name, output_dir)
                 
-                # Display output files like Step 1 does
-                self._display_output_files()
-                
-                # Create prompt index if PromptSaver is enabled
+                # Create prompt index if PromptSaver is enabled and add to saved files
                 prompt_saver = get_prompt_saver()
                 if prompt_saver:
                     index_file = prompt_saver.create_index()
                     if index_file:
-                        self.console.print(f"[dim]Prompt index created: {index_file}[/dim]")
+                        # Get all prompt files for display
+                        prompts_dir = output_dir / "prompts"
+                        prompt_files = []
+                        if prompts_dir.exists():
+                            prompt_files = list(prompts_dir.glob("*.json"))
+                        
+                        # Use OutputDisplay for consistent formatting
+                        output_display = OutputDisplay(self.console)
+                        
+                        # Add main results section
+                        output_display.add_section(
+                            title="Results saved to",
+                            base_path=self._output_dir,
+                            files=self._saved_files,
+                            is_secondary=False
+                        )
+                        
+                        # Add prompts section if available
+                        if prompt_files:
+                            output_display.add_section(
+                                title="Prompts saved to",
+                                base_path=prompts_dir,
+                                files=prompt_files[:5],  # Show first 5 prompt files
+                                is_secondary=True
+                            )
+                        
+                        # Display all sections
+                        output_display.display()
+                else:
+                    # Display output files normally if no prompts
+                    self._display_output_files()
                 
             except Exception as e:
                 self.console.print(f"[red]Step 2 analysis failed: {str(e)}[/red]")
@@ -2733,6 +2829,40 @@ class Step1CLI:
             )
             if not process_models_exists:
                 migrations_to_run.append("021_process_models.sql")
+            
+            # Check for system_descriptions table
+            system_desc_exists = await db_conn.fetchval(
+                "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'system_descriptions')"
+            )
+            if not system_desc_exists:
+                migrations_to_run.append("022_system_description.sql")
+            
+            # Check for control_contexts table
+            control_contexts_exists = await db_conn.fetchval(
+                "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'control_contexts')"
+            )
+            if not control_contexts_exists:
+                migrations_to_run.append("023_control_contexts.sql")
+            
+            # Check for control_structures table
+            control_structures_exists = await db_conn.fetchval(
+                "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'control_structures')"
+            )
+            if not control_structures_exists:
+                migrations_to_run.append("024_control_structures.sql")
+            
+            # Always run foreign key type fixes after other tables are created
+            # Check if we need the foreign key type fix by testing input_analysis table type
+            try:
+                input_analysis_type = await db_conn.fetchval(
+                    "SELECT data_type FROM information_schema.columns WHERE table_name = 'input_analysis' AND column_name = 'analysis_id'"
+                )
+                if input_analysis_type == 'uuid':
+                    # Still has UUID type, needs fixing
+                    migrations_to_run.append("025_fix_foreign_key_types.sql")
+            except Exception:
+                # input_analysis table might not exist, that's OK
+                pass
                     
             # Run necessary migrations
             for migration_file in migrations_to_run:
@@ -2773,6 +2903,7 @@ async def main():
     analyze_parser.add_argument('--use-database', help='Use existing database (for testing Step 2+)')
     analyze_parser.add_argument('--step', type=int, default=1, help='Which step to run (default: 1)')
     analyze_parser.add_argument('--save-prompts', action='store_true', help='Save all LLM prompts and responses for debugging')
+    analyze_parser.add_argument('--max-refinements', type=int, default=5, help='Maximum refinement iterations for quality control (default: 5)')
     
     # Demo command
     demo_parser = subparsers.add_parser('demo', help='Load pre-packaged demo analysis')
@@ -2801,7 +2932,8 @@ async def main():
             input_files=getattr(args, 'input', None),
             use_database=getattr(args, 'use_database', None),
             save_prompts=getattr(args, 'save_prompts', False),
-            step=getattr(args, 'step', 1)
+            step=getattr(args, 'step', 1),
+            max_refinements=getattr(args, 'max_refinements', 5)
         )
     elif args.command == 'demo':
         await cli.demo(args.name)

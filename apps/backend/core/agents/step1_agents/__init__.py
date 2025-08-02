@@ -10,6 +10,7 @@ from .loss_identification import LossIdentificationAgent
 from .hazard_identification import HazardIdentificationAgent
 from .stakeholder_analyst import StakeholderAnalystAgent
 from .validation_agent import ValidationAgent
+from .system_description import SystemDescriptionAgent
 from .step1_coordinator import Step1Coordinator
 
 __all__ = [
@@ -19,5 +20,6 @@ __all__ = [
     'HazardIdentificationAgent',
     'StakeholderAnalystAgent',
     'ValidationAgent',
+    'SystemDescriptionAgent',
     'Step1Coordinator'
 ]

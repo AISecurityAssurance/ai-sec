@@ -22,6 +22,7 @@ class ModelProvider(str, Enum):
     GEMINI = "gemini"
     OLLAMA = "ollama"
     CUSTOM = "custom"
+    MOCK = "mock"
 
 
 class AuthMethod(str, Enum):

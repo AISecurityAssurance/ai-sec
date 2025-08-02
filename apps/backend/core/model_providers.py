@@ -177,14 +177,33 @@ class MockModelClient(BaseModelClient):
     async def generate(self, messages: List[Dict[str, str]], 
                       temperature: float = 0.7,
                       max_tokens: Optional[int] = None) -> ModelResponse:
-        """Generate mock response"""
+        """Generate mock response based on message content"""
         
-        # Return a simple mock response
-        return ModelResponse(
-            content="Mock response for testing",
-            model="mock",
-            usage={"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
-        )
+        # Get the last user message to determine response type
+        user_message = ""
+        for msg in reversed(messages):
+            if msg["role"] == "user":
+                user_message = msg["content"]
+                break
+        
+        # Import the mock provider for sophisticated responses
+        try:
+            from core.model_providers.mock_provider import MockModelProvider
+            mock = MockModelProvider()
+            response = await mock.query(user_message)
+            return ModelResponse(
+                content=response.content,
+                model=response.model,
+                usage=response.usage,
+                raw_response={"mock": True, "finish_reason": response.finish_reason}
+            )
+        except:
+            # Fallback to simple response
+            return ModelResponse(
+                content="Mock response for testing",
+                model="mock",
+                usage={"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
+            )
 
 
 def get_model_client() -> BaseModelClient:

@@ -9,6 +9,7 @@ from datetime import datetime
 
 from .base_step2 import BaseStep2Agent, AgentResult
 from .db_compat import Step2DBCompat
+from .component_registry import ComponentRegistry
 from core.agents.step1_agents.base_step1 import CognitiveStyle
 from core.utils.json_parser import parse_llm_json
 
@@ -23,11 +24,16 @@ class ControlStructureAnalystAgent(BaseStep2Agent):
         """Identify control structure components."""
         start_time = datetime.now()
         
+        # Get or create component registry
+        registry = kwargs.get('component_registry')
+        if registry is None:
+            registry = ComponentRegistry()
+        
         # Load Step 1 results
         step1_results = await self.load_step1_results(step1_analysis_id)
         
         # Build prompt for control structure identification
-        prompt = self._build_control_structure_prompt(step1_results)
+        prompt = self._build_control_structure_prompt(step1_results, kwargs.get('previous_results', {}))
         
         # Get LLM response with retry logic
         messages = [
@@ -41,8 +47,8 @@ class ControlStructureAnalystAgent(BaseStep2Agent):
         # Parse response
         components = self._parse_control_structure(response_text, step1_results)
         
-        # Store in database
-        await self._store_components(step2_analysis_id, components)
+        # Store in database and register in component registry
+        await self._store_components(step2_analysis_id, components, registry)
         
         execution_time = int((datetime.now() - start_time).total_seconds() * 1000)
         
@@ -51,7 +57,8 @@ class ControlStructureAnalystAgent(BaseStep2Agent):
             success=True,
             data={
                 'components': components,
-                'summary': self._generate_summary(components)
+                'summary': self._generate_summary(components),
+                'component_registry': registry
             },
             execution_time_ms=execution_time,
             metadata={
@@ -61,9 +68,13 @@ class ControlStructureAnalystAgent(BaseStep2Agent):
             }
         )
         
-    def _build_control_structure_prompt(self, step1_results: Dict[str, Any]) -> str:
+    def _build_control_structure_prompt(self, step1_results: Dict[str, Any], previous_results: Dict[str, Any] = None) -> str:
         """Build prompt for control structure identification."""
         base_prompt = self.format_control_structure_prompt(step1_results)
+        
+        # Apply expert refinement if available
+        if previous_results:
+            base_prompt = self.apply_expert_refinement(base_prompt, previous_results)
         
         cognitive_prompts = {
             CognitiveStyle.INTUITIVE: """
@@ -303,14 +314,27 @@ Ensure all string values properly escape newlines and quotes.
                     controller['stakeholder_link'] = stakeholder['id']
                     controller['trust_level'] = stakeholder.get('trust_level', 'medium')
                     
-    async def _store_components(self, step2_analysis_id: str, components: Dict[str, Any]) -> None:
-        """Store components in database."""
+    async def _store_components(self, step2_analysis_id: str, components: Dict[str, Any], registry: ComponentRegistry) -> None:
+        """Store components in database and register in component registry."""
         # Create compatibility layer
         db_compat = Step2DBCompat(self.db_connection)
         
         # Store controllers
         for controller in components['controllers']:
             try:
+                # Register in component registry
+                registry.register_component(
+                    identifier=controller['identifier'],
+                    name=controller['name'],
+                    comp_type='controller',
+                    description=controller.get('description', ''),
+                    source='control_structure_analyst',
+                    authority_level=controller.get('authority_level'),
+                    controls=controller.get('controls', []),
+                    abstraction_level=controller.get('abstraction_level', 'service')
+                )
+                
+                # Store in database
                 await db_compat.insert_component(
                     component_id=str(uuid.uuid4()),
                     analysis_id=step2_analysis_id,
@@ -334,6 +358,19 @@ Ensure all string values properly escape newlines and quotes.
         # Store controlled processes
         for process in components['controlled_processes']:
             try:
+                # Register in component registry
+                registry.register_component(
+                    identifier=process['identifier'],
+                    name=process['name'],
+                    comp_type='process',
+                    description=process.get('description', ''),
+                    source='control_structure_analyst',
+                    criticality=process.get('criticality'),
+                    controlled_by=process.get('controlled_by', []),
+                    abstraction_level=process.get('abstraction_level', 'service')
+                )
+                
+                # Store in database
                 await db_compat.insert_component(
                     component_id=str(uuid.uuid4()),
                     analysis_id=step2_analysis_id,
@@ -355,6 +392,20 @@ Ensure all string values properly escape newlines and quotes.
         # Store dual-role components
         for dual in components['dual_role_components']:
             try:
+                # Register in component registry
+                registry.register_component(
+                    identifier=dual['identifier'],
+                    name=dual['name'],
+                    comp_type='dual-role',
+                    description=dual.get('description', ''),
+                    source='control_structure_analyst',
+                    controls=dual.get('controls', []),
+                    controlled_by=dual.get('controlled_by', []),
+                    rationale=dual.get('rationale', ''),
+                    abstraction_level=dual.get('abstraction_level', 'service')
+                )
+                
+                # Store in database
                 await db_compat.insert_component(
                     component_id=str(uuid.uuid4()),
                     analysis_id=step2_analysis_id,
@@ -376,6 +427,9 @@ Ensure all string values properly escape newlines and quotes.
             
         # Store hierarchy relationships
         for rel in components['control_hierarchy']:
+            # Register hierarchy in component registry
+            registry.add_reference(rel['parent'], rel['child'])
+            
             # Need to look up component IDs by identifier
             parent_id = await self._get_component_id(step2_analysis_id, rel['parent'])
             child_id = await self._get_component_id(step2_analysis_id, rel['child'])

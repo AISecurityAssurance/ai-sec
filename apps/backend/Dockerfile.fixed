@@ -1,0 +1,48 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    git \
+    curl \
+    postgresql-client \
+    poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Apply mock provider fix
+RUN echo '\n\n# Mock provider override for testing\n' >> /app/core/model_providers.py && \
+    cat << 'EOF' >> /app/core/model_providers.py
+# Override MockModelClient with fixed version
+import json
+_original_MockModelClient = MockModelClient
+
+class MockModelClient(BaseModelClient):
+    async def generate(self, messages, temperature=0.7, max_tokens=None):
+        response_data = {
+            "components": {
+                "controllers": [{"identifier": "CTRL-1", "name": "SD-WAN Controller", "type": "orchestrator", "description": "Central management"}],
+                "controlled_processes": [{"identifier": "PROC-1", "name": "Network Traffic", "type": "data_flow", "description": "Data traffic"}]
+            },
+            "control_actions": [{"identifier": "CA-1", "controller_identifier": "CTRL-1", "process_identifier": "PROC-1", "action_name": "Route Traffic", "description": "Traffic routing"}],
+            "trust_boundaries": [{"identifier": "TB-1", "name": "Network Perimeter", "type": "network", "description": "External boundary"}],
+            "feedback_mechanisms": [{"identifier": "FB-1", "from_component": "PROC-1", "to_component": "CTRL-1", "type": "telemetry", "description": "Performance metrics"}]
+        }
+        return ModelResponse(content=json.dumps(response_data), model="mock", usage={"prompt_tokens": 10, "completion_tokens": 100, "total_tokens": 110})
+EOF
+
+# Make the CLI executable
+RUN chmod +x ai-sec
+
+ENV PYTHONUNBUFFERED=1
+
+CMD ["python", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

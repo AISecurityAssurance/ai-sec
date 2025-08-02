@@ -1,26 +1,42 @@
 -- Migration: 021_process_models.sql
--- Description: Add process models, control algorithms, and inadequate control scenarios tables
+-- Description: Update process models table and add control algorithms, inadequate control scenarios tables
 -- Created: 2025-08-01
 
--- Process Models table
-CREATE TABLE IF NOT EXISTS process_models (
-    id UUID PRIMARY KEY,
-    analysis_id UUID NOT NULL REFERENCES step2_analyses(id) ON DELETE CASCADE,
-    identifier VARCHAR NOT NULL,
-    controller_id VARCHAR,
-    process_id VARCHAR,
-    state_variables JSONB,
-    assumptions JSONB,
-    update_frequency VARCHAR,
-    staleness_risk VARCHAR,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(identifier, analysis_id)
-);
+-- Update existing process_models table to add missing columns
+-- Note: process_models table already exists from migration 016, we need to add missing columns
+ALTER TABLE process_models ADD COLUMN IF NOT EXISTS analysis_id VARCHAR;
+ALTER TABLE process_models ADD COLUMN IF NOT EXISTS identifier VARCHAR;
+ALTER TABLE process_models ADD COLUMN IF NOT EXISTS process_id VARCHAR;
+ALTER TABLE process_models ADD COLUMN IF NOT EXISTS staleness_risk VARCHAR;
+
+-- Add foreign key constraint for analysis_id if not exists
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'process_models_analysis_id_fkey'
+    ) THEN
+        ALTER TABLE process_models 
+        ADD CONSTRAINT process_models_analysis_id_fkey 
+        FOREIGN KEY (analysis_id) REFERENCES step2_analyses(id) ON DELETE CASCADE;
+    END IF;
+END $$;
+
+-- Add unique constraint if not exists
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'process_models_identifier_analysis_id_key'
+    ) THEN
+        ALTER TABLE process_models ADD CONSTRAINT process_models_identifier_analysis_id_key UNIQUE(identifier, analysis_id);
+    END IF;
+END $$;
 
 -- Control Algorithms table
 CREATE TABLE IF NOT EXISTS control_algorithms (
     id UUID PRIMARY KEY,
-    analysis_id UUID NOT NULL REFERENCES step2_analyses(id) ON DELETE CASCADE,
+    analysis_id VARCHAR NOT NULL REFERENCES step2_analyses(id) ON DELETE CASCADE,
     identifier VARCHAR NOT NULL,
     controller_id VARCHAR,
     name VARCHAR,
@@ -35,7 +51,7 @@ CREATE TABLE IF NOT EXISTS control_algorithms (
 -- Inadequate Control Scenarios table
 CREATE TABLE IF NOT EXISTS inadequate_control_scenarios (
     id UUID PRIMARY KEY,
-    analysis_id UUID NOT NULL REFERENCES step2_analyses(id) ON DELETE CASCADE,
+    analysis_id VARCHAR NOT NULL REFERENCES step2_analyses(id) ON DELETE CASCADE,
     identifier VARCHAR NOT NULL,
     name VARCHAR,
     scenario_type VARCHAR,

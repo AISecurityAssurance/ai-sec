@@ -9,6 +9,7 @@ import json
 import uuid
 from datetime import datetime
 from .base_step2 import BaseStep2Agent, AgentResult
+from .component_registry import ComponentRegistry
 from core.agents.step1_agents.base_step1 import CognitiveStyle
 from core.utils.json_parser import parse_llm_json
 
@@ -24,76 +25,113 @@ class ProcessModelAnalystAgent(BaseStep2Agent):
         """Analyze process models and control algorithm constraints."""
         start_time = datetime.now()
         
-        # Get control structure from previous phase
-        control_structure = self._extract_control_structure(previous_results)
-        control_actions = self._extract_control_actions(previous_results)
+        try:
+            # Get component registry from previous phases
+            registry = self._get_registry_from_previous(previous_results)
+            
+            # Get control structure from previous phase
+            control_structure = self._extract_control_structure(previous_results)
+            control_actions = self._extract_control_actions(previous_results)
+            
+            # Build prompt with registry context
+            prompt = self._build_process_model_prompt(control_structure, control_actions, registry)
+            
+            # Query LLM with retry
+            response = await self.query_llm_with_retry(prompt)
+            
+            # Parse response and validate against registry
+            process_models = self._parse_process_models(response, registry)
+            
+            # Store in database
+            await self._store_process_models(step2_analysis_id, process_models)
+            
+            execution_time = int((datetime.now() - start_time).total_seconds() * 1000)
+            
+            return AgentResult(
+                agent_type="process_model_analyst",
+                success=True,
+                data={
+                    'process_models': process_models.get('models', []),
+                    'control_algorithms': process_models.get('algorithms', []),
+                    'insights': process_models.get('insights', {}),
+                    'summary': process_models.get('summary', 'Process model analysis completed'),
+                    'component_registry': registry
+                },
+                execution_time_ms=execution_time,
+                metadata={
+                    'cognitive_style': self.cognitive_style.value,
+                    'model_count': len(process_models.get('models', [])),
+                    'algorithm_count': len(process_models.get('algorithms', []))
+                }
+            )
+        except Exception as e:
+            self.logger.error(f"Process model analysis failed: {str(e)}")
+            return AgentResult(
+                agent_type="process_model_analyst",
+                success=False,
+                data={'error': str(e)},
+                execution_time_ms=int((datetime.now() - start_time).total_seconds() * 1000)
+            )
+    
+    def _get_registry_from_previous(self, previous_results: Dict[str, Any]) -> ComponentRegistry:
+        """Extract component registry from previous phase results."""
+        # Check different phases in reverse order (most recent first)
+        phases_to_check = ['control_context', 'feedback_trust', 'control_actions', 'control_structure']
         
-        # Build prompt
-        prompt = self._build_process_model_prompt(control_structure, control_actions)
+        for phase_name in phases_to_check:
+            if phase_name in previous_results:
+                phase_data = previous_results[phase_name]
+                if isinstance(phase_data, dict):
+                    for agent_key, agent_result in phase_data.items():
+                        if hasattr(agent_result, 'data') and 'component_registry' in agent_result.data:
+                            return agent_result.data['component_registry']
+                        elif isinstance(agent_result, dict) and 'data' in agent_result and 'component_registry' in agent_result['data']:
+                            return agent_result['data']['component_registry']
         
-        # Query LLM with retry
-        response = await self.query_llm_with_retry(prompt)
-        
-        # Parse response
-        process_models = self._parse_process_models(response)
-        
-        # Store in database
-        await self._store_process_models(step2_analysis_id, process_models)
-        
-        execution_time = int((datetime.now() - start_time).total_seconds() * 1000)
-        
-        return AgentResult(
-            agent_type="process_model_analyst",
-            success=True,
-            data={
-                'process_models': process_models['models'],
-                'control_algorithms': process_models['algorithms'],
-                'inadequate_control_scenarios': process_models['scenarios'],
-                'summary': process_models['summary']
-            },
-            execution_time_ms=execution_time,
-            metadata={
-                'cognitive_style': self.cognitive_style.value,
-                'model_count': len(process_models['models']),
-                'scenario_count': len(process_models['scenarios'])
-            }
-        )
+        # If no registry found, create new one
+        return ComponentRegistry()
     
     def _build_process_model_prompt(self, control_structure: Dict[str, Any], 
-                                    control_actions: List[Dict[str, Any]]) -> str:
+                                    control_actions: List[Dict[str, Any]], 
+                                    registry: ComponentRegistry) -> str:
         """Build prompt for process model analysis."""
+        
+        # Get registry context
+        registry_context = registry.get_prompt_context()
         
         prompt = f"""You are a process model analyst performing STPA-Sec Step 2 analysis.
 
 ## Control Structure
-Controllers: {json.dumps([c for c in control_structure.get('controllers', [])], indent=2)}
-Processes: {json.dumps([p for p in control_structure.get('processes', [])], indent=2)}
+
+{registry_context}
+
+### Controllers from Previous Analysis:
+{json.dumps([c for c in control_structure.get('controllers', [])], indent=2)}
+
+### Processes from Previous Analysis:
+{json.dumps([p for p in control_structure.get('processes', [])], indent=2)}
 
 ## Control Actions
 {json.dumps(control_actions, indent=2)}
 
 ## Your Task: Analyze Process Models and Control Algorithms
 
+This is Step 2 analysis - focus on understanding HOW control works, not identifying unsafe conditions.
+
 For each controller-process pair, analyze:
 
-1. **Process Model**: The controller's view/belief of the controlled process state
+1. **Process Model**: The controller's internal representation of process state
    - What state variables does the controller track?
    - How does the controller update its model?
-   - What assumptions does the controller make?
-   - Potential mismatches between model and reality
+   - What information sources feed the model?
+   - Update frequency and data freshness requirements
 
-2. **Control Algorithm Constraints**: Rules the controller uses
+2. **Control Algorithm**: The logic and rules the controller uses
    - Decision logic for control actions
-   - Timing constraints
-   - Priority/conflict resolution rules
-   - Safety/security constraints
-
-3. **Inadequate Control Scenarios**: Beyond missing/delayed actions
-   - Incorrect process model leading to wrong action
-   - Conflicting control actions
-   - Control action with wrong parameters
-   - Action correct but process model update fails
-   - Controller receives incorrect feedback
+   - Input processing and evaluation
+   - Priority/conflict resolution between actions
+   - Timing and sequencing constraints
+   - Operational constraints and limits
 
 Provide response as JSON:
 {{
@@ -134,28 +172,22 @@ Provide response as JSON:
             "conflict_resolution": "how conflicts are handled"
         }}
     ],
-    "scenarios": [
-        {{
-            "identifier": "ICS-1",
-            "name": "scenario name",
-            "type": "incorrect_model|conflicting_actions|wrong_parameters|failed_update|incorrect_feedback",
-            "description": "detailed description",
-            "involved_components": ["CTRL-X", "PROC-Y"],
-            "preconditions": ["what must be true for this to occur"],
-            "consequences": ["potential impacts"],
-            "likelihood": "low|medium|high",
-            "severity": "low|medium|high|critical"
-        }}
-    ],
-    "summary": "Overall assessment of process model adequacy and control algorithm robustness"
+    "insights": {{
+        "model_coverage": "How well process models represent actual system state",
+        "algorithm_sophistication": "Level of control algorithm complexity",
+        "information_dependencies": "Critical information flows for control decisions",
+        "timing_characteristics": "Which algorithms have strict timing requirements",
+        "coordination_needs": "How controllers coordinate their actions"
+    }},
+    "summary": "Overall description of process modeling and control algorithm approach"
 }}
 
-Focus on security-relevant scenarios where attackers could exploit process model weaknesses.
+Remember: This is Step 2 - focus on understanding HOW control works, not on identifying problems or unsafe scenarios.
 """
         
         return prompt
     
-    def _parse_process_models(self, response: str) -> Dict[str, Any]:
+    def _parse_process_models(self, response: str, registry: ComponentRegistry) -> Dict[str, Any]:
         """Parse LLM response into structured process models."""
         try:
             data = parse_llm_json(response)
@@ -163,26 +195,53 @@ Focus on security-relevant scenarios where attackers could exploit process model
             # Validate and enhance
             models = data.get('models', [])
             algorithms = data.get('algorithms', [])
-            scenarios = data.get('scenarios', [])
+            insights = data.get('insights', {})
+            validation_errors = []
             
-            # Add identifiers if missing
+            # Validate and add identifiers if missing
+            validated_models = []
             for i, model in enumerate(models):
                 if not model.get('identifier'):
                     model['identifier'] = f'PM-{i+1}'
+                    
+                # Validate component references
+                controller_id = model.get('controller_id')
+                process_id = model.get('process_id')
+                
+                if controller_id and not registry.validate_component_reference(controller_id):
+                    validation_errors.append(f"Invalid controller reference in process model: {controller_id}")
+                    continue
+                    
+                if process_id and not registry.validate_component_reference(process_id):
+                    validation_errors.append(f"Invalid process reference in process model: {process_id}")
+                    continue
+                    
+                validated_models.append(model)
             
+            validated_algorithms = []
             for i, alg in enumerate(algorithms):
                 if not alg.get('identifier'):
                     alg['identifier'] = f'ALG-{i+1}'
                     
-            for i, scenario in enumerate(scenarios):
-                if not scenario.get('identifier'):
-                    scenario['identifier'] = f'ICS-{i+1}'
+                # Validate controller reference
+                controller_id = alg.get('controller_id')
+                if controller_id and not registry.validate_component_reference(controller_id):
+                    validation_errors.append(f"Invalid controller reference in algorithm: {controller_id}")
+                    continue
+                    
+                validated_algorithms.append(alg)
+            
+            # Add validation errors to summary if any
+            summary = data.get('summary', 'Process model analysis completed')
+            if validation_errors:
+                summary += f"\n\nValidation errors:\n" + "\n".join(validation_errors)
             
             return {
-                'models': models,
-                'algorithms': algorithms,
-                'scenarios': scenarios,
-                'summary': data.get('summary', 'Process model analysis completed')
+                'models': validated_models,
+                'algorithms': validated_algorithms,
+                'insights': insights,
+                'summary': summary,
+                'validation_errors': validation_errors
             }
             
         except Exception as e:
@@ -191,27 +250,38 @@ Focus on security-relevant scenarios where attackers could exploit process model
             return {
                 'models': [],
                 'algorithms': [],
-                'scenarios': [],
-                'summary': f'Process model analysis failed: {str(e)}'
+                'insights': {},
+                'summary': f'Process model analysis failed: {str(e)}',
+                'validation_errors': []
             }
     
     def _extract_control_structure(self, previous_results: Dict[str, Any]) -> Dict[str, Any]:
         """Extract control structure from previous results."""
-        control_structure = previous_results.get('control_structure', {})
-        
-        # Extract from different result formats
         controllers = []
         processes = []
         
-        for key, value in control_structure.items():
-            if hasattr(value, 'data'):
-                components = value.data.get('components', {})
-                controllers.extend(components.get('controllers', []))
-                processes.extend(components.get('controlled_processes', []))
-            elif isinstance(value, dict) and value.get('success'):
-                components = value.get('data', {}).get('components', {})
-                controllers.extend(components.get('controllers', []))
-                processes.extend(components.get('controlled_processes', []))
+        # Check different possible locations for control structure data
+        # First check if there's a control_structure phase result
+        if 'control_structure' in previous_results:
+            control_phase = previous_results['control_structure']
+            
+            # Handle phase results which contain agent results
+            if isinstance(control_phase, dict):
+                for agent_key, agent_result in control_phase.items():
+                    if hasattr(agent_result, 'data'):
+                        components = agent_result.data.get('components', {})
+                        controllers.extend(components.get('controllers', []))
+                        processes.extend(components.get('controlled_processes', []))
+                    elif isinstance(agent_result, dict) and agent_result.get('success'):
+                        components = agent_result.get('data', {}).get('components', {})
+                        controllers.extend(components.get('controllers', []))
+                        processes.extend(components.get('controlled_processes', []))
+        
+        # Also check if data is directly in previous_results
+        if 'components' in previous_results:
+            components = previous_results['components']
+            controllers.extend(components.get('controllers', []))
+            processes.extend(components.get('controlled_processes', []))
         
         return {
             'controllers': controllers,
@@ -221,13 +291,31 @@ Focus on security-relevant scenarios where attackers could exploit process model
     def _extract_control_actions(self, previous_results: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Extract control actions from previous results."""
         actions = []
-        action_results = previous_results.get('control_actions', {})
         
-        for key, value in action_results.items():
-            if hasattr(value, 'data'):
-                actions.extend(value.data.get('control_actions', {}).get('control_actions', []))
-            elif isinstance(value, dict) and value.get('success'):
-                actions.extend(value.get('data', {}).get('control_actions', {}).get('control_actions', []))
+        # Check if there's a control_actions phase result
+        if 'control_actions' in previous_results:
+            action_phase = previous_results['control_actions']
+            
+            # Handle phase results which contain agent results
+            if isinstance(action_phase, dict):
+                for agent_key, agent_result in action_phase.items():
+                    if hasattr(agent_result, 'data'):
+                        control_actions_data = agent_result.data.get('control_actions', [])
+                        if isinstance(control_actions_data, dict):
+                            actions.extend(control_actions_data.get('control_actions', []))
+                        elif isinstance(control_actions_data, list):
+                            actions.extend(control_actions_data)
+                    elif isinstance(agent_result, dict) and agent_result.get('success'):
+                        data = agent_result.get('data', {})
+                        control_actions_data = data.get('control_actions', [])
+                        if isinstance(control_actions_data, dict):
+                            actions.extend(control_actions_data.get('control_actions', []))
+                        elif isinstance(control_actions_data, list):
+                            actions.extend(control_actions_data)
+        
+        # Also check if control_actions is directly in previous_results
+        if 'control_actions' in previous_results and isinstance(previous_results['control_actions'], list):
+            actions.extend(previous_results['control_actions'])
         
         return actions
     
@@ -284,34 +372,13 @@ Focus on security-relevant scenarios where attackers could exploit process model
                 alg.get('conflict_resolution')
             )
         
-        # Store inadequate control scenarios
-        for scenario in process_models['scenarios']:
-            await self.db_connection.execute(
-                """
-                INSERT INTO inadequate_control_scenarios
-                (id, analysis_id, identifier, name, scenario_type,
-                 description, involved_components, preconditions, 
-                 consequences, likelihood, severity)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-                ON CONFLICT (identifier, analysis_id) DO UPDATE SET
-                    name = EXCLUDED.name,
-                    scenario_type = EXCLUDED.scenario_type,
-                    description = EXCLUDED.description,
-                    involved_components = EXCLUDED.involved_components,
-                    preconditions = EXCLUDED.preconditions,
-                    consequences = EXCLUDED.consequences,
-                    likelihood = EXCLUDED.likelihood,
-                    severity = EXCLUDED.severity
-                """,
-                str(uuid.uuid4()),
-                analysis_id,
-                scenario['identifier'],
-                scenario.get('name'),
-                scenario.get('type'),
-                scenario.get('description'),
-                json.dumps(scenario.get('involved_components', [])),
-                json.dumps(scenario.get('preconditions', [])),
-                json.dumps(scenario.get('consequences', [])),
-                scenario.get('likelihood'),
-                scenario.get('severity')
-            )
+        # Store insights as metadata
+        await self.db_connection.execute(
+            """
+            UPDATE step2_analyses 
+            SET metadata = COALESCE(metadata, '{}'::jsonb) || jsonb_build_object('process_model_insights', $1)
+            WHERE id = $2
+            """,
+            json.dumps(process_models.get('insights', {})),
+            analysis_id
+        )

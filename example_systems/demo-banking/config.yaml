@@ -1,0 +1,21 @@
+analysis:
+  description: STPA-Sec Step 1 analysis using standard single-agent approach with
+    GPT-4o
+  name: demo-banking 
+  output_dir: ./analyses/demo
+execution:
+  mode: standard
+input:
+  path: example_systems/demo-banking/system-description.txt
+  type: file
+model:
+  api_key_env: AZURE_OPENAI_API_KEY
+  name: gpt-4o
+  provider: openai
+  base_url: https://ai-sec-openai.openai.azure.com/ 
+output:
+  exports:
+  - format: json
+  - format: markdown
+
+

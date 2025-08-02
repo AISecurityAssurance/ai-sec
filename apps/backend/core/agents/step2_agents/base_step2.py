@@ -256,6 +256,51 @@ class BaseStep2Agent(ABC):
             
         return prompt
         
+    def apply_expert_refinement(self, base_prompt: str, previous_results: Dict[str, Any]) -> str:
+        """
+        Apply expert refinement guidance to prompts if available.
+        """
+        # Check if we have expert refinement guidance
+        if "expert_refinement" not in previous_results:
+            return base_prompt
+            
+        refinement = previous_results["expert_refinement"]
+        
+        # Add priority fixes
+        if refinement.get("priority_fixes"):
+            base_prompt += "\n## CRITICAL REFINEMENTS REQUIRED:\n"
+            for fix in refinement["priority_fixes"]:
+                base_prompt += f"\n### {fix['issue']}:\n"
+                base_prompt += f"- Required Action: {fix['specific_guidance']}\n"
+                if fix.get('example'):
+                    base_prompt += f"- Example: {fix['example']}\n"
+                    
+        # Add patterns to avoid
+        if refinement.get("avoid_patterns"):
+            base_prompt += "\n## PATTERNS TO AVOID:\n"
+            for pattern in refinement["avoid_patterns"]:
+                base_prompt += f"- {pattern}\n"
+                
+        # Add specific requirements
+        if refinement.get("specific_requirements"):
+            base_prompt += "\n## ADDITIONAL REQUIREMENTS:\n"
+            for req in refinement["specific_requirements"]:
+                base_prompt += f"- {req}\n"
+                
+        # Add examples if provided
+        if "expert_examples" in previous_results:
+            base_prompt += "\n## EXPERT-PROVIDED EXAMPLES:\n"
+            for example in previous_results["expert_examples"]:
+                base_prompt += f"- {example}\n"
+                
+        # Add clarified requirements
+        if "clarified_requirements" in previous_results:
+            base_prompt += "\n## CLARIFIED REQUIREMENTS:\n"
+            for req in previous_results["clarified_requirements"]:
+                base_prompt += f"- {req}\n"
+                
+        return base_prompt
+        
     @abstractmethod
     async def analyze(self, step1_analysis_id: str, step2_analysis_id: str, **kwargs) -> AgentResult:
         """

@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime
 
 from .base_step2 import BaseStep2Agent, AgentResult
+from .component_registry import ComponentRegistry
 from core.agents.step1_agents.base_step1 import CognitiveStyle
 from core.utils.json_parser import parse_llm_json
 
@@ -18,15 +19,29 @@ class ControlActionMappingAgent(BaseStep2Agent):
         """Map control actions between components."""
         start_time = datetime.now()
         
+        # Get component registry from previous phase
+        previous_results = kwargs.get('previous_results', {})
+        registry = None
+        if 'control_structure' in previous_results:
+            control_phase = previous_results['control_structure']
+            if isinstance(control_phase, dict):
+                for agent_key, agent_result in control_phase.items():
+                    if hasattr(agent_result, 'data') and 'component_registry' in agent_result.data:
+                        registry = agent_result.data['component_registry']
+                    elif isinstance(agent_result, dict) and 'data' in agent_result and 'component_registry' in agent_result['data']:
+                        registry = agent_result['data']['component_registry']
+        
+        if registry is None:
+            registry = ComponentRegistry()
+        
         # Load Step 1 results
         step1_results = await self.load_step1_results(step1_analysis_id)
         
         # Load control structure from previous phase
-        previous_results = kwargs.get('previous_results', {})
         control_structure = await self._load_control_structure(step2_analysis_id)
         
-        # Build prompt
-        prompt = self._build_control_action_prompt(step1_results, control_structure)
+        # Build prompt with component registry context
+        prompt = self._build_control_action_prompt(step1_results, control_structure, registry)
         
         # Get LLM response with retry logic
         messages = [
@@ -37,8 +52,8 @@ class ControlActionMappingAgent(BaseStep2Agent):
         # Use the new retry method from base class
         response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
         
-        # Parse response
-        control_actions = self._parse_control_actions(response_text, control_structure)
+        # Parse response and validate against registry
+        control_actions = self._parse_control_actions(response_text, control_structure, registry)
         
         # Store in database
         await self._store_control_actions(step2_analysis_id, control_actions)
@@ -50,7 +65,8 @@ class ControlActionMappingAgent(BaseStep2Agent):
             success=True,
             data={
                 'control_actions': control_actions,
-                'summary': self._generate_summary(control_actions)
+                'summary': self._generate_summary(control_actions),
+                'component_registry': registry
             },
             execution_time_ms=execution_time,
             metadata={'cognitive_style': self.cognitive_style.value}
@@ -83,15 +99,20 @@ class ControlActionMappingAgent(BaseStep2Agent):
             'processes': [dict(p) for p in processes]
         }
         
-    def _build_control_action_prompt(self, step1_results: Dict[str, Any], control_structure: Dict[str, Any]) -> str:
+    def _build_control_action_prompt(self, step1_results: Dict[str, Any], control_structure: Dict[str, Any], registry: ComponentRegistry) -> str:
         """Build prompt for control action mapping."""
         base_prompt = self.format_control_structure_prompt(step1_results)
+        
+        # Get component context from registry
+        registry_context = registry.get_prompt_context()
         
         prompt = f"""{base_prompt}
 
 ## Identified Control Structure
 
-### Controllers:
+{registry_context}
+
+### Controllers from Database:
 
 CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks or use backticks.
 Start your response with {{ and end with }}.
@@ -99,7 +120,7 @@ Ensure all string values properly escape newlines and quotes."""
         for controller in control_structure['controllers']:
             prompt += f"- {controller['identifier']}: {controller['name']}\n"
             
-        prompt += "\n### Controlled Processes:\n"
+        prompt += "\n### Controlled Processes from Database:\n"
         for process in control_structure['processes']:
             prompt += f"- {process['identifier']}: {process['name']}\n"
             
@@ -190,7 +211,7 @@ Ensure all string values properly escape newlines and quotes."""
         
         return prompt
         
-    def _parse_control_actions(self, response: str, control_structure: Dict[str, Any]) -> Dict[str, Any]:
+    def _parse_control_actions(self, response: str, control_structure: Dict[str, Any], registry: ComponentRegistry) -> Dict[str, Any]:
         """Parse LLM response into control actions."""
         try:
             data = parse_llm_json(response)
@@ -201,15 +222,32 @@ Ensure all string values properly escape newlines and quotes."""
             
             # Process control actions
             actions = []
+            validation_errors = []
+            
             for action in data.get('control_actions', []):
+                controller_id_str = action.get('controller_id')
+                process_id_str = action.get('controlled_process_id')
+                
+                # Validate against registry
+                if not registry.validate_component_reference(controller_id_str):
+                    validation_errors.append(f"Invalid controller reference: {controller_id_str}")
+                    continue
+                    
+                if not registry.validate_component_reference(process_id_str):
+                    validation_errors.append(f"Invalid process reference: {process_id_str}")
+                    continue
+                
                 # Map identifiers to database IDs
-                controller_id = controller_map.get(action.get('controller_id'))
-                process_id = process_map.get(action.get('controlled_process_id'))
+                controller_id = controller_map.get(controller_id_str)
+                process_id = process_map.get(process_id_str)
                 
                 if controller_id and process_id:
                     action['controller_db_id'] = controller_id
                     action['process_db_id'] = process_id
                     actions.append(action)
+                    
+                    # Register the control action reference in the registry
+                    registry.add_reference(controller_id_str, process_id_str)
                     
             # Store contexts with actions
             context_map = {}
@@ -218,10 +256,16 @@ Ensure all string values properly escape newlines and quotes."""
                 if action_id:
                     context_map[action_id] = context
                     
+            # Add validation errors to analysis notes
+            analysis_notes = data.get('analysis_notes', '')
+            if validation_errors:
+                analysis_notes += f"\n\nValidation errors:\n" + "\n".join(validation_errors)
+                    
             return {
                 'control_actions': actions,
                 'control_contexts': context_map,
-                'analysis_notes': data.get('analysis_notes', '')
+                'analysis_notes': analysis_notes,
+                'validation_errors': validation_errors
             }
             
         except Exception as e:
@@ -229,7 +273,8 @@ Ensure all string values properly escape newlines and quotes."""
             return {
                 'control_actions': [],
                 'control_contexts': {},
-                'analysis_notes': f'Parse error: {str(e)}'
+                'analysis_notes': f'Parse error: {str(e)}',
+                'validation_errors': []
             }
             
     async def _store_control_actions(self, analysis_id: str, actions_data: Dict[str, Any]) -> None:

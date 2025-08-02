@@ -16,7 +16,7 @@ from core.validation import Step2Validator
 
 from .control_structure_analyst import ControlStructureAnalystAgent
 from .control_action_mapping import ControlActionMappingAgent
-from .state_context_analysis import StateContextAnalysisAgent
+from .control_context_analyst import ControlContextAnalystAgent
 from .feedback_mechanism import FeedbackMechanismAgent
 from .trust_boundary import TrustBoundaryAgent
 from .synthesis_enhancement import Step2SynthesisEnhancer
@@ -29,9 +29,11 @@ class Step2Coordinator:
     Focuses on control structure identification and analysis.
     """
     
-    def __init__(self, model_provider, db_connection: asyncpg.Connection, output_dir: Optional[Path] = None):
+    def __init__(self, model_provider, db_connection: asyncpg.Connection, output_dir: Optional[Path] = None, 
+                 cognitive_style: CognitiveStyle = CognitiveStyle.BALANCED):
         self.model_provider = model_provider
         self.db_connection = db_connection
+        self.cognitive_style = cognitive_style
         self.logger = logging.getLogger(self.__class__.__name__)
         self.output_dir = output_dir
         self.validator = Step2Validator()
@@ -50,9 +52,9 @@ class Step2Coordinator:
                 'description': 'Map control actions between components'
             },
             {
-                'name': 'state_context',
-                'agents': ['state_context_analysis'],
-                'description': 'Analyze state-dependent control contexts'
+                'name': 'control_context',
+                'agents': ['control_context_analyst'],
+                'description': 'Analyze when and how control actions are executed'
             },
             {
                 'name': 'feedback_trust',
@@ -67,12 +69,22 @@ class Step2Coordinator:
             }
         ]
         
+        # Agent class mapping for expert integration
+        self.agent_classes = {
+            'control_structure_analyst': ControlStructureAnalystAgent,
+            'control_action_mapping': ControlActionMappingAgent,
+            'control_context_analyst': ControlContextAnalystAgent,
+            'feedback_mechanism': FeedbackMechanismAgent,
+            'trust_boundary': TrustBoundaryAgent,
+            'process_model_analyst': ProcessModelAnalystAgent
+        }
+        
         # Agent configuration
         self.agent_config = {
             'standard': {
                 'control_structure_analyst': [CognitiveStyle.BALANCED],
                 'control_action_mapping': [CognitiveStyle.SYSTEMATIC],
-                'state_context_analysis': [CognitiveStyle.SYSTEMATIC],
+                'control_context_analyst': [CognitiveStyle.SYSTEMATIC],
                 'feedback_mechanism': [CognitiveStyle.TECHNICAL],
                 'trust_boundary': [CognitiveStyle.SYSTEMATIC],
                 'process_model_analyst': [CognitiveStyle.SYSTEMATIC]
@@ -80,7 +92,7 @@ class Step2Coordinator:
             'enhanced': {
                 'control_structure_analyst': [CognitiveStyle.INTUITIVE, CognitiveStyle.SYSTEMATIC],
                 'control_action_mapping': [CognitiveStyle.TECHNICAL, CognitiveStyle.SYSTEMATIC],
-                'state_context_analysis': [CognitiveStyle.SYSTEMATIC, CognitiveStyle.CREATIVE],
+                'control_context_analyst': [CognitiveStyle.SYSTEMATIC, CognitiveStyle.CREATIVE],
                 'feedback_mechanism': [CognitiveStyle.TECHNICAL, CognitiveStyle.INTUITIVE],
                 'trust_boundary': [CognitiveStyle.SYSTEMATIC, CognitiveStyle.CREATIVE],
                 'process_model_analyst': [CognitiveStyle.SYSTEMATIC, CognitiveStyle.TECHNICAL]
@@ -114,6 +126,7 @@ class Step2Coordinator:
         
         # Create Step 2 analysis record
         step2_analysis_id = await self._create_step2_analysis(step1_analysis_id, execution_mode)
+        self.current_step2_id = step2_analysis_id
         
         # Execute phases
         phase_results = {}
@@ -280,21 +293,33 @@ class Step2Coordinator:
         
     def _create_agent(self, agent_name: str, cognitive_style: CognitiveStyle):
         """Create agent instance."""
-        agent_classes = {
-            'control_structure_analyst': ControlStructureAnalystAgent,
-            'control_action_mapping': ControlActionMappingAgent,
-            'state_context_analysis': StateContextAnalysisAgent,
-            'feedback_mechanism': FeedbackMechanismAgent,
-            'trust_boundary': TrustBoundaryAgent,
-            'process_model_analyst': ProcessModelAnalystAgent
-        }
-        
-        agent_class = agent_classes.get(agent_name)
+        agent_class = self.agent_classes.get(agent_name)
         if not agent_class:
             raise ValueError(f"Unknown agent: {agent_name}")
             
         return agent_class(self.model_provider, self.db_connection, cognitive_style)
         
+    def _make_json_serializable(self, obj):
+        """Convert objects to JSON-serializable format"""
+        if hasattr(obj, 'value'):  # Handle enums
+            return obj.value
+        elif hasattr(obj, 'dict'):  # Handle AgentResult and similar objects with dict() method
+            return self._make_json_serializable(obj.dict())
+        elif hasattr(obj, '__dict__'):  # Handle custom objects with attributes
+            return self._make_json_serializable(obj.__dict__)
+        elif isinstance(obj, dict):
+            return {key: self._make_json_serializable(value) for key, value in obj.items()}
+        elif isinstance(obj, list):
+            return [self._make_json_serializable(item) for item in obj]
+        else:
+            try:
+                # Test if it's already JSON serializable
+                json.dumps(obj)
+                return obj
+            except (TypeError, ValueError):
+                # Skip non-serializable values
+                return str(obj)  # Convert to string as fallback
+
     def _synthesize_cognitive_styles(self, agent_name: str, results: Dict[str, AgentResult]) -> AgentResult:
         """Synthesize results from multiple cognitive styles."""
         # Extract successful results
@@ -374,7 +399,8 @@ class Step2Coordinator:
             'critical_control_actions': [],
             'trust_boundaries': [],
             'feedback_loops': [],
-            'state_contexts': [],
+            'control_contexts': [],
+            'operational_modes': [],
             'security_concerns': []
         }
         
@@ -435,39 +461,43 @@ class Step2Coordinator:
                         'between': [boundary.get('component_a_id'), boundary.get('component_b_id')]
                     })
         
-        # Extract state contexts
-        state_results = phase_results.get('state_context', {})
-        for result in state_results.values():
+        # Extract control contexts
+        context_results = phase_results.get('control_context', {})
+        for result in context_results.values():
             if isinstance(result, AgentResult) and result.success:
-                contexts = result.data.get('state_contexts', [])
-                for context in contexts:
-                    unsafe_states = context.get('unsafe_states', [])
-                    if any(state.get('severity') == 'critical' for state in unsafe_states):
-                        synthesis['state_contexts'].append({
+                contexts = result.data.get('control_contexts', [])
+                for context in contexts[:10]:  # Top 10 most important
+                    timing = context.get('execution_context', {}).get('timing_requirements', {})
+                    if timing.get('response_time') or len(context.get('decision_logic', {}).get('inputs_evaluated', [])) > 3:
+                        synthesis['control_contexts'].append({
                             'control_action': context['control_action_id'],
-                            'critical_unsafe_states': len([s for s in unsafe_states if s.get('severity') == 'critical']),
-                            'total_unsafe_states': len(unsafe_states)
+                            'timing_critical': bool(timing.get('response_time')),
+                            'decision_complexity': len(context.get('decision_logic', {}).get('inputs_evaluated', [])),
+                            'applicable_modes': context.get('applicable_modes', [])
                         })
                 
-                # Add operational modes as security concerns
+                # Add operational modes
                 modes = result.data.get('operational_modes', [])
+                synthesis['operational_modes'] = modes
+                
+                # Add mode-based security concerns
                 for mode in modes:
-                    if mode.get('restricted_actions'):
+                    if mode.get('mode_constraints'):
                         synthesis['security_concerns'].append({
-                            'type': 'operational_mode_restriction',
+                            'type': 'operational_mode_constraints',
                             'mode': mode['mode_name'],
-                            'restricted_actions': mode['restricted_actions'],
+                            'constraints': mode['mode_constraints'],
                             'implications': mode.get('security_implications', '')
                         })
         
         # Add key feedback mechanisms to synthesis
         synthesis['key_feedback_mechanisms'] = synthesis.pop('feedback_loops', [])
         
-        # Extract process models and inadequate control scenarios
+        # Extract process models and control algorithms
         process_model_results = phase_results.get('process_models', {})
         synthesis['process_models'] = []
         synthesis['control_algorithms'] = []
-        synthesis['inadequate_control_scenarios'] = []
+        synthesis['process_model_insights'] = {}
         
         for result in process_model_results.values():
             if isinstance(result, AgentResult) and result.success:
@@ -492,17 +522,10 @@ class Step2Coordinator:
                         'constraints_count': len(alg.get('constraints', []))
                     })
                 
-                # Add critical inadequate control scenarios
-                scenarios = result.data.get('inadequate_control_scenarios', [])
-                for scenario in scenarios:
-                    if scenario.get('severity') in ['high', 'critical']:
-                        synthesis['inadequate_control_scenarios'].append({
-                            'identifier': scenario['identifier'],
-                            'name': scenario.get('name'),
-                            'type': scenario.get('type'),
-                            'severity': scenario.get('severity'),
-                            'likelihood': scenario.get('likelihood')
-                        })
+                # Add process model insights
+                insights = result.data.get('insights', {})
+                if insights:
+                    synthesis['process_model_insights'] = insights
         
         # Include all controllers and processes for complete picture
         all_controllers = []
@@ -546,5 +569,5 @@ class Step2Coordinator:
                 updated_at = NOW()
             WHERE id = $2
             """,
-            json.dumps(synthesis), analysis_id
+            json.dumps(self._make_json_serializable(synthesis)), analysis_id
         )

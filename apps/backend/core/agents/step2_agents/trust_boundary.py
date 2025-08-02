@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime
 
 from .base_step2 import BaseStep2Agent, AgentResult
+from .component_registry import ComponentRegistry
 from core.agents.step1_agents.base_step1 import CognitiveStyle
 from core.utils.json_parser import parse_llm_json
 
@@ -18,6 +19,10 @@ class TrustBoundaryAgent(BaseStep2Agent):
         """Identify trust boundaries."""
         start_time = datetime.now()
         
+        # Get component registry from previous phases
+        previous_results = kwargs.get('previous_results', {})
+        registry = self._get_registry_from_previous(previous_results)
+        
         # Load Step 1 results
         step1_results = await self.load_step1_results(step1_analysis_id)
         
@@ -26,9 +31,9 @@ class TrustBoundaryAgent(BaseStep2Agent):
         control_actions = await self._load_control_actions(step2_analysis_id)
         feedback_mechanisms = await self._load_feedback_mechanisms(step2_analysis_id)
         
-        # Build prompt
+        # Build prompt with registry context
         prompt = self._build_trust_boundary_prompt(step1_results, control_structure, 
-                                                  control_actions, feedback_mechanisms)
+                                                  control_actions, feedback_mechanisms, registry)
         
         # Get LLM response with retry logic
         messages = [
@@ -38,8 +43,8 @@ class TrustBoundaryAgent(BaseStep2Agent):
         
         response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
         
-        # Parse response
-        trust_data = self._parse_trust_boundaries(response_text, control_structure)
+        # Parse response and validate against registry
+        trust_data = self._parse_trust_boundaries(response_text, control_structure, registry)
         
         # Store in database
         await self._store_trust_boundaries(step2_analysis_id, trust_data)
@@ -52,7 +57,8 @@ class TrustBoundaryAgent(BaseStep2Agent):
             data={
                 'trust_boundaries': trust_data['trust_boundaries'],
                 'security_implications': trust_data['security_implications'],
-                'summary': self._generate_summary(trust_data)
+                'summary': self._generate_summary(trust_data),
+                'component_registry': registry
             },
             execution_time_ms=execution_time,
             metadata={'cognitive_style': self.cognitive_style.value}
@@ -108,17 +114,60 @@ class TrustBoundaryAgent(BaseStep2Agent):
         )
         
         return [dict(f) for f in feedbacks]
+    
+    def _get_registry_from_previous(self, previous_results: Dict[str, Any]) -> ComponentRegistry:
+        """Extract component registry from previous phase results."""
+        # Check feedback mechanisms phase (most recent)
+        if 'feedback_mechanisms' in previous_results:
+            feedback_phase = previous_results['feedback_mechanisms']
+            if isinstance(feedback_phase, dict):
+                for agent_key, agent_result in feedback_phase.items():
+                    if hasattr(agent_result, 'data') and 'component_registry' in agent_result.data:
+                        return agent_result.data['component_registry']
+                    elif isinstance(agent_result, dict) and 'data' in agent_result and 'component_registry' in agent_result['data']:
+                        return agent_result['data']['component_registry']
+        
+        # Check control actions phase
+        if 'control_actions' in previous_results:
+            action_phase = previous_results['control_actions']
+            if isinstance(action_phase, dict):
+                for agent_key, agent_result in action_phase.items():
+                    if hasattr(agent_result, 'data') and 'component_registry' in agent_result.data:
+                        return agent_result.data['component_registry']
+                    elif isinstance(agent_result, dict) and 'data' in agent_result and 'component_registry' in agent_result['data']:
+                        return agent_result['data']['component_registry']
+        
+        # Fall back to control structure phase
+        if 'control_structure' in previous_results:
+            control_phase = previous_results['control_structure']
+            if isinstance(control_phase, dict):
+                for agent_key, agent_result in control_phase.items():
+                    if hasattr(agent_result, 'data') and 'component_registry' in agent_result.data:
+                        return agent_result.data['component_registry']
+                    elif isinstance(agent_result, dict) and 'data' in agent_result and 'component_registry' in agent_result['data']:
+                        return agent_result['data']['component_registry']
+        
+        # If no registry found, create new one
+        return ComponentRegistry()
         
     def _build_trust_boundary_prompt(self, step1_results: Dict[str, Any], 
                                     control_structure: Dict[str, Any],
                                     control_actions: List[Dict[str, Any]],
-                                    feedback_mechanisms: List[Dict[str, Any]]) -> str:
+                                    feedback_mechanisms: List[Dict[str, Any]],
+                                    registry: ComponentRegistry) -> str:
         """Build prompt for trust boundary identification."""
         base_prompt = self.format_control_structure_prompt(step1_results)
+        
+        # Get registry context
+        registry_context = registry.get_prompt_context()
         
         prompt = f"""{base_prompt}
 
 ## Control Structure Components
+
+{registry_context}
+
+### Components from Database:
 
 CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks or use backticks.
 Start your response with {{ and end with }}.
@@ -237,7 +286,7 @@ Ensure all string values properly escape newlines and quotes."""
         
         return prompt
         
-    def _parse_trust_boundaries(self, response: str, control_structure: Dict[str, Any]) -> Dict[str, Any]:
+    def _parse_trust_boundaries(self, response: str, control_structure: Dict[str, Any], registry: ComponentRegistry) -> Dict[str, Any]:
         """Parse LLM response into trust boundaries."""
         try:
             data = parse_llm_json(response)
@@ -247,20 +296,43 @@ Ensure all string values properly escape newlines and quotes."""
             
             # Process trust boundaries
             boundaries = []
+            validation_errors = []
+            
             for boundary in data.get('trust_boundaries', []):
-                comp_a_id = component_map.get(boundary.get('component_a_id'))
-                comp_b_id = component_map.get(boundary.get('component_b_id'))
+                comp_a_id_str = boundary.get('component_a_id')
+                comp_b_id_str = boundary.get('component_b_id')
+                
+                # Validate against registry
+                if not registry.validate_component_reference(comp_a_id_str):
+                    validation_errors.append(f"Invalid component A reference: {comp_a_id_str}")
+                    continue
+                    
+                if not registry.validate_component_reference(comp_b_id_str):
+                    validation_errors.append(f"Invalid component B reference: {comp_b_id_str}")
+                    continue
+                
+                comp_a_id = component_map.get(comp_a_id_str)
+                comp_b_id = component_map.get(comp_b_id_str)
                 
                 if comp_a_id and comp_b_id:
                     boundary['component_a_db_id'] = comp_a_id
                     boundary['component_b_db_id'] = comp_b_id
                     boundaries.append(boundary)
                     
+                    # Register the trust boundary reference in the registry
+                    registry.add_reference(comp_a_id_str, comp_b_id_str)
+                    
+            # Add validation errors to analysis notes
+            analysis_notes = data.get('analysis_notes', '')
+            if validation_errors:
+                analysis_notes += f"\n\nValidation errors:\n" + "\n".join(validation_errors)
+                    
             return {
                 'trust_boundaries': boundaries,
                 'security_implications': data.get('security_implications', []),
                 'trust_violations': data.get('trust_violations', []),
-                'analysis_notes': data.get('analysis_notes', '')
+                'analysis_notes': analysis_notes,
+                'validation_errors': validation_errors
             }
             
         except Exception as e:
@@ -269,7 +341,8 @@ Ensure all string values properly escape newlines and quotes."""
                 'trust_boundaries': [],
                 'security_implications': [],
                 'trust_violations': [],
-                'analysis_notes': f'Parse error: {str(e)}'
+                'analysis_notes': f'Parse error: {str(e)}',
+                'validation_errors': []
             }
             
     async def _store_trust_boundaries(self, analysis_id: str, trust_data: Dict[str, Any]) -> None:

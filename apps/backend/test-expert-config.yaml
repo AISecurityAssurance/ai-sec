@@ -1,0 +1,16 @@
+analysis:
+  description: Test ExpertAgent with mock provider
+  name: Test ExpertAgent
+  output_dir: ./analyses/test-expert
+execution:
+  mode: standard
+input:
+  path: example_systems/sd-wan/sd-wan-deployment-models-ra.pdf
+  type: file
+model:
+  provider: mock
+  name: mock-gpt4
+output:
+  exports:
+  - format: json
+  - format: markdown

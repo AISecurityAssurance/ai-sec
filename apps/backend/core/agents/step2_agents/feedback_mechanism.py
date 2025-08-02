@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime
 
 from .base_step2 import BaseStep2Agent, AgentResult
+from .component_registry import ComponentRegistry
 from core.agents.step1_agents.base_step1 import CognitiveStyle
 from core.utils.json_parser import parse_llm_json
 
@@ -18,6 +19,10 @@ class FeedbackMechanismAgent(BaseStep2Agent):
         """Identify feedback mechanisms."""
         start_time = datetime.now()
         
+        # Get component registry from previous phases
+        previous_results = kwargs.get('previous_results', {})
+        registry = self._get_registry_from_previous(previous_results)
+        
         # Load Step 1 results
         step1_results = await self.load_step1_results(step1_analysis_id)
         
@@ -25,8 +30,8 @@ class FeedbackMechanismAgent(BaseStep2Agent):
         control_structure = await self._load_control_structure(step2_analysis_id)
         control_actions = await self._load_control_actions(step2_analysis_id)
         
-        # Build prompt
-        prompt = self._build_feedback_prompt(step1_results, control_structure, control_actions)
+        # Build prompt with registry context
+        prompt = self._build_feedback_prompt(step1_results, control_structure, control_actions, registry)
         
         # Get LLM response with retry logic
         messages = [
@@ -36,8 +41,8 @@ class FeedbackMechanismAgent(BaseStep2Agent):
         
         response_text = await self.query_llm_with_retry(messages, temperature=0.7, max_tokens=4000)
         
-        # Parse response
-        feedback_data = self._parse_feedback_mechanisms(response_text, control_structure)
+        # Parse response and validate against registry
+        feedback_data = self._parse_feedback_mechanisms(response_text, control_structure, registry)
         
         # Store in database
         await self._store_feedback_mechanisms(step2_analysis_id, feedback_data)
@@ -50,7 +55,8 @@ class FeedbackMechanismAgent(BaseStep2Agent):
             data={
                 'feedback_mechanisms': feedback_data['feedback_mechanisms'],
                 'process_models': feedback_data['process_models'],
-                'summary': self._generate_summary(feedback_data)
+                'summary': self._generate_summary(feedback_data),
+                'component_registry': registry
             },
             execution_time_ms=execution_time,
             metadata={'cognitive_style': self.cognitive_style.value}
@@ -89,18 +95,49 @@ class FeedbackMechanismAgent(BaseStep2Agent):
         )
         
         return [dict(a) for a in actions]
+    
+    def _get_registry_from_previous(self, previous_results: Dict[str, Any]) -> ComponentRegistry:
+        """Extract component registry from previous phase results."""
+        # Check control actions phase first (most recent)
+        if 'control_actions' in previous_results:
+            action_phase = previous_results['control_actions']
+            if isinstance(action_phase, dict):
+                for agent_key, agent_result in action_phase.items():
+                    if hasattr(agent_result, 'data') and 'component_registry' in agent_result.data:
+                        return agent_result.data['component_registry']
+                    elif isinstance(agent_result, dict) and 'data' in agent_result and 'component_registry' in agent_result['data']:
+                        return agent_result['data']['component_registry']
+        
+        # Fall back to control structure phase
+        if 'control_structure' in previous_results:
+            control_phase = previous_results['control_structure']
+            if isinstance(control_phase, dict):
+                for agent_key, agent_result in control_phase.items():
+                    if hasattr(agent_result, 'data') and 'component_registry' in agent_result.data:
+                        return agent_result.data['component_registry']
+                    elif isinstance(agent_result, dict) and 'data' in agent_result and 'component_registry' in agent_result['data']:
+                        return agent_result['data']['component_registry']
+        
+        # If no registry found, create new one
+        return ComponentRegistry()
         
     def _build_feedback_prompt(self, step1_results: Dict[str, Any], 
                               control_structure: Dict[str, Any],
-                              control_actions: List[Dict[str, Any]]) -> str:
+                              control_actions: List[Dict[str, Any]],
+                              registry: ComponentRegistry) -> str:
         """Build prompt for feedback mechanism identification."""
         base_prompt = self.format_control_structure_prompt(step1_results)
+        
+        # Get registry context
+        registry_context = registry.get_prompt_context()
         
         prompt = f"""{base_prompt}
 
 ## Control Structure
 
-### Controllers:
+{registry_context}
+
+### Controllers from Database:
 
 CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks or use backticks.
 Start your response with {{ and end with }}.
@@ -208,9 +245,9 @@ Provide your response in the following JSON format:
     "analysis_notes": "Key insights about feedback and observability"
 }}
 
-Focus on security-critical feedback.
-Identify missing feedback that could lead to unsafe control.
-Consider how attackers might manipulate or block feedback.
+Focus on understanding the complete feedback structure.
+Identify all information flows that enable controllers to understand process state.
+Consider the completeness and coverage of feedback mechanisms.
 
 CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks or use backticks.
 Start your response with {{ and end with }}.
@@ -218,7 +255,7 @@ Ensure all string values properly escape newlines and quotes."""
         
         return prompt
         
-    def _parse_feedback_mechanisms(self, response: str, control_structure: Dict[str, Any]) -> Dict[str, Any]:
+    def _parse_feedback_mechanisms(self, response: str, control_structure: Dict[str, Any], registry: ComponentRegistry) -> Dict[str, Any]:
         """Parse LLM response into feedback mechanisms."""
         try:
             data = parse_llm_json(response)
@@ -228,28 +265,58 @@ Ensure all string values properly escape newlines and quotes."""
             
             # Process feedback mechanisms
             mechanisms = []
+            validation_errors = []
+            
             for feedback in data.get('feedback_mechanisms', []):
-                source_id = component_map.get(feedback.get('source_process_id'))
-                target_id = component_map.get(feedback.get('target_controller_id'))
+                source_id_str = feedback.get('source_process_id')
+                target_id_str = feedback.get('target_controller_id')
+                
+                # Validate against registry
+                if not registry.validate_component_reference(source_id_str):
+                    validation_errors.append(f"Invalid source process reference: {source_id_str}")
+                    continue
+                    
+                if not registry.validate_component_reference(target_id_str):
+                    validation_errors.append(f"Invalid target controller reference: {target_id_str}")
+                    continue
+                
+                source_id = component_map.get(source_id_str)
+                target_id = component_map.get(target_id_str)
                 
                 if source_id and target_id:
                     feedback['source_db_id'] = source_id
                     feedback['target_db_id'] = target_id
                     mechanisms.append(feedback)
                     
+                    # Register the feedback reference in the registry
+                    registry.add_reference(source_id_str, target_id_str)
+                    
             # Process process models
             models = []
             for model in data.get('process_models', []):
-                controller_id = component_map.get(model.get('controller_id'))
+                controller_id_str = model.get('controller_id')
+                
+                # Validate against registry
+                if not registry.validate_component_reference(controller_id_str):
+                    validation_errors.append(f"Invalid controller reference in process model: {controller_id_str}")
+                    continue
+                    
+                controller_id = component_map.get(controller_id_str)
                 if controller_id:
                     model['controller_db_id'] = controller_id
                     models.append(model)
+            
+            # Add validation errors to analysis notes
+            analysis_notes = data.get('analysis_notes', '')
+            if validation_errors:
+                analysis_notes += f"\n\nValidation errors:\n" + "\n".join(validation_errors)
                     
             return {
                 'feedback_mechanisms': mechanisms,
                 'process_models': models,
                 'feedback_gaps': data.get('feedback_gaps', []),
-                'analysis_notes': data.get('analysis_notes', '')
+                'analysis_notes': analysis_notes,
+                'validation_errors': validation_errors
             }
             
         except Exception as e:
@@ -258,7 +325,8 @@ Ensure all string values properly escape newlines and quotes."""
                 'feedback_mechanisms': [],
                 'process_models': [],
                 'feedback_gaps': [],
-                'analysis_notes': f'Parse error: {str(e)}'
+                'analysis_notes': f'Parse error: {str(e)}',
+                'validation_errors': []
             }
             
     async def _store_feedback_mechanisms(self, analysis_id: str, feedback_data: Dict[str, Any]) -> None:

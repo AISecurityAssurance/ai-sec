@@ -17,6 +17,7 @@ from .stakeholder_analyst import StakeholderAnalystAgent
 from .security_constraint_agent import SecurityConstraintAgent
 from .system_boundary_agent import SystemBoundaryAgent
 from .validation_agent import ValidationAgent
+from .system_description import SystemDescriptionAgent
 from .base_step1 import CognitiveStyle
 from core.agents.input_agent import InputAgent
 
@@ -27,9 +28,9 @@ class Step1Coordinator:
     
     Execution flow:
     1. Mission Analyst - Extract mission and context
-    2. Loss Identification - Identify unacceptable outcomes
-    3. Hazard Identification - Identify hazardous states (depends on losses)
-    4. Stakeholder Analyst - Analyze perspectives (depends on losses)
+    2. System Description - Create comprehensive system description
+    3. Loss Identification - Identify unacceptable outcomes
+    4. Hazard & Stakeholder - Parallel analysis (depends on losses)
     5. Security Constraint - Define required properties (depends on losses/hazards)
     6. System Boundary - Define analysis scope (depends on all above)
     7. Validation - Validate and create Step 2 bridge
@@ -43,12 +44,14 @@ class Step1Coordinator:
     def __init__(self, analysis_id: Optional[str] = None, 
                  db_connection: Optional[asyncpg.Connection] = None,
                  execution_mode: str = "standard",
-                 db_name: Optional[str] = None):
+                 db_name: Optional[str] = None,
+                 model_provider: Optional[Any] = None):
         self.analysis_id = analysis_id or str(uuid4())
         self.db_connection = db_connection
         self.db_name = db_name  # Store database name for parallel connections
         self.execution_log = []
         self.execution_mode = execution_mode
+        self.model_provider = model_provider
         
         # Define cognitive styles for each execution mode
         # Standard mode uses single balanced style for all phases
@@ -132,8 +135,23 @@ class Step1Coordinator:
             if self.db_connection:
                 await self._save_mission_results(mission_results)
             
-            # Phase 2: Loss Identification
-            self._log_execution("Starting Phase 2: Loss Identification")
+            # Phase 2: System Description Generation
+            self._log_execution("Starting Phase 2: System Description Generation")
+            system_desc_agent = SystemDescriptionAgent(self.analysis_id, self.db_connection)
+            
+            # Update context with mission results
+            context['mission_analyst'] = mission_results
+            
+            system_description_results = await system_desc_agent.analyze(context)
+            
+            if self.db_connection:
+                await self._save_system_description_results(system_description_results)
+            
+            # Update context with system description for subsequent phases
+            context['system_description_structured'] = system_description_results
+            
+            # Phase 3: Loss Identification
+            self._log_execution("Starting Phase 3: Loss Identification")
             loss_results = await self._run_agent_with_cognitive_styles(
                 LossIdentificationAgent, context, "Loss Identification"
             )
@@ -141,8 +159,8 @@ class Step1Coordinator:
             if self.db_connection:
                 await self._save_loss_results(loss_results)
             
-            # Phase 3: Parallel execution of Hazard and Stakeholder analysis
-            self._log_execution("Starting Phase 3: Hazard and Stakeholder Analysis (parallel)")
+            # Phase 4: Parallel execution of Hazard and Stakeholder analysis
+            self._log_execution("Starting Phase 4: Hazard and Stakeholder Analysis (parallel)")
             
             # Update context with losses for hazard and stakeholder analysis
             context['losses'] = loss_results.get('losses', [])
@@ -161,8 +179,8 @@ class Step1Coordinator:
             context['stakeholders'] = stakeholder_results.get('stakeholders', [])
             context['adversaries'] = stakeholder_results.get('adversaries', [])
             
-            # Phase 4: Security Constraint Definition
-            self._log_execution("Starting Phase 4: Security Constraint Definition")
+            # Phase 5: Security Constraint Definition
+            self._log_execution("Starting Phase 5: Security Constraint Definition")
             security_constraint_results = await self._run_agent_with_cognitive_styles(
                 SecurityConstraintAgent, context, "Security Constraint Definition"
             )
@@ -173,8 +191,8 @@ class Step1Coordinator:
             # Update context with security constraints for system boundary agent
             context['security_constraints'] = security_constraint_results.get('security_constraints', [])
             
-            # Phase 5: System Boundary Definition
-            self._log_execution("Starting Phase 5: System Boundary Definition")
+            # Phase 6: System Boundary Definition
+            self._log_execution("Starting Phase 6: System Boundary Definition")
             system_boundary_results = await self._run_agent_with_cognitive_styles(
                 SystemBoundaryAgent, context, "System Boundary Definition"
             )
@@ -185,8 +203,8 @@ class Step1Coordinator:
             # Update context with all results for validation
             context['system_boundaries'] = system_boundary_results.get('system_boundaries', [])
             
-            # Phase 6: Validation
-            self._log_execution("Starting Phase 6: Validation and Quality Assessment")
+            # Phase 7: Validation
+            self._log_execution("Starting Phase 7: Validation and Quality Assessment")
             validation_agent = ValidationAgent(self.analysis_id, self.db_connection)
             validation_results = await validation_agent.analyze(context)
             
@@ -202,6 +220,7 @@ class Step1Coordinator:
                 "status": validation_results['overall_status'],
                 "results": {
                     "mission_analysis": mission_results,
+                    "system_description": system_description_results,
                     "loss_identification": loss_results,
                     "hazard_identification": hazard_results,
                     "stakeholder_analysis": stakeholder_results,  # Fixed to match completeness check
@@ -812,6 +831,46 @@ class Step1Coordinator:
                 f"Step 1 analysis: {description[:200]}...",
                 datetime.now()
             )
+    
+    async def _save_system_description_results(self, results: Dict[str, Any]):
+        """Save system description results to database"""
+        if not self.db_connection:
+            return
+            
+        desc_id = str(uuid4())
+        overview = results.get('system_overview', {})
+        
+        await self.db_connection.execute("""
+            INSERT INTO system_descriptions
+            (id, analysis_id, system_name, system_type, purpose, scope, 
+             operational_context, architecture, components, interactions,
+             control_hierarchy, operational_flows, key_characteristics,
+             description_version, raw_data)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        """,
+            desc_id,
+            self.analysis_id,
+            overview.get('name', 'Unknown System'),
+            overview.get('type'),
+            overview.get('purpose'),
+            overview.get('scope'),
+            overview.get('operational_context'),
+            json.dumps(results.get('architecture', {})),
+            json.dumps(results.get('components', [])),
+            json.dumps(results.get('interactions', [])),
+            json.dumps(results.get('control_hierarchy', {})),
+            json.dumps(results.get('operational_flows', [])),
+            json.dumps(results.get('key_characteristics', {})),
+            results.get('description_version', '1.0'),
+            json.dumps(results)
+        )
+        
+        # Update step1_analyses with reference
+        await self.db_connection.execute("""
+            UPDATE step1_analyses 
+            SET system_description_id = $1
+            WHERE id = $2
+        """, desc_id, self.analysis_id)
     
     async def _save_mission_results(self, results: Dict[str, Any]):
         """Save mission analysis results to database"""

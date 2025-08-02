@@ -58,6 +58,7 @@ class CrossReferenceValidator:
         components = {
             'controllers': set(),
             'processes': set(),
+            'dual_role': set(),
             'all': set(),
             'hierarchical_levels': {}  # component_id -> level
         }
@@ -72,6 +73,8 @@ class CrossReferenceValidator:
                 continue
                 
             comp_data = data.get('components', {})
+            
+            # Extract controllers
             for ctrl in comp_data.get('controllers', []):
                 ctrl_id = ctrl.get('identifier')
                 components['controllers'].add(ctrl_id)
@@ -79,10 +82,21 @@ class CrossReferenceValidator:
                 # Store hierarchical level
                 if 'hierarchical_level' in ctrl:
                     components['hierarchical_levels'][ctrl_id] = ctrl['hierarchical_level']
+                    
+            # Extract processes
             for proc in comp_data.get('controlled_processes', []):
                 proc_id = proc.get('identifier')
                 components['processes'].add(proc_id)
                 components['all'].add(proc_id)
+            
+            # Extract dual-role components
+            for dual in comp_data.get('dual_role_components', []):
+                dual_id = dual.get('identifier')
+                components['dual_role'].add(dual_id)
+                components['all'].add(dual_id)
+                # Dual-role should also be in both controllers and processes
+                components['controllers'].add(dual_id)
+                components['processes'].add(dual_id)
                 
         return components
     
@@ -296,9 +310,14 @@ class CrossReferenceValidator:
                                       actions: List[Dict[str, Any]], 
                                       feedbacks: List[Dict[str, Any]]) -> None:
         """Validate overall component consistency."""
+        # Validate dual-role components
+        self._validate_dual_role_components(components, actions, feedbacks)
+        
         # Check for controllers without any outgoing actions
         controllers_with_actions = {a.get('controller_id') for a in actions if a.get('controller_id')}
-        orphan_controllers = components['controllers'] - controllers_with_actions
+        # Exclude dual-role from orphan check as they may act primarily as processes
+        non_dual_controllers = components['controllers'] - components['dual_role']
+        orphan_controllers = non_dual_controllers - controllers_with_actions
         
         for ctrl in orphan_controllers:
             self.validation_warnings.append({
@@ -310,7 +329,9 @@ class CrossReferenceValidator:
         
         # Check for processes without any incoming control
         processes_with_control = {a.get('controlled_process_id') for a in actions if a.get('controlled_process_id')}
-        orphan_processes = components['processes'] - processes_with_control
+        # Exclude dual-role from orphan check as they may act primarily as controllers
+        non_dual_processes = components['processes'] - components['dual_role']
+        orphan_processes = non_dual_processes - processes_with_control
         
         for proc in orphan_processes:
             self.validation_warnings.append({
@@ -330,6 +351,45 @@ class CrossReferenceValidator:
                 'entity': 'system',
                 'message': f"{len(processes_without_feedback)} processes have no feedback mechanisms"
             })
+    
+    def _validate_dual_role_components(self, components: Dict[str, Any],
+                                      actions: List[Dict[str, Any]],
+                                      feedbacks: List[Dict[str, Any]]) -> None:
+        """Validate that dual-role components are properly represented."""
+        for dual_id in components['dual_role']:
+            # Check if dual-role component acts as a controller
+            acts_as_controller = any(
+                a.get('controller_id') == dual_id for a in actions
+            )
+            
+            # Check if dual-role component acts as a process
+            acts_as_process = any(
+                a.get('controlled_process_id') == dual_id for a in actions
+            ) or any(
+                f.get('source_process_id') == dual_id for f in feedbacks
+            )
+            
+            if not acts_as_controller and not acts_as_process:
+                self.validation_errors.append({
+                    'type': 'inactive_dual_role',
+                    'entity': 'dual_role',
+                    'id': dual_id,
+                    'message': f"Dual-role component {dual_id} has no controller or process activities"
+                })
+            elif not acts_as_controller:
+                self.validation_warnings.append({
+                    'type': 'partial_dual_role',
+                    'entity': 'dual_role',
+                    'id': dual_id,
+                    'message': f"Dual-role component {dual_id} only acts as a process, not as a controller"
+                })
+            elif not acts_as_process:
+                self.validation_warnings.append({
+                    'type': 'partial_dual_role',
+                    'entity': 'dual_role',
+                    'id': dual_id,
+                    'message': f"Dual-role component {dual_id} only acts as a controller, not as a process"
+                })
     
     def _extract_hierarchy(self, phase_results: Dict[str, Any]) -> List[Dict[str, str]]:
         """Extract hierarchy relationships from control structure phase."""
@@ -370,20 +430,15 @@ class CrossReferenceValidator:
     def _validate_hierarchy_consistency(self, components: Dict[str, Any], 
                                       hierarchy: List[Dict[str, str]]) -> None:
         """Validate hierarchy consistency and check for issues."""
-        # Check for circular dependencies
-        all_nodes = set()
-        for rel in hierarchy:
-            all_nodes.add(rel['parent'])
-            all_nodes.add(rel['child'])
-        
-        for node in all_nodes:
-            if self._has_circular_dependency(node, hierarchy):
-                self.validation_errors.append({
-                    'type': 'circular_hierarchy',
-                    'entity': 'hierarchy',
-                    'message': f"Circular dependency detected involving: {node}"
-                })
-                break  # Only report once per cycle
+        # Check for circular dependencies using efficient single-pass algorithm
+        cycles = self._find_all_cycles(hierarchy)
+        for cycle in cycles:
+            cycle_path = " -> ".join(cycle) + " -> " + cycle[0]
+            self.validation_errors.append({
+                'type': 'circular_hierarchy',
+                'entity': 'hierarchy',
+                'message': f"Circular dependency detected: {cycle_path}"
+            })
         
         # Verify all parent-child relationships reference valid components
         for rel in hierarchy:
@@ -444,20 +499,41 @@ class CrossReferenceValidator:
                         'message': f"Invalid hierarchy: {parent} ({parent_level}) cannot be parent of {child} ({child_level})"
                     })
     
-    def _has_circular_dependency(self, node: str, hierarchy: List[Dict[str, str]]) -> bool:
-        """Check if node participates in any cycle."""
-        def dfs(current: str, path: Set[str]) -> bool:
-            if current in path:
-                return True
-            path.add(current)
-            for rel in hierarchy:
-                if rel['parent'] == current:
-                    # Use path.copy() to ensure each branch has its own path
-                    if dfs(rel['child'], path.copy()):
-                        return True
-            return False
+    def _find_all_cycles(self, hierarchy: List[Dict[str, str]]) -> List[List[str]]:
+        """Find all cycles in hierarchy using efficient single-pass algorithm."""
+        WHITE, GRAY, BLACK = 0, 1, 2
+        color = {}
+        cycles = []
         
-        return dfs(node, set())
+        def dfs(node: str, path: List[str]) -> None:
+            color[node] = GRAY
+            path.append(node)
+            
+            for rel in hierarchy:
+                if rel['parent'] == node:
+                    child = rel['child']
+                    if child not in color:
+                        dfs(child, path)
+                    elif color[child] == GRAY:
+                        # Found cycle
+                        cycle_start = path.index(child)
+                        cycles.append(path[cycle_start:].copy())
+            
+            path.pop()
+            color[node] = BLACK
+        
+        # Get all nodes
+        nodes = set()
+        for rel in hierarchy:
+            nodes.add(rel['parent'])
+            nodes.add(rel['child'])
+        
+        # DFS from each unvisited node
+        for node in nodes:
+            if node not in color:
+                dfs(node, [])
+        
+        return cycles
     
     def _validate_process_model_completeness(self, components: Dict[str, Any], 
                                             process_models: List[Dict[str, Any]],

@@ -221,6 +221,13 @@ Provide your response in the following JSON format:
                 "staleness_handling": "How outdated information is handled",
                 "model_reality_gaps": ["Potential mismatches between model and reality"]
             }},
+            "controller_algorithm": {{
+                "decision_rules": ["Explicit rules used for control decisions"],
+                "input_prioritization": "How inputs are weighted or prioritized",
+                "conflict_resolution": "How conflicting inputs/rules are resolved",
+                "fallback_behavior": "What happens when primary logic fails",
+                "timing_logic": "How timing affects decisions"
+            }},
             "applicable_modes": ["Mode names where this action is available"]
         }}
     ],

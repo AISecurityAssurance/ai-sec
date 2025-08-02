@@ -85,10 +85,11 @@ FEEDBACK_MECHANISM_SCHEMA = {
                         "items": {"type": "string"}
                     },
                     "feedback_delay": {"type": "string"},
-                    "adequacy_assessment": {"type": "string", "enum": ["sufficient", "partial", "insufficient"]}
+                    "adequacy_assessment": {"type": "string", "enum": ["sufficient", "partial", "insufficient"]},
+                    "adequacy_score": {"type": "number", "minimum": 0, "maximum": 1}
                 },
                 "required": ["control_action_id", "has_execution_feedback", "has_effect_feedback",
-                            "unobservable_states", "feedback_delay", "adequacy_assessment"]
+                            "unobservable_states", "feedback_delay", "adequacy_assessment", "adequacy_score"]
             }
         },
         "feedback_gaps": {
@@ -103,7 +104,28 @@ FEEDBACK_MECHANISM_SCHEMA = {
                 "required": ["description", "impact", "recommendation"]
             }
         },
+        "feedback_coverage_metrics": {
+            "type": "object",
+            "properties": {
+                "overall_coverage_score": {"type": "number", "minimum": 0, "maximum": 1},
+                "critical_gaps_count": {"type": "integer", "minimum": 0},
+                "coverage_by_component": {
+                    "type": "object",
+                    "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1}
+                },
+                "coverage_by_type": {
+                    "type": "object",
+                    "properties": {
+                        "execution_feedback": {"type": "number", "minimum": 0, "maximum": 1},
+                        "effect_feedback": {"type": "number", "minimum": 0, "maximum": 1},
+                        "state_monitoring": {"type": "number", "minimum": 0, "maximum": 1}
+                    },
+                    "required": ["execution_feedback", "effect_feedback", "state_monitoring"]
+                }
+            },
+            "required": ["overall_coverage_score", "critical_gaps_count", "coverage_by_component", "coverage_by_type"]
+        },
         "analysis_notes": {"type": "string"}
     },
-    "required": ["feedback_mechanisms", "process_models", "feedback_adequacy", "feedback_gaps", "analysis_notes"]
+    "required": ["feedback_mechanisms", "process_models", "feedback_adequacy", "feedback_gaps", "feedback_coverage_metrics", "analysis_notes"]
 }

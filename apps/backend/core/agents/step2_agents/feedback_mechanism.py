@@ -265,7 +265,8 @@ Provide your response in the following JSON format:
             "has_effect_feedback": true/false,
             "unobservable_states": ["Critical states not visible to controller"],
             "feedback_delay": "Time between action and feedback",
-            "adequacy_assessment": "sufficient/partial/insufficient"
+            "adequacy_assessment": "sufficient/partial/insufficient",
+            "adequacy_score": 0.85  # 0-1 scale based on coverage
         }}
     ],
     "feedback_gaps": [
@@ -275,6 +276,20 @@ Provide your response in the following JSON format:
             "recommendation": "How to address"
         }}
     ],
+    "feedback_coverage_metrics": {{
+        "overall_coverage_score": 0.75,  # 0-1 scale for entire system
+        "critical_gaps_count": 3,  # Number of critical missing feedbacks
+        "coverage_by_component": {{
+            "CTRL-1": 0.9,  # Individual controller coverage scores
+            "CTRL-2": 0.6,
+            "PROC-1": 0.8
+        }},
+        "coverage_by_type": {{
+            "execution_feedback": 0.85,
+            "effect_feedback": 0.65,
+            "state_monitoring": 0.7
+        }}
+    }},
     "analysis_notes": "Key insights about feedback and observability"
 }}
 

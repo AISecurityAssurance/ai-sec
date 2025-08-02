@@ -79,12 +79,27 @@ CONTROL_CONTEXT_SCHEMA = {
                         "required": ["state_beliefs", "key_assumptions", "update_sources",
                                     "tracked_variables", "staleness_handling", "model_reality_gaps"]
                     },
+                    "controller_algorithm": {
+                        "type": "object",
+                        "properties": {
+                            "decision_rules": {
+                                "type": "array",
+                                "items": {"type": "string"}
+                            },
+                            "input_prioritization": {"type": "string"},
+                            "conflict_resolution": {"type": "string"},
+                            "fallback_behavior": {"type": "string"},
+                            "timing_logic": {"type": "string"}
+                        },
+                        "required": ["decision_rules", "input_prioritization", 
+                                    "conflict_resolution", "fallback_behavior", "timing_logic"]
+                    },
                     "applicable_modes": {
                         "type": "array",
                         "items": {"type": "string"}
                     }
                 },
-                "required": ["control_action_id", "execution_context", "decision_logic", "process_model", "applicable_modes"]
+                "required": ["control_action_id", "execution_context", "decision_logic", "process_model", "controller_algorithm", "applicable_modes"]
             }
         },
         "operational_modes": {

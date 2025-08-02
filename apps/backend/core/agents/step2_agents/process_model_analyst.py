@@ -351,7 +351,7 @@ Remember: This is Step 2 - focus on understanding HOW control works, not on iden
                 INSERT INTO process_models 
                 (id, analysis_id, identifier, controller_id, process_id, 
                  state_variables, assumptions, update_frequency, staleness_risk)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                VALUES ($1::VARCHAR, $2, $3, $4, $5, $6::JSONB, $7::JSONB, $8, $9)
                 ON CONFLICT (identifier, analysis_id) DO UPDATE SET
                     state_variables = EXCLUDED.state_variables,
                     assumptions = EXCLUDED.assumptions,
@@ -376,7 +376,7 @@ Remember: This is Step 2 - focus on understanding HOW control works, not on iden
                 INSERT INTO control_algorithms
                 (id, analysis_id, identifier, controller_id, name, 
                  description, constraints, decision_logic, conflict_resolution)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                VALUES ($1::UUID, $2, $3, $4, $5, $6, $7::JSONB, $8, $9)
                 ON CONFLICT (identifier, analysis_id) DO UPDATE SET
                     name = EXCLUDED.name,
                     description = EXCLUDED.description,
@@ -384,7 +384,7 @@ Remember: This is Step 2 - focus on understanding HOW control works, not on iden
                     decision_logic = EXCLUDED.decision_logic,
                     conflict_resolution = EXCLUDED.conflict_resolution
                 """,
-                str(uuid.uuid4()),
+                uuid.uuid4(),  # Pass UUID directly, not string
                 analysis_id,
                 alg['identifier'],
                 alg.get('controller_id'),

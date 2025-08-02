@@ -250,6 +250,160 @@ class OllamaClient(BaseModelClient):
 class MockModelClient(BaseModelClient):
     """Mock client for testing without real LLM calls"""
     
+    def _generate_mock_json_response(self, user_message: str) -> str:
+        """Generate a mock JSON response based on the prompt context."""
+        import json
+        
+        # Check for Step 2 agent contexts
+        if "control structure" in user_message.lower():
+            return json.dumps({
+                "components": {
+                    "controllers": [
+                        {
+                            "identifier": "CTRL-1",
+                            "name": "System Administrator",
+                            "type": "human",
+                            "description": "Primary system admin",
+                            "authority_level": "high",
+                            "hierarchical_level": "system"
+                        }
+                    ],
+                    "controlled_processes": [
+                        {
+                            "identifier": "PROC-1",
+                            "name": "System Configuration",
+                            "type": "configuration",
+                            "description": "System settings management",
+                            "criticality": "high"
+                        },
+                        {
+                            "identifier": "PROC-2",
+                            "name": "Access Control",
+                            "type": "security",
+                            "description": "User access management",
+                            "criticality": "critical"
+                        }
+                    ],
+                    "control_hierarchy": []
+                },
+                "summary": "Basic control structure"
+            })
+        elif "control action" in user_message.lower():
+            return json.dumps({
+                "control_actions": {
+                    "control_actions": [
+                        {
+                            "identifier": "CA-1",
+                            "controller_id": "CTRL-1",
+                            "controlled_process_id": "PROC-1",
+                            "action_name": "Update Configuration",
+                            "action_type": "configuration",
+                            "authority_level": "mandatory"
+                        }
+                    ]
+                },
+                "completeness_check": {
+                    "controllers_without_actions": [],
+                    "processes_without_control": ["PROC-2"],
+                    "orphan_components": [],
+                    "coverage_assessment": "Partial coverage"
+                }
+            })
+        elif "feedback" in user_message.lower():
+            return json.dumps({
+                "feedback_mechanisms": [
+                    {
+                        "identifier": "FB-1",
+                        "feedback_name": "Status Report",
+                        "source_process_id": "PROC-1",
+                        "target_controller_id": "CTRL-1",
+                        "information_type": "status"
+                    }
+                ],
+                "feedback_adequacy": []
+            })
+        elif "trust boundar" in user_message.lower():
+            return json.dumps({
+                "trust_boundaries": [
+                    {
+                        "identifier": "TB-1",
+                        "boundary_name": "Admin Interface",
+                        "boundary_type": "interface",
+                        "component_a_id": "CTRL-1",
+                        "component_b_id": "PROC-1"
+                    }
+                ],
+                "trust_mechanisms": {
+                    "authentication_protocols": ["password"],
+                    "authorization_schemes": ["role-based"],
+                    "data_protection": ["TLS"],
+                    "trust_establishment": ["manual"],
+                    "trust_maintenance": ["session"]
+                }
+            })
+        elif "process model" in user_message.lower():
+            return json.dumps({
+                "process_models": [
+                    {
+                        "identifier": "PM-1",
+                        "controller_id": "CTRL-1",
+                        "process_id": "PROC-1",
+                        "state_variables": ["config_version", "last_update"],
+                        "assumptions": ["Config changes are atomic"],
+                        "staleness_risk": "low"
+                    }
+                ],
+                "control_algorithms": [],
+                "insights": {}
+            })
+        elif "control context" in user_message.lower() or "operational mode" in user_message.lower():
+            return json.dumps({
+                "control_contexts": [
+                    {
+                        "control_action_id": "CA-1",
+                        "execution_context": {
+                            "triggers": ["Admin request"],
+                            "preconditions": ["Valid auth"],
+                            "environmental_factors": [],
+                            "timing_requirements": {}
+                        },
+                        "decision_logic": {
+                            "inputs_evaluated": ["Request validity"],
+                            "decision_criteria": "Authorization check",
+                            "priority": "high",
+                            "conflict_resolution": "First come first serve"
+                        },
+                        "process_model": {
+                            "state_beliefs": ["System is stable"],
+                            "key_assumptions": ["Admin is authorized"],
+                            "update_sources": ["Auth system"],
+                            "tracked_variables": ["session_id"],
+                            "staleness_handling": "Revalidate",
+                            "model_reality_gaps": []
+                        },
+                        "applicable_modes": ["normal"]
+                    }
+                ],
+                "operational_modes": [
+                    {
+                        "mode_name": "normal",
+                        "description": "Normal operation",
+                        "entry_conditions": ["System startup"],
+                        "exit_conditions": ["Shutdown command"],
+                        "active_controllers": ["CTRL-1"],
+                        "available_actions": ["CA-1"],
+                        "mode_constraints": []
+                    }
+                ],
+                "mode_transitions": []
+            })
+        else:
+            # Default response
+            return json.dumps({
+                "result": "Mock response",
+                "status": "success"
+            })
+    
     async def generate(self, messages: List[Dict[str, str]], 
                       temperature: float = 0.7,
                       max_tokens: Optional[int] = None) -> ModelResponse:
@@ -274,11 +428,12 @@ class MockModelClient(BaseModelClient):
                 raw_response={"mock": True, "finish_reason": response.finish_reason}
             )
         except:
-            # Fallback to simple response
+            # Fallback to simple JSON response based on context
+            mock_response = self._generate_mock_json_response(user_message)
             return ModelResponse(
-                content="Mock response for testing",
+                content=mock_response,
                 model="mock",
-                usage={"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
+                usage={"prompt_tokens": 10, "completion_tokens": 50, "total_tokens": 60}
             )
 
 

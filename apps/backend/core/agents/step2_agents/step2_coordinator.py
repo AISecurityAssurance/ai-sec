@@ -21,6 +21,7 @@ from .feedback_mechanism import FeedbackMechanismAgent
 from .trust_boundary import TrustBoundaryAgent
 from .synthesis_enhancement import Step2SynthesisEnhancer
 from .process_model_analyst import ProcessModelAnalystAgent
+from .cross_reference_validator import CrossReferenceValidator
 
 
 class Step2Coordinator:
@@ -38,6 +39,7 @@ class Step2Coordinator:
         self.output_dir = output_dir
         self.validator = Step2Validator()
         self.synthesis_enhancer = Step2SynthesisEnhancer()
+        self.cross_ref_validator = CrossReferenceValidator()
         
         # Define execution phases for Step 2
         self.phases = [
@@ -159,6 +161,17 @@ class Step2Coordinator:
             if not validation['valid']:
                 self.logger.warning(f"Phase {phase['name']} validation issues: {validation['errors']}")
                 
+        # Run cross-reference validation
+        cross_ref_validation = self.cross_ref_validator.validate(phase_results)
+        if not cross_ref_validation['valid']:
+            self.logger.error(f"Cross-reference validation failed: {cross_ref_validation['summary']}")
+            for error in cross_ref_validation['errors']:
+                self.logger.error(f"  - {error['message']}")
+        elif cross_ref_validation['warnings']:
+            self.logger.warning(f"Cross-reference validation warnings: {cross_ref_validation['summary']}")
+            for warning in cross_ref_validation['warnings']:
+                self.logger.warning(f"  - {warning['message']}")
+                
         # Final synthesis
         synthesis = await self._synthesize_results(step2_analysis_id, phase_results)
         
@@ -174,6 +187,7 @@ class Step2Coordinator:
             'execution_mode': execution_mode,
             'phase_results': phase_results,
             'synthesis': synthesis,
+            'cross_reference_validation': cross_ref_validation,
             'execution_time_ms': execution_time,
             'timestamp': datetime.now().isoformat()
         }

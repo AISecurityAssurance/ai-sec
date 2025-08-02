@@ -569,7 +569,8 @@ class MockModelClient(BaseModelClient):
                 "mode_transitions": []
             })
         elif ("quality" in user_message.lower() and "assess" in user_message.lower()) or \
-             ("methodology" in user_message.lower() and "expert" in user_message.lower()):
+             ("methodology" in user_message.lower() and "stpa" in user_message.lower()) or \
+             ("quality_level" in user_message and "methodology_compliance" in user_message):
             # Quality assessment response for expert agent
             return json.dumps({
                 "quality_level": "acceptable",
@@ -592,6 +593,22 @@ class MockModelClient(BaseModelClient):
                 "specific_requirements": [],
                 "avoid_patterns": [],
                 "example_corrections": []
+            })
+        elif "step 2" in user_message.lower() or "stpa-sec step 2" in user_message.lower():
+            # Generic Step 2 response
+            return json.dumps({
+                "quality_level": "acceptable",
+                "overall_score": 0.8,
+                "methodology_compliance": {
+                    "follows_stpa_principles": True,
+                    "meets_step_requirements": True,
+                    "appropriate_abstraction": True,
+                    "complete_control_loops": True
+                },
+                "issues": [],
+                "recommendations": [],
+                "strengths": ["Good structure"],
+                "weaknesses": []
             })
         else:
             # Default response

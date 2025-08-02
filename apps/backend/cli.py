@@ -1905,32 +1905,48 @@ class Step1CLI:
                     expert_mode = OperatingMode.HUMAN_AFTER_LOOP
                     mode_desc = "Human-after-the-loop (batch analysis)"
                 
-                # Create knowledge directory path at project root for easy user access
-                # Go up from backend/cli.py to project root
-                project_root = Path(__file__).parent.parent.parent
-                knowledge_dir = project_root / "expert_knowledge"
+                # Check if using mock provider
+                is_mock_provider = hasattr(model_provider, '__class__') and \
+                                 model_provider.__class__.__name__ == 'MockModelClient'
                 
-                # Create supervised coordinator
-                coordinator = create_expert_supervised_coordinator(
-                    base_coordinator=coordinator,
-                    model_provider=model_provider,
-                    knowledge_dir=knowledge_dir,
-                    operating_mode=expert_mode
-                )
-                
-                self.console.print(f"[green]Quality control enabled[/green] - Max refinements: {max_refinements}")
+                if is_mock_provider:
+                    # Skip quality control for mock provider
+                    self.console.print("[yellow]Mock provider detected - quality control disabled[/yellow]")
+                else:
+                    # Create knowledge directory path at project root for easy user access
+                    # Go up from backend/cli.py to project root
+                    project_root = Path(__file__).parent.parent.parent
+                    knowledge_dir = project_root / "expert_knowledge"
+                    
+                    # Create supervised coordinator
+                    coordinator = create_expert_supervised_coordinator(
+                        base_coordinator=coordinator,
+                        model_provider=model_provider,
+                        knowledge_dir=knowledge_dir,
+                        operating_mode=expert_mode
+                    )
+                    
+                    self.console.print(f"[green]Quality control enabled[/green] - Max refinements: {max_refinements}")
                 
                 # Update progress
                 progress.update(task, description="Running Step 2 Analysis - Identifying control structure...")
                 
-                # Run Step 2 analysis with supervision
+                # Run Step 2 analysis
                 execution_mode = 'enhanced' if enhanced else 'standard'
                 
-                results = await coordinator.coordinate_with_supervision(
-                    step1_analysis_id=step1_analysis_id,
-                    execution_mode=execution_mode,
-                    max_refinements=max_refinements
-                )
+                if is_mock_provider:
+                    # Run without supervision for mock provider
+                    results = await coordinator.coordinate(
+                        step1_analysis_id=step1_analysis_id,
+                        execution_mode=execution_mode
+                    )
+                else:
+                    # Run with supervision for real providers
+                    results = await coordinator.coordinate_with_supervision(
+                        step1_analysis_id=step1_analysis_id,
+                        execution_mode=execution_mode,
+                        max_refinements=max_refinements
+                    )
                 
                 # Close database connection
                 await db_conn.close()

@@ -209,6 +209,27 @@ class Step1CLI:
                 # Store config file path for resolving relative paths
                 self._config_file_path = config_path
                 
+                # Initialize PromptSaver BEFORE running analysis if --save-prompts flag is set
+                if hasattr(self, '_save_prompts') and self._save_prompts:
+                    # Get project root and create output directory early
+                    project_root = Path(__file__).parent.parent.parent
+                    timestamp = self._timestamp if hasattr(self, '_timestamp') else db_name.replace('stpa_analysis_', '')
+                    
+                    # Use configured output_dir or default
+                    if 'output_dir' in config['analysis']:
+                        base_dir = Path(config['analysis']['output_dir'])
+                        if not base_dir.is_absolute():
+                            base_dir = project_root / base_dir
+                    else:
+                        base_dir = project_root / 'analyses'
+                    
+                    output_dir = base_dir / timestamp
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                    
+                    # Initialize the PromptSaver
+                    init_prompt_saver(output_dir, enabled=True)
+                    self.console.print(f"[dim]PromptSaver initialized in: {output_dir}/prompts[/dim]")
+                
                 # Handle input files from CLI or config
                 if input_files:
                     # Use files from command line

@@ -296,28 +296,48 @@ Ensure all string values properly escape newlines and quotes.
         
     def _validate_components(self, components: Dict[str, Any]) -> None:
         """Validate component structure and relationships."""
+        # Handle both old format and new structured output format
+        if 'components' in components:
+            # New structured output format
+            controllers = components['components']['controllers']
+            processes = components['components']['controlled_processes']
+            dual_role = []  # Not in new schema
+        else:
+            # Old format
+            controllers = components.get('controllers', [])
+            processes = components.get('controlled_processes', [])
+            dual_role = components.get('dual_role_components', [])
+        
         # Ensure all components have required fields
-        for controller in components['controllers']:
+        for controller in controllers:
             controller.setdefault('identifier', f"CTRL-{uuid.uuid4().hex[:8]}")
             controller.setdefault('authority_level', 'medium')
             controller.setdefault('source', 'inferred')
             controller.setdefault('abstraction_level', 'service')
             
-        for process in components['controlled_processes']:
+        for process in processes:
             process.setdefault('identifier', f"PROC-{uuid.uuid4().hex[:8]}")
             process.setdefault('criticality', 'medium')
             process.setdefault('abstraction_level', 'service')
             
-        for dual in components['dual_role_components']:
+        for dual in dual_role:
             dual.setdefault('identifier', f"DUAL-{uuid.uuid4().hex[:8]}")
             dual.setdefault('abstraction_level', 'service')
             
     def _enhance_with_step1_context(self, components: Dict[str, Any], step1_results: Dict[str, Any]) -> None:
         """Enhance components with context from Step 1."""
+        # Handle both old format and new structured output format
+        if 'components' in components:
+            # New structured output format
+            controllers = components['components']['controllers']
+        else:
+            # Old format
+            controllers = components.get('controllers', [])
+        
         # Map stakeholders to potential controllers
         stakeholder_map = {s['name']: s for s in step1_results.get('stakeholders', [])}
         
-        for controller in components['controllers']:
+        for controller in controllers:
             # Check if controller matches a stakeholder
             for stakeholder_name, stakeholder in stakeholder_map.items():
                 if (stakeholder_name.lower() in controller['name'].lower() or 
@@ -330,8 +350,22 @@ Ensure all string values properly escape newlines and quotes.
         # Create compatibility layer
         db_compat = Step2DBCompat(self.db_connection)
         
+        # Handle both old format and new structured output format
+        if 'components' in components:
+            # New structured output format
+            controllers = components['components']['controllers']
+            processes = components['components']['controlled_processes']
+            relationships = components.get('relationships', [])
+            hierarchy = components.get('hierarchy', {})
+        else:
+            # Old format
+            controllers = components.get('controllers', [])
+            processes = components.get('controlled_processes', [])
+            relationships = components.get('control_relationships', [])
+            hierarchy = components.get('control_hierarchy', [])
+        
         # Store controllers
-        for controller in components['controllers']:
+        for controller in controllers:
             try:
                 # Register in component registry
                 registry.register_component(
@@ -367,7 +401,7 @@ Ensure all string values properly escape newlines and quotes.
                 raise
             
         # Store controlled processes
-        for process in components['controlled_processes']:
+        for process in processes:
             try:
                 # Register in component registry
                 registry.register_component(
@@ -400,8 +434,9 @@ Ensure all string values properly escape newlines and quotes.
                 self.logger.error(f"Error storing process {process['name']}: {e}")
                 raise
             
-        # Store dual-role components
-        for dual in components['dual_role_components']:
+        # Store dual-role components (only in old format)
+        dual_role_components = components.get('dual_role_components', [])
+        for dual in dual_role_components:
             try:
                 # Register in component registry
                 registry.register_component(
@@ -475,15 +510,37 @@ Ensure all string values properly escape newlines and quotes.
         
     def _generate_summary(self, components: Dict[str, Any]) -> str:
         """Generate summary of control structure."""
-        controller_count = len(components['controllers'])
-        process_count = len(components['controlled_processes'])
-        dual_count = len(components['dual_role_components'])
-        hierarchy_count = len(components['control_hierarchy'])
-        
-        summary = f"""Identified {controller_count} controllers, {process_count} controlled processes, and {dual_count} dual-role components.
-        
-Control hierarchy has {components['hierarchy_depth']} levels with {hierarchy_count} relationships.
-        
+        # Handle both old format and new structured output format
+        if 'components' in components:
+            # New structured output format
+            comp_data = components['components']
+            controller_count = len(comp_data.get('controllers', []))
+            process_count = len(comp_data.get('controlled_processes', []))
+            
+            # Calculate hierarchy depth from hierarchy levels
+            hierarchy_levels = components.get('hierarchy', {}).get('levels', [])
+            hierarchy_depth = len(hierarchy_levels)
+            
+            # Count relationships
+            relationship_count = len(components.get('relationships', []))
+            
+            summary = components.get('summary', '')
+            if not summary:
+                summary = f"""Identified {controller_count} controllers and {process_count} controlled processes.
+                
+Control hierarchy has {hierarchy_depth} levels with {relationship_count} relationships."""
+        else:
+            # Old format
+            controller_count = len(components.get('controllers', []))
+            process_count = len(components.get('controlled_processes', []))
+            dual_count = len(components.get('dual_role_components', []))
+            hierarchy_count = len(components.get('control_hierarchy', []))
+            hierarchy_depth = components.get('hierarchy_depth', 0)
+            
+            summary = f"""Identified {controller_count} controllers, {process_count} controlled processes, and {dual_count} dual-role components.
+            
+Control hierarchy has {hierarchy_depth} levels with {hierarchy_count} relationships.
+            
 {components.get('analysis_notes', '')}"""
         
         return summary

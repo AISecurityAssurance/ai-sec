@@ -45,7 +45,29 @@ class BaseModelClient(ABC):
         else:
             # Fallback: Enhance prompt for JSON output
             enhanced_messages = self._enhance_messages_for_json(messages, response_format)
-            return await self.generate(enhanced_messages, temperature, max_tokens)
+            # Use lower temperature for more consistent JSON output
+            json_temperature = min(temperature, 0.3)
+            if json_temperature < temperature:
+                logger = logging.getLogger(__name__)
+                logger.debug(f"Lowered temperature from {temperature} to {json_temperature} for JSON consistency")
+            response = await self.generate(enhanced_messages, json_temperature, max_tokens)
+            
+            # Try to parse JSON if response is a string
+            if isinstance(response.content, str):
+                try:
+                    parsed_content = json.loads(response.content)
+                    return ModelResponse(
+                        content=parsed_content,
+                        model=response.model,
+                        usage=response.usage,
+                        raw_response=response.raw_response
+                    )
+                except json.JSONDecodeError:
+                    # Log but don't fail - let the agent's parser handle it
+                    logger = logging.getLogger(__name__)
+                    logger.debug(f"Could not parse JSON in base fallback: {response.content[:100]}...")
+            
+            return response
     
     def _enhance_messages_for_json(self, messages: List[Dict[str, str]], 
                                   response_format: Dict[str, Any]) -> List[Dict[str, str]]:
@@ -238,25 +260,8 @@ class OpenAIClient(BaseModelClient):
                 else:
                     raise
         
-        # Fallback to enhanced prompting
-        enhanced_messages = self._enhance_messages_for_json(messages, response_format)
-        response = await self.generate(enhanced_messages, temperature, max_tokens)
-        
-        # Try to parse the response as JSON
-        if isinstance(response.content, str):
-            try:
-                parsed_content = json.loads(response.content)
-                return ModelResponse(
-                    content=parsed_content,
-                    model=response.model,
-                    usage=response.usage,
-                    raw_response=response.raw_response
-                )
-            except json.JSONDecodeError:
-                # If parsing fails, return as-is
-                pass
-        
-        return response
+        # Fallback to enhanced prompting - use base class method which handles everything
+        return await super().generate_structured(messages, response_format, temperature, max_tokens)
 
 
 class OllamaClient(BaseModelClient):
@@ -412,8 +417,8 @@ class MockModelClient(BaseModelClient):
     
     def __init__(self):
         super().__init__()
-        # Mock client always returns valid JSON
-        self.supports_structured_output = True
+        # Mock client simulates no structured output support for testing fallback
+        self.supports_structured_output = False
     
     def _generate_mock_json_response(self, user_message: str) -> str:
         """Generate a mock JSON response based on the prompt context."""

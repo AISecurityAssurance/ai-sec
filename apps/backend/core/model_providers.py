@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 import os
 import httpx
 import json
+import logging
 from dataclasses import dataclass
 
 from config.settings import settings, ModelProvider
@@ -23,6 +24,9 @@ class ModelResponse:
 class BaseModelClient(ABC):
     """Base class for model provider clients"""
     
+    def __init__(self):
+        self.supports_structured_output = False
+    
     @abstractmethod
     async def generate(self, messages: List[Dict[str, str]], 
                       temperature: float = 0.7,
@@ -35,15 +39,65 @@ class BaseModelClient(ABC):
                                  temperature: float = 0.7,
                                  max_tokens: Optional[int] = None) -> ModelResponse:
         """Generate a structured response from the model with JSON schema validation"""
-        # Default implementation falls back to regular generation
-        # Subclasses can override to use native structured output support
-        return await self.generate(messages, temperature, max_tokens)
+        if self.supports_structured_output:
+            # Subclasses should override this method if they support structured output
+            return await self.generate(messages, temperature, max_tokens)
+        else:
+            # Fallback: Enhance prompt for JSON output
+            enhanced_messages = self._enhance_messages_for_json(messages, response_format)
+            return await self.generate(enhanced_messages, temperature, max_tokens)
+    
+    def _enhance_messages_for_json(self, messages: List[Dict[str, str]], 
+                                  response_format: Dict[str, Any]) -> List[Dict[str, str]]:
+        """Enhance messages to encourage JSON output when structured output not supported."""
+        enhanced = messages.copy()
+        
+        # Extract schema if present
+        schema = None
+        if isinstance(response_format, dict) and 'json_schema' in response_format:
+            schema = response_format['json_schema'].get('schema', {})
+        
+        # Add JSON instruction to system message
+        json_instruction = "\n\nIMPORTANT: You MUST respond with valid JSON only. Do not include any markdown formatting, explanations, or text outside of the JSON object."
+        
+        if schema:
+            json_instruction += f"\n\nYour response must conform to this JSON schema:\n{json.dumps(schema, indent=2)}"
+        
+        # Find and enhance system message
+        system_msg_found = False
+        for i, msg in enumerate(enhanced):
+            if msg['role'] == 'system':
+                enhanced[i] = {
+                    'role': 'system',
+                    'content': msg['content'] + json_instruction
+                }
+                system_msg_found = True
+                break
+        
+        # If no system message, add one
+        if not system_msg_found:
+            enhanced.insert(0, {
+                'role': 'system',
+                'content': 'You are a helpful assistant.' + json_instruction
+            })
+        
+        # Also add reminder in the last user message
+        for i in range(len(enhanced) - 1, -1, -1):
+            if enhanced[i]['role'] == 'user':
+                enhanced[i] = {
+                    'role': 'user',
+                    'content': enhanced[i]['content'] + '\n\nRemember: Respond with valid JSON only.'
+                }
+                break
+        
+        return enhanced
 
 
 class OpenAIClient(BaseModelClient):
     """OpenAI API client (supports both OpenAI and Azure)"""
     
     def __init__(self, api_key: str, model: str = "gpt-4-turbo-preview", api_endpoint: Optional[str] = None):
+        super().__init__()
         self.api_key = api_key
         self.model = model
         self.api_endpoint = api_endpoint
@@ -53,10 +107,14 @@ class OpenAIClient(BaseModelClient):
             # Azure OpenAI
             self.is_azure = True
             self.base_url = api_endpoint.rstrip('/')
+            # Azure OpenAI with 2024-10-21 API version supports structured output
+            self.supports_structured_output = True
         else:
             # Standard OpenAI
             self.is_azure = False
             self.base_url = "https://api.openai.com/v1"
+            # OpenAI supports structured output with certain models
+            self.supports_structured_output = True
         
     async def generate(self, messages: List[Dict[str, str]], 
                       temperature: float = 0.7,
@@ -116,65 +174,89 @@ class OpenAIClient(BaseModelClient):
                                  max_tokens: Optional[int] = None) -> ModelResponse:
         """Generate structured response using OpenAI's structured output feature"""
         
-        if self.is_azure:
-            headers = {
-                "api-key": self.api_key,
-                "Content-Type": "application/json"
-            }
-            # Use API version that supports structured outputs
-            url = f"{self.base_url}/openai/deployments/{self.model}/chat/completions?api-version=2024-10-21"
-        else:
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json"
-            }
-            url = f"{self.base_url}/chat/completions"
-        
-        data = {
-            "messages": messages,
-            "temperature": temperature,
-            "response_format": response_format
-        }
-        
-        if not self.is_azure:
-            data["model"] = self.model
-        
-        if max_tokens:
-            data["max_tokens"] = max_tokens
-            
-        async with httpx.AsyncClient() as client:
+        # First, try with native structured output support
+        if self.supports_structured_output:
             try:
-                response = await client.post(
-                    url,
-                    headers=headers,
-                    json=data,
-                    timeout=120.0
-                )
-                response.raise_for_status()
+                if self.is_azure:
+                    headers = {
+                        "api-key": self.api_key,
+                        "Content-Type": "application/json"
+                    }
+                    # Use API version that supports structured outputs
+                    url = f"{self.base_url}/openai/deployments/{self.model}/chat/completions?api-version=2024-10-21"
+                else:
+                    headers = {
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json"
+                    }
+                    url = f"{self.base_url}/chat/completions"
                 
-                result = response.json()
+                data = {
+                    "messages": messages,
+                    "temperature": temperature,
+                    "response_format": response_format
+                }
                 
-                # Parse the structured content
-                content = result["choices"][0]["message"]["content"]
+                if not self.is_azure:
+                    data["model"] = self.model
                 
-                # If content is a string, try to parse as JSON
-                if isinstance(content, str):
-                    try:
-                        content = json.loads(content)
-                    except json.JSONDecodeError:
-                        pass  # Keep as string if not valid JSON
-                
-                return ModelResponse(
-                    content=content,
-                    model=result["model"],
-                    usage=result.get("usage"),
-                    raw_response=result
-                )
+                if max_tokens:
+                    data["max_tokens"] = max_tokens
+                    
+                async with httpx.AsyncClient() as client:
+                    response = await client.post(
+                        url,
+                        headers=headers,
+                        json=data,
+                        timeout=120.0
+                    )
+                    response.raise_for_status()
+                    
+                    result = response.json()
+                    
+                    # Parse the structured content
+                    content = result["choices"][0]["message"]["content"]
+                    
+                    # If content is a string, try to parse as JSON
+                    if isinstance(content, str):
+                        try:
+                            content = json.loads(content)
+                        except json.JSONDecodeError:
+                            pass  # Keep as string if not valid JSON
+                    
+                    return ModelResponse(
+                        content=content,
+                        model=result["model"],
+                        usage=result.get("usage"),
+                        raw_response=result
+                    )
             except httpx.HTTPStatusError as e:
-                # If structured output not supported, fall back to regular generation
+                # If structured output not supported, disable it and fall back
                 if e.response.status_code == 400 and "response_format" in str(e.response.text):
-                    return await self.generate(messages, temperature, max_tokens)
-                raise
+                    self.supports_structured_output = False
+                    logging.getLogger(__name__).info("Structured output not supported, falling back to enhanced prompting")
+                else:
+                    raise
+        
+        # Fallback to enhanced prompting
+        enhanced_messages = self._enhance_messages_for_json(messages, response_format)
+        response = await self.generate(enhanced_messages, temperature, max_tokens)
+        
+        # Try to parse the response as JSON
+        if isinstance(response.content, str):
+            try:
+                parsed_content = json.loads(response.content)
+                return ModelResponse(
+                    content=parsed_content,
+                    model=response.model,
+                    usage=response.usage,
+                    raw_response=response.raw_response
+                )
+            except json.JSONDecodeError:
+                # If parsing fails, return as-is
+                pass
+        
+        return response
 
 
 class OllamaClient(BaseModelClient):
@@ -182,8 +264,11 @@ class OllamaClient(BaseModelClient):
     
     def __init__(self, api_endpoint: str = "http://localhost:11434", 
                  model: str = "mixtral:instruct"):
+        super().__init__()
         self.api_endpoint = api_endpoint
         self.model = model
+        # Ollama doesn't support structured output natively
+        self.supports_structured_output = False
         
     async def generate(self, messages: List[Dict[str, str]], 
                       temperature: float = 0.7,
@@ -247,8 +332,88 @@ class OllamaClient(BaseModelClient):
         return "\n\n".join(formatted)
 
 
+class AnthropicClient(BaseModelClient):
+    """Anthropic Claude API client"""
+    
+    def __init__(self, api_key: str, model: str = "claude-3-sonnet-20240229"):
+        super().__init__()
+        self.api_key = api_key
+        self.model = model
+        self.base_url = "https://api.anthropic.com/v1"
+        # Anthropic doesn't support structured output yet
+        self.supports_structured_output = False
+        
+    async def generate(self, messages: List[Dict[str, str]], 
+                      temperature: float = 0.7,
+                      max_tokens: Optional[int] = None) -> ModelResponse:
+        """Generate response using Anthropic API"""
+        
+        headers = {
+            "x-api-key": self.api_key,
+            "anthropic-version": "2023-06-01",
+            "Content-Type": "application/json"
+        }
+        
+        # Convert messages to Anthropic format
+        system_message = None
+        anthropic_messages = []
+        
+        for msg in messages:
+            if msg["role"] == "system":
+                system_message = msg["content"]
+            else:
+                anthropic_messages.append({
+                    "role": msg["role"],
+                    "content": msg["content"]
+                })
+        
+        data = {
+            "model": self.model,
+            "messages": anthropic_messages,
+            "temperature": temperature,
+            "max_tokens": max_tokens or 4000
+        }
+        
+        if system_message:
+            data["system"] = system_message
+            
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{self.base_url}/messages",
+                headers=headers,
+                json=data,
+                timeout=120.0
+            )
+            response.raise_for_status()
+            
+            result = response.json()
+            
+            # Extract content from Anthropic's response format
+            content = ""
+            for content_block in result.get("content", []):
+                if content_block.get("type") == "text":
+                    content += content_block.get("text", "")
+            
+            return ModelResponse(
+                content=content,
+                model=result.get("model", self.model),
+                usage={
+                    "prompt_tokens": result.get("usage", {}).get("input_tokens", 0),
+                    "completion_tokens": result.get("usage", {}).get("output_tokens", 0),
+                    "total_tokens": (result.get("usage", {}).get("input_tokens", 0) + 
+                                   result.get("usage", {}).get("output_tokens", 0))
+                },
+                raw_response=result
+            )
+
+
 class MockModelClient(BaseModelClient):
     """Mock client for testing without real LLM calls"""
+    
+    def __init__(self):
+        super().__init__()
+        # Mock client always returns valid JSON
+        self.supports_structured_output = True
     
     def _generate_mock_json_response(self, user_message: str) -> str:
         """Generate a mock JSON response based on the prompt context."""
@@ -487,6 +652,15 @@ def get_model_client() -> BaseModelClient:
             api_key=config.api_key, 
             model=config.model,
             api_endpoint=config.api_endpoint
+        )
+        
+    elif config.provider == ModelProvider.ANTHROPIC:
+        if not config.api_key:
+            raise ValueError("Anthropic API key not configured")
+        
+        return AnthropicClient(
+            api_key=config.api_key,
+            model=config.model
         )
         
     elif config.provider == ModelProvider.OLLAMA:

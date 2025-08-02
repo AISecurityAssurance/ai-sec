@@ -419,47 +419,51 @@ Maintain appropriate abstraction for security analysis:
                                   max_tokens: int = 4000) -> Dict[str, Any]:
         """Query LLM with structured output for guaranteed valid JSON."""
         
-        try:
-            # Try structured output first
-            response = await self.model_provider.generate_structured(
-                messages=messages,
-                response_format={
-                    "type": "json_schema",
-                    "json_schema": {
-                        "name": f"{self.__class__.__name__.lower()}_response",
-                        "schema": response_schema,
-                        "strict": True
-                    }
-                },
-                temperature=temperature,  # Lower for structured output
-                max_tokens=max_tokens
+        # Always try structured output first
+        response = await self.model_provider.generate_structured(
+            messages=messages,
+            response_format={
+                "type": "json_schema",
+                "json_schema": {
+                    "name": f"{self.__class__.__name__.lower()}_response",
+                    "schema": response_schema,
+                    "strict": True
+                }
+            },
+            temperature=temperature,  # Lower for structured output
+            max_tokens=max_tokens
+        )
+        
+        # Save to PromptSaver if enabled
+        prompt_saver = get_prompt_saver()
+        if prompt_saver:
+            prompt = messages[-1]["content"] if messages else ""
+            prompt_saver.save_prompt_response(
+                agent_name=self.__class__.__name__.lower().replace('agent', ''),
+                cognitive_style=self.cognitive_style.value,
+                prompt=prompt,
+                response=json.dumps(response.content, indent=2) if isinstance(response.content, dict) else response.content,
+                step=2,
+                metadata={
+                    'temperature': temperature,
+                    'max_tokens': max_tokens,
+                    'mode': 'structured_output' if hasattr(self.model_provider, 'supports_structured_output') and self.model_provider.supports_structured_output else 'enhanced_json'
+                }
             )
-            
-            # Save to PromptSaver if enabled
-            prompt_saver = get_prompt_saver()
-            if prompt_saver:
-                prompt = messages[-1]["content"] if messages else ""
-                prompt_saver.save_prompt_response(
-                    agent_name=self.__class__.__name__.lower().replace('agent', ''),
-                    cognitive_style=self.cognitive_style.value,
-                    prompt=prompt,
-                    response=json.dumps(response.content, indent=2) if isinstance(response.content, dict) else response.content,
-                    step=2,
-                    metadata={
-                        'temperature': temperature,
-                        'max_tokens': max_tokens,
-                        'mode': 'structured_output'
-                    }
-                )
-            
-            # Return already parsed JSON (or parse if string)
-            if isinstance(response.content, str):
-                return json.loads(response.content)
+        
+        # Handle response based on type
+        if isinstance(response.content, dict):
+            # Already parsed JSON from structured output
             return response.content
-            
-        except Exception as e:
-            # If structured output fails, fall back to regular query with retry
-            self.logger.warning(f"Structured output failed: {e}. Falling back to regular generation.")
-            self.logger.debug(f"Structured output error details: {type(e).__name__}: {str(e)}")
-            response = await self.query_llm_with_retry(messages, max_retries=3, temperature=temperature, max_tokens=max_tokens)
-            return parse_llm_json(response)
+        elif isinstance(response.content, str):
+            # Parse string response
+            try:
+                # Try direct JSON parsing first
+                return json.loads(response.content)
+            except json.JSONDecodeError:
+                # Fall back to our robust parser
+                return parse_llm_json(response.content)
+        else:
+            # Unexpected type, try to convert
+            self.logger.warning(f"Unexpected response type from structured output: {type(response.content)}")
+            return parse_llm_json(str(response.content))

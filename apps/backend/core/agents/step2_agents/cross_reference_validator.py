@@ -53,12 +53,13 @@ class CrossReferenceValidator:
             'summary': self._generate_summary()
         }
     
-    def _extract_components(self, phase_results: Dict[str, Any]) -> Dict[str, Set[str]]:
+    def _extract_components(self, phase_results: Dict[str, Any]) -> Dict[str, Any]:
         """Extract all components from control structure phase."""
         components = {
             'controllers': set(),
             'processes': set(),
-            'all': set()
+            'all': set(),
+            'hierarchical_levels': {}  # component_id -> level
         }
         
         control_structure = phase_results.get('control_structure', {})
@@ -72,11 +73,16 @@ class CrossReferenceValidator:
                 
             comp_data = data.get('components', {})
             for ctrl in comp_data.get('controllers', []):
-                components['controllers'].add(ctrl.get('identifier'))
-                components['all'].add(ctrl.get('identifier'))
+                ctrl_id = ctrl.get('identifier')
+                components['controllers'].add(ctrl_id)
+                components['all'].add(ctrl_id)
+                # Store hierarchical level
+                if 'hierarchical_level' in ctrl:
+                    components['hierarchical_levels'][ctrl_id] = ctrl['hierarchical_level']
             for proc in comp_data.get('controlled_processes', []):
-                components['processes'].add(proc.get('identifier'))
-                components['all'].add(proc.get('identifier'))
+                proc_id = proc.get('identifier')
+                components['processes'].add(proc_id)
+                components['all'].add(proc_id)
                 
         return components
     
@@ -176,7 +182,7 @@ class CrossReferenceValidator:
         return models
     
     def _validate_control_action_references(self, actions: List[Dict[str, Any]], 
-                                          components: Dict[str, Set[str]]) -> None:
+                                          components: Dict[str, Any]) -> None:
         """Validate that control actions reference existing components."""
         for action in actions:
             controller_id = action.get('controller_id')
@@ -200,7 +206,7 @@ class CrossReferenceValidator:
                 })
     
     def _validate_feedback_references(self, feedbacks: List[Dict[str, Any]], 
-                                    components: Dict[str, Set[str]]) -> None:
+                                    components: Dict[str, Any]) -> None:
         """Validate that feedback mechanisms reference existing components."""
         for feedback in feedbacks:
             source_id = feedback.get('source_process_id')
@@ -224,7 +230,7 @@ class CrossReferenceValidator:
                 })
     
     def _validate_trust_boundary_references(self, boundaries: List[Dict[str, Any]], 
-                                          components: Dict[str, Set[str]]) -> None:
+                                          components: Dict[str, Any]) -> None:
         """Validate that trust boundaries reference existing components."""
         for boundary in boundaries:
             comp_a = boundary.get('component_a_id')
@@ -263,7 +269,7 @@ class CrossReferenceValidator:
                 })
     
     def _validate_process_model_references(self, models: List[Dict[str, Any]], 
-                                         components: Dict[str, Set[str]]) -> None:
+                                         components: Dict[str, Any]) -> None:
         """Validate that process models reference existing components."""
         for model in models:
             controller_id = model.get('controller_id')
@@ -286,7 +292,7 @@ class CrossReferenceValidator:
                     'message': f"Process model references non-existent process: {process_id}"
                 })
     
-    def _validate_component_consistency(self, components: Dict[str, Set[str]], 
+    def _validate_component_consistency(self, components: Dict[str, Any], 
                                       actions: List[Dict[str, Any]], 
                                       feedbacks: List[Dict[str, Any]]) -> None:
         """Validate overall component consistency."""
@@ -338,41 +344,46 @@ class CrossReferenceValidator:
             else:
                 continue
                 
-            # Look for hierarchy in relationships or control_hierarchy
-            if 'relationships' in data:
-                for rel in data['relationships']:
-                    if rel.get('relationship_type') in ['supervises', 'coordinates', 'delegates']:
-                        hierarchy.append({
-                            'parent': rel.get('controller_id'),
-                            'child': rel.get('process_id') or rel.get('subordinate_id'),
-                            'type': rel.get('relationship_type')
-                        })
+            # Extract control_hierarchy from components
+            components = data.get('components', {})
+            if isinstance(components, dict) and 'control_hierarchy' in components:
+                for rel in components.get('control_hierarchy', []):
+                    hierarchy.append({
+                        'parent': rel.get('parent'),
+                        'child': rel.get('child'),
+                        'type': rel.get('relationship_type', 'hierarchical'),
+                        'description': rel.get('description', '')
+                    })
             
-            # Also check for explicit hierarchy field
-            if 'hierarchy' in data and 'levels' in data['hierarchy']:
-                levels = data['hierarchy']['levels']
-                for i in range(len(levels) - 1):
-                    for parent_id in levels[i].get('component_ids', []):
-                        for child_id in levels[i + 1].get('component_ids', []):
-                            hierarchy.append({
-                                'parent': parent_id,
-                                'child': child_id,
-                                'type': 'hierarchical'
-                            })
+            # Also check top-level control_hierarchy (in case it's not nested)
+            if 'control_hierarchy' in data:
+                for rel in data.get('control_hierarchy', []):
+                    hierarchy.append({
+                        'parent': rel.get('parent'),
+                        'child': rel.get('child'),
+                        'type': rel.get('relationship_type', 'hierarchical'),
+                        'description': rel.get('description', '')
+                    })
                             
         return hierarchy
     
-    def _validate_hierarchy_consistency(self, components: Dict[str, Set[str]], 
+    def _validate_hierarchy_consistency(self, components: Dict[str, Any], 
                                       hierarchy: List[Dict[str, str]]) -> None:
         """Validate hierarchy consistency and check for issues."""
         # Check for circular dependencies
+        all_nodes = set()
         for rel in hierarchy:
-            if self._has_circular_dependency(rel['parent'], rel['child'], hierarchy):
+            all_nodes.add(rel['parent'])
+            all_nodes.add(rel['child'])
+        
+        for node in all_nodes:
+            if self._has_circular_dependency(node, hierarchy):
                 self.validation_errors.append({
                     'type': 'circular_hierarchy',
                     'entity': 'hierarchy',
-                    'message': f"Circular dependency detected: {rel['parent']} -> {rel['child']}"
+                    'message': f"Circular dependency detected involving: {node}"
                 })
+                break  # Only report once per cycle
         
         # Verify all parent-child relationships reference valid components
         for rel in hierarchy:
@@ -406,27 +417,49 @@ class CrossReferenceValidator:
                 'entity': 'hierarchy',
                 'message': f"{len(orphan_controllers)} controllers not in hierarchy"
             })
+        
+        # Validate hierarchical level consistency
+        self._validate_hierarchical_levels(components, hierarchy)
     
-    def _has_circular_dependency(self, start: str, current: str, 
-                                hierarchy: List[Dict[str, str]], 
-                                visited: Set[str] = None) -> bool:
-        """Check for circular dependencies in hierarchy."""
-        if visited is None:
-            visited = set()
-            
-        if current in visited:
-            return current == start
-            
-        visited.add(current)
+    def _validate_hierarchical_levels(self, components: Dict[str, Any], 
+                                     hierarchy: List[Dict[str, str]]) -> None:
+        """Validate that hierarchical levels are consistent with parent-child relationships."""
+        level_order = {'system': 3, 'subsystem': 2, 'component': 1}
         
         for rel in hierarchy:
-            if rel['parent'] == current:
-                if self._has_circular_dependency(start, rel['child'], hierarchy, visited):
-                    return True
-                    
-        return False
+            parent = rel['parent']
+            child = rel['child']
+            
+            parent_level = components['hierarchical_levels'].get(parent)
+            child_level = components['hierarchical_levels'].get(child)
+            
+            if parent_level and child_level:
+                parent_rank = level_order.get(parent_level, 0)
+                child_rank = level_order.get(child_level, 0)
+                
+                if parent_rank <= child_rank:
+                    self.validation_errors.append({
+                        'type': 'invalid_hierarchy_levels',
+                        'entity': 'hierarchy',
+                        'message': f"Invalid hierarchy: {parent} ({parent_level}) cannot be parent of {child} ({child_level})"
+                    })
     
-    def _validate_process_model_completeness(self, components: Dict[str, Set[str]], 
+    def _has_circular_dependency(self, node: str, hierarchy: List[Dict[str, str]]) -> bool:
+        """Check if node participates in any cycle."""
+        def dfs(current: str, path: Set[str]) -> bool:
+            if current in path:
+                return True
+            path.add(current)
+            for rel in hierarchy:
+                if rel['parent'] == current:
+                    # Use path.copy() to ensure each branch has its own path
+                    if dfs(rel['child'], path.copy()):
+                        return True
+            return False
+        
+        return dfs(node, set())
+    
+    def _validate_process_model_completeness(self, components: Dict[str, Any], 
                                             process_models: List[Dict[str, Any]],
                                             control_actions: List[Dict[str, Any]]) -> None:
         """Validate that every controller has adequate process models."""
